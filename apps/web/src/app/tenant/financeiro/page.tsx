@@ -59,16 +59,32 @@ export default function FinanceiroPage() {
     if (!formData.descricao.trim() || !formData.valor) return;
 
     try {
-      await apiClient.createTransacao({
-        ...formData,
-        valor: parseFloat(formData.valor)
+      console.log("Criando transação:", {
+        descricao: formData.descricao,
+        valor: parseFloat(formData.valor),
+        tipo: formData.tipo,
+        categoria: formData.categoria || null,
+        status: 'pendente'
       });
+      
+      await apiClient.createTransacao({
+        descricao: formData.descricao,
+        valor: parseFloat(formData.valor),
+        tipo: formData.tipo,
+        categoria: formData.categoria || null,
+        status: 'pendente'
+      });
+      
+      console.log("Transação criada com sucesso!");
+      
       setFormData({ descricao: '', valor: '', tipo: 'receita', categoria: '', status: 'pendente' });
       setShowForm(false);
       await carregarTransacoes();
+      
+      alert("✅ Transação criada com sucesso!");
     } catch (err) {
       console.error("Erro ao criar transação:", err);
-      alert("Erro ao criar transação. Tente novamente.");
+      alert("❌ Erro ao criar transação. Verifique se as tabelas foram criadas no Supabase.");
     }
   };
 
@@ -168,6 +184,13 @@ export default function FinanceiroPage() {
             Ver Fluxo de Caixa
           </button>
           <button 
+            onClick={() => setShowForm(!showForm)}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-4 py-2"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Transação
+          </button>
+          <button 
             onClick={sincronizarBanco}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
           >
@@ -176,6 +199,76 @@ export default function FinanceiroPage() {
           </button>
         </div>
       </div>
+
+      {showForm && (
+        <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+          <h3 className="text-lg font-semibold mb-4">Nova Transação</h3>
+          <form onSubmit={criarTransacao} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição *</label>
+                <input
+                  type="text"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: Venda de produtos, pagamento de fornecedor"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Valor *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.valor}
+                  onChange={(e) => setFormData({...formData, valor: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="0,00"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Tipo *</label>
+                <select
+                  value={formData.tipo}
+                  onChange={(e) => setFormData({...formData, tipo: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                >
+                  <option value="receita">Receita</option>
+                  <option value="despesa">Despesa</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                <input
+                  type="text"
+                  value={formData.categoria}
+                  onChange={(e) => setFormData({...formData, categoria: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: Vendas, Aluguel, Marketing"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="bg-emerald-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-emerald-700 transition-colors"
+              >
+                Salvar Transação
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <KPICard title="Entradas (Mês)" value="R$ 45.200,00" icon={ArrowDownToLine} className="border-emerald-200" trend={{ value: 12, label: "vs mês ant", isPositive: true }} />
