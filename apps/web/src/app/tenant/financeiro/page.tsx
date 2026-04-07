@@ -142,28 +142,66 @@ export default function FinanceiroPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recons.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="text-muted-foreground text-sm">{item.data}</TableCell>
-                <TableCell className="font-medium text-slate-900">{item.descricao}</TableCell>
-                <TableCell>
-                  <span className={item.tipo === 'entrada' ? 'text-emerald-600' : 'text-red-600'}>
-                    {item.tipo === 'entrada' ? 'Entrada' : 'Saída'}
-                  </span>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-6">
+                  <div className="text-slate-500">Carregando transações...</div>
                 </TableCell>
-                <TableCell className={item.tipo === 'entrada' ? 'font-medium text-emerald-600' : 'font-medium text-red-600'}>
-                  {item.valor}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={item.status === 'conciliado' ? 'success' : 'warning'} label={item.status} className="capitalize" />
-                </TableCell>
-                <TableCell className="text-right">
-                  <button className="text-slate-400 hover:text-primary p-1" title="Ver Detalhes">
-                    <ExternalLink className="h-4 w-4" />
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-6">
+                  <div className="text-red-500">{error}</div>
+                  <button 
+                    onClick={carregarTransacoes}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Tentar novamente
                   </button>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : transacoes.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-6">
+                  <div className="text-slate-500">Nenhuma transação encontrada</div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              transacoes.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
+                  <TableCell className="font-medium text-slate-900">{item.descricao}</TableCell>
+                  <TableCell>
+                    <span className={item.tipo === 'receita' ? 'text-emerald-600' : 'text-red-600'}>
+                      {item.tipo === 'receita' ? 'Receita' : 'Despesa'}
+                    </span>
+                  </TableCell>
+                  <TableCell className={item.tipo === 'receita' ? 'font-medium text-emerald-600' : 'font-medium text-red-600'}>
+                    {formatarValor(item.valor)}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={item.status === 'concluido' ? 'success' : 'warning'} label={item.status} className="capitalize" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <button className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button 
+                        onClick={() => excluirTransacao(item.id)}
+                        className="text-slate-400 hover:text-red-600 p-1" 
+                        title="Excluir"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button className="text-slate-400 hover:text-primary p-1" title="Ver Detalhes">
+                        <ExternalLink className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
