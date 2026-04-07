@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
 import {
@@ -10,16 +11,78 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Users, UserX, AlertCircle, Plus, Search, MessageCircle } from "lucide-react";
+import { Users, UserX, AlertCircle, Plus, Search, MessageCircle, Edit, Trash2 } from "lucide-react";
+import { apiClient } from "@/lib/api";
 
-// Mock Data
-const clientes = [
-  { id: 1, nome: "João Silva", telefone: "(11) 98765-4321", email: "joao.silva@email.com", utlima_compra: "Há 2 dias", status: "ativo" },
-  { id: 2, nome: "Maria Oliveira", telefone: "(11) 91234-5678", email: "maria@email.com", utlima_compra: "Há 35 dias", status: "inativo" },
-  { id: 3, nome: "Empresa XPTO Ltda", telefone: "(11) 3214-5566", email: "contato@xpto.com.br", utlima_compra: "Há 65 dias", status: "risco" },
-];
+interface Cliente {
+  id: string;
+  nome: string;
+  telefone?: string;
+  email?: string;
+  criado_em: string;
+  atualizado_em?: string;
+}
 
 export default function CRMPage() {
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    nome: '',
+    telefone: '',
+    email: '',
+    endereco: ''
+  });
+
+  useEffect(() => {
+    carregarClientes();
+  }, []);
+
+  const carregarClientes = async () => {
+    try {
+      setLoading(true);
+      const data = await apiClient.getClientes();
+      setClientes(data);
+    } catch (err) {
+      console.error("Erro ao carregar clientes:", err);
+      setError("Erro ao carregar clientes. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const criarCliente = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.nome.trim()) return;
+
+    try {
+      await apiClient.createCliente(formData);
+      setFormData({ nome: '', telefone: '', email: '', endereco: '' });
+      setShowForm(false);
+      await carregarClientes();
+    } catch (err) {
+      console.error("Erro ao criar cliente:", err);
+      alert("Erro ao criar cliente. Tente novamente.");
+    }
+  };
+
+  const excluirCliente = async (id: string) => {
+    if (!window.confirm("Tem certeza que deseja excluir este cliente?")) return;
+    
+    try {
+      await apiClient.deleteCliente(id);
+      setClientes(clientes.filter(c => c.id !== id));
+    } catch (err) {
+      console.error("Erro ao excluir cliente:", err);
+      alert("Erro ao excluir cliente. Tente novamente.");
+    }
+  };
+
+  const formatarData = (dataString: string) => {
+    const data = new Date(dataString);
+    return data.toLocaleDateString('pt-BR');
+  };
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -67,26 +130,64 @@ export default function CRMPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clientes.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium text-slate-900">{item.nome}</TableCell>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="text-sm">{item.telefone}</span>
-                    <span className="text-xs text-muted-foreground">{item.email}</span>
-                  </div>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-6">
+                  <div className="text-slate-500">Carregando clientes...</div>
                 </TableCell>
-                <TableCell className="text-slate-500">{item.utlima_compra}</TableCell>
-                <TableCell>
-                  <StatusBadge status={item.status === 'ativo' ? 'success' : item.status === 'inativo' ? 'warning' : 'error'} label={item.status} className="capitalize" />
-                </TableCell>
-                <TableCell className="text-right">
-                  <button className="text-emerald-600 hover:text-emerald-700 p-1" title="WhatsApp">
-                    <MessageCircle className="h-4 w-4" />
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-6">
+                  <div className="text-red-500">{error}</div>
+                  <button 
+                    onClick={carregarClientes}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Tentar novamente
                   </button>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : clientes.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-6">
+                  <div className="text-slate-500">Nenhum cliente encontrado</div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              clientes.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium text-slate-900">{item.nome}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="text-sm">{item.telefone || '-'}</span>
+                      <span className="text-xs text-muted-foreground">{item.email || '-'}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-slate-500">{formatarData(item.criado_em)}</TableCell>
+                  <TableCell>
+                    <StatusBadge status="success" label="ativo" className="capitalize" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <button className="text-emerald-600 hover:text-emerald-700 p-1" title="WhatsApp">
+                        <MessageCircle className="h-4 w-4" />
+                      </button>
+                      <button className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button 
+                        onClick={() => excluirCliente(item.id)}
+                        className="text-slate-400 hover:text-red-600 p-1" 
+                        title="Excluir"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

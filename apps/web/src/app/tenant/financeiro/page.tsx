@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
 import {
@@ -10,15 +11,90 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowDownToLine, ArrowUpFromLine, RefreshCcw, Search, ExternalLink } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, RefreshCcw, Search, ExternalLink, Plus, Edit, Trash2 } from "lucide-react";
+import { apiClient } from "@/lib/api";
 
-const recons = [
-  { id: "RC-101", data: "05 Abr 2026", descricao: "PIX - João Silva", valor: "R$ 3.500,00", status: "conciliado", tipo: "entrada" },
-  { id: "RC-102", data: "05 Abr 2026", descricao: "Boleto - Fornecedor X", valor: "R$ 450,00", status: "conciliado", tipo: "saida" },
-  { id: "RC-103", data: "06 Abr 2026", descricao: "Cartão de Crédito - Compra não identificada", valor: "R$ 80,00", status: "pendente", tipo: "entrada" },
-];
+interface Transacao {
+  id: string;
+  descricao: string;
+  valor: number;
+  tipo: string;
+  categoria?: string;
+  status: string;
+  criado_em: string;
+}
 
 export default function FinanceiroPage() {
+  const [transacoes, setTransacoes] = useState<Transacao[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    descricao: '',
+    valor: '',
+    tipo: 'receita',
+    categoria: '',
+    status: 'pendente'
+  });
+
+  useEffect(() => {
+    carregarTransacoes();
+  }, []);
+
+  const carregarTransacoes = async () => {
+    try {
+      setLoading(true);
+      const data = await apiClient.getTransacoes();
+      setTransacoes(data);
+    } catch (err) {
+      console.error("Erro ao carregar transações:", err);
+      setError("Erro ao carregar transações. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const criarTransacao = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.descricao.trim() || !formData.valor) return;
+
+    try {
+      await apiClient.createTransacao({
+        ...formData,
+        valor: parseFloat(formData.valor)
+      });
+      setFormData({ descricao: '', valor: '', tipo: 'receita', categoria: '', status: 'pendente' });
+      setShowForm(false);
+      await carregarTransacoes();
+    } catch (err) {
+      console.error("Erro ao criar transação:", err);
+      alert("Erro ao criar transação. Tente novamente.");
+    }
+  };
+
+  const excluirTransacao = async (id: string) => {
+    if (!window.confirm("Tem certeza que deseja excluir esta transação?")) return;
+    
+    try {
+      await apiClient.deleteTransacao(id);
+      setTransacoes(transacoes.filter(t => t.id !== id));
+    } catch (err) {
+      console.error("Erro ao excluir transação:", err);
+      alert("Erro ao excluir transação. Tente novamente.");
+    }
+  };
+
+  const formatarValor = (valor: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor);
+  };
+
+  const formatarData = (dataString: string) => {
+    const data = new Date(dataString);
+    return data.toLocaleDateString('pt-BR');
+  };
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
