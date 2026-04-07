@@ -18,18 +18,37 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      setError(error.message);
+    if (signInError) {
+      setError(signInError.message);
       setLoading(false);
       return;
     }
-    
-    router.push("/tenant/dashboard");
+
+    const { data: userRes, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userRes?.user) {
+      setError("Sessão inválida. Tente novamente.");
+      setLoading(false);
+      return;
+    }
+
+    const { data: profile, error: profileErr } = await supabase
+      .from("user_profiles")
+      .select("role")
+      .eq("user_id", userRes.user.id)
+      .maybeSingle();
+
+    if (profileErr || !profile?.role) {
+      setError("Usuário sem perfil. Contate o administrador do sistema.");
+      setLoading(false);
+      return;
+    }
+
+    router.push(profile.role === "master" ? "/admin" : "/tenant/dashboard");
     router.refresh();
   };
 

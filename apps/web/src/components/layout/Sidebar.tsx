@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -14,20 +15,65 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { createClient } from "@/utils/supabase/client";
 
 const navigation = [
-  { name: "Dashboard", href: "/tenant/dashboard", icon: LayoutDashboard },
-  { name: "Vendas", href: "/tenant/vendas", icon: ShoppingCart },
-  { name: "Estoque", href: "/tenant/estoque", icon: Package },
-  { name: "Clientes & CRM", href: "/tenant/crm", icon: Users },
-  { name: "Financeiro", href: "/tenant/financeiro", icon: Wallet },
-  { name: "Catálogo", href: "/tenant/catalogo", icon: Tags },
-  { name: "RH & Equipe", href: "/tenant/rh", icon: Briefcase },
-  { name: "Configurações", href: "/tenant/configuracoes", icon: Settings },
+  { key: "dashboard", name: "Dashboard", href: "/tenant/dashboard", icon: LayoutDashboard },
+  { key: "vendas", name: "Vendas", href: "/tenant/vendas", icon: ShoppingCart },
+  { key: "estoque", name: "Estoque", href: "/tenant/estoque", icon: Package },
+  { key: "crm", name: "Clientes & CRM", href: "/tenant/crm", icon: Users },
+  { key: "financeiro", name: "Financeiro", href: "/tenant/financeiro", icon: Wallet },
+  { key: "catalogo", name: "Catálogo", href: "/tenant/catalogo", icon: Tags },
+  { key: "rh", name: "RH & Equipe", href: "/tenant/rh", icon: Briefcase },
+  { key: "configuracoes", name: "Configurações", href: "/tenant/configuracoes", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [activeKeys, setActiveKeys] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    let cancelled = false;
+
+    async function load() {
+      const { data: userRes } = await supabase.auth.getUser();
+      const user = userRes?.user;
+      if (!user) {
+        if (!cancelled) setActiveKeys([]);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("role, empresa_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!profile || profile.role === "master" || !profile.empresa_id) {
+        if (!cancelled) setActiveKeys([]);
+        return;
+      }
+
+      const { data: mods } = await supabase
+        .from("empresa_modulos")
+        .select("modulo_key, ativo")
+        .eq("empresa_id", profile.empresa_id)
+        .eq("ativo", true);
+
+      if (!cancelled) setActiveKeys((mods || []).map((m: any) => m.modulo_key));
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleNavigation = useMemo(() => {
+    if (activeKeys === null) return [];
+    return navigation.filter((n) => activeKeys.includes(n.key));
+  }, [activeKeys]);
 
   return (
     <div className="flex h-full w-64 flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border text-sidebar-foreground transition-all duration-300 shadow-xl">
@@ -43,7 +89,12 @@ export function Sidebar() {
       </div>
       <nav className="flex flex-1 flex-col px-4 py-6">
         <ul role="list" className="flex flex-1 flex-col gap-y-2">
-          {navigation.map((item) => {
+          {activeKeys !== null && visibleNavigation.length === 0 && (
+            <li className="px-2 py-3 text-sm text-slate-400">
+              Nenhum módulo ativo. Solicite ativação ao administrador do sistema.
+            </li>
+          )}
+          {visibleNavigation.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
               <li key={item.name}>

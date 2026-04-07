@@ -6,13 +6,9 @@ class EmpresaCreate(BaseModel):
     razao_social: str = Field(..., min_length=3)
     porte: Optional[str] = "ME"
     segmento: Optional[str] = None
-    
-    # Supabase credentials (usado apenas no Onboarding)
-    supabase_url: str
-    supabase_service_role_key: str
-    
-    # Toggles default para onboarding
-    modules: List[str] = ["dashboard", "vendas", "crm"]
+
+    # Onboarding (governado pelo usuário-master); módulos são geridos centralmente
+    modules: List[str] = []
 
 class ProvisioningResponse(BaseModel):
     empresa_id: str
