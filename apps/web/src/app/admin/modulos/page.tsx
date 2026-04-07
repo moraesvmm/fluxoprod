@@ -47,7 +47,7 @@ export default async function AdminModulosPage({
     : { data: null as any };
 
   const ativoPorKey = new Map<string, boolean>(
-    (empresaMods || []).map((m) => [m.modulo_key, !!m.ativo])
+    (empresaMods || []).map((m: { modulo_key: string; ativo: boolean }) => [m.modulo_key, !!m.ativo])
   );
 
   return (
