@@ -13,9 +13,12 @@
 - `apps/api/routers/provisioning.py`
   - remove `BackgroundTasks` e executa provisionamento de forma sincronizada.
   - converte falhas HTTP do Supabase em `RuntimeError` com mensagem contextual.
-  - valida retorno da RPC e faz compensacao (`DELETE` em `empresas`) quando falhar.
-  - ativa modulos selecionados via upsert em `empresa_modulos`.
+  - passa a chamar RPC unica `provisionar_empresa_master` (empresa + schema + modulos).
   - retorna `status=success` apenas quando tudo conclui.
+- `apps/api/supabase_rpc.sql`
+  - adiciona `public.provisionar_empresa_master(...)` com validacao de schema e modulos.
+  - registra sucesso/erro em `logs_provisionamento`.
+  - restringe EXECUTE da RPC para `service_role`.
 - `apps/web/src/app/mestre/page.tsx`
   - parseia payload de erro da API (`detail/message`) e exibe na UI.
   - separa status de progresso de detalhe tecnico de erro.
@@ -23,8 +26,8 @@
   - corrige lista mutavel padrao para `Field(default_factory=list)`.
 
 ### Observacao arquitetural critica
-- O fluxo atual ainda usa **compensacao** (saga simples), nao transacao unica distribuida.
-- Para transacao forte, o ideal e consolidar cadastro da empresa + DDL + ativacao de modulos em **uma unica funcao SQL SECURITY DEFINER**, chamada uma vez pelo backend.
+- A transacao forte foi implementada na camada SQL via `provisionar_empresa_master(...)`.
+- Para entrar em vigor, esta versao do SQL precisa ser aplicada no Supabase (SQL Editor ou migration).
 
 ## Eixo 2 - Gaps prototipo (tenant UI) vs producao backend
 
