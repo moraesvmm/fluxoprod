@@ -2,6 +2,17 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
+  const hasSupabaseEnv =
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // Allow the app to boot even without env configured (shows /setup).
+  if (!hasSupabaseEnv) {
+    if (!request.nextUrl.pathname.startsWith('/setup')) {
+      return NextResponse.redirect(new URL('/setup', request.url))
+    }
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({
     request: {
       headers: request.headers,
