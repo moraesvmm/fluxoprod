@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, constr
 from typing import List, Optional
+from datetime import datetime
 
 class EmpresaCreate(BaseModel):
     cnpj: constr(min_length=14, max_length=18)
@@ -15,3 +16,27 @@ class ProvisioningResponse(BaseModel):
     schema_name: str
     status: str
     message: str
+
+# Schemas para Vendas
+class VendaBase(BaseModel):
+    cliente: str
+    valor: float
+    metodo: str
+    status: str = "concluido"
+
+class VendaCreate(VendaBase):
+    pass
+
+class VendaUpdate(BaseModel):
+    cliente: Optional[str] = None
+    valor: Optional[float] = None
+    metodo: Optional[str] = None
+    status: Optional[str] = None
+
+class VendaResponse(VendaBase):
+    id: str
+    criado_em: datetime
+    atualizado_em: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True

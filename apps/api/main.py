@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import provisioning
+from routers import provisioning, vendas
 import os
 from dotenv import load_dotenv
 
@@ -23,6 +23,7 @@ app.add_middleware(
 )
 
 app.include_router(provisioning.router, prefix="/api/v1")
+app.include_router(vendas.router, prefix="/api/v1")
 
 @app.get("/")
 def read_root():

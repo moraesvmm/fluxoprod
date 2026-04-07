@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Banknote, ShoppingBag, BarChart, CreditCard, Plus, Search, FileText } from "lucide-react";
+import { Banknote, ShoppingBag, BarChart, CreditCard, Plus, Search, FileText, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 const transacoes = [
@@ -22,6 +22,20 @@ const transacoes = [
 ];
 
 export default function VendasPage() {
+  const handleEdit = (id: string) => {
+    // TODO: Implementar função de edição
+    console.log("Editar transação:", id);
+    // Aqui você pode abrir um modal ou redirecionar para página de edição
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Tem certeza que deseja excluir esta transação?")) {
+      // TODO: Implementar chamada à API para deletar
+      console.log("Excluir transação:", id);
+      // Aqui você faria a chamada à API: DELETE /api/v1/vendas/{id}
+      // E atualizaria a lista de transações
+    }
+  };
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -85,9 +99,25 @@ export default function VendasPage() {
                   <StatusBadge status={item.status as any} />
                 </TableCell>
                 <TableCell className="text-right">
-                  <button className="text-slate-400 hover:text-primary transition-colors p-1" title="Gerar Recibo PDF">
-                    <FileText className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center justify-end gap-1">
+                    <button 
+                      className="text-slate-400 hover:text-blue-600 transition-colors p-1" 
+                      title="Editar transação"
+                      onClick={() => handleEdit(item.id)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button 
+                      className="text-slate-400 hover:text-red-600 transition-colors p-1" 
+                      title="Excluir transação"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                    <button className="text-slate-400 hover:text-primary transition-colors p-1" title="Gerar Recibo PDF">
+                      <FileText className="h-4 w-4" />
+                    </button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
