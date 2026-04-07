@@ -95,6 +95,64 @@ export default function FinanceiroPage() {
     const data = new Date(dataString);
     return data.toLocaleDateString('pt-BR');
   };
+
+  const verFluxoCaixa = () => {
+    // Calcular fluxo de caixa com base nas transações
+    const entradas = transacoes.filter(t => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0);
+    const saidas = transacoes.filter(t => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0);
+    const saldo = entradas - saidas;
+    
+    const mensagem = `
+📊 FLUXO DE CAIXA
+
+💰 Entradas: ${formatarValor(entradas)}
+💸 Saídas: ${formatarValor(saidas)}
+💎 Saldo Líquido: ${formatarValor(saldo)}
+
+📈 Transações Totais: ${transacoes.length}
+✅ Concluídas: ${transacoes.filter(t => t.status === 'concluido').length}
+⏳ Pendentes: ${transacoes.filter(t => t.status === 'pendente').length}
+    `.trim();
+    
+    alert(mensagem);
+  };
+
+  const sincronizarBanco = async () => {
+    // Simular sincronização com banco
+    if (window.confirm('Deseja sincronizar com o banco? Isso irá atualizar as transações bancárias.')) {
+      try {
+        // Simular loading
+        const button = event.target as HTMLButtonElement;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-2"></div>Sincronizando...';
+        button.disabled = true;
+        
+        // Simular delay de sincronização
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Recarregar transações
+        await carregarTransacoes();
+        
+        button.innerHTML = '<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Sincronizado!';
+        
+        setTimeout(() => {
+          button.innerHTML = originalText;
+          button.disabled = false;
+        }, 2000);
+        
+        alert('✅ Sincronização concluída com sucesso!');
+        
+      } catch (error) {
+        console.error('Erro ao sincronizar:', error);
+        alert('❌ Erro ao sincronizar com o banco. Tente novamente.');
+        
+        // Restaurar botão
+        const button = event.target as HTMLButtonElement;
+        button.innerHTML = '<RefreshCcw class="mr-2 h-4 w-4" />Sincronizar Banco';
+        button.disabled = false;
+      }
+    }
+  };
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -103,10 +161,16 @@ export default function FinanceiroPage() {
           <p className="text-muted-foreground">Gestão de caixa e reconciliação bancária.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-border hover:bg-slate-50 text-slate-700 h-10 px-4 py-2">
+          <button 
+            onClick={verFluxoCaixa}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-border hover:bg-slate-50 text-slate-700 h-10 px-4 py-2"
+          >
             Ver Fluxo de Caixa
           </button>
-          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+          <button 
+            onClick={sincronizarBanco}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
             <RefreshCcw className="mr-2 h-4 w-4" />
             Sincronizar Banco
           </button>

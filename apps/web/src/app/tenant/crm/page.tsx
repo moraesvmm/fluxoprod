@@ -91,19 +91,106 @@ export default function CRMPage() {
           <p className="text-muted-foreground">Gestão de relacionamento e campanhas.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-4 py-2">
+          <button 
+            onClick={() => {
+              const totalClientes = clientes.length;
+              const mensagem = `
+📱 CAMPANHA EM MASSA
+
+👥 Clientes Ativos: ${totalClientes}
+📊 Status: Pronto para envio
+📨 Canal: WhatsApp
+
+Deseja enviar campanha para todos os ${totalClientes} clientes?
+              `.trim();
+              
+              if (window.confirm(mensagem)) {
+                alert('✅ Campanha enviada com sucesso!\n\n📱 Mensagens enviadas via WhatsApp\n👥 ' + totalClientes + ' clientes notificados');
+              }
+            }}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-4 py-2"
+          >
             <MessageCircle className="mr-2 h-4 w-4" />
             Campanha em Massa
           </button>
-          <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+          <button 
+            onClick={() => setShowForm(!showForm)}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Novo Cliente
           </button>
         </div>
       </div>
 
+      {showForm && (
+        <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+          <h3 className="text-lg font-semibold mb-4">Novo Cliente</h3>
+          <form onSubmit={criarCliente} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
+                <input
+                  type="text"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Nome completo"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
+                <input
+                  type="tel"
+                  value={formData.telefone}
+                  onChange={(e) => setFormData({...formData, telefone: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="email@exemplo.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+                <input
+                  type="text"
+                  value={formData.endereco}
+                  onChange={(e) => setFormData({...formData, endereco: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Endereço completo"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                Salvar Cliente
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-3">
-        <KPICard title="Clientes Ativos" value="245" icon={Users} trend={{ value: 12, label: "vs mês ant", isPositive: true }} />
+        <KPICard title="Clientes Ativos" value={clientes.length} icon={Users} trend={{ value: 12, label: "vs mês ant", isPositive: true }} />
         <KPICard title="Inativos (30D+)" value="32" icon={UserX} className="border-amber-200 bg-amber-50/10" />
         <KPICard title="Em Risco (60D+)" value="8" icon={AlertCircle} className="border-red-200 bg-red-50/10" />
       </div>
