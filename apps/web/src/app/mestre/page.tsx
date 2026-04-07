@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Database, Key, LayoutGrid, Building2, ChevronRight, Loader2 } from "lucide-react";
+import { Check, LayoutGrid, Building2, ChevronRight, Loader2 } from "lucide-react";
 
 export default function MestreWizard() {
   const [step, setStep] = useState(1);
@@ -15,9 +15,7 @@ export default function MestreWizard() {
     razao_social: "",
     porte: "MPE",
     segmento: "",
-    supabase_url: "",
-    supabase_service_role_key: "",
-    modules: ["dashboard"] as string[]
+    modules: [] as string[]
   });
 
   const availableModules = [
@@ -26,11 +24,11 @@ export default function MestreWizard() {
     { id: "vendas", name: "Vendas & PDV", icon: "🛒" },
     { id: "financeiro", name: "Gestão Financeira", icon: "💰" },
     { id: "estoque", name: "Controle de Estoque", icon: "📦" },
-    { id: "produtos", name: "Catálogo", icon: "📋" },
+    { id: "catalogo", name: "Catálogo", icon: "📋" },
     { id: "rh", name: "RH & Pessoal", icon: "👥" },
     { id: "relatorios", name: "Relatórios", icon: "📄" },
     { id: "os", name: "Ordem de Serviço", icon: "🔧" },
-    { id: "config", name: "Configurações", icon: "⚙️" },
+    { id: "configuracoes", name: "Configurações", icon: "⚙️" },
   ];
 
   const handleToggleModule = (id: string) => {
@@ -47,8 +45,8 @@ export default function MestreWizard() {
     setProgressStatus("Iniciando orquestração no FastAPI...");
     
     try {
-      // Endpoint to inner FastAPI api container
-      const res = await fetch("http://localhost:8000/api/v1/provisioning/criar-empresa", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${apiUrl}/api/v1/provisioning/criar-empresa`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
@@ -106,29 +104,17 @@ export default function MestreWizard() {
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
             <div className="flex items-center gap-3 text-emerald-400 mb-6 border-b border-white/10 pb-4">
-              <Key className="w-5 h-5"/>
-              <h2 className="text-xl font-semibold text-white">Infraestrutura Supabase</h2>
+              <LayoutGrid className="w-5 h-5"/>
+              <h2 className="text-xl font-semibold text-white">Onboarding</h2>
             </div>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-gray-400 mb-1 block">Project Reference URL</label>
-                <div className="relative">
-                  <Database className="w-4 h-4 absolute left-3 top-3.5 text-gray-500" />
-                  <input value={formData.supabase_url} onChange={e => setFormData({...formData, supabase_url: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 pl-10 text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="https://xxxxxx.supabase.co" />
-                </div>
-              </div>
-              <div>
-                <label className="text-sm text-gray-400 mb-1 block">Service Role Key <span className="text-xs ml-2 text-rose-400">(Apenas Backend)</span></label>
-                <div className="relative">
-                  <Key className="w-4 h-4 absolute left-3 top-3.5 text-gray-500" />
-                  <input type="password" value={formData.supabase_service_role_key} onChange={e => setFormData({...formData, supabase_service_role_key: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 pl-10 text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="eyJh..." />
-                </div>
-              </div>
+            <div className="space-y-2 text-sm text-gray-400">
+              <p>Este fluxo cria a empresa e provisiona o schema isolado.</p>
+              <p>Módulos permanecem <span className="text-rose-300 font-medium">desativados por padrão</span> e só podem ser ativados pelo usuário-master.</p>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setStep(1)} className="px-6 py-3 rounded-lg border border-white/10 text-white hover:bg-white/5 transition-colors">Voltar</button>
               <button onClick={() => setStep(3)} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                Definir Módulos <ChevronRight className="w-4 h-4"/>
+                Continuar <ChevronRight className="w-4 h-4"/>
               </button>
             </div>
           </motion.div>

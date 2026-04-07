@@ -21,10 +21,150 @@ CREATE TABLE IF NOT EXISTS public.modulos_ativos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     empresa_id UUID REFERENCES public.empresas(id) ON DELETE CASCADE,
     modulo_nome VARCHAR(100) NOT NULL, -- ex: 'crm', 'financeiro', 'pdv'
-    ativo BOOLEAN DEFAULT TRUE,
+    -- Nenhum módulo deve nascer ativo por padrão (governança central pelo usuário-master)
+    ativo BOOLEAN DEFAULT FALSE,
     criado_em TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(empresa_id, modulo_nome)
 );
+
+-- ==========================================
+-- 0.1. CATÁLOGO DE MÓDULOS E GOVERNANÇA
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.modulos_catalogo (
+    key TEXT PRIMARY KEY, -- ex: 'dashboard', 'crm'
+    nome TEXT NOT NULL,
+    descricao TEXT NOT NULL,
+    criado_em TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Feature flags por empresa (fonte de verdade)
+CREATE TABLE IF NOT EXISTS public.empresa_modulos (
+    empresa_id UUID NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+    modulo_key TEXT NOT NULL REFERENCES public.modulos_catalogo(key) ON DELETE CASCADE,
+    ativo BOOLEAN NOT NULL DEFAULT FALSE,
+    atualizado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (empresa_id, modulo_key)
+);
+
+-- Usuários e papéis (master global e usuários por empresa)
+CREATE TABLE IF NOT EXISTS public.user_profiles (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    empresa_id UUID REFERENCES public.empresas(id) ON DELETE SET NULL,
+    role TEXT NOT NULL CHECK (role IN ('master', 'tenant_admin', 'tenant_user')),
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE OR REPLACE FUNCTION public.is_master()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.user_profiles p
+    WHERE p.user_id = auth.uid()
+      AND p.role = 'master'
+  );
+$$;
+
+-- Ao criar empresa, garantir feature flags criadas (todas false)
+CREATE OR REPLACE FUNCTION public._after_empresa_insert_seed_modules()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  INSERT INTO public.empresa_modulos (empresa_id, modulo_key, ativo)
+  SELECT NEW.id, m.key, FALSE
+  FROM public.modulos_catalogo m
+  ON CONFLICT (empresa_id, modulo_key) DO NOTHING;
+  RETURN NEW;
+END;
+$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'trg_empresas_seed_modules'
+  ) THEN
+    CREATE TRIGGER trg_empresas_seed_modules
+    AFTER INSERT ON public.empresas
+    FOR EACH ROW
+    EXECUTE FUNCTION public._after_empresa_insert_seed_modules();
+  END IF;
+END $$;
+
+-- Seed catálogo (idempotente)
+INSERT INTO public.modulos_catalogo (key, nome, descricao) VALUES
+  ('dashboard', 'Dashboard', 'Indicadores e visão geral do negócio.'),
+  ('crm', 'CRM', 'Cadastro de clientes e funil de relacionamento.'),
+  ('vendas', 'Vendas & PDV', 'Registro de vendas, PDV e emissão de comprovantes.'),
+  ('financeiro', 'Financeiro', 'Contas a pagar/receber, conciliação e fluxo de caixa.'),
+  ('estoque', 'Estoque', 'Controle de estoque, SKUs e níveis mínimos.'),
+  ('catalogo', 'Catálogo', 'Produtos e serviços com precificação base.'),
+  ('rh', 'RH', 'Cadastro de colaboradores e informações básicas.'),
+  ('relatorios', 'Relatórios', 'Relatórios e exportações consolidadas.'),
+  ('os', 'Ordem de Serviço', 'Abertura e gestão de ordens de serviço.'),
+  ('configuracoes', 'Configurações', 'Preferências e parâmetros do tenant.')
+ON CONFLICT (key) DO NOTHING;
+
+-- ==========================================
+-- 0.2. RLS (GOVERNANÇA CENTRAL + ISOLAMENTO)
+-- ==========================================
+ALTER TABLE public.empresas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.modulos_catalogo ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.empresa_modulos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+
+-- master pode tudo (governança central)
+DROP POLICY IF EXISTS master_all_empresas ON public.empresas;
+CREATE POLICY master_all_empresas ON public.empresas
+  FOR ALL USING (public.is_master()) WITH CHECK (public.is_master());
+
+DROP POLICY IF EXISTS master_all_modulos_catalogo ON public.modulos_catalogo;
+CREATE POLICY master_all_modulos_catalogo ON public.modulos_catalogo
+  FOR ALL USING (public.is_master()) WITH CHECK (public.is_master());
+
+DROP POLICY IF EXISTS master_all_empresa_modulos ON public.empresa_modulos;
+CREATE POLICY master_all_empresa_modulos ON public.empresa_modulos
+  FOR ALL USING (public.is_master()) WITH CHECK (public.is_master());
+
+DROP POLICY IF EXISTS master_all_user_profiles ON public.user_profiles;
+CREATE POLICY master_all_user_profiles ON public.user_profiles
+  FOR ALL USING (public.is_master()) WITH CHECK (public.is_master());
+
+-- usuário comum: ler própria empresa e seus módulos
+DROP POLICY IF EXISTS tenant_read_own_empresa ON public.empresas;
+CREATE POLICY tenant_read_own_empresa ON public.empresas
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1
+      FROM public.user_profiles p
+      WHERE p.user_id = auth.uid()
+        AND p.empresa_id = public.empresas.id
+        AND p.role IN ('tenant_admin', 'tenant_user')
+    )
+  );
+
+DROP POLICY IF EXISTS tenant_read_own_empresa_modulos ON public.empresa_modulos;
+CREATE POLICY tenant_read_own_empresa_modulos ON public.empresa_modulos
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1
+      FROM public.user_profiles p
+      WHERE p.user_id = auth.uid()
+        AND p.empresa_id = public.empresa_modulos.empresa_id
+        AND p.role IN ('tenant_admin', 'tenant_user')
+    )
+  );
+
+DROP POLICY IF EXISTS tenant_read_modulos_catalogo ON public.modulos_catalogo;
+CREATE POLICY tenant_read_modulos_catalogo ON public.modulos_catalogo
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS user_read_own_profile ON public.user_profiles;
+CREATE POLICY user_read_own_profile ON public.user_profiles
+  FOR SELECT USING (user_id = auth.uid());
 
 CREATE TABLE IF NOT EXISTS public.logs_provisionamento (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
