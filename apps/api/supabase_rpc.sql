@@ -198,6 +198,29 @@ BEGIN
     -- 2. Cria o schema
     EXECUTE format('CREATE SCHEMA %I;', novo_schema);
 
+    -- Endurecimento: por padrão, schemas tenant NÃO devem ser acessíveis por anon/authenticated
+    -- (evita exposição acidental caso o schema seja adicionado na lista de schemas expostos da API)
+    EXECUTE format('REVOKE ALL ON SCHEMA %I FROM PUBLIC;', novo_schema);
+    EXECUTE format('REVOKE ALL ON SCHEMA %I FROM anon;', novo_schema);
+    EXECUTE format('REVOKE ALL ON SCHEMA %I FROM authenticated;', novo_schema);
+    EXECUTE format('GRANT USAGE ON SCHEMA %I TO service_role;', novo_schema);
+
+    -- Default privileges para tabelas/funções futuras no schema
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON TABLES FROM PUBLIC;', novo_schema);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON TABLES FROM anon;', novo_schema);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON TABLES FROM authenticated;', novo_schema);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I GRANT ALL ON TABLES TO service_role;', novo_schema);
+
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON SEQUENCES FROM PUBLIC;', novo_schema);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON SEQUENCES FROM anon;', novo_schema);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON SEQUENCES FROM authenticated;', novo_schema);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I GRANT ALL ON SEQUENCES TO service_role;', novo_schema);
+
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON FUNCTIONS FROM PUBLIC;', novo_schema);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON FUNCTIONS FROM anon;', novo_schema);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON FUNCTIONS FROM authenticated;', novo_schema);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I GRANT ALL ON FUNCTIONS TO service_role;', novo_schema);
+
     -- 3. MÓDULO 2: CRM & Gestão de Clientes
     EXECUTE format('
         CREATE TABLE %I.clientes (
@@ -294,6 +317,12 @@ BEGIN
             atualizado_em TIMESTAMPTZ DEFAULT NOW()
         );
     ', novo_schema);
+
+    -- Garantir que as tabelas criadas também não sejam acessíveis por anon/authenticated
+    EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM PUBLIC;', novo_schema);
+    EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM anon;', novo_schema);
+    EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM authenticated;', novo_schema);
+    EXECUTE format('GRANT ALL ON ALL TABLES IN SCHEMA %I TO service_role;', novo_schema);
 
     -- Módulo 1 (Dashboard) e Módulo 8 (Relatórios) consumirão dados agregados dessas tabelas lógicas via views/consultas.
 
