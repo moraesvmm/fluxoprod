@@ -8,6 +8,7 @@ export default function MestreWizard() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [progressStatus, setProgressStatus] = useState("");
+  const [errorDetail, setErrorDetail] = useState("");
   
   // Form state
   const [formData, setFormData] = useState({
@@ -42,7 +43,8 @@ export default function MestreWizard() {
 
   const submitProvisioning = async () => {
     setLoading(true);
-    setProgressStatus("Iniciando orquestração no FastAPI...");
+    setErrorDetail("");
+    setProgressStatus("Provisionando tenant no backend...");
     
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -52,14 +54,24 @@ export default function MestreWizard() {
         body: JSON.stringify(formData)
       });
       
-      if (!res.ok) throw new Error("Erro na solicitação de provisionamento");
+      if (!res.ok) {
+        let apiMessage = "Erro na solicitação de provisionamento";
+        try {
+          const errData = await res.json();
+          apiMessage = errData?.detail || errData?.message || apiMessage;
+        } catch {
+          // keep default message when response isn't json
+        }
+        throw new Error(apiMessage);
+      }
       
       const data = await res.json();
       setProgressStatus(data.message || "Ambiente gerado com sucesso!");
       setTimeout(() => setStep(4), 2000); // go to success
       
-    } catch (err) {
-      setProgressStatus("Erro ao comunicar com orquestrador.");
+    } catch (err: any) {
+      setProgressStatus("Provisionamento falhou.");
+      setErrorDetail(err?.message || "Erro inesperado no backend.");
     } finally {
       setLoading(false);
     }
@@ -147,6 +159,11 @@ export default function MestreWizard() {
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin"/> {progressStatus}</> : "Provisionar Tenant Workspace"}
               </button>
             </div>
+            {!!errorDetail && (
+              <div className="mt-3 rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-200">
+                {errorDetail}
+              </div>
+            )}
           </motion.div>
         );
       case 4:

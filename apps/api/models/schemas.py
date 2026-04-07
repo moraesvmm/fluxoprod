@@ -8,7 +8,7 @@ class EmpresaCreate(BaseModel):
     segmento: Optional[str] = None
 
     # Onboarding (governado pelo usuário-master); módulos são geridos centralmente
-    modules: List[str] = []
+    modules: List[str] = Field(default_factory=list)
 
 class ProvisioningResponse(BaseModel):
     empresa_id: str
