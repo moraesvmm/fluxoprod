@@ -34,7 +34,12 @@ $nodeDir = Get-ChildItem -Path (Join-Path $repoRoot ".local\bin") -Directory -Er
 if ($nodeDir) {
   $env:PATH = $nodeDir.FullName + ";" + $env:PATH
   $nodeExe = Join-Path $nodeDir.FullName "node.exe"
-  $npmExe = Join-Path $nodeDir.FullName "npm.cmd"
+  $npmExe = Join-Path $nodeDir.FullName "npm-cli.js"
+  if (!(Test-Path $npmExe)) {
+    Write-Host "Extraindo npm-cli.zip..."
+    Expand-Archive -Path (Join-Path $nodeDir.FullName "npm-cli.zip") -DestinationPath $nodeDir.FullName -Force
+    $npmExe = Join-Path $nodeDir.FullName "npm-cli.js"
+  }
 } else {
   Write-Host "AVISO: Node portátil não encontrado em .local/bin. Rode o bootstrap local antes."
 }
@@ -48,7 +53,7 @@ if ((Test-Path $rootEnv) -and !(Test-Path $webEnv)) {
 
 # Frontend
 if ($npmExe) {
-  Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$repoRoot\apps\web`"; `"$npmExe`" run dev -- --port 3000"
+  Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$repoRoot\apps\web`"; `"$nodeExe`" `"$npmExe`" run dev -- --port 3000"
   Write-Host "Frontend Next.js em http://localhost:3000"
 } else {
   Write-Host "AVISO: npm não encontrado. Frontend não iniciado."
