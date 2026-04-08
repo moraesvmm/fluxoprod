@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import provisioning
+from routers import provisioning, vendas, crm, financeiro, estoque
+import os
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 app = FastAPI(
     title="FLUXO API",
@@ -18,6 +23,10 @@ app.add_middleware(
 )
 
 app.include_router(provisioning.router, prefix="/api/v1")
+app.include_router(vendas.router, prefix="/api/v1")
+app.include_router(crm.router, prefix="/api/v1")
+app.include_router(financeiro.router, prefix="/api/v1")
+app.include_router(estoque.router, prefix="/api/v1")
 
 @app.get("/")
 def read_root():

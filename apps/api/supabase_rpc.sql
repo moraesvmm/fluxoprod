@@ -341,3 +341,77 @@ EXCEPTION WHEN OTHERS THEN
     RETURN json_build_object('status', 'error', 'message', SQLERRM);
 END;
 $$;
+
+-- ==========================================
+-- 2. RPC TRANSACIONAL MASTER (EMPRESA + SCHEMA + MODULOS)
+-- ==========================================
+CREATE OR REPLACE FUNCTION public.provisionar_empresa_master(
+  p_empresa_id uuid,
+  p_cnpj text,
+  p_razao_social text,
+  p_porte text,
+  p_segmento text,
+  p_schema_name text,
+  p_modules text[] DEFAULT ARRAY[]::text[]
+)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_rpc json;
+  v_invalid_modules text[];
+BEGIN
+  IF p_schema_name IS NULL OR p_schema_name !~ '^[a-z][a-z0-9_]{2,62}$' THEN
+    RAISE EXCEPTION 'schema_name inválido: %', p_schema_name;
+  END IF;
+
+  SELECT array_agg(m)
+  INTO v_invalid_modules
+  FROM unnest(COALESCE(p_modules, ARRAY[]::text[])) AS m
+  WHERE NOT EXISTS (SELECT 1 FROM public.modulos_catalogo c WHERE c.key = m);
+
+  IF v_invalid_modules IS NOT NULL THEN
+    RAISE EXCEPTION 'Módulos inválidos no payload: %', array_to_string(v_invalid_modules, ', ');
+  END IF;
+
+  INSERT INTO public.empresas (
+    id, cnpj, razao_social, porte, segmento, schema_name
+  ) VALUES (
+    p_empresa_id, p_cnpj, p_razao_social, p_porte, p_segmento, p_schema_name
+  );
+
+  v_rpc := public.provisionar_empresa(p_schema_name);
+  IF COALESCE(v_rpc->>'status', 'error') <> 'success' THEN
+    RAISE EXCEPTION 'Falha ao criar schema tenant: %', COALESCE(v_rpc->>'message', 'erro desconhecido');
+  END IF;
+
+  IF array_length(COALESCE(p_modules, ARRAY[]::text[]), 1) > 0 THEN
+    INSERT INTO public.empresa_modulos (empresa_id, modulo_key, ativo)
+    SELECT p_empresa_id, m, true
+    FROM unnest(p_modules) AS m
+    ON CONFLICT (empresa_id, modulo_key)
+    DO UPDATE SET ativo = EXCLUDED.ativo, atualizado_em = now();
+  END IF;
+
+  INSERT INTO public.logs_provisionamento (empresa_id, schema_name, status, mensagem)
+  VALUES (p_empresa_id, p_schema_name, 'success', 'Provisionamento transacional concluído');
+
+  RETURN json_build_object(
+    'status', 'success',
+    'empresa_id', p_empresa_id,
+    'schema_name', p_schema_name,
+    'message', 'Empresa, schema e módulos provisionados com sucesso.'
+  );
+EXCEPTION WHEN OTHERS THEN
+  INSERT INTO public.logs_provisionamento (empresa_id, schema_name, status, mensagem)
+  VALUES (p_empresa_id, p_schema_name, 'error', SQLERRM);
+  RAISE;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) FROM anon;
+REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) FROM authenticated;
+GRANT EXECUTE ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) TO service_role;

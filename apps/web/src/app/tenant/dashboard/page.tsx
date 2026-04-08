@@ -134,7 +134,7 @@ export default function DashboardPage() {
                   tick={{ fill: '#64748b', fontSize: 12 }}
                   tickFormatter={(value) => `R$${(value / 1000)}k`}
                 />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   formatter={(value: any) => [`R$ ${Number(value ?? 0).toLocaleString()}`, 'Faturamento']}
                 />

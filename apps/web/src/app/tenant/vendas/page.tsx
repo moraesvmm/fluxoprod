@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
 import {
@@ -10,18 +11,68 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Banknote, ShoppingBag, BarChart, CreditCard, Plus, Search, FileText } from "lucide-react";
+import { Banknote, ShoppingBag, BarChart, CreditCard, Plus, Search, FileText, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
-
-const transacoes = [
-  { id: "TRX-1025", cliente: "Cliente Avulso", data: "06 Abr 2026, 14:30", valor: "R$ 450,00", status: "concluido", metodo: "PIX" },
-  { id: "TRX-1024", cliente: "Empresa XPTO Ltda", data: "06 Abr 2026, 11:15", valor: "R$ 1.200,00", status: "concluido", metodo: "Boleto" },
-  { id: "TRX-1023", cliente: "Maria Oliveira", data: "06 Abr 2026, 09:45", valor: "R$ 80,00", status: "pendente", metodo: "Cartão de Crédito" },
-  { id: "TRX-1022", cliente: "João Silva", data: "05 Abr 2026, 16:20", valor: "R$ 3.500,00", status: "concluido", metodo: "PIX" },
-  { id: "TRX-1021", cliente: "Cliente Avulso", data: "05 Abr 2026, 14:10", valor: "R$ 210,00", status: "concluido", metodo: "Dinheiro" },
-];
+import { apiClient, Venda } from "@/lib/api";
 
 export default function VendasPage() {
+  const [vendas, setVendas] = useState<Venda[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    carregarVendas();
+  }, []);
+
+  const carregarVendas = async () => {
+    try {
+      setLoading(true);
+      const data = await apiClient.getVendas();
+      setVendas(data);
+    } catch (err) {
+      console.error("Erro ao carregar vendas:", err);
+      setError("Erro ao carregar vendas. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = async (id: string) => {
+    // TODO: Implementar modal de edição
+    console.log("Editar transação:", id);
+    // Por enquanto, apenas log - implementar modal depois
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Tem certeza que deseja excluir esta transação?")) {
+      try {
+        await apiClient.deleteVenda(id);
+        // Atualizar lista removendo o item deletado
+        setVendas(vendas.filter(v => v.id !== id));
+      } catch (err) {
+        console.error("Erro ao excluir venda:", err);
+        alert("Erro ao excluir venda. Tente novamente.");
+      }
+    }
+  };
+
+  const formatarValor = (valor: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor);
+  };
+
+  const formatarData = (dataString: string) => {
+    const data = new Date(dataString);
+    return data.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -74,23 +125,65 @@ export default function VendasPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transacoes.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.id}</TableCell>
-                <TableCell>{item.cliente}</TableCell>
-                <TableCell className="text-muted-foreground text-sm">{item.data}</TableCell>
-                <TableCell className="text-muted-foreground text-sm">{item.metodo}</TableCell>
-                <TableCell className="font-medium text-slate-900">{item.valor}</TableCell>
-                <TableCell>
-                  <StatusBadge status={item.status as any} />
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-6">
+                  <div className="text-slate-500">Carregando vendas...</div>
                 </TableCell>
-                <TableCell className="text-right">
-                  <button className="text-slate-400 hover:text-primary transition-colors p-1" title="Gerar Recibo PDF">
-                    <FileText className="h-4 w-4" />
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-6">
+                  <div className="text-red-500">{error}</div>
+                  <button 
+                    onClick={carregarVendas}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Tentar novamente
                   </button>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : vendas.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-6">
+                  <div className="text-slate-500">Nenhuma venda encontrada</div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              vendas.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.id.substring(0, 8)}...</TableCell>
+                  <TableCell>{item.cliente}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{item.metodo}</TableCell>
+                  <TableCell className="font-medium text-slate-900">{formatarValor(item.valor)}</TableCell>
+                  <TableCell>
+                    <StatusBadge status={item.status as any} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <button 
+                        className="text-slate-400 hover:text-blue-600 transition-colors p-1" 
+                        title="Editar transação"
+                        onClick={() => handleEdit(item.id)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button 
+                        className="text-slate-400 hover:text-red-600 transition-colors p-1" 
+                        title="Excluir transação"
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button className="text-slate-400 hover:text-primary transition-colors p-1" title="Gerar Recibo PDF">
+                        <FileText className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, ShoppingCart, Trash2, ArrowLeft, CreditCard, Banknote, QrCode, AlertCircle } from "lucide-react";
+import { Search, ShoppingCart, Trash2, ArrowLeft, CreditCard, Banknote, QrCode, Check, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { twMerge } from "tailwind-merge";
 import { clsx } from "clsx";
@@ -29,6 +29,8 @@ export default function PDVPage() {
   const [produtos, setProdutos] = useState<ProdutoEstoque[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [metodoPagamento, setMetodoPagamento] = useState<string>('cartao');
+  const [cliente, setCliente] = useState('Cliente Avulso');
   const supabase = createClient();
 
   // Carregar produtos do estoque
@@ -61,8 +63,7 @@ export default function PDVPage() {
     };
     
     loadProdutos();
-  }, [supabase]);
-  
+  }, [supabase]);  
   const addToCart = (produto: ProdutoEstoque) => {
     // Validação crítica: produto deve existir no estoque
     const produtoEstoque = produtos.find(p => p.id === produto.id);
@@ -101,6 +102,22 @@ export default function PDVPage() {
 
   const removeFromCart = (id: string) => {
     setCart(prev => prev.filter(i => i.id !== id));
+  };
+
+  const finalizarPagamento = async () => {
+    if (cart.length === 0) return;
+    
+    setLoading(true);
+    try {
+      // TODO: Implementar integração real com Supabase/Backend
+      alert('Pagamento realizado com sucesso!');
+      setCart([]);
+    } catch (error) {
+      console.error('Erro ao finalizar pagamento:', error);
+      alert('Erro ao processar pagamento. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const total = cart.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
@@ -226,34 +243,85 @@ export default function PDVPage() {
         </div>
 
         <div className="p-4 border-t border-border bg-slate-50 rounded-b-xl">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">Cliente</label>
+            <input
+              type="text"
+              value={cliente}
+              onChange={(e) => setCliente(e.target.value)}
+              className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Nome do cliente"
+            />
+          </div>
+
           <div className="flex justify-between items-end mb-4">
             <span className="text-slate-500 font-medium">Total</span>
             <span className="text-3xl font-black text-slate-900">R$ {total.toFixed(2)}</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            <button className="flex flex-col items-center p-2 rounded border border-border bg-white hover:border-primary hover:text-primary transition-colors text-slate-600">
-              <QrCode className="h-5 w-5 mb-1" />
-              <span className="text-xs font-medium">PIX</span>
-            </button>
-            <button className="flex flex-col items-center p-2 rounded border border-primary bg-indigo-50 text-primary transition-colors">
-              <CreditCard className="h-5 w-5 mb-1" />
-              <span className="text-xs font-medium">Cartão</span>
-            </button>
-            <button className="flex flex-col items-center p-2 rounded border border-border bg-white hover:border-primary hover:text-primary transition-colors text-slate-600">
-              <Banknote className="h-5 w-5 mb-1" />
-              <span className="text-xs font-medium">Dinheiro</span>
-            </button>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">Método de Pagamento</label>
+            <div className="grid grid-cols-3 gap-2">
+              <button 
+                onClick={() => setMetodoPagamento('pix')}
+                className={twMerge(clsx(
+                  "flex flex-col items-center p-2 rounded border transition-colors",
+                  metodoPagamento === 'pix' 
+                    ? "border-primary bg-indigo-50 text-primary" 
+                    : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
+                ))}
+              >
+                <QrCode className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">PIX</span>
+                {metodoPagamento === 'pix' && <Check className="h-3 w-3 text-primary" />}
+              </button>
+              <button 
+                onClick={() => setMetodoPagamento('cartao')}
+                className={twMerge(clsx(
+                  "flex flex-col items-center p-2 rounded border transition-colors",
+                  metodoPagamento === 'cartao' 
+                    ? "border-primary bg-indigo-50 text-primary" 
+                    : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
+                ))}
+              >
+                <CreditCard className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">Cartão</span>
+                {metodoPagamento === 'cartao' && <Check className="h-3 w-3 text-primary" />}
+              </button>
+              <button 
+                onClick={() => setMetodoPagamento('dinheiro')}
+                className={twMerge(clsx(
+                  "flex flex-col items-center p-2 rounded border transition-colors",
+                  metodoPagamento === 'dinheiro' 
+                    ? "border-primary bg-indigo-50 text-primary" 
+                    : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
+                ))}
+              >
+                <Banknote className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">Dinheiro</span>
+                {metodoPagamento === 'dinheiro' && <Check className="h-3 w-3 text-primary" />}
+              </button>
+            </div>
           </div>
 
           <button 
-            disabled={cart.length === 0}
+            onClick={finalizarPagamento}
+            disabled={cart.length === 0 || loading}
             className={twMerge(clsx(
-              "w-full h-12 rounded-lg font-bold text-white transition-all",
-              cart.length === 0 ? "bg-slate-300 cursor-not-allowed" : "bg-primary hover:bg-primary/90 shadow-lg shadow-indigo-500/25"
+              "w-full h-12 rounded-lg font-bold text-white transition-all flex items-center justify-center gap-2",
+              cart.length === 0 || loading 
+                ? "bg-slate-300 cursor-not-allowed" 
+                : "bg-primary hover:bg-primary/90 shadow-lg shadow-indigo-500/25"
             ))}
           >
-            Finalizar Pagamento
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Processando...
+              </>
+            ) : (
+              'Finalizar Pagamento'
+            )}
           </button>
         </div>
       </div>
