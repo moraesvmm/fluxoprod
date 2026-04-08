@@ -157,19 +157,28 @@ BEGIN
         RETURNS trigger
         LANGUAGE plpgsql
         AS $$
+        DECLARE
+            v_qtd_atual INTEGER;
         BEGIN
-            UPDATE %I.estoque e
-            SET quantidade = e.quantidade - NEW.quantidade,
-                atualizado_em = NOW()
-            WHERE e.id = NEW.produto_id;
+            -- Verificar estoque atual antes da venda
+            SELECT quantidade INTO v_qtd_atual
+            FROM %I.estoque
+            WHERE id = NEW.produto_id
+            FOR UPDATE;
             
             IF NOT FOUND THEN
                 RAISE EXCEPTION ''Produto não encontrado no estoque'';
             END IF;
             
-            IF (SELECT quantidade FROM %I.estoque WHERE id = NEW.produto_id) < 0 THEN
-                RAISE EXCEPTION ''Quantidade insuficiente no estoque'';
+            IF v_qtd_atual < NEW.quantidade THEN
+                RAISE EXCEPTION ''Quantidade insuficiente no estoque. Disponível: %s, Solicitado: %s'', v_qtd_atual, NEW.quantidade;
             END IF;
+            
+            -- Atualizar estoque
+            UPDATE %I.estoque
+            SET quantidade = quantidade - NEW.quantidade,
+                atualizado_em = NOW()
+            WHERE id = NEW.produto_id;
             
             RETURN NEW;
         END;
