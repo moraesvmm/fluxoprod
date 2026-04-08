@@ -22,6 +22,9 @@ function Import-EnvFile([string]$path) {
 # Load env from repo root
 Import-EnvFile (Join-Path $repoRoot ".env.local")
 
+# Load backend env
+Import-EnvFile (Join-Path $repoRoot "apps\api\.env")
+
 # Portable Node (local)
 $nodeDir = Get-ChildItem -Path (Join-Path $repoRoot ".local\bin") -Directory -ErrorAction SilentlyContinue |
   Where-Object { $_.Name -like "node-v*-win-x64" } |
@@ -40,10 +43,6 @@ $rootEnv = Join-Path $repoRoot ".env.local"
 if ((Test-Path $rootEnv) -and !(Test-Path $webEnv)) {
   Copy-Item $rootEnv $webEnv
 }
-
-# Portable uv (local)
-$uvExe = Get-ChildItem -Path (Join-Path $repoRoot ".local\bin\uv") -Recurse -Filter "uv.exe" -ErrorAction SilentlyContinue |
-  Select-Object -First 1
 
 # Frontend
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$repoRoot\apps\web`"; npm run dev -- --port 3000"

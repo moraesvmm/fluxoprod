@@ -1,8 +1,18 @@
 "use client";
 
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, LogOut } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export function Header() {
+  const supabase = createClient();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  };
   const currentDate = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     year: "numeric",
@@ -69,6 +79,13 @@ export function Header() {
                 Admin User
               </span>
             </span>
+            <button
+              onClick={handleLogout}
+              className="-m-2.5 p-2.5 text-muted-foreground/70 hover:text-foreground hover:bg-muted/50 transition-all rounded-lg"
+              title="Logout"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </div>

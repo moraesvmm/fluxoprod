@@ -3,9 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import provisioning, vendas, crm, financeiro, estoque
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-# Carregar variáveis de ambiente do arquivo .env
-load_dotenv()
+# Carregar variáveis de ambiente do arquivo .env explicitamente
+env_path = Path(__file__).parent / ".env"
+load_dotenv(env_path)
 
 app = FastAPI(
     title="FLUXO API",
