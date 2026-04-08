@@ -67,7 +67,8 @@ export function Sidebar() {
         .from("empresa_modulos")
         .select("modulo_key, ativo")
         .eq("empresa_id", profile.empresa_id)
-        .eq("ativo", true);
+        .eq("ativo", true)
+        .order("modulo_key");
 
       if (!cancelled) setActiveKeys((mods || []).map((m: any) => m.modulo_key));
     }
