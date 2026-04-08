@@ -12,6 +12,10 @@ import {
   Settings,
   Tags,
   Briefcase,
+  FileText,
+  Wrench,
+  Building2,
+  DollarSign,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -25,6 +29,10 @@ const navigation = [
   { key: "financeiro", name: "Financeiro", href: "/tenant/financeiro", icon: Wallet },
   { key: "catalogo", name: "Catálogo", href: "/tenant/catalogo", icon: Tags },
   { key: "rh", name: "RH & Equipe", href: "/tenant/rh", icon: Briefcase },
+  { key: "os", name: "Ordem de Serviço", href: "/tenant/os", icon: Wrench },
+  { key: "obras", name: "Obras", href: "/tenant/obras", icon: Building2 },
+  { key: "comissoes", name: "Comissões", href: "/tenant/comissoes", icon: DollarSign },
+  { key: "relatorios", name: "Relatórios", href: "/tenant/relatorios", icon: FileText },
   { key: "configuracoes", name: "Configurações", href: "/tenant/configuracoes", icon: Settings },
 ];
 
@@ -76,10 +84,10 @@ export function Sidebar() {
   }, [activeKeys]);
 
   return (
-    <div className="flex h-full w-64 flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border text-sidebar-foreground transition-all duration-300 shadow-xl">
-      <div className="flex h-16 shrink-0 items-center px-6 border-b border-sidebar-border">
-        <div className="flex items-center gap-2">
-          <div className="bg-sidebar-primary w-8 h-8 rounded-lg flex items-center justify-center shadow-md">
+    <div className="flex h-full w-64 flex-col overflow-y-auto bg-sidebar border-r border-sidebar-border/60 text-sidebar-foreground transition-all duration-300 shadow-lg">
+      <div className="flex h-16 shrink-0 items-center px-6 border-b border-sidebar-border/60">
+        <div className="flex items-center gap-2.5">
+          <div className="bg-gradient-to-br from-sidebar-primary to-indigo-500 w-9 h-9 rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
             <span className="text-white font-bold text-lg leading-none">F</span>
           </div>
           <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
@@ -87,10 +95,10 @@ export function Sidebar() {
           </span>
         </div>
       </div>
-      <nav className="flex flex-1 flex-col px-4 py-6">
-        <ul role="list" className="flex flex-1 flex-col gap-y-2">
+      <nav className="flex flex-1 flex-col px-3 py-6">
+        <ul role="list" className="flex flex-1 flex-col gap-y-1">
           {activeKeys !== null && visibleNavigation.length === 0 && (
-            <li className="px-2 py-3 text-sm text-slate-400">
+            <li className="px-3 py-3 text-sm text-slate-400/80">
               Nenhum módulo ativo. Solicite ativação ao administrador do sistema.
             </li>
           )}
@@ -102,10 +110,10 @@ export function Sidebar() {
                   href={item.href}
                   className={twMerge(
                     clsx(
-                      "group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 transition-all duration-200",
+                      "group flex gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold leading-6 transition-all duration-200",
                       isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md shadow-indigo-500/20"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-primary/25"
+                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
                     )
                   )}
                 >
@@ -126,14 +134,14 @@ export function Sidebar() {
         </ul>
       </nav>
       {/* Tenant Indicator */}
-      <div className="p-4 border-t border-sidebar-border bg-sidebar-accent/30">
+      <div className="p-4 border-t border-sidebar-border/60 bg-sidebar-accent/40">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-medium text-slate-300">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-xs font-bold text-white shadow-md ring-2 ring-sidebar-border">
             TJ
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-white">Empresa Demo</span>
-            <span className="text-xs text-slate-400">Plano Premium</span>
+            <span className="text-sm font-bold text-white">Empresa Demo</span>
+            <span className="text-xs text-slate-400/80">Plano Premium</span>
           </div>
         </div>
       </div>

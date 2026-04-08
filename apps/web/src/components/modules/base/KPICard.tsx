@@ -18,17 +18,17 @@ interface KPICardProps {
 
 export function KPICard({ title, value, icon: Icon, trend, className }: KPICardProps) {
   return (
-    <div className={twMerge(clsx("relative overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-border transition-all duration-200 hover:shadow-md", className))}>
+    <div className={twMerge(clsx("relative overflow-hidden rounded-xl bg-white p-6 border border-border/60 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5", className))}>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground truncate">
+        <p className="text-sm font-semibold text-muted-foreground/80 truncate">
           {title}
         </p>
-        <div className="rounded-lg bg-indigo-50 p-2 text-primary">
+        <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100 p-2.5 text-primary shadow-sm">
           <Icon className="h-5 w-5" />
         </div>
       </div>
       <div className="mt-4 flex items-baseline gap-x-2">
-        <h3 className="text-2xl font-bold tracking-tight text-foreground">
+        <h3 className="text-3xl font-bold tracking-tight text-foreground">
           {value}
         </h3>
       </div>
@@ -38,15 +38,15 @@ export function KPICard({ title, value, icon: Icon, trend, className }: KPICardP
           <span
             className={twMerge(
               clsx(
-                "inline-flex font-medium",
-                trend.isPositive ? "text-emerald-600" : "text-destructive"
+                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold",
+                trend.isPositive ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
               )
             )}
           >
             {trend.isPositive ? "+" : "-"}
             {Math.abs(trend.value)}%
           </span>
-          <span className="ml-2 text-muted-foreground">{trend.label}</span>
+          <span className="ml-2 text-muted-foreground/80">{trend.label}</span>
         </div>
       )}
     </div>

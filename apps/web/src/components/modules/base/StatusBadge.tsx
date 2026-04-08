@@ -45,7 +45,7 @@ export function StatusBadge({ status, label, className }: StatusBadgeProps) {
     <span
       className={twMerge(
         clsx(
-          "inline-flex items-center gap-x-1.5 rounded-full px-2 py-1 text-xs font-medium border border-black/5",
+          "inline-flex items-center gap-x-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border border-black/5 shadow-sm",
           config.bg,
           config.text,
           className
