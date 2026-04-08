@@ -64,7 +64,7 @@ export function Sidebar() {
       }
 
       const { data: mods } = await supabase
-        .from("empresa_modulos")
+        .from("v_empresa_modulos")
         .select("modulo_key, ativo")
         .eq("empresa_id", profile.empresa_id);
 
