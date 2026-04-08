@@ -5,7 +5,6 @@
 
 -- 1. Limpar dados de vendas (todas as empresas)
 DELETE FROM public.vendas;
-DELETE FROM public.vendas_itens;
 
 -- 2. Limpar dados de clientes (todas as empresas)
 DELETE FROM public.clientes;
