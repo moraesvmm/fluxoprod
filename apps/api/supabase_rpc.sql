@@ -17,16 +17,6 @@ CREATE TABLE IF NOT EXISTS public.empresas (
     status VARCHAR(50) DEFAULT 'ativo'
 );
 
-CREATE TABLE IF NOT EXISTS public.modulos_ativos (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    empresa_id UUID REFERENCES public.empresas(id) ON DELETE CASCADE,
-    modulo_nome VARCHAR(100) NOT NULL, -- ex: 'crm', 'financeiro', 'pdv'
-    -- Nenhum módulo deve nascer ativo por padrão (governança central pelo usuário-master)
-    ativo BOOLEAN DEFAULT FALSE,
-    criado_em TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(empresa_id, modulo_nome)
-);
-
 -- ==========================================
 -- 0.1. CATÁLOGO DE MÓDULOS E GOVERNANÇA
 -- ==========================================
@@ -105,6 +95,8 @@ INSERT INTO public.modulos_catalogo (key, nome, descricao) VALUES
   ('rh', 'RH', 'Cadastro de colaboradores e informações básicas.'),
   ('relatorios', 'Relatórios', 'Relatórios e exportações consolidadas.'),
   ('os', 'Ordem de Serviço', 'Abertura e gestão de ordens de serviço.'),
+  ('obras', 'Obras', 'Gestão de obras e projetos com integração com OS e vendas.'),
+  ('comissoes', 'Comissões', 'Regras de comissão por colaborador e cálculo automático.'),
   ('configuracoes', 'Configurações', 'Preferências e parâmetros do tenant.')
 ON CONFLICT (key) DO NOTHING;
 
@@ -174,6 +166,16 @@ CREATE TABLE IF NOT EXISTS public.logs_provisionamento (
     mensagem TEXT,
     criado_em TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Índices para performance em tabelas públicas
+CREATE INDEX IF NOT EXISTS idx_empresas_schema_name ON public.empresas(schema_name);
+CREATE INDEX IF NOT EXISTS idx_empresas_status ON public.empresas(status);
+CREATE INDEX IF NOT EXISTS idx_empresa_modulos_empresa ON public.empresa_modulos(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_empresa_modulos_ativo ON public.empresa_modulos(ativo);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_empresa ON public.user_profiles(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_role ON public.user_profiles(role);
+CREATE INDEX IF NOT EXISTS idx_logs_provisionamento_empresa ON public.logs_provisionamento(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_logs_provisionamento_criado_em ON public.logs_provisionamento(criado_em DESC);
 
 -- ==========================================
 -- 1. FUNÇÃO RPC DE PROVISIONAMENTO DINÂMICO
@@ -299,12 +301,13 @@ BEGIN
     EXECUTE format('
         CREATE TABLE %I.ordens_servico (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            cliente_id UUID REFERENCES %I.clientes(id),
+            cliente_id UUID REFERENCES %I.clientes(id) ON DELETE SET NULL,
             veiculo_equipamento VARCHAR(255),
             descricao_problema TEXT,
-            status VARCHAR(50) DEFAULT ''aberto'',
+            status VARCHAR(50) DEFAULT ''aberta'' CHECK (status IN (''aberta'', ''em_execucao'', ''concluida'', ''cancelada'')),
             valor_orcamento NUMERIC(10, 2),
-            criado_em TIMESTAMPTZ DEFAULT NOW()
+            criado_em TIMESTAMPTZ DEFAULT NOW(),
+            atualizado_em TIMESTAMPTZ DEFAULT NOW()
         );
     ', novo_schema, novo_schema);
 
@@ -313,10 +316,13 @@ BEGIN
         CREATE TABLE %I.configuracoes (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             chave VARCHAR(100) UNIQUE NOT NULL,
-            valor JSONB NOT NULL,
+            valor JSONB NOT NULL CHECK (valor IS NOT NULL),
             atualizado_em TIMESTAMPTZ DEFAULT NOW()
         );
     ', novo_schema);
+
+    -- Índice explícito para configurações
+    EXECUTE format('CREATE INDEX idx_%I_configuracoes_chave ON %I.configuracoes(chave);', novo_schema, novo_schema);
 
     -- Garantir que as tabelas criadas também não sejam acessíveis por anon/authenticated
     EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM PUBLIC;', novo_schema);
