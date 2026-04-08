@@ -61,6 +61,39 @@ export default function EstoquePage() {
     }
   };
 
+  const adicionarProduto = async () => {
+    const nome = prompt("Nome do produto:");
+    if (!nome) return;
+
+    const descricao = prompt("Descrição (opcional):") || '';
+    const sku = prompt("SKU (opcional):") || '';
+    const precoCusto = prompt("Preço de custo (opcional):") || '';
+    const precoVenda = prompt("Preço de venda (opcional):") || '';
+    const estoqueAtual = prompt("Quantidade atual:") || '0';
+    const estoqueMinimo = prompt("Quantidade mínima:") || '10';
+    const categoria = prompt("Categoria (opcional):") || '';
+
+    try {
+      const produto = {
+        nome,
+        descricao,
+        sku,
+        preco_custo: precoCusto ? parseFloat(precoCusto) : undefined,
+        preco_venda: precoVenda ? parseFloat(precoVenda) : undefined,
+        estoque_atual: parseInt(estoqueAtual),
+        estoque_minimo: parseInt(estoqueMinimo),
+        categoria
+      };
+
+      const novo = await apiClient.createProduto(produto);
+      setProdutos([...produtos, novo]);
+      alert("Produto adicionado com sucesso!");
+    } catch (err) {
+      console.error("Erro ao adicionar produto:", err);
+      alert("Erro ao adicionar produto. Tente novamente.");
+    }
+  };
+
   const getStatus = (qtd: number, min: number) => {
     if (qtd === 0) return 'error';
     if (qtd <= min) return 'warning';
@@ -107,9 +140,7 @@ Deseja exportar relatório atual?
             Importar/Exportar
           </button>
           <button 
-            onClick={() => {
-              alert('🔧 Funcionalidade em desenvolvimento\n\nEm breve você poderá:\n• Adicionar novos produtos\n• Editar informações\n• Gerenciar categorias\n• Configurar alertas de estoque');
-            }}
+            onClick={adicionarProduto}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
           >
             <Plus className="mr-2 h-4 w-4" />
