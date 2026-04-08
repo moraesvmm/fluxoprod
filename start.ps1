@@ -15,7 +15,7 @@ function Import-EnvFile([string]$path) {
     if (($val.StartsWith('"') -and $val.EndsWith('"')) -or ($val.StartsWith("'") -and $val.EndsWith("'"))) {
       $val = $val.Substring(1, $val.Length - 2)
     }
-    if (-not $env:$key) { $env:$key = $val }
+    if (-not (Get-Item -Path "env:$key" -ErrorAction SilentlyContinue)) { Set-Item -Path "env:$key" -Value $val }
   }
 }
 
