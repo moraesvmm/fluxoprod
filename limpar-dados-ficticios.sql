@@ -1,34 +1,18 @@
 -- Script para limpar dados fictícios dos módulos do Supabase
 -- Mantém empresas, usuários e configurações base intactos
--- Limpa dados dos schemas específicos de cada empresa (tenant)
+-- Limpa dados do schema específico da empresa vidanovaimobiliaria
 
--- VERIFICAR SCHEMAS EXISTENTES
-SELECT schema_name FROM public.empresas WHERE schema_name IS NOT NULL;
+-- LIMPAR DADOS FICTÍCIOS DO SCHEMA tenant_vidanovaimobiliria_c19798
 
--- LIMPAR DADOS FICTÍCIOS DOS SCHEMAS ESPECÍFICOS
--- Substitua pelos nomes dos schemas que existem no seu banco
-
--- Exemplo para limpar dados do schema 'techsolutions' (se existir)
--- DELETE FROM techsolutions.vendas;
--- DELETE FROM techsolutions.vendas_itens;
--- DELETE FROM techsolutions.clientes;
--- DELETE FROM techsolutions.produtos;
--- DELETE FROM techsolutions.estoque;
--- DELETE FROM techsolutions.financeiro;
--- DELETE FROM techsolutions.funcionarios;
--- DELETE FROM techsolutions.ordens_servico;
--- DELETE FROM techsolutions.ordens_servico_itens;
-
--- Exemplo para limpar dados do schema 'vidanovaimobiliaria' (se existir)
--- DELETE FROM vidanovaimobiliaria.vendas;
--- DELETE FROM vidanovaimobiliaria.vendas_itens;
--- DELETE FROM vidanovaimobiliaria.clientes;
--- DELETE FROM vidanovaimobiliaria.produtos;
--- DELETE FROM vidanovaimobiliaria.estoque;
--- DELETE FROM vidanovaimobiliaria.financeiro;
--- DELETE FROM vidanovaimobiliaria.funcionarios;
--- DELETE FROM vidanovaimobiliaria.ordens_servico;
--- DELETE FROM vidanovaimobiliaria.ordens_servico_itens;
+DELETE FROM tenant_vidanovaimobiliria_c19798.vendas;
+DELETE FROM tenant_vidanovaimobiliria_c19798.vendas_itens;
+DELETE FROM tenant_vidanovaimobiliria_c19798.clientes;
+DELETE FROM tenant_vidanovaimobiliria_c19798.produtos;
+DELETE FROM tenant_vidanovaimobiliria_c19798.estoque;
+DELETE FROM tenant_vidanovaimobiliria_c19798.financeiro;
+DELETE FROM tenant_vidanovaimobiliria_c19798.funcionarios;
+DELETE FROM tenant_vidanovaimobiliria_c19798.ordens_servico;
+DELETE FROM tenant_vidanovaimobiliria_c19798.ordens_servico_itens;
 
 -- Limpar logs de provisionamento antigos (opcional)
 DELETE FROM public.logs_provisionamento WHERE criado_em < NOW() - INTERVAL '7 days';
