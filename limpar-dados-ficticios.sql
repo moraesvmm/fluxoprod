@@ -3,16 +3,16 @@
 -- Limpa dados do schema específico da empresa vidanovaimobiliaria
 
 -- LIMPAR DADOS FICTÍCIOS DO SCHEMA tenant_vidanovaimobiliria_c19798
+-- Tabelas existentes: vendas, clientes, vendas_itens, funcionarios, regras_comissao, comissoes, produtos, estoque
 
 DELETE FROM tenant_vidanovaimobiliria_c19798.vendas;
 DELETE FROM tenant_vidanovaimobiliria_c19798.vendas_itens;
 DELETE FROM tenant_vidanovaimobiliria_c19798.clientes;
+DELETE FROM tenant_vidanovaimobiliria_c19798.funcionarios;
+DELETE FROM tenant_vidanovaimobiliria_c19798.regras_comissao;
+DELETE FROM tenant_vidanovaimobiliria_c19798.comissoes;
 DELETE FROM tenant_vidanovaimobiliria_c19798.produtos;
 DELETE FROM tenant_vidanovaimobiliria_c19798.estoque;
-DELETE FROM tenant_vidanovaimobiliria_c19798.financeiro;
-DELETE FROM tenant_vidanovaimobiliria_c19798.funcionarios;
-DELETE FROM tenant_vidanovaimobiliria_c19798.ordens_servico;
-DELETE FROM tenant_vidanovaimobiliria_c19798.ordens_servico_itens;
 
 -- Limpar logs de provisionamento antigos (opcional)
 DELETE FROM public.logs_provisionamento WHERE criado_em < NOW() - INTERVAL '7 days';
