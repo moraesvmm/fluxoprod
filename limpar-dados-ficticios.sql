@@ -1,34 +1,36 @@
 -- Script para limpar dados fictícios dos módulos do Supabase
 -- Mantém empresas, usuários e configurações base intactos
+-- Limpa dados dos schemas específicos de cada empresa (tenant)
 
--- LIMPAR DADOS FICTÍCIOS DOS MÓDULOS
+-- VERIFICAR SCHEMAS EXISTENTES
+SELECT schema_name FROM public.empresas WHERE schema_name IS NOT NULL;
 
--- 1. Limpar dados de vendas (todas as empresas)
-DELETE FROM public.vendas;
+-- LIMPAR DADOS FICTÍCIOS DOS SCHEMAS ESPECÍFICOS
+-- Substitua pelos nomes dos schemas que existem no seu banco
 
--- 2. Limpar dados de clientes (todas as empresas)
-DELETE FROM public.clientes;
+-- Exemplo para limpar dados do schema 'techsolutions' (se existir)
+-- DELETE FROM techsolutions.vendas;
+-- DELETE FROM techsolutions.vendas_itens;
+-- DELETE FROM techsolutions.clientes;
+-- DELETE FROM techsolutions.produtos;
+-- DELETE FROM techsolutions.estoque;
+-- DELETE FROM techsolutions.financeiro;
+-- DELETE FROM techsolutions.funcionarios;
+-- DELETE FROM techsolutions.ordens_servico;
+-- DELETE FROM techsolutions.ordens_servico_itens;
 
--- 3. Limpar dados de transações financeiras (todas as empresas)
-DELETE FROM public.transacoes_financeiras;
+-- Exemplo para limpar dados do schema 'vidanovaimobiliaria' (se existir)
+-- DELETE FROM vidanovaimobiliaria.vendas;
+-- DELETE FROM vidanovaimobiliaria.vendas_itens;
+-- DELETE FROM vidanovaimobiliaria.clientes;
+-- DELETE FROM vidanovaimobiliaria.produtos;
+-- DELETE FROM vidanovaimobiliaria.estoque;
+-- DELETE FROM vidanovaimobiliaria.financeiro;
+-- DELETE FROM vidanovaimobiliaria.funcionarios;
+-- DELETE FROM vidanovaimobiliaria.ordens_servico;
+-- DELETE FROM vidanovaimobiliaria.ordens_servico_itens;
 
--- 4. Limpar dados de produtos (todas as empresas)
-DELETE FROM public.produtos;
-
--- 5. Limpar dados de ordens de serviço (todas as empresas)
-DELETE FROM public.ordens_servico_historico;
-DELETE FROM public.ordens_servico;
-
--- 6. Limpar dados de obras (todas as empresas)
-DELETE FROM public.obras;
-
--- 7. Limpar dados de comissões (todas as empresas)
-DELETE FROM public.comissoes;
-
--- 8. Limpar dados de RH (todas as empresas)
-DELETE FROM public.colaboradores;
-
--- 9. Limpar logs de provisionamento antigos (opcional)
+-- Limpar logs de provisionamento antigos (opcional)
 DELETE FROM public.logs_provisionamento WHERE criado_em < NOW() - INTERVAL '7 days';
 
 -- VERIFICAÇÃO APÓS LIMPEZA
