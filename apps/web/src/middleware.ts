@@ -90,7 +90,7 @@ export async function middleware(request: NextRequest) {
         // Rotas especiais que não são módulos
         if (moduleKey !== 'sem-modulos') {
           const { data: modRow } = await supabase
-            .from('empresa_modulos')
+            .from('v_empresa_modulos')
             .select('ativo')
             .eq('empresa_id', profile.empresa_id)
             .eq('modulo_key', moduleKey)
