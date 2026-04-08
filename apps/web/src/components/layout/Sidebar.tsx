@@ -66,11 +66,9 @@ export function Sidebar() {
       const { data: mods } = await supabase
         .from("empresa_modulos")
         .select("modulo_key, ativo")
-        .eq("empresa_id", profile.empresa_id)
-        .eq("ativo", true)
-        .order("modulo_key");
+        .eq("empresa_id", profile.empresa_id);
 
-      if (!cancelled) setActiveKeys((mods || []).map((m: any) => m.modulo_key));
+      if (!cancelled) setActiveKeys((mods || []).filter((m: any) => m.ativo).map((m: any) => m.modulo_key));
     }
 
     load();
