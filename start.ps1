@@ -33,6 +33,8 @@ $nodeDir = Get-ChildItem -Path (Join-Path $repoRoot ".local\bin") -Directory -Er
 
 if ($nodeDir) {
   $env:PATH = $nodeDir.FullName + ";" + $env:PATH
+  $nodeExe = Join-Path $nodeDir.FullName "node.exe"
+  $npmExe = Join-Path $nodeDir.FullName "npm.cmd"
 } else {
   Write-Host "AVISO: Node portátil não encontrado em .local/bin. Rode o bootstrap local antes."
 }
@@ -45,8 +47,12 @@ if ((Test-Path $rootEnv) -and !(Test-Path $webEnv)) {
 }
 
 # Frontend
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$repoRoot\apps\web`"; npm run dev -- --port 3000"
-Write-Host "Frontend Next.js em http://localhost:3000"
+if ($npmExe) {
+  Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$repoRoot\apps\web`"; `"$npmExe`" run dev -- --port 3000"
+  Write-Host "Frontend Next.js em http://localhost:3000"
+} else {
+  Write-Host "AVISO: npm não encontrado. Frontend não iniciado."
+}
 
 # Backend
 if ($uvExe) {
