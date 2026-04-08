@@ -31,17 +31,28 @@ $nodeDir = Get-ChildItem -Path (Join-Path $repoRoot ".local\bin") -Directory -Er
   Sort-Object Name -Descending |
   Select-Object -First 1
 
-if ($nodeDir) {
+# Verificar se npm está disponível no sistema
+$npmSystem = Get-Command npm -ErrorAction SilentlyContinue
+
+if ($nodeDir -and $npmSystem) {
+  # Usar Node portátil com npm do sistema
+  $env:PATH = $nodeDir.FullName + ";" + $env:PATH
+  $nodeExe = Join-Path $nodeDir.FullName "node.exe"
+  $npmExe = "npm"
+  Write-Host "Usando Node portátil com npm do sistema"
+} elseif ($nodeDir) {
+  # Tentar usar Node portátil completo
   $env:PATH = $nodeDir.FullName + ";" + $env:PATH
   $nodeExe = Join-Path $nodeDir.FullName "node.exe"
   $npmExe = Join-Path $nodeDir.FullName "npm-cli.js"
   if (!(Test-Path $npmExe)) {
-    Write-Host "Extraindo npm-cli.zip..."
-    Expand-Archive -Path (Join-Path $nodeDir.FullName "npm-cli.zip") -DestinationPath $nodeDir.FullName -Force
-    $npmExe = Join-Path $nodeDir.FullName "npm-cli.js"
+    Write-Host "AVISO: npm-cli.js não encontrado. Usando npm do sistema se disponível."
+    $npmExe = "npm"
   }
 } else {
-  Write-Host "AVISO: Node portátil não encontrado em .local/bin. Rode o bootstrap local antes."
+  Write-Host "AVISO: Node portátil não encontrado em .local/bin. Usando Node do sistema se disponível."
+  $nodeExe = "node"
+  $npmExe = "npm"
 }
 
 # Ensure Next.js reads env (must be inside apps/web)
@@ -53,7 +64,11 @@ if ((Test-Path $rootEnv) -and !(Test-Path $webEnv)) {
 
 # Frontend
 if ($npmExe) {
-  Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$repoRoot\apps\web`"; `"$nodeExe`" `"$npmExe`" run dev -- --port 3000"
+  if ($npmExe -eq "npm") {
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$repoRoot\apps\web`"; npm run dev -- --port 3000"
+  } else {
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd `"$repoRoot\apps\web`"; `"$nodeExe`" `"$npmExe`" run dev -- --port 3000"
+  }
   Write-Host "Frontend Next.js em http://localhost:3000"
 } else {
   Write-Host "AVISO: npm não encontrado. Frontend não iniciado."
