@@ -1,0 +1,61 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20.19.0"
+  NPM_VERSION = "10.9.0"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[dev]
+  command = "npm run dev"
+  port = 3000
+  targetPort = 3000
+  publish = ".next"
+
+# MCP (Model Context Protocol) Configuration
+[context.production.environment]
+  NEXT_PUBLIC_MCP_ENABLED = "true"
+  MCP_SERVER_URL = "/api/mcp"
+
+[context.deploy-preview.environment]
+  NEXT_PUBLIC_MCP_ENABLED = "true"
+  MCP_SERVER_URL = "/api/mcp"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# MCP API Routes
+[[redirects]]
+  from = "/api/mcp/*"
+  to = "/.netlify/functions/mcp/:splat"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# MCP Headers
+[[headers]]
+  for = "/api/mcp/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Content-Type = "application/json"
+
+[functions]
+  node_bundler = "esbuild"
+
+[functions.mcp]
+  runtime = "nodejs20.x"
+  memory = 1024
