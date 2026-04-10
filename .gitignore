@@ -1,0 +1,37 @@
+# env files (never commit secrets)
+.env
+.env.*
+.env.local
+!.env.example
+
+# local toolchains / caches
+.local/
+**/__pycache__/
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# temp / backup / log files
+*.tmp
+*.log
+*.old
+*.bak
+*.swp
+*.swo
+*~
+
+# build artifacts
+dist/
+build/
+out/
+# Local Netlify folder
+.netlify
+
+# MCP and AI agent configs (ignore to avoid leaking local setups and tokens)
+mcp.json
+mcp-config.json
+.antigravity/
+.cursor/
+mcp-setup/

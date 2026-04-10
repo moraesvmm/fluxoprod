@@ -1,0 +1,507 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Search, ShoppingCart, Trash2, ArrowLeft, CreditCard, Banknote, QrCode, Check, AlertCircle, User } from "lucide-react";
+import Link from "next/link";
+import { twMerge } from "tailwind-merge";
+import { clsx } from "clsx";
+import { createClient } from "@/utils/supabase/client";
+import { useToast, Toast } from "@/components/ui/toast";
+
+interface Funcionario {
+  id: string;
+  nome: string;
+  cargo: string;
+}
+
+interface ProdutoEstoque {
+  id: string;
+  nome: string;
+  preco_venda: number;
+  estoque_atual: number;
+  estoque_minimo: number;
+  sku: string;
+}
+
+interface CartItem {
+  id: string;
+  nome: string;
+  preco: number;
+  qtd: number;
+  estoque_disponivel: number;
+}
+
+export default function PDVPage() {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [produtos, setProdutos] = useState<ProdutoEstoque[]>([]);
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [metodoPagamento, setMetodoPagamento] = useState<string>('cartao');
+  const [cliente, setCliente] = useState('Cliente Avulso');
+  const [vendedorId, setVendedorId] = useState('');
+  const [userEmpresaId, setUserEmpresaId] = useState('');
+  const [busca, setBusca] = useState('');
+  const supabase = createClient();
+  const { toasts, removeToast, success, error: toastError, warning } = useToast();
+
+  // Carregar produtos REAIS do Supabase
+  useEffect(() => {
+    const loadProdutos = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const { data, error: dbError } = await supabase
+          .from("produtos")
+          .select("id, nome, preco_venda, estoque_atual, estoque_minimo, sku")
+          .gte("estoque_atual", 0)
+          .order("nome", { ascending: true });
+
+        if (dbError) throw dbError;
+        setProdutos(data || []);
+      } catch (err: any) {
+        setError("Erro ao carregar produtos do estoque. Verifique a conexão.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProdutos();
+
+    // Carregar funcionários para select de vendedor
+    const loadData = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("empresa_id")
+          .eq("user_id", userData.user.id)
+          .single();
+        if (profile?.empresa_id) {
+          setUserEmpresaId(profile.empresa_id);
+        }
+      }
+
+      const { data } = await supabase.from("funcionarios").select("id, nome, cargo").order("nome");
+      setFuncionarios(data || []);
+    };
+    loadData();
+  }, []);
+
+  // Filtrar produtos por busca
+  const produtosFiltrados = produtos.filter(p =>
+    p.nome.toLowerCase().includes(busca.toLowerCase()) ||
+    (p.sku && p.sku.toLowerCase().includes(busca.toLowerCase()))
+  );
+
+  const addToCart = (produto: ProdutoEstoque) => {
+    if (!produto.preco_venda || produto.preco_venda <= 0) {
+      warning("Produto sem preço de venda definido. Atualize no Catálogo.");
+      return;
+    }
+
+    const itemNoCarrinho = cart.find(i => i.id === produto.id);
+    const qtdNoCarrinho = itemNoCarrinho ? itemNoCarrinho.qtd : 0;
+
+    if (qtdNoCarrinho >= produto.estoque_atual) {
+      warning(`Quantidade insuficiente no estoque. Disponível: ${produto.estoque_atual}`);
+      return;
+    }
+
+    setCart(prev => {
+      const exists = prev.find(i => i.id === produto.id);
+      if (exists) {
+        return prev.map(i => {
+          if (i.id === produto.id) {
+            const novaQtd = i.qtd + 1;
+            if (novaQtd > produto.estoque_atual) {
+              warning(`Quantidade insuficiente no estoque. Disponível: ${produto.estoque_atual}`);
+              return i;
+            }
+            return { ...i, qtd: novaQtd };
+          }
+          return i;
+        });
+      }
+      return [...prev, {
+        id: produto.id,
+        nome: produto.nome,
+        preco: produto.preco_venda,
+        qtd: 1,
+        estoque_disponivel: produto.estoque_atual
+      }];
+    });
+  };
+
+  const removeFromCart = (id: string) => {
+    setCart(prev => prev.filter(i => i.id !== id));
+  };
+
+  const finalizarPagamento = async () => {
+    if (cart.length === 0) return;
+
+    setSubmitting(true);
+    try {
+      // 1. Registrar a venda
+      const valorTotal = cart.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+
+      const vendedorSelecionado = funcionarios.find(f => f.id === vendedorId);
+
+      const vendaPayload: any = {
+        empresa_id: userEmpresaId,
+        cliente: cliente,
+        valor: valorTotal,
+        metodo: metodoPagamento,
+        status: "concluido",
+      };
+      if (vendedorId) {
+        vendaPayload.vendedor_id = vendedorId;
+        vendaPayload.vendedor_nome = vendedorSelecionado?.nome || null;
+      }
+
+      const { data: venda, error: vendaError } = await supabase
+        .from("vendas")
+        .insert(vendaPayload)
+        .select()
+        .single();
+
+      if (vendaError) throw vendaError;
+
+      // 2. Registrar itens da venda (se tabela vendas_itens existir)
+      try {
+        const itens = cart.map(item => ({
+          venda_id: venda.id,
+          produto_id: item.id,
+          quantidade: item.qtd,
+          preco_unitario: item.preco,
+          subtotal: item.preco * item.qtd,
+        }));
+
+        await supabase.from("vendas_itens").insert(itens);
+      } catch {
+        // vendas_itens pode não existir - não bloqueia a venda
+      }
+
+      // 3. Atualizar estoque (decrementar)
+      for (const item of cart) {
+        const produto = produtos.find(p => p.id === item.id);
+        if (produto) {
+          await supabase
+            .from("produtos")
+            .update({ estoque_atual: produto.estoque_atual - item.qtd })
+            .eq("id", item.id);
+        }
+      }
+
+      success('Pagamento realizado com sucesso!');
+
+      // 4. Calcular comissão automaticamente se vendedor selecionado
+      if (vendedorId && venda) {
+        try {
+          const { data: regra } = await supabase
+            .from("comissoes_regras")
+            .select("*")
+            .eq("funcionario_id", vendedorId)
+            .eq("ativo", true)
+            .limit(1)
+            .single();
+
+          if (regra) {
+            const valorComissao = regra.tipo_calculo === "percentual"
+              ? (valorTotal * regra.valor) / 100
+              : regra.valor;
+
+            await supabase.from("comissoes").insert({
+              funcionario_id: vendedorId,
+              funcionario_nome: vendedorSelecionado?.nome || null,
+              venda_id: venda.id,
+              valor_venda: valorTotal,
+              valor_comissao: valorComissao,
+              status: "pendente",
+            });
+          }
+        } catch {
+          // comissoes_regras pode não existir — não bloqueia
+        }
+      }
+
+      setCart([]);
+      setCliente('Cliente Avulso');
+      setVendedorId('');
+
+      // Recarregar produtos com estoque atualizado
+      const { data: produtosAtualizados } = await supabase
+        .from("produtos")
+        .select("id, nome, preco_venda, estoque_atual, estoque_minimo, sku")
+        .gte("estoque_atual", 0)
+        .order("nome", { ascending: true });
+
+      setProdutos(produtosAtualizados || []);
+    } catch (err: any) {
+      toastError('Erro ao processar pagamento: ' + (err.message || 'Tente novamente.'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const total = cart.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+
+  return (
+    <div className="h-[calc(100vh-8rem)] flex gap-6">
+      {/* Toast Container */}
+      {toasts.map(toast => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
+
+      {/* Esquerda: Catálogo */}
+      <div className="flex-1 flex flex-col bg-slate-50/50 rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="p-4 bg-white border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/tenant/vendas" className="text-slate-400 hover:text-slate-900 transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <h2 className="text-lg font-bold">Frente de Caixa (PDV)</h2>
+          </div>
+          <div className="relative w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar por nome ou código..."
+              className="w-full bg-slate-100/50 border border-transparent rounded-full pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+            />
+          </div>
+        </div>
+
+        <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto content-start">
+          {loading ? (
+            <div className="col-span-full text-center py-8 text-muted-foreground">Carregando produtos do estoque...</div>
+          ) : error ? (
+            <div className="col-span-full text-center py-8 text-red-600 flex items-center justify-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              {error}
+            </div>
+          ) : produtosFiltrados.length === 0 ? (
+            <div className="col-span-full text-center py-8">
+              <div className="flex flex-col items-center gap-2">
+                <ShoppingCart className="h-10 w-10 text-slate-200" />
+                <p className="text-muted-foreground text-sm">
+                  {produtos.length === 0
+                    ? "Nenhum produto cadastrado. Cadastre produtos no Catálogo primeiro."
+                    : "Nenhum produto encontrado para essa busca."}
+                </p>
+                {produtos.length === 0 && (
+                  <Link
+                    href="/tenant/catalogo"
+                    className="text-sm text-primary hover:text-primary/80 underline mt-1"
+                  >
+                    Ir para Catálogo
+                  </Link>
+                )}
+              </div>
+            </div>
+          ) : (
+            produtosFiltrados.map((item) => {
+              const itemNoCarrinho = cart.find(i => i.id === item.id);
+              const qtdNoCarrinho = itemNoCarrinho ? itemNoCarrinho.qtd : 0;
+              const disponivel = item.estoque_atual - qtdNoCarrinho;
+              const semEstoque = disponivel <= 0;
+              const estoqueBaixo = disponivel <= item.estoque_minimo;
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => !semEstoque && addToCart(item)}
+                  disabled={semEstoque}
+                  className={twMerge(
+                    clsx(
+                      "flex flex-col text-left p-4 rounded-xl border transition-all group",
+                      semEstoque
+                        ? "border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed"
+                        : "border-border bg-white hover:border-primary/50 hover:shadow-md"
+                    )
+                  )}
+                >
+                  <span className="font-medium text-slate-800 line-clamp-2">{item.nome}</span>
+                  <div className="mt-2 text-xs text-slate-500 font-mono">{item.sku || "—"}</div>
+                  <div className="mt-4 flex items-center justify-between w-full">
+                    <span className="text-primary font-bold">
+                      {item.preco_venda
+                        ? `R$ ${item.preco_venda.toFixed(2)}`
+                        : "Sem preço"}
+                    </span>
+                    <span className={twMerge(
+                      clsx(
+                        "text-xs px-2 py-1 rounded-md",
+                        semEstoque
+                          ? "bg-red-100 text-red-600"
+                          : estoqueBaixo
+                          ? "bg-amber-100 text-amber-600"
+                          : "bg-slate-100 text-slate-500"
+                      )
+                    )}>
+                      {semEstoque ? "Esgotado" : `${disponivel} un`}
+                    </span>
+                  </div>
+                  {semEstoque && (
+                    <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      Produto indisponível
+                    </div>
+                  )}
+                </button>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Direita: Carrinho */}
+      <div className="w-96 flex flex-col bg-white rounded-xl border border-border shadow-lg">
+        <div className="p-4 border-b border-border bg-slate-900 text-white rounded-t-xl flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5" />
+            <h3 className="font-semibold">Carrinho</h3>
+          </div>
+          <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-bold">{cart.length}</span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 hide-scrollbar">
+          {cart.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3">
+              <ShoppingCart className="h-12 w-12 opacity-20" />
+              <p className="text-sm">Carrinho vazio</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {cart.map(item => (
+                <div key={item.id} className="flex gap-3 justify-between items-center group bg-slate-50 p-2 rounded-lg border border-slate-100">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900 truncate">{item.nome}</p>
+                    <p className="text-xs text-slate-500">{item.qtd}x R$ {item.preco.toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">Disp: {item.estoque_disponivel}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-slate-900">R$ {(item.preco * item.qtd).toFixed(2)}</p>
+                  </div>
+                  <button onClick={() => removeFromCart(item.id)} className="text-slate-300 hover:text-red-500 p-1 transition-colors">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 border-t border-border bg-slate-50 rounded-b-xl">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">Cliente</label>
+            <input
+              type="text"
+              value={cliente}
+              onChange={(e) => setCliente(e.target.value)}
+              className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Nome do cliente"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" /> Vendedor</span>
+            </label>
+            <select
+              value={vendedorId}
+              onChange={(e) => setVendedorId(e.target.value)}
+              className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="">Sem vendedor (avulso)</option>
+              {funcionarios.map(f => (
+                <option key={f.id} value={f.id}>{f.nome} — {f.cargo}</option>
+              ))}
+            </select>
+            {funcionarios.length === 0 && (
+              <p className="text-xs text-amber-500 mt-1">Cadastre colaboradores no RH para vincular vendedor.</p>
+            )}
+          </div>
+
+          <div className="flex justify-between items-end mb-4">
+            <span className="text-slate-500 font-medium">Total</span>
+            <span className="text-3xl font-black text-slate-900">R$ {total.toFixed(2)}</span>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">Método de Pagamento</label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => setMetodoPagamento('pix')}
+                className={twMerge(clsx(
+                  "flex flex-col items-center p-2 rounded border transition-colors",
+                  metodoPagamento === 'pix'
+                    ? "border-primary bg-indigo-50 text-primary"
+                    : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
+                ))}
+              >
+                <QrCode className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">PIX</span>
+                {metodoPagamento === 'pix' && <Check className="h-3 w-3 text-primary" />}
+              </button>
+              <button
+                onClick={() => setMetodoPagamento('cartao')}
+                className={twMerge(clsx(
+                  "flex flex-col items-center p-2 rounded border transition-colors",
+                  metodoPagamento === 'cartao'
+                    ? "border-primary bg-indigo-50 text-primary"
+                    : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
+                ))}
+              >
+                <CreditCard className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">Cartão</span>
+                {metodoPagamento === 'cartao' && <Check className="h-3 w-3 text-primary" />}
+              </button>
+              <button
+                onClick={() => setMetodoPagamento('dinheiro')}
+                className={twMerge(clsx(
+                  "flex flex-col items-center p-2 rounded border transition-colors",
+                  metodoPagamento === 'dinheiro'
+                    ? "border-primary bg-indigo-50 text-primary"
+                    : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
+                ))}
+              >
+                <Banknote className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">Dinheiro</span>
+                {metodoPagamento === 'dinheiro' && <Check className="h-3 w-3 text-primary" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            onClick={finalizarPagamento}
+            disabled={cart.length === 0 || submitting}
+            className={twMerge(clsx(
+              "w-full h-12 rounded-lg font-bold text-white transition-all flex items-center justify-center gap-2",
+              cart.length === 0 || submitting
+                ? "bg-slate-300 cursor-not-allowed"
+                : "bg-primary hover:bg-primary/90 shadow-lg shadow-indigo-500/25"
+            ))}
+          >
+            {submitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Processando...
+              </>
+            ) : (
+              'Finalizar Pagamento'
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
