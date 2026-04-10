@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, LayoutGrid, Building2, ChevronRight, Loader2 } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
 
 export default function MestreWizard() {
   const [step, setStep] = useState(1);
@@ -44,37 +45,39 @@ export default function MestreWizard() {
   const submitProvisioning = async () => {
     setLoading(true);
     setErrorDetail("");
-    setProgressStatus("Provisionando tenant no backend...");
+    setProgressStatus("Provisionando tenant no Supabase...");
     
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) {
-        throw new Error("Variável NEXT_PUBLIC_API_URL não configurada. Configure no painel do Netlify.");
-      }
-      const res = await fetch(`${apiUrl}/api/v1/provisioning/criar-empresa`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+      const supabase = createClient();
+      
+      // Gerar schema_name baseado no CNPJ
+      const schemaName = `tenant_${formData.cnpj.replace(/\D/g, '').slice(-8)}`;
+      
+      // Gerar empresa_id UUID
+      const empresaId = crypto.randomUUID();
+      
+      // Chamar RPC do Supabase diretamente
+      const { data, error } = await supabase.rpc('provisionar_empresa_master', {
+        p_empresa_id: empresaId,
+        p_cnpj: formData.cnpj,
+        p_razao_social: formData.razao_social,
+        p_porte: formData.porte,
+        p_segmento: formData.segmento,
+        p_schema_name: schemaName,
+        p_modules: formData.modules
       });
       
-      if (!res.ok) {
-        let apiMessage = "Erro na solicitação de provisionamento";
-        try {
-          const errData = await res.json();
-          apiMessage = errData?.detail || errData?.message || apiMessage;
-        } catch {
-          // keep default message when response isn't json
-        }
-        throw new Error(apiMessage);
+      if (error) {
+        throw new Error(error.message || "Erro ao chamar RPC do Supabase");
       }
       
-      const data = await res.json();
-      setProgressStatus(data.message || "Ambiente gerado com sucesso!");
+      const result = data as { status: string; message: string };
+      setProgressStatus(result.message || "Ambiente gerado com sucesso!");
       setTimeout(() => setStep(4), 2000); // go to success
       
     } catch (err: any) {
       setProgressStatus("Provisionamento falhou.");
-      setErrorDetail(err?.message || "Erro inesperado no backend.");
+      setErrorDetail(err?.message || "Erro inesperado no Supabase.");
     } finally {
       setLoading(false);
     }
