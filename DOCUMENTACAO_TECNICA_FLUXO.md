@@ -1421,6 +1421,20 @@ Para dúvidas ou problemas:
 
 ---
 
-**Última atualização:** 08/04/2026  
-**Versão do documento:** 1.2  
-**Status:** Produção Ready (Deploy Imediato)
+**Última atualização:** 10/04/2026 (Fix Deploy 404)  
+**Versão do documento:** 1.3  
+**Status:** Produção Operacional (Landing Page Ativa)
+
+---
+
+## 13. REGISTRO DE VERIFICAÇÃO DE DEPLOY (NOVO)
+
+### 13.1 Resolução do Erro 404 em Produção (10/04/2026)
+- **Problema:** A rota raiz (/) estava retornando 404 no Netlify devido à estrutura de monorepo.
+- **Causa:** O Netlify não estava ativando o Next.js Runtime corretamente para a subpasta `apps/web`.
+- **Solução:**
+  - Criação de `netlify.toml` na raiz apontando `base = "apps/web"`.
+  - Configuração de build e diretório de publicação (`.next`) dentro de `apps/web/netlify.toml`.
+- **Resultado:** Landing Page premium totalmente funcional na raiz do domínio principal.
+- **Commits:** Sincronizados com `origin/main`.
+
