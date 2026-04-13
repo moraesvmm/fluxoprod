@@ -54,9 +54,7 @@ export default function FinanceiroPage() {
       setLoading(true);
       setError(null);
       const { data, error: fetchError } = await supabase
-        .from("transacoes_financeiras")
-        .select("*")
-        .order("criado_em", { ascending: false });
+        .rpc('tenant_listar_financeiro');
 
       if (fetchError) throw fetchError;
       setTransacoes(data || []);
@@ -74,13 +72,12 @@ export default function FinanceiroPage() {
 
     try {
       const { error: insertError } = await supabase
-        .from("transacoes_financeiras")
-        .insert({
-          descricao: formData.descricao,
-          valor: parseFloat(formData.valor),
-          tipo: formData.tipo,
-          categoria: formData.categoria || null,
-          status: 'pendente'
+        .rpc('tenant_criar_financeiro', {
+          p_tipo: formData.tipo,
+          p_descricao: formData.descricao,
+          p_valor: parseFloat(formData.valor),
+          p_data_vencimento: null,
+          p_status: 'pendente'
         });
 
       if (insertError) throw insertError;
@@ -100,9 +97,7 @@ export default function FinanceiroPage() {
     if (!deleteId) return;
     try {
       const { error: deleteError } = await supabase
-        .from("transacoes_financeiras")
-        .delete()
-        .eq("id", deleteId);
+        .rpc('tenant_excluir_financeiro', { p_financeiro_id: deleteId });
 
       if (deleteError) throw deleteError;
 

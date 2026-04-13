@@ -76,6 +76,20 @@ export async function middleware(request: NextRequest) {
 
     const isMaster = profile.role === 'master'
 
+    // Schema Routing: Configurar search_path baseado no usuário
+    const { data: schema, error: schemaError } = await supabase.rpc('set_tenant_schema', {
+      p_user_id: user.id
+    })
+
+    if (schemaError) {
+      console.error('Erro ao configurar schema tenant:', schemaError)
+      // Se falhar, redirecionar para página de erro
+      return NextResponse.redirect(new URL('/erro-schema', request.url))
+    }
+
+    // Injetar schema no header para uso no client
+    supabaseResponse.headers.set('x-tenant-schema', schema || 'public')
+
     // master: só governa /admin (e pode usar onboarding /mestre)
     if (isMaster) {
       if (pathname.startsWith('/tenant')) {

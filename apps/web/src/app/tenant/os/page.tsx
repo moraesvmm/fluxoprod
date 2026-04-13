@@ -49,7 +49,7 @@ export default function OSPage() {
   }, []);
 
   const carregarFuncionarios = async () => {
-    const { data } = await supabase.from("funcionarios").select("id, nome").order("nome");
+    const { data } = await supabase.rpc('tenant_listar_funcionarios');
     if (data) setFuncionarios(data);
   };
 

@@ -50,11 +50,11 @@ export default function MestreWizard() {
     try {
       const supabase = createClient();
       
-      // Gerar schema_name baseado no CNPJ
-      const schemaName = `tenant_${formData.cnpj.replace(/\D/g, '').slice(-8)}`;
-      
-      // Gerar empresa_id UUID
+      // Gerar empresa_id UUID primeiro
       const empresaId = crypto.randomUUID();
+      
+      // Gerar schema_name único baseado no UUID (mais seguro que CNPJ)
+      const schemaName = `tenant_${empresaId.replace(/-/g, '').slice(0, 8)}`;
       
       // Chamar RPC do Supabase diretamente
       const { data, error } = await supabase.rpc('provisionar_empresa_master', {

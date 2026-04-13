@@ -143,168 +143,153 @@ export interface EmpresaUpdate {
 
 // ─── Supabase-backed data functions ──────────────────────
 // These replace the old ApiClient that hit localhost:8000
-
+// NOW ALL OPERATIONS USE RPCs (Opção A - Database as Source of Truth)
 
 const getSupabase = () => createClient();
 
-// VENDAS
+// VENDAS - Usar RPC tenant_listar_vendas para leitura
 export async function fetchVendas(): Promise<Venda[]> {
   const { data, error } = await getSupabase()
-    .from('vendas')
-    .select('*')
-    .order('criado_em', { ascending: false });
+    .rpc('tenant_listar_vendas', { p_limit: 100 });
   if (error) throw new Error(error.message);
   return data || [];
 }
 
+// Vendas são criadas via RPC tenant_processar_venda (PDV)
+// createVenda mantida apenas para compatibilidade, mas não deve ser usada
 export async function createVenda(venda: VendaCreate): Promise<Venda> {
-  const { data, error } = await getSupabase()
-    .from('vendas')
-    .insert(venda)
-    .select()
-    .single();
-  if (error) throw new Error(error.message);
-  return data;
+  throw new Error('Use RPC tenant_processar_venda para criar vendas');
 }
 
 export async function updateVenda(id: string, venda: VendaUpdate): Promise<Venda> {
-  const { data, error } = await getSupabase()
-    .from('vendas')
-    .update(venda)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw new Error(error.message);
-  return data;
+  throw new Error('Atualização de vendas não implementada via RPC');
 }
 
 export async function deleteVenda(id: string): Promise<void> {
-  const { error } = await getSupabase()
-    .from('vendas')
-    .delete()
-    .eq('id', id);
-  if (error) throw new Error(error.message);
+  throw new Error('Exclusão de vendas não implementada via RPC');
 }
 
-// CLIENTES
+// CLIENTES - Usar RPCs para operações CRUD
 export async function fetchClientes(): Promise<Cliente[]> {
   const { data, error } = await getSupabase()
-    .from('clientes')
-    .select('*')
-    .order('criado_em', { ascending: false });
+    .rpc('tenant_listar_clientes');
   if (error) throw new Error(error.message);
   return data || [];
 }
 
 export async function createCliente(cliente: ClienteCreate): Promise<Cliente> {
   const { data, error } = await getSupabase()
-    .from('clientes')
-    .insert(cliente)
-    .select()
-    .single();
+    .rpc('tenant_criar_cliente', {
+      p_nome: cliente.nome,
+      p_email: cliente.email,
+      p_telefone: cliente.telefone,
+      p_funil_fase: 'lead',
+      p_status: 'ativo'
+    });
   if (error) throw new Error(error.message);
-  return data;
+  return { id: data?.cliente_id, ...cliente, criado_em: new Date().toISOString() } as Cliente;
 }
 
 export async function deleteCliente(id: string): Promise<void> {
   const { error } = await getSupabase()
-    .from('clientes')
-    .delete()
-    .eq('id', id);
+    .rpc('tenant_excluir_cliente', { p_cliente_id: id });
   if (error) throw new Error(error.message);
 }
 
-// PRODUTOS
+// PRODUTOS - Usar RPCs para operações CRUD
 export async function fetchProdutos(): Promise<Produto[]> {
   const { data, error } = await getSupabase()
-    .from('produtos')
-    .select('*')
-    .order('nome');
+    .rpc('tenant_listar_produtos');
   if (error) throw new Error(error.message);
   return data || [];
 }
 
 export async function createProduto(produto: ProdutoCreate): Promise<Produto> {
   const { data, error } = await getSupabase()
-    .from('produtos')
-    .insert(produto)
-    .select()
-    .single();
+    .rpc('tenant_criar_produto', {
+      p_nome: produto.nome,
+      p_descricao: produto.descricao,
+      p_tipo: 'produto',
+      p_preco_base: produto.preco_venda || 0,
+      p_sku: produto.sku,
+      p_qtd_inicial: produto.estoque_atual || 0,
+      p_qtd_minima: produto.estoque_minimo || 10
+    });
   if (error) throw new Error(error.message);
-  return data;
+  return { id: data?.produto_id, ...produto, criado_em: new Date().toISOString() } as Produto;
 }
 
 export async function deleteProduto(id: string): Promise<void> {
   const { error } = await getSupabase()
-    .from('produtos')
-    .delete()
-    .eq('id', id);
+    .rpc('tenant_excluir_produto', { p_produto_id: id });
   if (error) throw new Error(error.message);
 }
 
-// OS
+// OS - Usar RPCs para operações CRUD
 export async function fetchOS(): Promise<OrdemServico[]> {
   const { data, error } = await getSupabase()
-    .from('ordens_servico')
-    .select(`*, cliente:clientes(nome), colaborador:funcionarios(nome)`)
-    .order('criado_em', { ascending: false });
+    .rpc('tenant_listar_ordens_servico');
   if (error) throw new Error(error.message);
   return data || [];
 }
 
 export async function createOS(os: OrdemServicoCreate): Promise<OrdemServico> {
   const { data, error } = await getSupabase()
-    .from('ordens_servico')
-    .insert(os)
-    .select()
-    .single();
+    .rpc('tenant_criar_os', {
+      p_cliente_id: os.cliente_id,
+      p_colaborador_id: os.colaborador_id,
+      p_veiculo_equipamento: os.veiculo_equipamento,
+      p_descricao_problema: os.descricao_problema,
+      p_status: 'aberta',
+      p_valor_orcamento: os.valor || 0
+    });
   if (error) throw new Error(error.message);
-  return data;
+  return { id: data?.os_id, ...os, criado_em: new Date().toISOString() } as OrdemServico;
 }
 
 export async function deleteOS(id: string): Promise<void> {
   const { error } = await getSupabase()
-    .from('ordens_servico')
-    .delete()
-    .eq('id', id);
+    .rpc('tenant_excluir_os', { p_os_id: id });
   if (error) throw new Error(error.message);
 }
 
-// OBRAS
+// OBRAS - Usar RPCs para operações CRUD
 export async function fetchObras(): Promise<Obra[]> {
   const { data, error } = await getSupabase()
-    .from('obras')
-    .select(`*, cliente:clientes(nome)`)
-    .order('criado_em', { ascending: false });
+    .rpc('tenant_listar_obras');
   if (error) throw new Error(error.message);
   return data || [];
 }
 
 export async function createObra(obra: ObraCreate): Promise<Obra> {
   const { data, error } = await getSupabase()
-    .from('obras')
-    .insert(obra)
-    .select()
-    .single();
+    .rpc('tenant_criar_obra', {
+      p_cliente_id: obra.cliente_id,
+      p_nome: obra.nome,
+      p_descricao: obra.descricao,
+      p_endereco: obra.endereco,
+      p_data_inicio: obra.data_inicio ? new Date(obra.data_inicio) : null,
+      p_data_fim_prevista: obra.data_fim_prevista ? new Date(obra.data_fim_prevista) : null,
+      p_status: 'planejamento',
+      p_orcamento_total: obra.orcamento || 0
+    });
   if (error) throw new Error(error.message);
-  return data;
+  return { id: data?.obra_id, ...obra, criado_em: new Date().toISOString() } as Obra;
 }
 
 export async function deleteObra(id: string): Promise<void> {
   const { error } = await getSupabase()
-    .from('obras')
-    .delete()
-    .eq('id', id);
+    .rpc('tenant_excluir_obra', { p_obra_id: id });
   if (error) throw new Error(error.message);
 }
 
-// EMPRESAS
+// EMPRESAS - Mantido para uso público (não tenant)
 export async function fetchEmpresa(): Promise<Empresa | null> {
   const { data, error } = await getSupabase()
     .from('empresas')
     .select('*')
     .limit(1)
-    .maybeSingle(); // maybeSingle returns null if 0 rows
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return data;
 }

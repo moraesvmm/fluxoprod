@@ -104,7 +104,7 @@ export function Sidebar() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, []); // Array vazio para executar apenas uma vez ao montar
 
   const visibleNavigation = useMemo(() => {
     if (activeKeys === null) return [];

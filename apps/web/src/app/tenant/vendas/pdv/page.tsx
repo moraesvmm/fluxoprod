@@ -46,20 +46,28 @@ export default function PDVPage() {
   const supabase = createClient();
   const { toasts, removeToast, success, error: toastError, warning } = useToast();
 
-  // Carregar produtos REAIS do Supabase
+  // Carregar produtos REAIS do Supabase via RPC (Opção A)
   useEffect(() => {
     const loadProdutos = async () => {
       try {
         setLoading(true);
         setError(null);
         const { data, error: dbError } = await supabase
-          .from("produtos")
-          .select("id, nome, preco_venda, estoque_atual, estoque_minimo, sku")
-          .gte("estoque_atual", 0)
-          .order("nome", { ascending: true });
+          .rpc('tenant_listar_estoque');
 
         if (dbError) throw dbError;
-        setProdutos(data || []);
+
+        // Mapear dados da RPC para o formato esperado pelo PDV
+        const produtosMapeados = (data || []).map((item: any) => ({
+          id: item.produto_id,
+          nome: item.produto_nome,
+          preco_venda: item.produto_preco_base,
+          estoque_atual: item.quantidade,
+          estoque_minimo: item.quantidade_minima,
+          sku: item.sku
+        }));
+
+        setProdutos(produtosMapeados);
       } catch (err: any) {
         setError("Erro ao carregar produtos do estoque. Verifique a conexão.");
       } finally {
@@ -69,7 +77,7 @@ export default function PDVPage() {
 
     loadProdutos();
 
-    // Carregar funcionários para select de vendedor
+    // Carregar funcionários para select de vendedor via RPC (Opção A)
     const loadData = async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
@@ -83,7 +91,7 @@ export default function PDVPage() {
         }
       }
 
-      const { data } = await supabase.from("funcionarios").select("id, nome, cargo").order("nome");
+      const { data } = await supabase.rpc('tenant_listar_funcionarios');
       setFuncionarios(data || []);
     };
     loadData();
@@ -143,103 +151,47 @@ export default function PDVPage() {
 
     setSubmitting(true);
     try {
-      // 1. Registrar a venda
-      const valorTotal = cart.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+      // Preparar payload para RPC transacional
+      const itens = cart.map(item => ({
+        produto_id: item.id,
+        qtd: item.qtd,
+        preco: item.preco
+      }));
 
-      const vendedorSelecionado = funcionarios.find(f => f.id === vendedorId);
+      // Chamar RPC transacional com dados do cliente
+      // A RPC agora cria ou busca o cliente automaticamente dentro da transação
+      const { data, error } = await supabase.rpc('tenant_processar_venda', {
+        p_cliente_id: null,
+        p_cliente_nome: cliente && cliente !== 'Cliente Avulso' ? cliente : 'Cliente Avulso',
+        p_cliente_telefone: null,
+        p_cliente_email: null,
+        p_itens: itens,
+        p_vendedor_id: vendedorId || null,
+        p_forma_pagamento: metodoPagamento
+      });
 
-      const vendaPayload: any = {
-        empresa_id: userEmpresaId,
-        cliente: cliente,
-        valor: valorTotal,
-        metodo: metodoPagamento,
-        status: "concluido",
-      };
-      if (vendedorId) {
-        vendaPayload.vendedor_id = vendedorId;
-        vendaPayload.vendedor_nome = vendedorSelecionado?.nome || null;
-      }
+      if (error) throw error;
 
-      const { data: venda, error: vendaError } = await supabase
-        .from("vendas")
-        .insert(vendaPayload)
-        .select()
-        .single();
+      const resultado = data as { success: boolean; venda_id?: string; total?: number; error?: string };
 
-      if (vendaError) throw vendaError;
-
-      // 2. Registrar itens da venda (se tabela vendas_itens existir)
-      try {
-        const itens = cart.map(item => ({
-          venda_id: venda.id,
-          produto_id: item.id,
-          quantidade: item.qtd,
-          preco_unitario: item.preco,
-          subtotal: item.preco * item.qtd,
-        }));
-
-        await supabase.from("vendas_itens").insert(itens);
-      } catch {
-        // vendas_itens pode não existir - não bloqueia a venda
-      }
-
-      // 3. Atualizar estoque (decrementar)
-      for (const item of cart) {
-        const produto = produtos.find(p => p.id === item.id);
-        if (produto) {
-          await supabase
-            .from("produtos")
-            .update({ estoque_atual: produto.estoque_atual - item.qtd })
-            .eq("id", item.id);
-        }
+      if (!resultado?.success) {
+        throw new Error(resultado?.error || 'Erro ao processar venda');
       }
 
       success('Pagamento realizado com sucesso!');
-
-      // 4. Calcular comissão automaticamente se vendedor selecionado
-      if (vendedorId && venda) {
-        try {
-          const { data: regra } = await supabase
-            .from("comissoes_regras")
-            .select("*")
-            .eq("funcionario_id", vendedorId)
-            .eq("ativo", true)
-            .limit(1)
-            .single();
-
-          if (regra) {
-            const valorComissao = regra.tipo_calculo === "percentual"
-              ? (valorTotal * regra.valor) / 100
-              : regra.valor;
-
-            await supabase.from("comissoes").insert({
-              funcionario_id: vendedorId,
-              funcionario_nome: vendedorSelecionado?.nome || null,
-              venda_id: venda.id,
-              valor_venda: valorTotal,
-              valor_comissao: valorComissao,
-              status: "pendente",
-            });
-          }
-        } catch {
-          // comissoes_regras pode não existir — não bloqueia
-        }
-      }
 
       setCart([]);
       setCliente('Cliente Avulso');
       setVendedorId('');
 
-      // Recarregar produtos com estoque atualizado
+      // Recarregar produtos com estoque atualizado via RPC
       const { data: produtosAtualizados } = await supabase
-        .from("produtos")
-        .select("id, nome, preco_venda, estoque_atual, estoque_minimo, sku")
-        .gte("estoque_atual", 0)
-        .order("nome", { ascending: true });
+        .rpc('tenant_listar_estoque');
 
       setProdutos(produtosAtualizados || []);
     } catch (err: any) {
       toastError('Erro ao processar pagamento: ' + (err.message || 'Tente novamente.'));
+      throw err; // Propagar erro (não silencioso)
     } finally {
       setSubmitting(false);
     }
