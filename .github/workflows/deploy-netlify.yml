@@ -1,5 +1,6 @@
 name: Deploy to Netlify
 
+# Deploy automático para Netlify via GitHub Actions
 on:
   push:
     branches:
