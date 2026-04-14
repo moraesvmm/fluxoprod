@@ -16,10 +16,11 @@ export function useDashboardData() {
       return data;
     },
     staleTime: 5 * 60_000,
+    retry: 2,
   });
 
   // Buscar últimas vendas separadamente (já existe RPC para isso)
-  const { data: ultimasVendas } = useQuery({
+  const { data: ultimasVendas, error: vendasError } = useQuery({
     queryKey: ["dashboard", "ultimas-vendas"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_listar_vendas', { p_limit: 5 });
@@ -27,6 +28,7 @@ export function useDashboardData() {
       return data || [];
     },
     staleTime: 60_000,
+    retry: 2,
   });
 
   // Derive KPIs a partir do resultado da RPC
@@ -60,6 +62,7 @@ export function useDashboardData() {
 
   return {
     isLoading: isLoading || !kpis,
+    error: error || vendasError,
     faturamentoHoje,
     vendasHoje,
     ticketMedio,
