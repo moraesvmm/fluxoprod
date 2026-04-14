@@ -48,8 +48,11 @@ CREATE POLICY authenticated_read_empresas ON public.empresas
   USING (auth.uid() IS NOT NULL);
 
 -- ==========================================
--- 6. VERIFICAR FUNÇÃO is_master()
+-- 6. CORRIGIR FUNÇÃO is_master() PARA EVITAR RECURSÃO
 -- ==========================================
+-- A função is_master() é usada em políticas RLS, mas se a tabela user_profiles
+-- também tiver RLS, isso pode causar recursão infinita.
+-- Solução: Marcar a função como SECURITY DEFINER e usar SET search_path = public
 CREATE OR REPLACE FUNCTION public.is_master()
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -64,6 +67,14 @@ AS $$
       AND p.role = 'master'
   );
 $$;
+
+-- ==========================================
+-- 7. DESATIVAR RLS EM user_profiles PARA EVITAR RECURSÃO
+-- ==========================================
+-- A tabela user_profiles é usada pela função is_master(), então não pode ter RLS
+-- que cause recursão. Vamos remover RLS de user_profiles e usar apenas verificações
+-- na própria função.
+ALTER TABLE public.user_profiles DISABLE ROW LEVEL SECURITY;
 
 -- ==========================================
 -- 7. GRANT PERMISSÕES
