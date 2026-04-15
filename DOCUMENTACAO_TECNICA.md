@@ -1,5 +1,7 @@
 # DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
 ## ESTADO ATUAL: PRODUCTION-READY
+## ÚLTIMA ATUALIZAÇÃO: 15/04/2026 (Vistoria Profunda)
+## VERSÃO: 2.0
 
 ---
 
@@ -7,10 +9,11 @@
 
 ### Arquitetura Geral (OPÇÃO A - IMPLEMENTADA)
 - **Backend**: Supabase (PostgreSQL + RPC) - **FONTE DA VERDADE**
-- **Frontend**: Next.js 14 (apps/web) - **UI E ORQUESTRADOR**
+- **Frontend**: Next.js 16.2.2 (apps/web) - **UI E ORQUESTRADOR**
 - **Database**: Supabase PostgreSQL com multi-tenancy por schema
 - **Backend Python**: **NÃO EXISTE** - deve ser ignorado
 - **Provisionamento**: RPC Functions via Supabase
+- **Tecnologias Frontend**: React 19.2.4, TypeScript 5, TailwindCSS 4, @tanstack/react-query 5.96.2
 
 ### Status Atual
 ✅ **O sistema está PRODUCTION-READY** após correções implementadas nas Auditorias 5-8:
@@ -194,6 +197,538 @@
 - **Responsabilidade**: Middleware Next.js para autenticação, schema routing e feature flags
 - **Funcionalidades**:
   1. Verifica env vars Supabase
+  2. Valida autenticação do usuário via Supabase Auth
+  3. Obtém perfil do usuário (role, empresa_id)
+  4. Configura schema do tenant via RPC `set_tenant_schema`
+  5. Valida acesso à rota baseado em role
+  6. Valida feature flags da empresa
+  7. Redireciona conforme necessário
+
+---
+
+## 🔄 FLUXO COMPLETO DA REQUISIÇÃO
+
+### 1. Usuário Acessa Rota (ex: /tenant/crm)
+
+### 2. Middleware Next.js Intercepta
+
+```typescript
+// apps/web/src/middleware.ts
+export async function middleware(request: NextRequest) {
+  // 2.1 Verifica env vars
+  const hasSupabaseEnv = !!process.env.NEXT_PUBLIC_SUPABASE_URL
+  
+  // 2.2 Cria cliente Supabase SSR
+  const supabase = createServerClient(...)
+  
+  // 2.3 Obtém usuário autenticado
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  // 2.4 Se não autenticado, redireciona para /login
+  if (!user && pathname.startsWith('/tenant')) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+  
+  // 2.5 Obtém perfil do usuário
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('role, empresa_id')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  
+  // 2.6 Configura schema do tenant
+  const { data: schema } = await supabase.rpc('set_tenant_schema', {
+    p_user_id: user.id
+  })
+  
+  // 2.7 Injeta schema no header
+  supabaseResponse.headers.set('x-tenant-schema', schema || 'public')
+  
+  // 2.8 Valida feature flags
+  const { data: modRow } = await supabase
+    .from('v_empresa_modulos')
+    .select('ativo')
+    .eq('empresa_id', profile.empresa_id)
+    .eq('modulo_key', 'crm')
+    .maybeSingle()
+  
+  if (!modRow?.ativo) {
+    return NextResponse.redirect(new URL('/tenant/sem-modulos', request.url))
+  }
+}
+```
+
+### 3. Componente React Carrega
+
+```typescript
+// apps/web/src/app/tenant/crm/page.tsx
+export default function CRMPage() {
+  // 3.1 Usa hook personalizado para buscar dados
+  const { data: clientes = [], isLoading } = useClientes()
+  
+  // 3.2 Hook React Query chama função API
+  // useClientes() → fetchClientes() → supabase.rpc('tenant_listar_clientes')
+}
+```
+
+### 4. Hook Personalizado Chama API
+
+```typescript
+// apps/web/src/lib/hooks/use-clientes.ts
+export function useClientes() {
+  return useQuery({
+    queryKey: CLIENTES_KEY,
+    queryFn: fetchClientes,
+  })
+}
+```
+
+### 5. Função API Chama RPC do Supabase
+
+```typescript
+// apps/web/src/lib/api.ts
+export async function fetchClientes() {
+  const supabase = createClient()
+  
+  const { data, error } = await supabase.rpc('tenant_listar_clientes', {
+    p_limit: 1000,
+    p_offset: 0
+  })
+  
+  if (error) throw error
+  return data
+}
+```
+
+### 6. RPC Public Roteia para Schema Tenant
+
+```sql
+-- Schema: public
+CREATE OR REPLACE FUNCTION public.tenant_listar_clientes(p_limit, p_offset)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_tenant_schema TEXT;
+  v_result JSONB;
+BEGIN
+  -- 6.1 Obtém schema do tenant do usuário
+  SELECT schema_name INTO v_tenant_schema
+  FROM public.user_profiles up
+  JOIN public.empresas e ON e.id = up.empresa_id
+  WHERE up.user_id = auth.uid();
+  
+  -- 6.2 Executa RPC no schema do tenant
+  EXECUTE format('SELECT %I.tenant_listar_clientes($1, $2)', v_tenant_schema)
+  INTO v_result
+  USING p_limit, p_offset;
+  
+  RETURN v_result;
+END;
+$$;
+```
+
+### 7. RPC Tenant Executa Query no Banco
+
+```sql
+-- Schema: tenant_62a495e1 (exemplo)
+CREATE OR REPLACE FUNCTION tenant_listar_clientes(p_limit, p_offset)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_result JSONB;
+BEGIN
+  -- 7.1 Executa SELECT na tabela do tenant
+  SELECT jsonb_agg(row_to_json(t))
+  INTO v_result
+  FROM (
+    SELECT id, nome, telefone, email, endereco, funil_fase, status, criado_em, atualizado_em
+    FROM clientes
+    ORDER BY criado_em DESC
+    LIMIT p_limit OFFSET p_offset
+  ) t;
+  
+  RETURN v_result;
+END;
+$$;
+```
+
+### 8. Dados Retornam ao Frontend
+
+```typescript
+// Fluxo de retorno:
+// PostgreSQL (tenant_62a495e1.clientes)
+// → RPC tenant (tenant_listar_clientes)
+// → RPC public (tenant_listar_clientes)
+// → Supabase API
+// → fetchClientes()
+// → React Query cache
+// → useClientes()
+// → Componente React
+// → Renderização na UI
+```
+
+### 9. Componente Renderiza Dados
+
+```typescript
+// apps/web/src/app/tenant/crm/page.tsx
+return (
+  <div>
+    {clientes.map((cliente) => (
+      <TableRow key={cliente.id}>
+        <TableCell>{cliente.nome}</TableCell>
+        <TableCell>{cliente.email}</TableCell>
+        {/* ... */}
+      </TableRow>
+    ))}
+  </div>
+)
+```
+
+---
+
+## 🏗️ ARQUITETURA DETALHADA
+
+### Frontend (Next.js 16.2.2)
+
+**Estrutura de pastas:**
+```
+apps/web/src/
+├── app/                    # Rotas Next.js (App Router)
+│   ├── auth/              # Rotas de autenticação
+│   ├── admin/             # Dashboard administrativo
+│   ├── mestre/            # Onboarding de tenants
+│   ├── tenant/            # Dashboard do tenant
+│   │   ├── catalogo/      # Módulo Catálogo
+│   │   ├── crm/           # Módulo CRM
+│   │   ├── vendas/        # Módulo Vendas
+│   │   ├── os/            # Módulo Ordens de Serviço
+│   │   ├── obras/         # Módulo Obras
+│   │   ├── financeiro/    # Módulo Financeiro
+│   │   ├── rh/            # Módulo RH
+│   │   ├── estoque/       # Módulo Estoque
+│   │   ├── comissoes/     # Módulo Comissões
+│   │   ├── relatorios/    # Módulo Relatórios
+│   │   └── configuracoes/ # Módulo Configurações
+│   ├── layout.tsx         # Layout raiz
+│   └── page.tsx           # Landing page
+├── components/            # Componentes React
+│   ├── layout/           # Layouts globais
+│   ├── modules/          # Componentes de módulos
+│   │   └── base/         # Componentes reutilizáveis
+│   │       ├── KPICard.tsx
+│   │       ├── StatusBadge.tsx
+│   │       ├── Calculator.tsx
+│   │       ├── Calendar.tsx
+│   │       ├── GlobalSearch.tsx
+│   │       └── ActionCard.tsx
+│   └── ui/               # Componentes shadcn/ui
+│       ├── Modal.tsx
+│       ├── Table.tsx
+│       ├── Toast.tsx
+│       └── ConfirmModal.tsx
+├── lib/                  # Lógica compartilhada
+│   ├── api.ts            # Interfaces TypeScript
+│   ├── hooks/            # Hooks React Query
+│   └── utils/            # Utilitários
+└── utils/                # Utilitários do Supabase
+    ├── client.ts         # Client browser
+    └── server.ts         # Client SSR
+```
+
+**Componentização:**
+- **KPICard:** Card para exibir KPIs (faturamento, vendas, etc.)
+- **StatusBadge:** Badge colorido para status (aberta, concluida, etc.)
+- **Calculator:** Calculadora flutuante global
+- **Calendar:** Componente de calendário reutilizável
+- **GlobalSearch:** Busca global em todo o sistema
+- **ActionCard:** Card com ação principal
+- **Modal:** Modal genérico
+- **Table:** Tabela estilizada
+- **Toast:** Notificações toast
+- **ConfirmModal:** Modal de confirmação
+
+**Hooks Personalizados:**
+- **use-clientes:** CRUD de clientes
+- **use-produtos:** CRUD de produtos
+- **use-vendas:** CRUD de vendas
+- **use-os:** CRUD de ordens de serviço
+- **use-obras:** CRUD de obras
+- **use-funcionarios:** CRUD de funcionários
+- **use-financeiro:** CRUD de transações financeiras
+- **use-dashboard:** KPIs do dashboard
+- **use-email:** Envio de e-mails via Resend
+
+**Interfaces TypeScript:**
+```typescript
+// apps/web/src/lib/api.ts
+export interface Cliente {
+  id: string;
+  nome: string;
+  telefone?: string;
+  email?: string;
+  endereco?: string;
+  criado_em: string;
+  atualizado_em?: string;
+}
+
+export interface ClienteCreate {
+  nome: string;
+  telefone?: string;
+  email?: string;
+  endereco?: string;
+}
+
+export interface ClienteUpdate {
+  nome?: string;
+  telefone?: string;
+  email?: string;
+}
+```
+
+---
+
+## 🗄️ BANCO DE DADOS DETALHADO
+
+### Estrutura de Schemas
+
+**Schema `public` (Global):**
+- `empresas` - Empresas/tenants
+- `modulos_catalogo` - Catálogo de módulos
+- `empresa_modulos` - Módulos ativos por empresa
+- `user_profiles` - Perfis de usuários
+- `logs_provisionamento` - Logs de provisionamento
+- `v_empresa_modulos` - View para módulos ativos
+
+**Schema `tenant_*` (Por empresa):**
+- `clientes` - Clientes/CRM
+- `produtos` - Produtos/Estoque
+- `estoque` - Movimentação de estoque
+- `vendas` - Vendas
+- `vendas_itens` - Itens de venda
+- `financeiro` - Transações financeiras
+- `funcionarios` - Funcionários/RH
+- `ordens_servico` - Ordens de Serviço
+- `ordens_servico_historico` - Histórico de OS
+- `obras` - Obras/Projetos
+- `configuracoes` - Configurações do tenant
+- `role_permissions` - Permissões por role
+- `schema_migrations` - Versionamento de schema
+- `idempotency_control` - Controle de idempotência
+- `audit_log` - Log de auditoria
+
+### Relacionamentos
+
+**Clientes:**
+- `vendas.cliente_id` → `clientes.id`
+- `ordens_servico.cliente_id` → `clientes.id`
+- `obras.cliente_id` → `clientes.id`
+
+**Produtos:**
+- `vendas_itens.produto_id` → `produtos.id`
+- `estoque.produto_id` → `produtos.id`
+
+**Vendas:**
+- `vendas_itens.venda_id` → `vendas.id`
+- `financeiro.venda_id` → `vendas.id` (opcional)
+
+**Funcionários:**
+- `ordens_servico.colaborador_id` → `funcionarios.id`
+
+### Índices Principais
+
+**Clientes:**
+- `idx_clientes_telefone` (telefone)
+- `idx_clientes_status` (status)
+- `idx_clientes_funil_fase` (funil_fase)
+
+**Produtos:**
+- `idx_produtos_preco_base` (preco_base)
+- `idx_produtos_sku` (sku)
+- `idx_produtos_tipo` (tipo)
+
+**Vendas:**
+- `idx_vendas_valor_total` (valor_total)
+- `idx_vendas_cliente` (cliente_id)
+- `idx_vendas_status` (status)
+- `idx_vendas_criado_em` (criado_em)
+
+---
+
+## 🔐 SEGURANÇA E AUTENTICAÇÃO
+
+### Supabase Auth
+
+**Configuração:**
+- Email/password authentication
+- JWT tokens para sessões
+- Row Level Security (RLS) implementado
+- Service role para operações administrativas
+
+**Middleware de Segurança:**
+```typescript
+// apps/web/src/middleware.ts
+// 1. Valida autenticação em todas as rotas protegidas
+if (!user && pathname.startsWith('/tenant')) {
+  return NextResponse.redirect(new URL('/login', request.url))
+}
+
+// 2. Valida perfil do usuário
+if (!profile) {
+  return NextResponse.redirect(new URL('/login', request.url))
+}
+
+// 3. Valida role (master vs tenant)
+if (isMaster && pathname.startsWith('/tenant')) {
+  return NextResponse.redirect(new URL('/admin', request.url))
+}
+
+// 4. Valida feature flags
+if (!modRow?.ativo) {
+  return NextResponse.redirect(new URL('/tenant/sem-modulos', request.url))
+}
+```
+
+### Schema Routing
+
+**RPC set_tenant_schema:**
+```sql
+CREATE OR REPLACE FUNCTION public.set_tenant_schema(p_user_id UUID)
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_schema TEXT;
+BEGIN
+  SELECT e.schema_name INTO v_schema
+  FROM public.user_profiles up
+  JOIN public.empresas e ON e.id = up.empresa_id
+  WHERE up.user_id = p_user_id;
+  
+  -- Configura search_path para o schema do tenant
+  PERFORM set_config('search_path', v_schema || ', public', false);
+  
+  RETURN v_schema;
+END;
+$$;
+```
+
+### Row Level Security (RLS)
+
+**Políticas por schema:**
+- RLS habilitado em todas as tabelas de tenant
+- Políticas permissivas (`USING (true)`) pois isolamento é por schema routing
+- Schema routing garante que cada requisição acessa apenas o schema correto
+
+### Roles e Permissões
+
+**Roles globais:**
+- `master`: Acesso total ao sistema, pode criar tenants
+- `tenant_admin`: Acesso administrativo do tenant
+- `tenant_user`: Acesso restrito aos módulos habilitados
+
+**RBAC intra-tenant:**
+- Tabela `role_permissions` define permissões por role
+- Padrão: `tenant_admin` tem todas as permissões, `tenant_user` tem apenas leitura
+
+---
+
+## 📊 RESPONSABILIDADE DE CADA MÓDULO
+
+### Dashboard
+- **Responsabilidade:** Visão geral do negócio
+- **KPIs:** Faturamento, vendas, clientes, produtos, OS pendentes, estoque baixo, saldo
+- **Gráficos:** Vendas por período, receitas vs despesas
+- **Ações:** Acesso rápido a módulos
+
+### CRM (Clientes)
+- **Responsabilidade:** Gestão de clientes e funil de vendas
+- **Funcionalidades:** CRUD clientes, funil de vendas, histórico
+- **Integrações:** Vendas, OS, Obras
+
+### Vendas
+- **Responsabilidade:** Gestão de vendas e PDV
+- **Funcionalidades:** PDV, gestão de vendas, relatórios
+- **Integrações:** Clientes, Produtos, Financeiro
+
+### Catálogo (Produtos)
+- **Responsabilidade:** Gestão de catálogo de produtos
+- **Funcionalidades:** CRUD produtos, controle de preços
+- **Integrações:** Vendas, Estoque
+
+### Estoque
+- **Responsabilidade:** Controle de estoque
+- **Funcionalidades:** Movimentação, alertas de estoque baixo
+- **Integrações:** Produtos, Vendas
+
+### OS (Ordens de Serviço)
+- **Responsabilidade:** Gestão de ordens de serviço
+- **Funcionalidades:** CRUD OS, status, calendário
+- **Integrações:** Clientes, Funcionários, Financeiro
+
+### Obras
+- **Responsabilidade:** Gestão de projetos/obras
+- **Funcionalidades:** CRUD obras, status, calendário
+- **Integrações:** Clientes, Financeiro
+
+### Financeiro
+- **Responsabilidade:** Gestão financeira
+- **Funcionalidades:** Transações, fluxo de caixa, relatórios
+- **Integrações:** Vendas, OS, Obras
+
+### RH
+- **Responsabilidade:** Gestão de funcionários
+- **Funcionalidades:** CRUD funcionários, gestão de equipe
+- **Integrações:** OS, Obras, Comissões
+
+### Comissões
+- **Responsabilidade:** Cálculo de comissões
+- **Funcionalidades:** Regras de comissão, cálculo automático
+- **Integrações:** Vendas, RH
+
+### Relatórios
+- **Responsabilidade:** Relatórios customizados
+- **Funcionalidades:** Relatórios por módulo, exportação
+- **Integrações:** Todos os módulos
+
+### Configurações
+- **Responsabilidade:** Configurações do tenant
+- **Funcionalidades:** Configurações de módulos, empresa
+- **Integrações:** Sistema global
+
+---
+
+## 🚀 DEPLOYMENT
+
+### Frontend (Netlify)
+- **Framework:** Next.js 16.2.2
+- **Build:** `npm run build`
+- **Deploy:** Netlify (configurado via netlify.toml)
+- **Environment Variables:** NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+### Backend (Supabase)
+- **Database:** PostgreSQL (gerenciado pelo Supabase)
+- **RPCs:** Deploy via SQL Editor ou CLI
+- **Edge Functions:** Deploy via dashboard (CLI não disponível)
+- **Environment Variables:** RESEND_API_KEY, RESEND_FROM_EMAIL
+
+### Provisionamento de Tenant
+- **Script:** PROVISIONAR_TENANT_62A495E1.sql
+- **RPC:** `provisionar_empresa(p_cnpj, p_razao_social, p_porte, p_segmento, p_modulos)`
+- **Processo:**
+  1. Cria empresa na tabela `empresas`
+  2. Cria schema `tenant_*`
+  3. Cria tabelas no schema do tenant
+  4. Cria RPCs no schema do tenant
+  5. Cria RPCs de roteamento no schema `public`
+  6. Popula dados seed (roles, permissões)
+  7. Registra log de provisionamento
+
+---
   2. Autentica usuário via supabase.auth.getUser()
   3. Protege rotas /tenant, /admin, /mestre
   4. Busca user_profiles.role e empresa_id
