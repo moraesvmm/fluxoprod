@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Users, UserX, AlertCircle, Plus, Search, MessageCircle, Edit, Trash2 } from "lucide-react";
-import { useClientes, useCreateCliente, useDeleteCliente } from "@/lib/hooks/use-clientes";
+import { useClientes, useCreateCliente, useDeleteCliente, useUpdateCliente } from "@/lib/hooks/use-clientes";
 import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
@@ -20,7 +20,10 @@ export default function CRMPage() {
   const { data: clientes = [], isLoading: loading, error: queryError } = useClientes();
   const createMutation = useCreateCliente();
   const deleteMutation = useDeleteCliente();
+  const updateMutation = useUpdateCliente();
   const [showForm, setShowForm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [campanhaConfirm, setCampanhaConfirm] = useState(false);
   const [formData, setFormData] = useState({ nome: '', telefone: '', email: '', endereco: '' });
@@ -48,6 +51,33 @@ export default function CRMPage() {
       toastError("Erro ao excluir cliente. Tente novamente.");
     } finally {
       setDeleteId(null);
+    }
+  };
+
+  const abrirEdicao = (cliente: any) => {
+    setEditId(cliente.id);
+    setFormData({
+      nome: cliente.nome || '',
+      telefone: cliente.telefone || '',
+      email: cliente.email || '',
+      endereco: cliente.endereco || '',
+    });
+    setShowEditModal(true);
+  };
+
+  const editarCliente = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editId || !formData.nome.trim()) return;
+
+    try {
+      await updateMutation.mutateAsync({ id: editId, cliente: formData });
+
+      setFormData({ nome: '', telefone: '', email: '', endereco: '' });
+      setShowEditModal(false);
+      setEditId(null);
+      success("Cliente atualizado com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao atualizar cliente: " + (err.message || "Tente novamente."));
     }
   };
 
@@ -143,6 +173,41 @@ export default function CRMPage() {
         </div>
       )}
 
+      {/* Modal de Edição */}
+      {showEditModal && (
+        <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+          <h3 className="text-lg font-semibold mb-4">Editar Cliente</h3>
+          <form onSubmit={editarCliente} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
+                <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Nome completo" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
+                <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="(00) 00000-0000" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="email@exemplo.com" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+                <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Endereço completo" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button type="submit" disabled={updateMutation.isPending} className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+                {updateMutation.isPending ? "Salvando..." : "Atualizar Cliente"}
+              </button>
+              <button type="button" onClick={() => setShowEditModal(false)} className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-3">
         <KPICard title="Clientes Ativos" value={clientes.length} icon={Users} />
         <KPICard title="Inativos (30D+)" value="0" icon={UserX} className="border-amber-200 bg-amber-50/10" />
@@ -207,7 +272,7 @@ export default function CRMPage() {
                       <button className="text-emerald-600 hover:text-emerald-700 p-1" title="WhatsApp">
                         <MessageCircle className="h-4 w-4" />
                       </button>
-                      <button className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
+                      <button onClick={() => abrirEdicao(item)} className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
                         <Edit className="h-4 w-4" />
                       </button>
                       <button onClick={() => setDeleteId(item.id)} className="text-slate-400 hover:text-red-600 p-1" title="Excluir">
