@@ -11,7 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Wrench, Plus, Search, Eye, Edit, Clock, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { Wrench, Plus, Search, Eye, Edit, Clock, CheckCircle, XCircle, Trash2, LayoutGrid } from "lucide-react";
+import { Calendar as CalendarComponent } from "@/components/modules/base/Calendar";
 import { createClient } from "@/utils/supabase/client";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -29,6 +30,7 @@ export default function OSPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [formData, setFormData] = useState({
     cliente_id: "",
@@ -121,26 +123,43 @@ export default function OSPage() {
 
   const editarOS = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editId || !formData.cliente_id) return;
+    if (!editId || !formData.veiculo_equipamento || !formData.cliente_id) return;
 
     try {
       const payload: any = {
         cliente_id: formData.cliente_id,
         veiculo_equipamento: formData.veiculo_equipamento,
         descricao_problema: formData.descricao_problema,
-        colaborador_id: formData.colaborador_id,
+        colaborador_id: formData.colaborador_id || undefined,
         valor: formData.valor ? parseFloat(formData.valor) : undefined,
       };
 
       await updateMutation.mutateAsync({ id: editId, os: payload });
 
-      setFormData({ cliente_id: '', veiculo_equipamento: '', descricao_problema: '', colaborador_id: '', valor: '' });
+      setFormData({
+        cliente_id: "",
+        veiculo_equipamento: "",
+        descricao_problema: "",
+        colaborador_id: "",
+        valor: "",
+      });
       setShowEditModal(false);
       setEditId(null);
-      success("Ordem de serviço atualizada com sucesso!");
+      success("OS atualizada com sucesso!");
     } catch (err: any) {
-      toastError("Erro ao atualizar ordem de serviço: " + (err.message || "Tente novamente."));
+      toastError("Erro ao atualizar OS: " + (err.message || "Tente novamente"));
     }
+  };
+
+  const transformarOSParaCalendario = () => {
+    return ordens?.map(os => ({
+      id: os.id,
+      title: os.veiculo_equipamento || `OS #${os.numero || os.id}`,
+      date: os.criado_em,
+      status: os.status,
+      type: 'os' as const,
+      description: os.descricao_problema,
+    })) || [];
   };
 
   const formatarMoeda = (v?: number) =>
@@ -201,8 +220,26 @@ export default function OSPage() {
               className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
+          <button
+            onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-border rounded-md hover:bg-slate-50 transition-colors"
+          >
+            {viewMode === 'table' ? (
+              <>
+                <Clock className="h-4 w-4" />
+                Calendário
+              </>
+            ) : (
+              <>
+                <LayoutGrid className="h-4 w-4" />
+                Tabela
+              </>
+            )}
+          </button>
         </div>
-        <Table>
+
+        {viewMode === 'table' ? (
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Número</TableHead>
@@ -262,6 +299,19 @@ export default function OSPage() {
             )}
           </TableBody>
         </Table>
+        ) : (
+          <div className="p-4">
+            <CalendarComponent
+              events={transformarOSParaCalendario()}
+              title="Calendário de Ordens de Serviço"
+              onEventClick={(event) => {
+                // Abrir modal de edição quando clicar em um evento
+                const os = ordens?.find(o => o.id === event.id);
+                if (os) abrirEdicao(os);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Nova Ordem de Serviço">

@@ -11,7 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Building2, Plus, Search, Calendar, MapPin, Trash2, Edit } from "lucide-react";
+import { Building2, Plus, Search, Calendar, MapPin, Trash2, Edit, LayoutGrid } from "lucide-react";
+import { Calendar as CalendarComponent } from "@/components/modules/base/Calendar";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
@@ -23,6 +24,7 @@ export default function ObrasPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
   const [formData, setFormData] = useState({
     nome: "",
     cliente_id: "",
@@ -78,11 +80,34 @@ export default function ObrasPage() {
       await deleteMutation.mutateAsync(deleteId);
       success("Obra excluída com sucesso!");
     } catch (err: any) {
-      toastError("Erro ao excluir obra: " + (err.message || "Tente novamente."));
+      toastError("Erro ao excluir Obra: " + (err.message || "Tente novamente"));
     } finally {
       setDeleteId(null);
     }
   };
+
+  const formatarValor = (valor: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+
+  const formatarData = (dataString?: string) => {
+    if (!dataString) return "—";
+    return new Date(dataString).toLocaleDateString('pt-BR');
+  };
+
+  const transformarObrasParaCalendario = () => {
+    return obras?.filter(obra => obra.data_inicio).map(obra => ({
+      id: obra.id,
+      title: obra.nome,
+      date: obra.data_inicio!,
+      endDate: obra.data_fim_prevista,
+      status: obra.status,
+      type: 'obra' as const,
+      description: obra.endereco || obra.descricao,
+    })) || [];
+  };
+
+  const formatarMoeda = (v?: number) =>
+    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
 
   const abrirEdicao = (obra: any) => {
     setEditId(obra.id);
@@ -123,11 +148,6 @@ export default function ObrasPage() {
       toastError("Erro ao atualizar obra: " + (err.message || "Tente novamente."));
     }
   };
-
-  const formatarMoeda = (v?: number) =>
-    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
-
-  const formatarData = (d?: string) => d ? new Date(d).toLocaleDateString("pt-BR") : "—";
 
   const planejadas = obras?.filter(o => o.status === "planejada").length || 0;
   const andamento = obras?.filter(o => o.status === "andamento").length || 0;
@@ -182,8 +202,26 @@ export default function ObrasPage() {
               className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
+          <button
+            onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-border rounded-md hover:bg-slate-50 transition-colors"
+          >
+            {viewMode === 'table' ? (
+              <>
+                <Calendar className="h-4 w-4" />
+                Calendário
+              </>
+            ) : (
+              <>
+                <LayoutGrid className="h-4 w-4" />
+                Tabela
+              </>
+            )}
+          </button>
         </div>
-        <Table>
+
+        {viewMode === 'table' ? (
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Nome da Obra</TableHead>
@@ -248,6 +286,19 @@ export default function ObrasPage() {
             )}
           </TableBody>
         </Table>
+        ) : (
+          <div className="p-4">
+            <CalendarComponent
+              events={transformarObrasParaCalendario()}
+              title="Calendário de Obras"
+              onEventClick={(event) => {
+                // Abrir modal de edição quando clicar em um evento
+                const obra = obras?.find(o => o.id === event.id);
+                if (obra) abrirEdicao(obra);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Nova Obra">
