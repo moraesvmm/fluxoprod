@@ -15,6 +15,7 @@ import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
 import { useProdutos, useCreateProduto, useDeleteProduto, useUpdateProduto } from "@/lib/hooks/use-produtos";
+import { type ProdutoUpdate } from "@/lib/api";
 
 interface Produto {
   id: string;
@@ -35,6 +36,8 @@ export default function CatalogoPage() {
   const deleteProduto = useDeleteProduto();
   const updateProduto = useUpdateProduto();
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nome: '',
@@ -83,6 +86,45 @@ export default function CatalogoPage() {
       toastError("Erro ao remover produto: " + (err.message || "Tente novamente."));
     } finally {
       setDeleteId(null);
+    }
+  };
+
+  const abrirEdicao = (produto: Produto) => {
+    setEditId(produto.id);
+    setFormData({
+      nome: produto.nome,
+      descricao: produto.descricao || '',
+      sku: produto.sku || '',
+      preco_custo: produto.preco_custo ? String(produto.preco_custo) : '',
+      preco_venda: produto.preco_venda ? String(produto.preco_venda) : '',
+      estoque_atual: String(produto.estoque_atual),
+      estoque_minimo: String(produto.estoque_minimo),
+      categoria: produto.categoria || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const editarProduto = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editId || !formData.nome.trim()) return;
+
+    try {
+      const payload: ProdutoUpdate = {
+        nome: formData.nome,
+      };
+      if (formData.descricao) payload.descricao = formData.descricao;
+      if (formData.sku) payload.sku = formData.sku;
+      if (formData.preco_custo) payload.preco_custo = parseFloat(formData.preco_custo);
+      if (formData.categoria) payload.categoria = formData.categoria;
+
+      await updateProduto.mutateAsync({ id: editId, produto: payload });
+
+      setFormData({ nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '', estoque_atual: '0', estoque_minimo: '10', categoria: '' });
+      setShowEditModal(false);
+      setEditId(null);
+      success("Produto atualizado com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao atualizar produto: " + (err.message || "Tente novamente."));
     }
   };
 
@@ -135,7 +177,7 @@ export default function CatalogoPage() {
         />
         <KPICard
           title="Preço Médio"
-          value={formatarMoeda((produtos?.length || 0) > 0 ? (produtos?.reduce((sum, p) => sum + (p.preco_venda || 0), 0) || 0) / produtos.length : 0)}
+          value={formatarMoeda((produtos?.length || 0) > 0 ? (produtos?.reduce((sum, p) => sum + (p.preco_venda || 0), 0) || 0) / (produtos?.length || 1) : 0)}
           icon={DollarSign}
         />
       </div>
@@ -219,7 +261,7 @@ export default function CatalogoPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
+                      <button onClick={() => abrirEdicao(p)} className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
@@ -340,6 +382,81 @@ export default function CatalogoPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
+              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal de Edição */}
+      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Produto">
+        <form onSubmit={editarProduto} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Produto *</label>
+            <input
+              type="text"
+              value={formData.nome}
+              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Ex: Cabo USB-C 100W"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+            <textarea
+              value={formData.descricao}
+              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              rows={2}
+              placeholder="Descrição detalhada do produto..."
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">SKU</label>
+              <input
+                type="text"
+                value={formData.sku}
+                onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Ex: CB-USBC-100W"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+              <input
+                type="text"
+                value={formData.categoria}
+                onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Ex: Acessórios"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Preço de Custo</label>
+            <input
+              type="number"
+              step="0.01"
+              value={formData.preco_custo}
+              onChange={(e) => setFormData({ ...formData, preco_custo: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="R$ 0,00"
+            />
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              Atualizar Produto
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowEditModal(false)}
               className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
