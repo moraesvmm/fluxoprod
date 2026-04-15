@@ -15,6 +15,7 @@ import { Users, UserX, AlertCircle, Plus, Search, MessageCircle, Edit, Trash2 } 
 import { useClientes, useCreateCliente, useDeleteCliente, useUpdateCliente } from "@/lib/hooks/use-clientes";
 import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { sendEmail } from "@/lib/hooks/use-email";
 
 export default function CRMPage() {
   const { data: clientes = [], isLoading: loading, error: queryError } = useClientes();
@@ -34,6 +35,30 @@ export default function CRMPage() {
     if (!formData.nome.trim()) return;
     try {
       await createMutation.mutateAsync(formData);
+      
+      // Enviar e-mail de boas-vindas se o cliente tiver e-mail
+      if (formData.email) {
+        try {
+          const emailHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333;">Bem-vindo ao Fluxo!</h2>
+              <p style="color: #666;">Olá, ${formData.nome}!</p>
+              <p style="color: #666;">Obrigado por se cadastrar em nosso sistema. Estamos felizes em ter você como cliente.</p>
+              <p style="color: #666;">Se precisar de qualquer ajuda, entre em contato conosco.</p>
+              <p style="color: #666; margin-top: 20px;">Atenciosamente,<br>Equipe Fluxo</p>
+            </div>
+          `;
+          await sendEmail({
+            to: formData.email,
+            subject: 'Bem-vindo ao Fluxo!',
+            html: emailHtml
+          });
+        } catch (emailError) {
+          console.error('Erro ao enviar e-mail de boas-vindas:', emailError);
+          // Não bloquear o fluxo se o e-mail falhar
+        }
+      }
+      
       setFormData({ nome: '', telefone: '', email: '', endereco: '' });
       setShowForm(false);
       success("Cliente criado com sucesso!");
