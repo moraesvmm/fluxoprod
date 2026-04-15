@@ -16,7 +16,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
-import { useOS, useCreateOS, useDeleteOS } from "@/lib/hooks/use-os";
+import { useOS, useCreateOS, useDeleteOS, useUpdateOS } from "@/lib/hooks/use-os";
 import { useClientes } from "@/lib/hooks/use-clientes";
 
 interface Funcionario {
@@ -26,6 +26,8 @@ interface Funcionario {
 
 export default function OSPage() {
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [formData, setFormData] = useState({
@@ -43,6 +45,7 @@ export default function OSPage() {
   const { data: clientes, isLoading: loadingClientes } = useClientes();
   const createMutation = useCreateOS();
   const deleteMutation = useDeleteOS();
+  const updateMutation = useUpdateOS();
 
   useEffect(() => {
     carregarFuncionarios();
@@ -89,6 +92,54 @@ export default function OSPage() {
       toastError("Erro ao excluir OS");
     } finally {
       setDeleteId(null);
+    }
+  };
+
+  const confirmarExclusao = async () => {
+    if (!deleteId) return;
+    try {
+      await deleteMutation.mutateAsync(deleteId);
+      success("Ordem de serviço excluída com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao excluir ordem de serviço: " + (err.message || "Tente novamente."));
+    } finally {
+      setDeleteId(null);
+    }
+  };
+
+  const abrirEdicao = (ordem: any) => {
+    setEditId(ordem.id);
+    setFormData({
+      cliente_id: ordem.cliente_id || '',
+      veiculo_equipamento: ordem.veiculo_equipamento || '',
+      descricao_problema: ordem.descricao_problema || '',
+      colaborador_id: ordem.colaborador_id || '',
+      valor: ordem.valor ? String(ordem.valor) : '',
+    });
+    setShowEditModal(true);
+  };
+
+  const editarOS = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editId || !formData.cliente_id) return;
+
+    try {
+      const payload: any = {
+        cliente_id: formData.cliente_id,
+        veiculo_equipamento: formData.veiculo_equipamento,
+        descricao_problema: formData.descricao_problema,
+        colaborador_id: formData.colaborador_id,
+        valor: formData.valor ? parseFloat(formData.valor) : undefined,
+      };
+
+      await updateMutation.mutateAsync({ id: editId, os: payload });
+
+      setFormData({ cliente_id: '', veiculo_equipamento: '', descricao_problema: '', colaborador_id: '', valor: '' });
+      setShowEditModal(false);
+      setEditId(null);
+      success("Ordem de serviço atualizada com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao atualizar ordem de serviço: " + (err.message || "Tente novamente."));
     }
   };
 
@@ -198,6 +249,9 @@ export default function OSPage() {
                   <TableCell className="text-sm text-slate-500">{formatarData(os.criado_em)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
+                      <button onClick={() => abrirEdicao(os)} className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
+                        <Edit className="h-4 w-4" />
+                      </button>
                       <button onClick={() => setDeleteId(os.id)} className="text-slate-400 hover:text-red-600 p-1 transition-colors" title="Excluir">
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -280,6 +334,85 @@ export default function OSPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
+              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal de Edição */}
+      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Ordem de Serviço">
+        <form onSubmit={editarOS} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Cliente *</label>
+            <select
+              value={formData.cliente_id}
+              onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              required
+            >
+              <option value="">Selecione...</option>
+              {clientes?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Veículo/Equipamento *</label>
+            <input
+              type="text"
+              value={formData.veiculo_equipamento}
+              onChange={(e) => setFormData({ ...formData, veiculo_equipamento: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Ex: Honda Civic 2020"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição do Problema</label>
+            <textarea
+              value={formData.descricao_problema}
+              onChange={(e) => setFormData({ ...formData, descricao_problema: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              rows={3}
+              placeholder="Descreva o problema..."
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Responsável</label>
+              <select
+                value={formData.colaborador_id}
+                onChange={(e) => setFormData({ ...formData, colaborador_id: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="">Selecione...</option>
+                {funcionarios.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Valor Estimado</label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.valor}
+                onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={updateMutation.isPending}
+              className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {updateMutation.isPending ? "Atualizando..." : "Atualizar OS"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowEditModal(false)}
               className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
