@@ -472,7 +472,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left text */}
             <AnimatedSection>
-              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 ${darkMode ? 'bg-violet-900/80 border-violet-700/50 text-violet-300' : 'bg-violet-100/80 border-violet-200/50 text-violet-700'}`}
+              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 ${darkMode ? 'bg-violet-900/80 border-violet-700/50 text-violet-300' : 'bg-violet-100/80 border-violet-200/50 text-violet-700'}`}>
                 <Star className="w-3.5 h-3.5" />
                 Vantagens
               </span>
