@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Briefcase, UserPlus, Search, Edit, Trash2, Users, Mail, Phone } from "lucide-react";
+import { FloatingCalculator } from "@/components/modules/base/Calculator";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
@@ -33,6 +34,7 @@ export default function RHPage() {
   const updateFuncionario = useUpdateFuncionario();
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -414,6 +416,9 @@ export default function RHPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Calculadora Flutuante */}
+      <FloatingCalculator isOpen={showCalculator} onToggle={() => setShowCalculator(!showCalculator)} />
     </div>
   );
 }
