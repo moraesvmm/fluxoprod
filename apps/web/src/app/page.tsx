@@ -21,6 +21,8 @@ import {
   Globe,
   Clock,
   Layers,
+  Moon,
+  Sun,
 } from "lucide-react";
 
 /* ─────────────────── DATA ─────────────────── */
@@ -144,6 +146,7 @@ function FloatingParticles() {
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
@@ -155,6 +158,18 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  useEffect(() => {
+    // Carregar preferência do localStorage
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(savedDarkMode);
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', String(newDarkMode));
+  };
+
   const navLinks = [
     { href: "#funcionalidades", label: "Funcionalidades" },
     { href: "#vantagens", label: "Vantagens" },
@@ -162,7 +177,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden">
+    <div className={`relative min-h-screen text-slate-900 overflow-x-hidden ${darkMode ? 'bg-[#0a0a0a]' : 'bg-slate-50'}`}>
 
       {/* ─────────── HEADER ─────────── */}
       <motion.header
@@ -205,6 +220,13 @@ export default function LandingPage() {
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-500 transition-all duration-300 group-hover:w-full rounded-full" />
                 </a>
               ))}
+              <button
+                onClick={toggleDarkMode}
+                className="p-2 rounded-lg text-slate-600 hover:text-violet-600 hover:bg-slate-100 transition-colors"
+                aria-label="Toggle Dark Mode"
+              >
+                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
               <Link
                 href="/login"
                 className="ml-2 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-violet-500 hover:to-indigo-500 shadow-md shadow-violet-500/25 hover:shadow-lg hover:shadow-violet-500/40 transition-all duration-300 hover:scale-[1.03]"
@@ -215,13 +237,22 @@ export default function LandingPage() {
             </div>
 
             {/* Mobile Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-slate-600 hover:text-violet-600 transition-colors"
-              aria-label="Menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            <div className="flex items-center gap-2 md:hidden">
+              <button
+                onClick={toggleDarkMode}
+                className="p-2 rounded-lg text-slate-600 hover:text-violet-600 hover:bg-slate-100 transition-colors"
+                aria-label="Toggle Dark Mode"
+              >
+                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-slate-600 hover:text-violet-600 transition-colors"
+                aria-label="Menu"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </nav>
 
