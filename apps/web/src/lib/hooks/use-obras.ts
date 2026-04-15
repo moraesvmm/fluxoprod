@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchObras, createObra, deleteObra, type ObraCreate } from "@/lib/api";
+import { fetchObras, createObra, deleteObra, updateObra, type ObraCreate, type ObraUpdate } from "@/lib/api";
 
 const OBRAS_KEY = ["obras"] as const;
 
@@ -24,6 +24,14 @@ export function useDeleteObra() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteObra(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: OBRAS_KEY }),
+  });
+}
+
+export function useUpdateObra() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, obra }: { id: string; obra: ObraUpdate }) => updateObra(id, obra),
     onSuccess: () => qc.invalidateQueries({ queryKey: OBRAS_KEY }),
   });
 }

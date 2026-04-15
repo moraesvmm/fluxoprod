@@ -46,6 +46,14 @@ export interface ClienteCreate {
   endereco?: string;
 }
 
+export interface ClienteUpdate {
+  nome?: string;
+  telefone?: string;
+  email?: string;
+  funil_fase?: string;
+  status?: string;
+}
+
 export interface Produto {
   id: string;
   nome: string;
@@ -67,6 +75,16 @@ export interface ProdutoCreate {
   preco_venda?: number;
   estoque_atual: number;
   estoque_minimo: number;
+  categoria?: string;
+}
+
+export interface ProdutoUpdate {
+  nome?: string;
+  descricao?: string;
+  tipo?: string;
+  preco_base?: number;
+  sku?: string;
+  preco_custo?: number;
   categoria?: string;
 }
 
@@ -93,6 +111,15 @@ export interface OrdemServicoCreate {
   colaborador_id?: string;
   status?: string;
   valor?: number;
+}
+
+export interface OrdemServicoUpdate {
+  cliente_id?: string;
+  colaborador_id?: string;
+  veiculo_equipamento?: string;
+  descricao_problema?: string;
+  status?: string;
+  valor_orcamento?: number;
 }
 
 export interface Obra {
@@ -122,6 +149,17 @@ export interface ObraCreate {
   status?: string;
 }
 
+export interface ObraUpdate {
+  cliente_id?: string;
+  nome?: string;
+  descricao?: string;
+  endereco?: string;
+  data_inicio?: string;
+  data_fim_prevista?: string;
+  status?: string;
+  orcamento_total?: number;
+}
+
 export interface Empresa {
   id: string;
   cnpj?: string;
@@ -139,6 +177,65 @@ export interface EmpresaUpdate {
   porte?: string;
   segmento?: string;
   status?: string;
+}
+
+export interface Funcionario {
+  id: string;
+  nome: string;
+  cargo?: string;
+  email?: string;
+  telefone?: string;
+  salario?: number;
+  role?: string;
+  criado_em: string;
+  atualizado_em?: string;
+}
+
+export interface FuncionarioUpdate {
+  nome?: string;
+  cargo?: string;
+  email?: string;
+  telefone?: string;
+  salario?: number;
+  role?: string;
+}
+
+export interface Financeiro {
+  id: string;
+  tipo: string;
+  descricao: string;
+  valor: number;
+  data_vencimento: string;
+  status: string;
+  categoria?: string;
+  criado_em: string;
+  atualizado_em?: string;
+}
+
+export interface FinanceiroUpdate {
+  tipo?: string;
+  descricao?: string;
+  valor?: number;
+  data_vencimento?: string;
+  status?: string;
+  categoria?: string;
+}
+
+export interface Comissao {
+  id: string;
+  colaborador_id: string;
+  venda_id?: string;
+  valor_comissao: number;
+  valor_venda?: number;
+  periodo_referencia: string;
+  status_pagamento: string;
+  data_pagamento?: string;
+  criado_em: string;
+}
+
+export interface ComissaoUpdate {
+  status_pagamento?: string;
+  data_pagamento?: string;
 }
 
 // ─── Supabase-backed data functions ──────────────────────
@@ -196,6 +293,20 @@ export async function deleteCliente(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function updateCliente(id: string, cliente: ClienteUpdate): Promise<Cliente> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_atualizar_cliente', {
+      p_cliente_id: id,
+      p_nome: cliente.nome,
+      p_email: cliente.email,
+      p_telefone: cliente.telefone,
+      p_funil_fase: cliente.funil_fase || 'lead',
+      p_status: cliente.status || 'ativo'
+    });
+  if (error) throw new Error(error.message);
+  return data as Cliente;
+}
+
 // PRODUTOS - Usar RPCs para operações CRUD
 export async function fetchProdutos(): Promise<Produto[]> {
   const { data, error } = await getSupabase()
@@ -225,6 +336,22 @@ export async function deleteProduto(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function updateProduto(id: string, produto: ProdutoUpdate): Promise<Produto> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_atualizar_produto', {
+      p_produto_id: id,
+      p_nome: produto.nome,
+      p_descricao: produto.descricao,
+      p_tipo: produto.tipo || 'produto',
+      p_preco_base: produto.preco_base,
+      p_sku: produto.sku,
+      p_preco_custo: produto.preco_custo,
+      p_categoria: produto.categoria
+    });
+  if (error) throw new Error(error.message);
+  return data as Produto;
+}
+
 // OS - Usar RPCs para operações CRUD
 export async function fetchOS(): Promise<OrdemServico[]> {
   const { data, error } = await getSupabase()
@@ -251,6 +378,21 @@ export async function deleteOS(id: string): Promise<void> {
   const { error } = await getSupabase()
     .rpc('tenant_excluir_os', { p_os_id: id });
   if (error) throw new Error(error.message);
+}
+
+export async function updateOS(id: string, os: OrdemServicoUpdate): Promise<OrdemServico> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_atualizar_os', {
+      p_os_id: id,
+      p_cliente_id: os.cliente_id,
+      p_colaborador_id: os.colaborador_id,
+      p_veiculo_equipamento: os.veiculo_equipamento,
+      p_descricao_problema: os.descricao_problema,
+      p_status: os.status || 'aberta',
+      p_valor_orcamento: os.valor_orcamento
+    });
+  if (error) throw new Error(error.message);
+  return data as OrdemServico;
 }
 
 // OBRAS - Usar RPCs para operações CRUD
@@ -283,6 +425,23 @@ export async function deleteObra(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function updateObra(id: string, obra: ObraUpdate): Promise<Obra> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_atualizar_obra', {
+      p_obra_id: id,
+      p_cliente_id: obra.cliente_id,
+      p_nome: obra.nome,
+      p_descricao: obra.descricao,
+      p_endereco: obra.endereco,
+      p_data_inicio: obra.data_inicio ? new Date(obra.data_inicio) : null,
+      p_data_fim_prevista: obra.data_fim_prevista ? new Date(obra.data_fim_prevista) : null,
+      p_status: obra.status || 'planejada',
+      p_orcamento_total: obra.orcamento_total
+    });
+  if (error) throw new Error(error.message);
+  return data as Obra;
+}
+
 // EMPRESAS - Mantido para uso público (não tenant)
 export async function fetchEmpresa(): Promise<Empresa | null> {
   const { data, error } = await getSupabase()
@@ -303,4 +462,69 @@ export async function updateEmpresa(id: string, empresa: EmpresaUpdate): Promise
     .single();
   if (error) throw new Error(error.message);
   return data;
+}
+
+// FUNCIONARIOS - Usar RPCs para operações CRUD
+export async function fetchFuncionarios(): Promise<Funcionario[]> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_listar_funcionarios');
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+export async function updateFuncionario(id: string, funcionario: FuncionarioUpdate): Promise<Funcionario> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_atualizar_funcionario', {
+      p_funcionario_id: id,
+      p_nome: funcionario.nome,
+      p_cargo: funcionario.cargo,
+      p_email: funcionario.email,
+      p_telefone: funcionario.telefone,
+      p_salario: funcionario.salario,
+      p_role: funcionario.role || 'funcionario'
+    });
+  if (error) throw new Error(error.message);
+  return data as Funcionario;
+}
+
+// FINANCEIRO - Usar RPCs para operações CRUD
+export async function fetchFinanceiro(): Promise<Financeiro[]> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_listar_financeiro');
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+export async function updateFinanceiro(id: string, financeiro: FinanceiroUpdate): Promise<Financeiro> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_atualizar_financeiro', {
+      p_financeiro_id: id,
+      p_tipo: financeiro.tipo,
+      p_descricao: financeiro.descricao,
+      p_valor: financeiro.valor,
+      p_data_vencimento: financeiro.data_vencimento ? new Date(financeiro.data_vencimento) : null,
+      p_status: financeiro.status || 'pendente',
+      p_categoria: financeiro.categoria
+    });
+  if (error) throw new Error(error.message);
+  return data as Financeiro;
+}
+
+// COMISSOES - Usar RPCs para operações CRUD
+export async function fetchComissoes(): Promise<Comissao[]> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_listar_comissoes');
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+export async function updateComissao(id: string, comissao: ComissaoUpdate): Promise<Comissao> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_atualizar_comissao', {
+      p_comissao_id: id,
+      p_status_pagamento: comissao.status_pagamento,
+      p_data_pagamento: comissao.data_pagamento ? new Date(comissao.data_pagamento) : null
+    });
+  if (error) throw new Error(error.message);
+  return data as Comissao;
 }
