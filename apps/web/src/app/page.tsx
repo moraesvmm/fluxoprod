@@ -186,7 +186,9 @@ export default function LandingPage() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-white/80 backdrop-blur-xl shadow-lg shadow-violet-500/5 border-b border-slate-200/50"
+            ? darkMode
+              ? "bg-[#1a1a1a]/80 backdrop-blur-xl shadow-lg shadow-violet-500/5 border-b border-slate-700/50"
+              : "bg-white/80 backdrop-blur-xl shadow-lg shadow-violet-500/5 border-b border-slate-200/50"
             : "bg-transparent"
         }`}
       >
@@ -264,7 +266,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="md:hidden bg-white/95 backdrop-blur-xl border-t border-slate-200/50"
+              className={`md:hidden backdrop-blur-xl border-t ${darkMode ? 'bg-[#1a1a1a]/95 border-slate-700/50' : 'bg-white/95 border-slate-200/50'}`}
             >
               <div className="px-4 py-6 space-y-4">
                 {navLinks.map((link) => (
@@ -358,7 +360,7 @@ export default function LandingPage() {
               </Link>
               <a
                 href="#funcionalidades"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-slate-700 font-semibold text-base rounded-2xl border border-slate-200 hover:border-violet-300 hover:text-violet-600 shadow-sm hover:shadow-md transition-all duration-300"
+                className={`inline-flex items-center gap-2 px-8 py-4 font-semibold text-base rounded-2xl border shadow-sm hover:shadow-md transition-all duration-300 ${darkMode ? 'bg-[#1a1a1a] text-slate-300 border-slate-700 hover:border-violet-500/60 hover:text-violet-400' : 'bg-white text-slate-700 border-slate-200 hover:border-violet-300 hover:text-violet-600'}`}
               >
                 Explorar Recursos
               </a>
@@ -388,7 +390,7 @@ export default function LandingPage() {
 
       {/* ─────────── STATS BAR ─────────── */}
       <AnimatedSection className="relative -mt-8 z-10 max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-200/50 p-6 sm:p-8">
+        <div className={`rounded-2xl border shadow-xl p-6 sm:p-8 ${darkMode ? 'bg-[#1a1a1a] border-slate-700/80 shadow-slate-900/50' : 'bg-white border-slate-200/80 shadow-slate-200/50'}`}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
             {stats.map((stat, i) => (
               <motion.div
@@ -436,7 +438,7 @@ export default function LandingPage() {
                 <motion.div
                   whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="group relative h-full p-6 sm:p-8 bg-white rounded-2xl border border-slate-200/80 hover:border-violet-300/60 shadow-sm hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300"
+                  className={`group relative h-full p-6 sm:p-8 rounded-2xl border shadow-sm hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300 ${darkMode ? 'bg-[#1a1a1a] border-slate-700/80 hover:border-violet-500/60' : 'bg-white border-slate-200/80 hover:border-violet-300/60'}`}
                 >
                   {/* Gradient glow on hover */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -460,7 +462,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─────────── BENEFITS / VANTAGENS ─────────── */}
-      <section id="vantagens" className="py-24 sm:py-32 bg-gradient-to-b from-slate-50 to-white relative">
+      <section id="vantagens" className={`py-24 sm:py-32 relative ${darkMode ? 'bg-gradient-to-b from-[#0a0a0a] to-[#121212]' : 'bg-gradient-to-b from-slate-50 to-white'}`}>
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/2 left-0 w-72 h-72 bg-violet-100/40 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-100/30 rounded-full blur-3xl" />
