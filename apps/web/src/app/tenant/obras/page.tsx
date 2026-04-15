@@ -11,15 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Building2, Plus, Search, Calendar, MapPin, Trash2 } from "lucide-react";
+import { Building2, Plus, Search, Calendar, MapPin, Trash2, Edit } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
-import { useObras, useCreateObra, useDeleteObra } from "@/lib/hooks/use-obras";
+import { useObras, useCreateObra, useDeleteObra, useUpdateObra } from "@/lib/hooks/use-obras";
 import { useClientes } from "@/lib/hooks/use-clientes";
 
 export default function ObrasPage() {
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nome: "",
@@ -37,6 +39,7 @@ export default function ObrasPage() {
   const { data: clientes, isLoading: loadingClientes } = useClientes();
   const createMutation = useCreateObra();
   const deleteMutation = useDeleteObra();
+  const updateMutation = useUpdateObra();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,15 +72,55 @@ export default function ObrasPage() {
     }
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
     try {
       await deleteMutation.mutateAsync(deleteId);
       success("Obra excluída com sucesso!");
     } catch (err: any) {
-      toastError("Erro ao excluir Obra");
+      toastError("Erro ao excluir obra: " + (err.message || "Tente novamente."));
     } finally {
       setDeleteId(null);
+    }
+  };
+
+  const abrirEdicao = (obra: any) => {
+    setEditId(obra.id);
+    setFormData({
+      nome: obra.nome || '',
+      cliente_id: obra.cliente_id || '',
+      endereco: obra.endereco || '',
+      data_inicio: obra.data_inicio || '',
+      data_fim_prevista: obra.data_fim_prevista || '',
+      orcamento: obra.orcamento ? String(obra.orcamento) : '',
+      descricao: obra.descricao || '',
+    });
+    setShowEditModal(true);
+  };
+
+  const editarObra = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editId || !formData.nome) return;
+
+    try {
+      const payload: any = {
+        nome: formData.nome,
+        cliente_id: formData.cliente_id || undefined,
+        endereco: formData.endereco,
+        data_inicio: formData.data_inicio || undefined,
+        data_fim_prevista: formData.data_fim_prevista || undefined,
+        orcamento: formData.orcamento ? parseFloat(formData.orcamento) : undefined,
+        descricao: formData.descricao,
+      };
+
+      await updateMutation.mutateAsync({ id: editId, obra: payload });
+
+      setFormData({ nome: '', cliente_id: '', endereco: '', data_inicio: '', data_fim_prevista: '', orcamento: '', descricao: '' });
+      setShowEditModal(false);
+      setEditId(null);
+      success("Obra atualizada com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao atualizar obra: " + (err.message || "Tente novamente."));
     }
   };
 
@@ -99,7 +142,7 @@ export default function ObrasPage() {
 
       <ConfirmModal
         isOpen={!!deleteId}
-        onConfirm={handleDelete}
+        onConfirm={confirmDelete}
         onCancel={() => setDeleteId(null)}
         title="Excluir Obra"
         message="Tem certeza que deseja excluir esta Obra e todo o seu histórico?"
@@ -192,6 +235,9 @@ export default function ObrasPage() {
                     <TableCell className="font-medium text-emerald-700">{formatarMoeda(obra.orcamento)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => abrirEdicao(obra)} className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
+                          <Edit className="h-4 w-4" />
+                        </button>
                         <button onClick={() => setDeleteId(obra.id)} className="text-slate-400 hover:text-red-600 p-1 transition-colors" title="Excluir">
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -290,6 +336,101 @@ export default function ObrasPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
+              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal de Edição */}
+      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Obra">
+        <form onSubmit={editarObra} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Nome da Obra *</label>
+            <input
+              type="text"
+              value={formData.nome}
+              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Ex: Reforma Residencial Silva"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
+            <select
+               value={formData.cliente_id}
+               onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
+               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="">Selecione...</option>
+              {clientes?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+            <input
+               type="text"
+               value={formData.endereco}
+               onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
+               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+               placeholder="Ex: Rua A, 123 - Centro"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Data Início</label>
+              <input
+                type="date"
+                value={formData.data_inicio}
+                onChange={(e) => setFormData({ ...formData, data_inicio: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Data Fim Prevista</label>
+              <input
+                type="date"
+                value={formData.data_fim_prevista}
+                onChange={(e) => setFormData({ ...formData, data_fim_prevista: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Orçamento Total</label>
+            <input
+              type="number"
+              step="0.01"
+              value={formData.orcamento}
+              onChange={(e) => setFormData({ ...formData, orcamento: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="0.00"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+            <textarea
+              value={formData.descricao}
+              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              rows={3}
+              placeholder="Descrição detalhada da obra..."
+            />
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+               type="submit"
+               disabled={updateMutation.isPending}
+               className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {updateMutation.isPending ? "Salvando..." : "Atualizar Obra"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowEditModal(false)}
               className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
