@@ -191,6 +191,15 @@ export interface Funcionario {
   atualizado_em?: string;
 }
 
+export interface FuncionarioCreate {
+  nome: string;
+  cargo?: string;
+  email?: string;
+  telefone?: string;
+  salario?: number;
+  role?: string;
+}
+
 export interface FuncionarioUpdate {
   nome?: string;
   cargo?: string;
@@ -210,6 +219,15 @@ export interface Financeiro {
   categoria?: string;
   criado_em: string;
   atualizado_em?: string;
+}
+
+export interface FinanceiroCreate {
+  tipo: string;
+  descricao: string;
+  valor: number;
+  data_vencimento: string;
+  status?: string;
+  categoria?: string;
 }
 
 export interface FinanceiroUpdate {
@@ -487,6 +505,26 @@ export async function updateFuncionario(id: string, funcionario: FuncionarioUpda
   return data as Funcionario;
 }
 
+export async function createFuncionario(funcionario: FuncionarioCreate): Promise<Funcionario> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_criar_funcionario', {
+      p_nome: funcionario.nome,
+      p_cargo: funcionario.cargo,
+      p_email: funcionario.email,
+      p_telefone: funcionario.telefone,
+      p_salario: funcionario.salario,
+      p_role: funcionario.role || 'funcionario'
+    });
+  if (error) throw new Error(error.message);
+  return { id: data?.funcionario_id, ...funcionario, criado_em: new Date().toISOString() } as Funcionario;
+}
+
+export async function deleteFuncionario(id: string): Promise<void> {
+  const { error } = await getSupabase()
+    .rpc('tenant_excluir_funcionario', { p_funcionario_id: id });
+  if (error) throw new Error(error.message);
+}
+
 // FINANCEIRO - Usar RPCs para operações CRUD
 export async function fetchFinanceiro(): Promise<Financeiro[]> {
   const { data, error } = await getSupabase()
@@ -508,6 +546,26 @@ export async function updateFinanceiro(id: string, financeiro: FinanceiroUpdate)
     });
   if (error) throw new Error(error.message);
   return data as Financeiro;
+}
+
+export async function createFinanceiro(financeiro: FinanceiroCreate): Promise<Financeiro> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_criar_financeiro', {
+      p_tipo: financeiro.tipo,
+      p_descricao: financeiro.descricao,
+      p_valor: financeiro.valor,
+      p_data_vencimento: financeiro.data_vencimento ? new Date(financeiro.data_vencimento) : null,
+      p_status: financeiro.status || 'pendente',
+      p_categoria: financeiro.categoria
+    });
+  if (error) throw new Error(error.message);
+  return { id: data?.financeiro_id, ...financeiro, criado_em: new Date().toISOString() } as Financeiro;
+}
+
+export async function deleteFinanceiro(id: string): Promise<void> {
+  const { error } = await getSupabase()
+    .rpc('tenant_excluir_financeiro', { p_financeiro_id: id });
+  if (error) throw new Error(error.message);
 }
 
 // COMISSOES - Usar RPCs para operações CRUD
