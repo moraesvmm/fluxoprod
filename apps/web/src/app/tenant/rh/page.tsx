@@ -14,12 +14,12 @@ import { Briefcase, UserPlus, Search, Edit, Trash2, Users, Mail, Phone } from "l
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
-import { useFuncionarios, useCreateFuncionario, useDeleteFuncionario } from "@/lib/hooks/use-funcionarios";
+import { useFuncionarios, useCreateFuncionario, useDeleteFuncionario, useUpdateFuncionario } from "@/lib/hooks/use-funcionarios";
 
 interface Funcionario {
   id: string;
   nome: string;
-  cargo: string;
+  cargo?: string;
   email?: string;
   telefone?: string;
   salario?: number;
@@ -30,7 +30,10 @@ export default function RHPage() {
   const { data: funcionarios, isLoading, error } = useFuncionarios();
   const createFuncionario = useCreateFuncionario();
   const deleteFuncionario = useDeleteFuncionario();
+  const updateFuncionario = useUpdateFuncionario();
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nome: '',
@@ -73,6 +76,42 @@ export default function RHPage() {
       toastError("Erro ao remover colaborador: " + (err.message || "Tente novamente."));
     } finally {
       setDeleteId(null);
+    }
+  };
+
+  const abrirEdicao = (funcionario: Funcionario) => {
+    setEditId(funcionario.id);
+    setFormData({
+      nome: funcionario.nome,
+      cargo: funcionario.cargo || '',
+      email: funcionario.email || '',
+      telefone: funcionario.telefone || '',
+      salario: funcionario.salario ? String(funcionario.salario) : ''
+    });
+    setShowEditModal(true);
+  };
+
+  const editarFuncionario = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editId || !formData.nome.trim() || !formData.cargo.trim()) return;
+
+    try {
+      const payload: any = {
+        nome: formData.nome,
+        cargo: formData.cargo,
+      };
+      if (formData.email) payload.email = formData.email;
+      if (formData.telefone) payload.telefone = formData.telefone;
+      if (formData.salario) payload.salario = parseFloat(formData.salario);
+
+      await updateFuncionario.mutateAsync({ id: editId, funcionario: payload });
+
+      setFormData({ nome: '', cargo: '', email: '', telefone: '', salario: '' });
+      setShowEditModal(false);
+      setEditId(null);
+      success("Colaborador atualizado com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao atualizar colaborador: " + (err.message || "Tente novamente."));
     }
   };
 
@@ -205,7 +244,7 @@ export default function RHPage() {
                   <TableCell className="text-sm text-muted-foreground">{formatarData(f.criado_em)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
+                      <button onClick={() => abrirEdicao(f)} className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
@@ -292,6 +331,82 @@ export default function RHPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
+              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal de Edição */}
+      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Colaborador">
+        <form onSubmit={editarFuncionario} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Nome Completo *</label>
+              <input
+                type="text"
+                value={formData.nome}
+                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Ex: João Silva"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Cargo *</label>
+              <input
+                type="text"
+                value={formData.cargo}
+                onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="Ex: Vendedor"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="email@empresa.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
+              <input
+                type="tel"
+                value={formData.telefone}
+                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                placeholder="(00) 00000-0000"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Salário Mensal</label>
+            <input
+              type="number"
+              step="0.01"
+              value={formData.salario}
+              onChange={(e) => setFormData({ ...formData, salario: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Ex: 2500.00"
+            />
+          </div>
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              Atualizar
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowEditModal(false)}
               className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
