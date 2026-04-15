@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import {
   Table,
@@ -11,10 +11,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tags, Plus, Search, Edit, Trash2, Package, DollarSign } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
+import { useProdutos, useCreateProduto, useDeleteProduto, useUpdateProduto } from "@/lib/hooks/use-produtos";
 
 interface Produto {
   id: string;
@@ -30,9 +30,10 @@ interface Produto {
 }
 
 export default function CatalogoPage() {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: produtos, isLoading, error } = useProdutos();
+  const createProduto = useCreateProduto();
+  const deleteProduto = useDeleteProduto();
+  const updateProduto = useUpdateProduto();
   const [showModal, setShowModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -46,29 +47,6 @@ export default function CatalogoPage() {
     categoria: ''
   });
   const { toasts, removeToast, success, error: toastError } = useToast();
-  const supabase = createClient();
-
-  useEffect(() => {
-    carregarProdutos();
-  }, []);
-
-  const carregarProdutos = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const { data, error: dbError } = await supabase
-        .from("produtos")
-        .select("*")
-        .order("criado_em", { ascending: false });
-
-      if (dbError) throw dbError;
-      setProdutos(data || []);
-    } catch (err: any) {
-      setError("Erro ao carregar produtos. Verifique a conexão.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const criarProduto = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,15 +64,10 @@ export default function CatalogoPage() {
       if (formData.preco_venda) payload.preco_venda = parseFloat(formData.preco_venda);
       if (formData.categoria) payload.categoria = formData.categoria;
 
-      const { error: dbError } = await supabase
-        .from("produtos")
-        .insert(payload);
-
-      if (dbError) throw dbError;
+      await createProduto.mutateAsync(payload);
 
       setFormData({ nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '', estoque_atual: '0', estoque_minimo: '10', categoria: '' });
       setShowModal(false);
-      await carregarProdutos();
       success("Produto cadastrado com sucesso!");
     } catch (err: any) {
       toastError("Erro ao cadastrar produto: " + (err.message || "Tente novamente."));
@@ -104,13 +77,7 @@ export default function CatalogoPage() {
   const confirmarExclusao = async () => {
     if (!deleteId) return;
     try {
-      const { error: dbError } = await supabase
-        .from("produtos")
-        .delete()
-        .eq("id", deleteId);
-
-      if (dbError) throw dbError;
-      setProdutos(produtos.filter(p => p.id !== deleteId));
+      await deleteProduto.mutateAsync(deleteId);
       success("Produto removido com sucesso!");
     } catch (err: any) {
       toastError("Erro ao remover produto: " + (err.message || "Tente novamente."));
@@ -159,16 +126,16 @@ export default function CatalogoPage() {
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-4">
-        <KPICard title="Total de Produtos" value={produtos.length} icon={Package} />
-        <KPICard title="Categorias" value={new Set(produtos.filter(p => p.categoria).map(p => p.categoria)).size} icon={Tags} />
+        <KPICard title="Total de Produtos" value={produtos?.length || 0} icon={Package} />
+        <KPICard title="Categorias" value={new Set(produtos?.filter(p => p.categoria).map(p => p.categoria) || []).size} icon={Tags} />
         <KPICard
           title="Valor do Estoque"
-          value={formatarMoeda(produtos.reduce((sum, p) => sum + ((p.preco_venda || 0) * p.estoque_atual), 0))}
+          value={formatarMoeda(produtos?.reduce((sum, p) => sum + ((p.preco_venda || 0) * p.estoque_atual), 0) || 0)}
           icon={DollarSign}
         />
         <KPICard
           title="Preço Médio"
-          value={formatarMoeda(produtos.length > 0 ? produtos.reduce((sum, p) => sum + (p.preco_venda || 0), 0) / produtos.length : 0)}
+          value={formatarMoeda((produtos?.length || 0) > 0 ? (produtos?.reduce((sum, p) => sum + (p.preco_venda || 0), 0) || 0) / produtos.length : 0)}
           icon={DollarSign}
         />
       </div>
@@ -198,7 +165,7 @@ export default function CatalogoPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
                   <div className="text-slate-500">Carregando produtos...</div>
@@ -207,13 +174,10 @@ export default function CatalogoPage() {
             ) : error ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
-                  <div className="text-red-500">{error}</div>
-                  <button onClick={carregarProdutos} className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline">
-                    Tentar novamente
-                  </button>
+                  <div className="text-red-500">{error.message}</div>
                 </TableCell>
               </TableRow>
-            ) : produtos.length === 0 ? (
+            ) : !produtos || produtos.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
@@ -224,7 +188,7 @@ export default function CatalogoPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              produtos.map((p) => (
+              produtos?.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>
                     <div className="flex flex-col">
