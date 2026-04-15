@@ -15,6 +15,7 @@ import { ArrowDownToLine, ArrowUpFromLine, RefreshCcw, Search, ExternalLink, Plu
 import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useFinanceiro, useCreateFinanceiro, useDeleteFinanceiro, useUpdateFinanceiro } from "@/lib/hooks/use-financeiro";
+import { type FinanceiroUpdate } from "@/lib/api";
 
 interface Transacao {
   id: string;
@@ -32,6 +33,8 @@ export default function FinanceiroPage() {
   const deleteFinanceiro = useDeleteFinanceiro();
   const updateFinanceiro = useUpdateFinanceiro();
   const [showForm, setShowForm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [syncConfirm, setSyncConfirm] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -78,6 +81,43 @@ export default function FinanceiroPage() {
       toastError("Erro ao excluir transação.");
     } finally {
       setDeleteId(null);
+    }
+  };
+
+  const abrirEdicao = (transacao: Transacao) => {
+    setEditId(transacao.id);
+    setFormData({
+      descricao: transacao.descricao,
+      valor: String(transacao.valor),
+      tipo: transacao.tipo,
+      categoria: transacao.categoria || '',
+      status: transacao.status
+    });
+    setShowEditModal(true);
+  };
+
+  const editarTransacao = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editId || !formData.descricao.trim() || !formData.valor) return;
+
+    try {
+      const payload: FinanceiroUpdate = {
+        descricao: formData.descricao,
+        valor: parseFloat(formData.valor),
+        tipo: formData.tipo,
+        status: formData.status,
+      };
+      if (formData.categoria) payload.categoria = formData.categoria;
+
+      await updateFinanceiro.mutateAsync({ id: editId, financeiro: payload });
+
+      setFormData({ descricao: '', valor: '', tipo: 'receita', categoria: '', status: 'pendente' });
+      setShowEditModal(false);
+      setEditId(null);
+      success("Transação atualizada com sucesso!");
+    } catch (err: any) {
+      console.error("Erro ao atualizar transação:", err);
+      toastError("Erro ao atualizar transação.");
     }
   };
 
@@ -256,6 +296,89 @@ export default function FinanceiroPage() {
         </div>
       )}
 
+      {/* Modal de Edição */}
+      {showEditModal && (
+        <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+          <h3 className="text-lg font-semibold mb-4">Editar Transação</h3>
+          <form onSubmit={editarTransacao} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição *</label>
+                <input
+                  type="text"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: Venda de produtos, pagamento de fornecedor"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Valor *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.valor}
+                  onChange={(e) => setFormData({...formData, valor: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="0,00"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Tipo *</label>
+                <select
+                  value={formData.tipo}
+                  onChange={(e) => setFormData({...formData, tipo: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                >
+                  <option value="receita">Receita</option>
+                  <option value="despesa">Despesa</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                <input
+                  type="text"
+                  value={formData.categoria}
+                  onChange={(e) => setFormData({...formData, categoria: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: Vendas, Aluguel, Marketing"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                >
+                  <option value="pendente">Pendente</option>
+                  <option value="concluido">Concluído</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="bg-emerald-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-emerald-700 transition-colors"
+              >
+                Atualizar Transação
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-3">
         <KPICard title="Entradas (Total)" value={formatarValor(totalEntradas)} icon={ArrowDownToLine} className="border-emerald-200" />
         <KPICard title="Saídas (Total)" value={formatarValor(totalSaidas)} icon={ArrowUpFromLine} className="border-red-200" />
@@ -321,7 +444,7 @@ export default function FinanceiroPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
+                      <button onClick={() => abrirEdicao(item)} className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
                         <Edit className="h-4 w-4" />
                       </button>
                       <button 
