@@ -216,7 +216,7 @@ export default function LandingPage() {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-slate-600 hover:text-violet-600 transition-colors relative group"
+                  className={`text-sm font-medium transition-colors relative group ${darkMode ? 'text-slate-300 hover:text-violet-400' : 'text-slate-600 hover:text-violet-600'}`}
                 >
                   {link.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet-500 transition-all duration-300 group-hover:w-full rounded-full" />
@@ -224,7 +224,7 @@ export default function LandingPage() {
               ))}
               <button
                 onClick={toggleDarkMode}
-                className="p-2 rounded-lg text-slate-600 hover:text-violet-600 hover:bg-slate-100 transition-colors"
+                className={`p-2 rounded-lg transition-colors ${darkMode ? 'text-slate-400 hover:text-violet-400 hover:bg-slate-800' : 'text-slate-600 hover:text-violet-600 hover:bg-slate-100'}`}
                 aria-label="Toggle Dark Mode"
               >
                 {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -242,7 +242,7 @@ export default function LandingPage() {
             <div className="flex items-center gap-2 md:hidden">
               <button
                 onClick={toggleDarkMode}
-                className="p-2 rounded-lg text-slate-600 hover:text-violet-600 hover:bg-slate-100 transition-colors"
+                className={`p-2 rounded-lg transition-colors ${darkMode ? 'text-slate-400 hover:text-violet-400 hover:bg-slate-800' : 'text-slate-600 hover:text-violet-600 hover:bg-slate-100'}`}
                 aria-label="Toggle Dark Mode"
               >
                 {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -274,7 +274,7 @@ export default function LandingPage() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block text-base font-medium text-slate-700 hover:text-violet-600 transition-colors"
+                    className={`block text-base font-medium transition-colors ${darkMode ? 'text-slate-300 hover:text-violet-400' : 'text-slate-700 hover:text-violet-600'}`}
                   >
                     {link.label}
                   </a>
@@ -295,9 +295,9 @@ export default function LandingPage() {
       <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-32 overflow-hidden" ref={heroRef}>
         {/* Background Decoration */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80rem] h-[50rem] bg-gradient-to-b from-violet-100/60 via-transparent to-transparent rounded-full blur-3xl" />
-          <div className="absolute top-20 right-0 w-96 h-96 bg-gradient-to-br from-indigo-200/40 to-purple-200/40 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-violet-200/30 to-fuchsia-200/30 rounded-full blur-3xl" />
+          <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[80rem] h-[50rem] bg-gradient-to-b via-transparent to-transparent rounded-full blur-3xl ${darkMode ? 'from-violet-900/40' : 'from-violet-100/60'}`} />
+          <div className={`absolute top-20 right-0 w-96 h-96 bg-gradient-to-br rounded-full blur-3xl animate-pulse ${darkMode ? 'from-indigo-900/20 to-purple-900/20' : 'from-indigo-200/40 to-purple-200/40'}`} />
+          <div className={`absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr rounded-full blur-3xl ${darkMode ? 'from-violet-900/20 to-fuchsia-900/20' : 'from-violet-200/30 to-fuchsia-200/30'}`} />
           <FloatingParticles />
         </div>
 
@@ -311,7 +311,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100/80 backdrop-blur-sm border border-violet-200/50 text-violet-700 text-xs font-semibold mb-8"
+              className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-sm border text-xs font-semibold mb-8 ${darkMode ? 'bg-violet-900/80 border-violet-700/50 text-violet-300' : 'bg-violet-100/80 border-violet-200/50 text-violet-700'}`}
             >
               <Sparkles className="w-3.5 h-3.5" />
               Plataforma Multi-Tenant SaaS
@@ -325,7 +325,7 @@ export default function LandingPage() {
               transition={{ duration: 0.7, delay: 0.1 }}
               className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.08]"
             >
-              <span className="text-slate-900">Gestão empresarial</span>
+              <span className={darkMode ? 'text-slate-100' : 'text-slate-900'}>Gestão empresarial</span>
               <br />
               <span className="bg-gradient-to-r from-violet-600 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
                 inteligente e unificada.
@@ -337,9 +337,9 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="mt-6 sm:mt-8 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed"
+              className={`mt-6 sm:mt-8 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}
             >
-              O <strong className="text-slate-800">Fluxo</strong> centraliza finanças, estoque, CRM
+              <strong className={darkMode ? 'text-slate-200' : 'text-slate-800'}>Fluxo</strong> centraliza finanças, estoque, CRM
               e vendas em uma única plataforma segura — para que você foque no que realmente importa:{" "}
               <strong className="text-violet-600">crescer.</strong>
             </motion.p>
@@ -371,7 +371,7 @@ export default function LandingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.7, delay: 0.5 }}
-              className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500"
+              className={`mt-12 flex flex-wrap items-center justify-center gap-6 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}
             >
               {[
                 { icon: ShieldCheck, text: "Dados Protegidos" },
@@ -404,7 +404,7 @@ export default function LandingPage() {
                 <div className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent">
                   {stat.value}
                 </div>
-                <div className="mt-1 text-xs sm:text-sm text-slate-500 font-medium">
+                <div className={`mt-1 text-xs sm:text-sm font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   {stat.label}
                 </div>
               </motion.div>
@@ -417,7 +417,7 @@ export default function LandingPage() {
       <section id="funcionalidades" className="py-24 sm:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center mb-16 sm:mb-20">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100/80 text-violet-700 text-xs font-semibold mb-4">
+            <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 ${darkMode ? 'bg-violet-900/80 border-violet-700/50 text-violet-300' : 'bg-violet-100/80 border-violet-200/50 text-violet-700'}`}>
               <Layers className="w-3.5 h-3.5" />
               Módulos
             </span>
@@ -427,7 +427,7 @@ export default function LandingPage() {
                 em um só lugar.
               </span>
             </h2>
-            <p className="mt-4 text-lg text-slate-500 max-w-2xl mx-auto">
+            <p className={`mt-4 text-lg max-w-2xl mx-auto ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               Módulos independentes que trabalham juntos. Ative sob demanda, escale sem limites.
             </p>
           </AnimatedSection>
@@ -447,10 +447,10 @@ export default function LandingPage() {
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mb-5 shadow-lg shadow-violet-500/25 group-hover:shadow-violet-500/40 transition-shadow">
                       <feature.icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">
+                    <h3 className={`text-lg font-bold mb-2 ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
                       {feature.title}
                     </h3>
-                    <p className="text-sm text-slate-500 leading-relaxed">
+                    <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                       {feature.description}
                     </p>
                   </div>
@@ -464,15 +464,15 @@ export default function LandingPage() {
       {/* ─────────── BENEFITS / VANTAGENS ─────────── */}
       <section id="vantagens" className={`py-24 sm:py-32 relative ${darkMode ? 'bg-gradient-to-b from-[#0a0a0a] to-[#121212]' : 'bg-gradient-to-b from-slate-50 to-white'}`}>
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-1/2 left-0 w-72 h-72 bg-violet-100/40 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-100/30 rounded-full blur-3xl" />
+          <div className={`absolute top-1/2 left-0 w-72 h-72 rounded-full blur-3xl ${darkMode ? 'bg-violet-900/30' : 'bg-violet-100/40'}`} />
+          <div className={`absolute bottom-0 right-0 w-96 h-96 rounded-full blur-3xl ${darkMode ? 'bg-indigo-900/20' : 'bg-indigo-100/30'}`} />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left text */}
             <AnimatedSection>
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-100/80 text-violet-700 text-xs font-semibold mb-4">
+              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold mb-4 ${darkMode ? 'bg-violet-900/80 border-violet-700/50 text-violet-300' : 'bg-violet-100/80 border-violet-200/50 text-violet-700'}`}
                 <Star className="w-3.5 h-3.5" />
                 Vantagens
               </span>
@@ -482,7 +482,7 @@ export default function LandingPage() {
                   Fluxo?
                 </span>
               </h2>
-              <p className="text-lg text-slate-500 mb-8 leading-relaxed">
+              <p className={`text-lg mb-8 leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                 Desenvolvido com tecnologia de ponta para negócios que levam gestão a sério.
                 Sem complexidade desnecessária, sem custos ocultos.
               </p>
@@ -494,7 +494,7 @@ export default function LandingPage() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.08, duration: 0.5 }}
-                    className="flex items-center gap-3 text-slate-700"
+                    className={`flex items-center gap-3 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}
                   >
                     <CheckCircle2 className="w-5 h-5 text-violet-500 flex-shrink-0" />
                     <span className="text-sm sm:text-base font-medium">{benefit}</span>
