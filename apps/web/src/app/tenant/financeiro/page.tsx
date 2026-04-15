@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
 import {
@@ -12,9 +12,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowDownToLine, ArrowUpFromLine, RefreshCcw, Search, ExternalLink, Plus, Edit, Trash2 } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
 import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { useFinanceiro, useCreateFinanceiro, useDeleteFinanceiro, useUpdateFinanceiro } from "@/lib/hooks/use-financeiro";
 
 interface Transacao {
   id: string;
@@ -27,9 +27,10 @@ interface Transacao {
 }
 
 export default function FinanceiroPage() {
-  const [transacoes, setTransacoes] = useState<Transacao[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: transacoes, isLoading, error } = useFinanceiro();
+  const createFinanceiro = useCreateFinanceiro();
+  const deleteFinanceiro = useDeleteFinanceiro();
+  const updateFinanceiro = useUpdateFinanceiro();
   const [showForm, setShowForm] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [syncConfirm, setSyncConfirm] = useState(false);
@@ -43,49 +44,23 @@ export default function FinanceiroPage() {
     status: 'pendente'
   });
   const { toasts, showToast, removeToast, success, error: toastError, info } = useToast();
-  const supabase = createClient();
-
-  useEffect(() => {
-    carregarTransacoes();
-  }, []);
-
-  const carregarTransacoes = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const { data, error: fetchError } = await supabase
-        .rpc('tenant_listar_financeiro');
-
-      if (fetchError) throw fetchError;
-      setTransacoes(data || []);
-    } catch (err: any) {
-      console.error("Erro ao carregar transações:", err);
-      setError("Erro ao carregar transações. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const criarTransacao = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.descricao.trim() || !formData.valor) return;
 
     try {
-      const { error: insertError } = await supabase
-        .rpc('tenant_criar_financeiro', {
-          p_tipo: formData.tipo,
-          p_descricao: formData.descricao,
-          p_valor: parseFloat(formData.valor),
-          p_data_vencimento: null,
-          p_status: 'pendente'
-        });
-
-      if (insertError) throw insertError;
+      await createFinanceiro.mutateAsync({
+        tipo: formData.tipo,
+        descricao: formData.descricao,
+        valor: parseFloat(formData.valor),
+        data_vencimento: new Date().toISOString(),
+        status: 'pendente',
+        categoria: formData.categoria
+      });
 
       setFormData({ descricao: '', valor: '', tipo: 'receita', categoria: '', status: 'pendente' });
       setShowForm(false);
-      await carregarTransacoes();
-
       success("Transação criada com sucesso!");
     } catch (err: any) {
       console.error("Erro ao criar transação:", err);
@@ -96,16 +71,11 @@ export default function FinanceiroPage() {
   const confirmDeleteTransacao = async () => {
     if (!deleteId) return;
     try {
-      const { error: deleteError } = await supabase
-        .rpc('tenant_excluir_financeiro', { p_financeiro_id: deleteId });
-
-      if (deleteError) throw deleteError;
-
-      setTransacoes(transacoes.filter(t => t.id !== deleteId));
+      await deleteFinanceiro.mutateAsync(deleteId);
       success("Transação excluída com sucesso!");
     } catch (err: any) {
       console.error("Erro ao excluir transação:", err);
-      toastError("Erro ao excluir transação. Tente novamente.");
+      toastError("Erro ao excluir transação.");
     } finally {
       setDeleteId(null);
     }
@@ -115,7 +85,7 @@ export default function FinanceiroPage() {
     setSyncConfirm(false);
     setSyncing(true);
     try {
-      await carregarTransacoes();
+      // A sincronização é automática via React Query
       success('Sincronização concluída com sucesso!');
     } catch (err) {
       toastError('Erro ao sincronizar com o banco. Tente novamente.');
@@ -137,19 +107,19 @@ export default function FinanceiroPage() {
   };
 
   const verFluxoCaixa = () => {
-    const entradas = transacoes.filter(t => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0);
-    const saidas = transacoes.filter(t => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0);
+    const entradas = transacoes?.filter(t => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0) || 0;
+    const saidas = transacoes?.filter(t => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0) || 0;
     const saldo = entradas - saidas;
 
-    const mensagem = `Entradas: ${formatarValor(entradas)} | Saídas: ${formatarValor(saidas)} | Saldo: ${formatarValor(saldo)} | Transações: ${transacoes.length}`;
+    const mensagem = `Entradas: ${formatarValor(entradas)} | Saídas: ${formatarValor(saidas)} | Saldo: ${formatarValor(saldo)} | Transações: ${transacoes?.length || 0}`;
 
     info(mensagem);
   };
 
   // KPIs dinâmicos
-  const totalEntradas = transacoes.filter(t => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0);
-  const totalSaidas = transacoes.filter(t => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0);
-  const pendentes = transacoes.filter(t => t.status === 'pendente').length;
+  const totalEntradas = transacoes?.filter(t => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0) || 0;
+  const totalSaidas = transacoes?.filter(t => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0) || 0;
+  const pendentes = transacoes?.filter(t => t.status === 'pendente').length || 0;
 
   return (
     <div className="space-y-8">
@@ -315,7 +285,7 @@ export default function FinanceiroPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-6">
                   <div className="text-slate-500">Carregando transações...</div>
@@ -324,23 +294,17 @@ export default function FinanceiroPage() {
             ) : error ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-6">
-                  <div className="text-red-500">{error}</div>
-                  <button 
-                    onClick={carregarTransacoes}
-                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
-                  >
-                    Tentar novamente
-                  </button>
+                  <div className="text-red-500">{error.message}</div>
                 </TableCell>
               </TableRow>
-            ) : transacoes.length === 0 ? (
+            ) : !transacoes || transacoes.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-6">
                   <div className="text-slate-500">Nenhuma transação encontrada</div>
                 </TableCell>
               </TableRow>
             ) : (
-              transacoes.map((item) => (
+              transacoes?.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
                   <TableCell className="font-medium text-slate-900">{item.descricao}</TableCell>
