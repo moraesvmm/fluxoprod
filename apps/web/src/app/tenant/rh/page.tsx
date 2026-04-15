@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import {
   Table,
@@ -11,10 +11,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Briefcase, UserPlus, Search, Edit, Trash2, Users, Mail, Phone } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
+import { useFuncionarios, useCreateFuncionario, useDeleteFuncionario } from "@/lib/hooks/use-funcionarios";
 
 interface Funcionario {
   id: string;
@@ -27,9 +27,9 @@ interface Funcionario {
 }
 
 export default function RHPage() {
-  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: funcionarios, isLoading, error } = useFuncionarios();
+  const createFuncionario = useCreateFuncionario();
+  const deleteFuncionario = useDeleteFuncionario();
   const [showModal, setShowModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -40,29 +40,6 @@ export default function RHPage() {
     salario: ''
   });
   const { toasts, removeToast, success, error: toastError } = useToast();
-  const supabase = createClient();
-
-  useEffect(() => {
-    carregarFuncionarios();
-  }, []);
-
-  const carregarFuncionarios = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const { data, error: dbError } = await supabase
-        .from("funcionarios")
-        .select("*")
-        .order("criado_em", { ascending: false });
-
-      if (dbError) throw dbError;
-      setFuncionarios(data || []);
-    } catch (err: any) {
-      setError("Erro ao carregar funcionários. Verifique a conexão.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const criarFuncionario = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,15 +54,10 @@ export default function RHPage() {
       if (formData.telefone) payload.telefone = formData.telefone;
       if (formData.salario) payload.salario = parseFloat(formData.salario);
 
-      const { error: dbError } = await supabase
-        .from("funcionarios")
-        .insert(payload);
-
-      if (dbError) throw dbError;
+      await createFuncionario.mutateAsync(payload);
 
       setFormData({ nome: '', cargo: '', email: '', telefone: '', salario: '' });
       setShowModal(false);
-      await carregarFuncionarios();
       success("Colaborador cadastrado com sucesso!");
     } catch (err: any) {
       toastError("Erro ao cadastrar colaborador: " + (err.message || "Tente novamente."));
@@ -95,13 +67,7 @@ export default function RHPage() {
   const confirmarExclusao = async () => {
     if (!deleteId) return;
     try {
-      const { error: dbError } = await supabase
-        .from("funcionarios")
-        .delete()
-        .eq("id", deleteId);
-
-      if (dbError) throw dbError;
-      setFuncionarios(funcionarios.filter(f => f.id !== deleteId));
+      await deleteFuncionario.mutateAsync(deleteId);
       success("Colaborador removido com sucesso!");
     } catch (err: any) {
       toastError("Erro ao remover colaborador: " + (err.message || "Tente novamente."));
@@ -154,11 +120,11 @@ export default function RHPage() {
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <KPICard title="Colaboradores Ativos" value={funcionarios.length} icon={Users} />
-        <KPICard title="Cargos Distintos" value={new Set(funcionarios.map(f => f.cargo)).size} icon={Briefcase} />
+        <KPICard title="Colaboradores Ativos" value={funcionarios?.length || 0} icon={Users} />
+        <KPICard title="Cargos Distintos" value={new Set(funcionarios?.map(f => f.cargo) || []).size} icon={Briefcase} />
         <KPICard
           title="Folha Estimada"
-          value={formatarMoeda(funcionarios.reduce((sum, f) => sum + (f.salario || 0), 0))}
+          value={formatarMoeda(funcionarios?.reduce((sum, f) => sum + (f.salario || 0), 0) || 0)}
           icon={Briefcase}
         />
       </div>
@@ -187,7 +153,7 @@ export default function RHPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8">
                   <div className="text-slate-500">Carregando colaboradores...</div>
@@ -196,13 +162,10 @@ export default function RHPage() {
             ) : error ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8">
-                  <div className="text-red-500">{error}</div>
-                  <button onClick={carregarFuncionarios} className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline">
-                    Tentar novamente
-                  </button>
+                  <div className="text-red-500">{error.message}</div>
                 </TableCell>
               </TableRow>
-            ) : funcionarios.length === 0 ? (
+            ) : !funcionarios || funcionarios.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
@@ -213,7 +176,7 @@ export default function RHPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              funcionarios.map((f) => (
+              funcionarios?.map((f) => (
                 <TableRow key={f.id}>
                   <TableCell className="font-medium text-slate-900">{f.nome}</TableCell>
                   <TableCell>
