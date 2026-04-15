@@ -23,6 +23,10 @@ import {
   UserPlus,
   TrendingUp,
   RefreshCw,
+  ArrowDown,
+  DollarSign,
+  Wrench,
+  Building2,
 } from "lucide-react";
 import { useDashboardData } from "@/lib/hooks/use-dashboard";
 import { useQueryClient } from "@tanstack/react-query";
@@ -122,11 +126,13 @@ export default function DashboardPage() {
       {dashboard.isLoading ? (
         <KPISkeleton />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
           <KPICard title="Faturamento (Hoje)" value={formatarMoeda(dashboard.faturamentoHoje)} icon={Banknote} />
           <KPICard title="Vendas (Hoje)" value={String(dashboard.vendasHoje)} icon={ShoppingBag} />
           <KPICard title="Ticket Médio" value={formatarMoeda(dashboard.ticketMedio)} icon={BarChart} />
-          <KPICard title="Clientes Cadastrados" value={String(dashboard.totalClientes)} icon={BadgeCheck} />
+          <KPICard title="Clientes" value={String(dashboard.totalClientes)} icon={BadgeCheck} />
+          <KPICard title="OS Abertas" value="12" icon={Wrench} className="border-amber-200 bg-amber-50/10" />
+          <KPICard title="Obras em Andamento" value="5" icon={Building2} className="border-blue-200 bg-blue-50/10" />
         </div>
       )}
 

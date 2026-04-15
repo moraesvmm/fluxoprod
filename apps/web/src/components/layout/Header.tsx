@@ -4,7 +4,11 @@ import { Bell, Search, LogOut } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 
-export function Header() {
+interface HeaderProps {
+  onSearchClick?: () => void;
+}
+
+export function Header({ onSearchClick }: HeaderProps) {
   const supabase = createClient();
   const router = useRouter();
 
@@ -36,22 +40,16 @@ export function Header() {
         </span>
       </div>
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-        <form className="relative flex flex-1" action="#" method="GET">
-          <label htmlFor="search-field" className="sr-only">
-            Buscar
-          </label>
-          <Search
-            className="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-muted-foreground/60 ml-2"
-            aria-hidden="true"
-          />
-          <input
-            id="search-field"
-            className="block h-full w-full border-0 py-0 pl-10 pr-0 text-foreground bg-transparent placeholder:text-muted-foreground/60 focus:ring-0 sm:text-sm focus:outline-none transition-colors"
-            placeholder="Buscar transações, produtos ou clientes..."
-            type="search"
-            name="search"
-          />
-        </form>
+        <button
+          onClick={onSearchClick}
+          className="relative flex flex-1 items-center gap-2 px-4 py-2 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors text-left"
+        >
+          <Search className="h-4 w-4 text-muted-foreground/60" />
+          <span className="text-sm text-muted-foreground/60">Buscar transações, produtos ou clientes...</span>
+          <kbd className="ml-auto hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-60">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </button>
         <div className="flex items-center gap-x-4 lg:gap-x-6">
           <div className="hidden lg:block text-sm text-muted-foreground/70 capitalize font-medium">
             {currentDate}

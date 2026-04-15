@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Banknote, ShoppingBag, BarChart, CreditCard, Plus, Search, FileText, Edit, Trash2 } from "lucide-react";
+import { FloatingCalculator } from "@/components/modules/base/Calculator";
 import Link from "next/link";
 import { useVendas, useDeleteVenda } from "@/lib/hooks/use-vendas";
 import { useToast, Toast } from "@/components/ui/toast";
@@ -21,6 +22,7 @@ export default function VendasPage() {
   const { data: vendas = [], isLoading: loading, error: queryError } = useVendas();
   const deleteMutation = useDeleteVenda();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showCalculator, setShowCalculator] = useState(false);
   const { toasts, removeToast, success, error: toastError } = useToast();
 
   const confirmDelete = async () => {
@@ -171,6 +173,9 @@ export default function VendasPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Calculadora Flutuante */}
+      <FloatingCalculator isOpen={showCalculator} onToggle={() => setShowCalculator(!showCalculator)} />
     </div>
   );
 }

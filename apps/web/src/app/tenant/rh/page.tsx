@@ -10,12 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Briefcase, UserPlus, Search, Edit, Trash2, Users, Mail, Phone } from "lucide-react";
+import { Briefcase, UserPlus, Search, Edit, Trash2, Users, Mail, Phone, Download } from "lucide-react";
 import { FloatingCalculator } from "@/components/modules/base/Calculator";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
 import { useFuncionarios, useCreateFuncionario, useDeleteFuncionario, useUpdateFuncionario } from "@/lib/hooks/use-funcionarios";
+import { exportToCSV } from "@/lib/utils/export";
 
 interface Funcionario {
   id: string;
@@ -126,6 +127,31 @@ export default function RHPage() {
     return new Date(data).toLocaleDateString("pt-BR");
   };
 
+  const exportarFuncionarios = () => {
+    if (!funcionarios || funcionarios.length === 0) {
+      toastError("Nenhum funcionário para exportar");
+      return;
+    }
+
+    try {
+      exportToCSV({
+        filename: `funcionarios_${new Date().toISOString().split('T')[0]}`,
+        data: funcionarios,
+        columns: [
+          { key: 'nome', label: 'Nome' },
+          { key: 'cargo', label: 'Cargo' },
+          { key: 'email', label: 'Email' },
+          { key: 'telefone', label: 'Telefone' },
+          { key: 'salario', label: 'Salário' },
+          { key: 'criado_em', label: 'Data de Cadastro' }
+        ]
+      });
+      success("Funcionários exportados com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao exportar funcionários: " + (err.message || "Tente novamente."));
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Toasts */}
@@ -181,6 +207,13 @@ export default function RHPage() {
               className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
+          <button
+            onClick={exportarFuncionarios}
+            className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Exportar
+          </button>
         </div>
         <Table>
           <TableHeader>

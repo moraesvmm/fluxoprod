@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowDownToLine, ArrowUpFromLine, RefreshCcw, Search, ExternalLink, Plus, Edit, Trash2 } from "lucide-react";
+import { FloatingCalculator } from "@/components/modules/base/Calculator";
 import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useFinanceiro, useCreateFinanceiro, useDeleteFinanceiro, useUpdateFinanceiro } from "@/lib/hooks/use-financeiro";
@@ -38,6 +39,7 @@ export default function FinanceiroPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [syncConfirm, setSyncConfirm] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
   const syncBtnRef = useRef<HTMLButtonElement>(null);
   const [formData, setFormData] = useState({
     descricao: '',
@@ -465,6 +467,9 @@ export default function FinanceiroPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Calculadora Flutuante */}
+      <FloatingCalculator isOpen={showCalculator} onToggle={() => setShowCalculator(!showCalculator)} />
     </div>
   );
 }
