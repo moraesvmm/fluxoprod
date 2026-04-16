@@ -319,7 +319,7 @@ export async function updateCliente(id: string, cliente: ClienteUpdate): Promise
       p_cliente_id: id,
       p_nome: cliente.nome,
       p_email: cliente.email,
-      p_telefone: cliente.telefone,
+      p_telefone: cliente.telefone || null,
       p_funil_fase: cliente.funil_fase || 'lead',
       p_status: cliente.status || 'ativo'
     });
@@ -387,9 +387,9 @@ export async function fetchOS(): Promise<OrdemServico[]> {
 export async function createOS(os: OrdemServicoCreate): Promise<OrdemServico> {
   const { data, error } = await getSupabase()
     .rpc('tenant_criar_os', {
-      p_cliente_id: os.cliente_id,
-      p_colaborador_id: os.colaborador_id,
-      p_veiculo_equipamento: os.veiculo_equipamento,
+      p_cliente_id: os.cliente_id || null,
+      p_colaborador_id: os.colaborador_id || null,
+      p_veiculo_equipamento: os.veiculo_equipamento || null,
       p_descricao_problema: os.descricao_problema,
       p_status: 'aberta',
       p_valor_orcamento: os.valor || 0
