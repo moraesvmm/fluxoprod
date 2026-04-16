@@ -3,6 +3,26 @@ import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 
+async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+  const supabase = await createClient();
+  
+  try {
+    const { data, error } = await supabase.functions.invoke('send-email', {
+      body: { to, subject, html }
+    });
+
+    if (error) {
+      console.error('Erro ao enviar e-mail:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Erro ao invocar função de e-mail:', error);
+    throw error;
+  }
+}
+
 async function createTenantUser(formData: FormData) {
   "use server";
 
@@ -27,6 +47,36 @@ async function createTenantUser(formData: FormData) {
     empresa_id: empresaId,
     role,
   });
+
+  // Buscar informações da empresa para personalizar o e-mail
+  const { data: empresa } = await admin
+    .from("empresas")
+    .select("razao_social")
+    .eq("id", empresaId)
+    .single();
+
+  // Enviar e-mail de boas-vindas
+  try {
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Bem-vindo ao Fluxo!</h2>
+        <p style="color: #666;">Olá,</p>
+        <p style="color: #666;">Você foi cadastrado no sistema Fluxo pela empresa <strong>${empresa?.razao_social || 'não informada'}</strong>.</p>
+        <p style="color: #666;">Seu e-mail de acesso é: <strong>${email}</strong></p>
+        <p style="color: #666;">Você receberá um e-mail de confirmação do Supabase com instruções para definir sua senha.</p>
+        <p style="color: #666;">Se precisar de qualquer ajuda, entre em contato com o administrador da sua empresa.</p>
+        <p style="color: #666; margin-top: 20px;">Atenciosamente,<br>Equipe Fluxo</p>
+      </div>
+    `;
+    await sendEmail({
+      to: email,
+      subject: 'Bem-vindo ao Fluxo!',
+      html: emailHtml
+    });
+  } catch (emailError) {
+    console.error('Erro ao enviar e-mail de boas-vindas:', emailError);
+    // Não bloquear o fluxo se o e-mail falhar
+  }
 
   revalidatePath("/admin/usuarios");
 }
