@@ -160,14 +160,17 @@ export default function PDVPage() {
 
       // Chamar RPC transacional com dados do cliente
       // A RPC agora cria ou busca o cliente automaticamente dentro da transação
+      // Buscar nome do vendedor selecionado
+      const vendedorSelecionado = funcionarios.find(f => f.id === vendedorId);
+      
       const { data, error } = await supabase.rpc('tenant_processar_venda', {
         p_cliente_id: null,
         p_cliente_nome: cliente && cliente !== 'Cliente Avulso' ? cliente : 'Cliente Avulso',
-        p_cliente_telefone: null,
-        p_cliente_email: null,
         p_itens: itens,
         p_vendedor_id: vendedorId || null,
-        p_forma_pagamento: metodoPagamento
+        p_vendedor_nome: vendedorSelecionado?.nome || null,
+        p_metodo_pagamento: metodoPagamento,
+        p_valor_total: total
       });
 
       if (error) throw error;

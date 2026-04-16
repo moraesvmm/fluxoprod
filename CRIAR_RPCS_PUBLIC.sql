@@ -12,10 +12,8 @@ CREATE OR REPLACE FUNCTION public.tenant_criar_produto(
   p_tipo VARCHAR(50),
   p_preco_base NUMERIC(10, 2),
   p_sku VARCHAR(100),
-  p_qtd_inicial INTEGER,
-  p_qtd_minima INTEGER,
-  p_categoria VARCHAR(100) DEFAULT NULL,
-  p_idempotency_key VARCHAR(255) DEFAULT NULL
+  p_preco_custo NUMERIC(10, 2),
+  p_categoria VARCHAR(100)
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -37,9 +35,9 @@ BEGIN
   END IF;
   
   -- Executar a RPC no schema do tenant
-  EXECUTE format('SELECT %I.tenant_criar_produto($1, $2, $3, $4, $5, $6, $7, $8)', v_tenant_schema)
+  EXECUTE format('SELECT %I.tenant_criar_produto($1, $2, $3, $4, $5, $6, $7)', v_tenant_schema)
   INTO v_result
-  USING p_nome, p_descricao, p_tipo, p_preco_base, p_sku, p_qtd_inicial, p_qtd_minima, p_idempotency_key;
+  USING p_nome, p_descricao, p_tipo, p_preco_base, p_sku, p_preco_custo, p_categoria;
   
   RETURN v_result;
 EXCEPTION WHEN OTHERS THEN

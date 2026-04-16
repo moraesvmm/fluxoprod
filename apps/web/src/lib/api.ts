@@ -73,9 +73,10 @@ export interface ProdutoCreate {
   sku?: string;
   preco_custo?: number;
   preco_venda?: number;
-  estoque_atual: number;
-  estoque_minimo: number;
+  estoque_atual?: number;
+  estoque_minimo?: number;
   categoria?: string;
+  tipo?: string;
 }
 
 export interface ProdutoUpdate {
@@ -302,6 +303,7 @@ export async function createCliente(cliente: ClienteCreate): Promise<Cliente> {
       p_status: 'ativo'
     });
   if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
   return { id: data?.cliente_id, ...cliente, criado_em: new Date().toISOString() } as Cliente;
 }
 
@@ -322,6 +324,7 @@ export async function updateCliente(id: string, cliente: ClienteUpdate): Promise
       p_status: cliente.status || 'ativo'
     });
   if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
   return data as Cliente;
 }
 
@@ -337,14 +340,15 @@ export async function createProduto(produto: ProdutoCreate): Promise<Produto> {
   const { data, error } = await getSupabase()
     .rpc('tenant_criar_produto', {
       p_nome: produto.nome,
-      p_descricao: produto.descricao,
-      p_tipo: 'produto',
+      p_descricao: produto.descricao || null,
+      p_tipo: produto.tipo || 'produto',
       p_preco_base: produto.preco_venda || 0,
-      p_sku: produto.sku,
-      p_qtd_inicial: produto.estoque_atual || 0,
-      p_qtd_minima: produto.estoque_minimo || 10
+      p_sku: produto.sku || null,
+      p_preco_custo: produto.preco_custo || 0,
+      p_categoria: produto.categoria || 'geral'
     });
   if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
   return { id: data?.produto_id, ...produto, criado_em: new Date().toISOString() } as Produto;
 }
 
@@ -389,6 +393,7 @@ export async function createOS(os: OrdemServicoCreate): Promise<OrdemServico> {
       p_valor_orcamento: os.valor || 0
     });
   if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
   return { id: data?.os_id, ...os, criado_em: new Date().toISOString() } as OrdemServico;
 }
 
@@ -434,6 +439,7 @@ export async function createObra(obra: ObraCreate): Promise<Obra> {
       p_orcamento_total: obra.orcamento || 0
     });
   if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
   return { id: data?.obra_id, ...obra, criado_em: new Date().toISOString() } as Obra;
 }
 
@@ -516,6 +522,7 @@ export async function createFuncionario(funcionario: FuncionarioCreate): Promise
       p_role: funcionario.role || 'funcionario'
     });
   if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
   return { id: data?.funcionario_id, ...funcionario, criado_em: new Date().toISOString() } as Funcionario;
 }
 
