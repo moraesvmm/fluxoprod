@@ -33,6 +33,16 @@ export default function CRMPage() {
   const criarCliente = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nome.trim()) return;
+    
+    // Validação de formato de e-mail antes de enviar
+    if (formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        toastError("E-mail inválido. Verifique o formato.");
+        return;
+      }
+    }
+    
     try {
       await createMutation.mutateAsync(formData);
       
