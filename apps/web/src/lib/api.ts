@@ -435,7 +435,7 @@ export async function createObra(obra: ObraCreate): Promise<Obra> {
       p_endereco: obra.endereco,
       p_data_inicio: obra.data_inicio ? new Date(obra.data_inicio) : null,
       p_data_fim_prevista: obra.data_fim_prevista ? new Date(obra.data_fim_prevista) : null,
-      p_status: 'planejamento',
+      p_status: 'planejada',
       p_orcamento_total: obra.orcamento || 0
     });
   if (error) throw new Error(error.message);
