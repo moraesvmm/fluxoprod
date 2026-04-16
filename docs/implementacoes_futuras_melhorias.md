@@ -49,6 +49,10 @@ if (!emailRegex.test(formData.email)) {
 }
 ```
 
+**Status:** ✅ IMPLEMENTADO (16/04/2026)
+**Arquivo modificado:** `apps/web/src/app/tenant/crm/page.tsx`
+**Commit:** 696cd8e - "feat: Adicionar validação de e-mail no cadastro de clientes"
+
 ---
 
 ### 2. Soft Delete em Tabelas Principais
