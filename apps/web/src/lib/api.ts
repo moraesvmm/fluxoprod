@@ -345,7 +345,9 @@ export async function createProduto(produto: ProdutoCreate): Promise<Produto> {
       p_preco_base: produto.preco_venda || 0,
       p_sku: produto.sku || null,
       p_preco_custo: produto.preco_custo || 0,
-      p_categoria: produto.categoria || 'geral'
+      p_categoria: produto.categoria || 'geral',
+      p_estoque_atual: produto.estoque_atual || 0,
+      p_estoque_minimo: produto.estoque_minimo || 10
     });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
