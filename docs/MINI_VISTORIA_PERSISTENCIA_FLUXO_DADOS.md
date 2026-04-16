@@ -490,9 +490,332 @@ $$;
 
 ---
 
-## 6. CONCLUSÃO
+## 6. VISTORIA ESPECÍFICA - MÓDULO DASHBOARD
 
-### 6.1 Estado Atual do Sistema
+### 6.1 Objetivo da Vistoria
+
+Verificar se as informações entregues pelo módulo Dashboard estão validadas dos outros módulos (estoque, vendas, OS, Obras, etc.) e se somente são entregues informações dos módulos que existem para aquela empresa (feature flags).
+
+### 6.2 Análise do Hook do Dashboard
+
+**Arquivo:** `apps/web/src/lib/hooks/use-dashboard.ts`
+
+```typescript
+export function useDashboardData() {
+  // Usar RPC tenant_dashboard_kpis para obter todos os KPIs calculados no banco
+  const { data: kpis, isLoading, error } = useQuery({
+    queryKey: ["dashboard", "kpis"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('tenant_dashboard_kpis');
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60_000,
+    retry: 2,
+  });
+
+  // Buscar últimas vendas separadamente
+  const { data: ultimasVendas, error: vendasError } = useQuery({
+    queryKey: ["dashboard", "ultimas-vendas"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('tenant_listar_vendas', { p_limit: 5 });
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 60_000,
+    retry: 2,
+  });
+
+  // Derive KPIs a partir do resultado da RPC
+  const faturamentoHoje = kpis?.[0]?.total_vendas || 0;
+  const vendasHoje = kpis?.[0]?.qtd_vendas || 0;
+  const ticketMedio = vendasHoje > 0 ? faturamentoHoje / vendasHoje : 0;
+  const totalClientes = kpis?.[0]?.qtd_clientes || 0;
+  const totalProdutos = kpis?.[0]?.qtd_produtos || 0;
+  const osAbertas = kpis?.[0]?.qtd_os_abertas || 0; // ✅ Vem da RPC
+  const estoqueBaixo = kpis?.[0]?.estoque_baixo || 0; // ✅ Vem da RPC
+  const saldo = kpis?.[0]?.saldo || 0;
+
+  return {
+    isLoading: isLoading || !kpis,
+    error: error || vendasError,
+    faturamentoHoje,
+    vendasHoje,
+    ticketMedio,
+    totalClientes,
+    totalProdutos,
+    osAbertas,
+    estoqueBaixo,
+    saldo,
+    chartData,
+    ultimasVendas: ultimasVendas || [],
+  };
+}
+```
+
+**✅ Verificação:** Hook obtém dados corretamente da RPC `tenant_dashboard_kpis` e deriva KPIs apropriados.
+
+### 6.3 Análise da Página do Dashboard
+
+**Arquivo:** `apps/web/src/app/tenant/dashboard/page.tsx`
+
+```typescript
+// Linha 134
+<KPICard title="OS Abertas" value="12" icon={Wrench} className="border-amber-200 bg-amber-50/10" />
+
+// Linha 135
+<KPICard title="Obras em Andamento" value="5" icon={Building2} className="border-blue-200 bg-blue-50/10" />
+```
+
+**❌ PROBLEMA CRÍTICO 1:** Os valores de OS Abertas e Obras em Andamento estão HARDCODED!
+- Linha 134: `value="12"` - valor hardcoded, não usa `dashboard.osAbertas` que vem da RPC
+- Linha 135: `value="5"` - valor hardcoded, não existe KPI de obras na RPC
+
+**❌ PROBLEMA CRÍTICO 2:** Não há validação de feature flags para mostrar/ocultar seções
+- As seções de OS e Obras aparecem sempre, independentemente de os módulos estarem ativos na empresa
+- O hook `useDashboardData` não consulta quais módulos estão ativos
+- A página não filtra seções baseadas em módulos ativos
+
+### 6.4 Análise da RPC de KPIs do Dashboard
+
+**Arquivo:** `sql/CORRECOES_LISTAGEM_E_KPIS.sql`
+
+```sql
+CREATE OR REPLACE FUNCTION public.tenant_dashboard_kpis() 
+RETURNS TABLE(
+  total_vendas NUMERIC, 
+  qtd_vendas BIGINT, 
+  qtd_clientes BIGINT, 
+  qtd_produtos BIGINT, 
+  qtd_os_abertas BIGINT, 
+  estoque_baixo BIGINT, 
+  saldo NUMERIC
+) 
+LANGUAGE plpgsql 
+SECURITY DEFINER 
+AS $$
+DECLARE 
+  v_schema TEXT;
+BEGIN
+  SELECT schema_name INTO v_schema 
+  FROM public.user_profiles up 
+  JOIN public.empresas e ON e.id = up.empresa_id 
+  WHERE up.user_id = auth.uid();
+  
+  IF v_schema IS NULL OR v_schema = 'public' THEN
+    RETURN;
+  END IF;
+  
+  RETURN QUERY EXECUTE format('
+    SELECT 
+      COALESCE((SELECT SUM(valor_total) FROM %I.vendas), 0)::NUMERIC,
+      COALESCE((SELECT COUNT(*) FROM %I.vendas), 0)::BIGINT,
+      COALESCE((SELECT COUNT(*) FROM %I.clientes), 0)::BIGINT,
+      COALESCE((SELECT COUNT(*) FROM %I.produtos), 0)::BIGINT,
+      COALESCE((SELECT COUNT(*) FROM %I.ordens_servico WHERE status = ''aberta''), 0)::BIGINT,
+      COALESCE((SELECT COUNT(*) FROM %I.estoque WHERE quantidade <= quantidade_minima), 0)::BIGINT,
+      COALESCE((SELECT SUM(CASE WHEN tipo IN (''receita'', ''receber'') THEN valor ELSE -valor END) FROM %I.financeiro), 0)::NUMERIC
+  ', v_schema, v_schema, v_schema, v_schema, v_schema, v_schema, v_schema);
+END;
+$$;
+```
+
+**✅ Verificação:** RPC calcula KPIs corretamente a partir dos dados reais do banco:
+- `total_vendas` - soma de vendas
+- `qtd_vendas` - contagem de vendas
+- `qtd_clientes` - contagem de clientes
+- `qtd_produtos` - contagem de produtos
+- `qtd_os_abertas` - contagem de OS com status = 'aberta'
+- `estoque_baixo` - contagem de produtos com estoque <= mínimo
+- `saldo` - soma de receitas e despesas
+
+**❌ PROBLEMA:** RPC não inclui KPI de Obras (não há cálculo de obras em andamento)
+
+### 6.5 Análise de Feature Flags
+
+**Arquivo:** `apps/web/src/middleware.ts`
+
+```typescript
+// Enforce module feature flags
+if (pathname.startsWith('/tenant')) {
+  const parts = pathname.split('/').filter(Boolean) // ['tenant', '<modulo>', ...]
+  const moduleKey = parts.length >= 2 ? parts[1] : 'dashboard'
+
+  // Rotas especiais que não são módulos
+  if (moduleKey !== 'sem-modulos') {
+    const { data: modRow } = await supabase
+      .from('v_empresa_modulos')
+      .select('ativo')
+      .eq('empresa_id', profile.empresa_id)
+      .eq('modulo_key', moduleKey)
+      .maybeSingle()
+
+    if (!modRow?.ativo) {
+      return NextResponse.redirect(new URL('/tenant/sem-modulos', request.url))
+    }
+  }
+}
+```
+
+**✅ Verificação:** Middleware valida feature flags para rotas, redirecionando para `/tenant/sem-modulos` se módulo não estiver ativo.
+
+**❌ PROBLEMA:** Dashboard não valida feature flags para mostrar/ocultar seções de KPIs baseadas em módulos ativos.
+
+### 6.6 Validação de Dados do Dashboard
+
+**Dados que vem da RPC:**
+- ✅ `faturamentoHoje` - vem de `kpis[0].total_vendas` (validado do banco)
+- ✅ `vendasHoje` - vem de `kpis[0].qtd_vendas` (validado do banco)
+- ✅ `ticketMedio` - calculado a partir de `faturamentoHoje / vendasHoje`
+- ✅ `totalClientes` - vem de `kpis[0].qtd_clientes` (validado do banco)
+- ✅ `totalProdutos` - vem de `kpis[0].qtd_produtos` (validado do banco)
+- ❌ `osAbertas` - vem de `kpis[0].qtd_os_abertas` (validado do banco) mas NÃO É USADO na página
+- ❌ `estoqueBaixo` - vem de `kpis[0].estoque_baixo` (validado do banco) mas NÃO É USADO na página
+- ❌ Obras - NÃO EXISTE na RPC, valor hardcoded na página
+
+### 6.7 Validação de Feature Flags no Dashboard
+
+**Tabela de módulos:** `public.empresa_modulos`
+
+**Colunas:**
+- `empresa_id` - ID da empresa
+- `modulo_key` - chave do módulo (ex: 'crm', 'vendas', 'os', 'obras', etc.)
+- `ativo` - boolean indicando se módulo está ativo
+
+**❌ PROBLEMA CRÍTICO:** Dashboard não consulta tabela `empresa_modulos` para filtrar seções baseadas em módulos ativos.
+
+**Comportamento atual:**
+- Dashboard mostra seção de OS Abertas mesmo quando módulo 'os' não está ativo
+- Dashboard mostra seção de Obras em Andamento mesmo quando módulo 'obras' não está ativo
+- Isso causa confusão para o usuário, pois vê KPIs de módulos que não tem acesso
+
+### 6.8 Fluxo de Dados do Dashboard
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 1. Frontend - Hook do Dashboard                                 │
+├─────────────────────────────────────────────────────────────────┤
+│ • useDashboardData() chama RPC tenant_dashboard_kpis()           │
+│ • useDashboardData() chama RPC tenant_listar_vendas()           │
+│ • Deriva KPIs a partir do resultado da RPC                       │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 2. RPC Public - Roteamento                                     │
+├─────────────────────────────────────────────────────────────────┤
+│ • tenant_dashboard_kpis() obtém schema do tenant                 │
+│ • Roteia para schema correto (ex: tenant_62a495e1)              │
+│ • Executa queries agregadas no schema do tenant                  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 3. Banco de Dados - Consultas Agregadas                        │
+├─────────────────────────────────────────────────────────────────┤
+│ • SUM(valor_total) FROM vendas                                   │
+│ • COUNT(*) FROM clientes                                         │
+│ • COUNT(*) FROM produtos                                        │
+│ • COUNT(*) FROM ordens_servico WHERE status = 'aberta'         │
+│ • COUNT(*) FROM estoque WHERE quantidade <= quantidade_minima   │
+│ • SUM(CASE WHEN tipo IN ('receita', 'receber') THEN valor...)  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 4. Frontend - Renderização                                     │
+├─────────────────────────────────────────────────────────────────┤
+│ • Página renderiza KPIs                                         │
+│ • ❌ OS Abertas: valor HARDCODED (12)                           │
+│ • ❌ Obras em Andamento: valor HARDCODED (5)                    │
+│ • ❌ Não valida feature flags para mostrar/ocultar seções       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 6.9 Problemas Identificados
+
+**❌ PROBLEMA 1: Valores Hardcoded no Dashboard**
+- Linha 134: `value="12"` para OS Abertas (deveria usar `dashboard.osAbertas`)
+- Linha 135: `value="5"` para Obras em Andamento (não existe na RPC)
+- **Impacto:** Usuário vê dados falsos no dashboard
+
+**❌ PROBLEMA 2: Ausência de Feature Flags no Dashboard**
+- Dashboard não consulta tabela `empresa_modulos` para validar módulos ativos
+- Seções de OS e Obras aparecem sempre, independentemente de módulos estarem ativos
+- **Impacto:** Usuário vê KPIs de módulos que não tem acesso
+
+**❌ PROBLEMA 3: KPI de Obras Não Existe na RPC**
+- RPC `tenant_dashboard_kpis` não inclui cálculo de obras em andamento
+- **Impacto:** Não há dado real para mostrar, valor é hardcoded
+
+### 6.10 Risco de Integridade de Dados
+
+**⚠️ Risco ALTO - Dados do Dashboard não são confiáveis**
+
+**Justificativa:**
+- Valores de OS e Obras são hardcoded, não refletem dados reais
+- Dashboard não valida se módulos estão ativos antes de mostrar KPIs
+- Usuário pode tomar decisões baseadas em dados falsos
+- Experiência do usuário é prejudicada por informações irrelevantes
+
+### 6.11 Recomendações de Correção
+
+**Correção 1: Usar dados reais da RPC**
+```typescript
+// Substituir linha 134
+<KPICard title="OS Abertas" value={String(dashboard.osAbertas)} icon={Wrench} className="border-amber-200 bg-amber-50/10" />
+```
+
+**Correção 2: Adicionar KPI de Obras na RPC**
+```sql
+-- Adicionar na RPC tenant_dashboard_kpis
+COALESCE((SELECT COUNT(*) FROM %I.obras WHERE status = ''em_andamento''), 0)::BIGINT AS qtd_obras_em_andamento
+```
+
+**Correção 3: Validar feature flags no Dashboard**
+```typescript
+// Adicionar no hook useDashboardData
+const { data: modulosAtivos } = useQuery({
+  queryKey: ["modulos-ativos"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from('v_empresa_modulos')
+      .select('modulo_key')
+      .eq('ativo', true);
+    if (error) throw error;
+    return data?.map(m => m.modulo_key) || [];
+  }
+});
+```
+
+**Correção 4: Renderizar seções condicionalmente**
+```typescript
+// Na página do dashboard
+{modulosAtivos?.includes('os') && (
+  <KPICard title="OS Abertas" value={String(dashboard.osAbertas)} icon={Wrench} />
+)}
+{modulosAtivos?.includes('obras') && (
+  <KPICard title="Obras em Andamento" value={String(dashboard.obrasEmAndamento)} icon={Building2} />
+)}
+```
+
+### 6.12 Conclusão da Vistoria do Dashboard
+
+**❌ DASHBOARD PARCIALMENTE ÍNTEGRO**
+
+**Status:**
+- ✅ Dados de vendas, clientes, produtos, estoque e saldo são validados e corretos
+- ❌ Dados de OS e Obras não são confiáveis (valores hardcoded)
+- ❌ Dashboard não valida feature flags para mostrar/ocultar seções
+- ❌ Usuário pode ver informações de módulos que não tem acesso
+
+**Risco de reincidência:**
+- ⚠️ ALTO - O problema se aplica a todos os tenants
+- ⚠️ ALTO - Novos módulos podem ter o mesmo problema
+- ⚠️ MÉDIO - Desenvolvedores podem adicionar seções sem validar feature flags
+
+---
+
+## 7. CONCLUSÃO GERAL
+
+### 7.1 Estado Atual do Sistema
 
 **✅ INTEGRO - O sistema está funcionando corretamente**
 
@@ -523,7 +846,7 @@ $$;
    - Não há falha silenciosa
    - Invalidação de cache garante dados atualizados
 
-### 6.2 Confirmação de Resolução do Problema
+### 7.2 Confirmação de Resolução do Problema (Persistência e Listagem)
 
 **O problema anterior (registros criados mas não aparecendo na lista) foi 100% resolvido.**
 
@@ -537,7 +860,7 @@ $$;
 - Arquivo `CORRECOES_LISTAGEM_E_KPIS.sql` aplicou correções
 - Mapeamento de campos agora está consistente entre frontend e RPCs
 
-### 6.3 Risco de Reincidência
+### 7.3 Risco de Reincidência (Persistência e Listagem)
 
 **⚠️ Risco BAIXO de reincidência em outros módulos**
 
@@ -554,15 +877,15 @@ $$;
 
 ---
 
-## 7. RECOMENDAÇÕES
+## 8. RECOMENDAÇÕES
 
-### 7.1 Curto Prazo (Opcional)
+### 8.1 Curto Prazo (Opcional)
 
 1. **Adicionar logging de RPCs:** Para facilitar debugging em caso de problemas futuros
 2. **Documentar padrão de invalidação de cache:** Para garantir consistência em novos módulos
 3. **Adicionar testes E2E:** Para validar fluxo de criação e listagem automaticamente
 
-### 7.2 Médio Prazo (Opcional)
+### 8.2 Médio Prazo (Opcional)
 
 1. **Implementar soft delete:** Com atualização de todas as listagens para considerar `deleted_at IS NULL`
 2. **Adicionar monitoramento de RPCs:** Para detectar falhas silenciosas
@@ -570,12 +893,14 @@ $$;
 
 ---
 
-## 8. ASSINATURA
+## 9. ASSINATURA
 
 **Vistoria realizada por:** Cascade AI  
 **Data:** 16/04/2026  
-**Status:** ✅ SISTEMA INTEGRO  
-**Risco de reincidência:** ⚠️ BAIXO
+**Status Persistência e Listagem:** ✅ SISTEMA INTEGRO  
+**Status Dashboard:** ❌ PARCIALMENTE ÍNTEGRO (valores hardcoded e ausência de feature flags)  
+**Risco de reincidência (Persistência e Listagem):** ⚠️ BAIXO  
+**Risco de reincidência (Dashboard):** ⚠️ ALTO
 
 ---
 

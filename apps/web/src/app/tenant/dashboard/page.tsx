@@ -131,8 +131,12 @@ export default function DashboardPage() {
           <KPICard title="Vendas (Hoje)" value={String(dashboard.vendasHoje)} icon={ShoppingBag} />
           <KPICard title="Ticket Médio" value={formatarMoeda(dashboard.ticketMedio)} icon={BarChart} />
           <KPICard title="Clientes" value={String(dashboard.totalClientes)} icon={BadgeCheck} />
-          <KPICard title="OS Abertas" value="12" icon={Wrench} className="border-amber-200 bg-amber-50/10" />
-          <KPICard title="Obras em Andamento" value="5" icon={Building2} className="border-blue-200 bg-blue-50/10" />
+          {dashboard.modulosAtivos?.includes('os') && (
+            <KPICard title="OS Abertas" value={String(dashboard.osAbertas)} icon={Wrench} className="border-amber-200 bg-amber-50/10" />
+          )}
+          {dashboard.modulosAtivos?.includes('obras') && (
+            <KPICard title="Obras em Andamento" value={String(dashboard.obrasEmAndamento || 0)} icon={Building2} className="border-blue-200 bg-blue-50/10" />
+          )}
         </div>
       )}
 

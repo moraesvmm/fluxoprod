@@ -31,6 +31,21 @@ export function useDashboardData() {
     retry: 2,
   });
 
+  // Buscar módulos ativos para validar feature flags
+  const { data: modulosAtivos } = useQuery({
+    queryKey: ["modulos-ativos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('v_empresa_modulos')
+        .select('modulo_key')
+        .eq('ativo', true);
+      if (error) throw error;
+      return data?.map(m => m.modulo_key) || [];
+    },
+    staleTime: 10 * 60_000,
+    retry: 2,
+  });
+
   // Derive KPIs a partir do resultado da RPC
   const faturamentoHoje = kpis?.[0]?.total_vendas || 0;
   const vendasHoje = kpis?.[0]?.qtd_vendas || 0;
@@ -38,6 +53,7 @@ export function useDashboardData() {
   const totalClientes = kpis?.[0]?.qtd_clientes || 0;
   const totalProdutos = kpis?.[0]?.qtd_produtos || 0;
   const osAbertas = kpis?.[0]?.qtd_os_abertas || 0;
+  const obrasEmAndamento = kpis?.[0]?.qtd_obras_em_andamento || 0;
   const estoqueBaixo = kpis?.[0]?.estoque_baixo || 0;
   const saldo = kpis?.[0]?.saldo || 0;
 
@@ -69,9 +85,11 @@ export function useDashboardData() {
     totalClientes,
     totalProdutos,
     osAbertas,
+    obrasEmAndamento,
     estoqueBaixo,
     saldo,
     chartData,
     ultimasVendas: ultimasVendas || [],
+    modulosAtivos: modulosAtivos || [],
   };
 }
