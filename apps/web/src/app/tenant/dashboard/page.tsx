@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { ActionCard } from "@/components/modules/base/ActionCard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
+import { KPISkeleton } from "@/components/modules/base/KPISkeleton";
+import { CardSkeleton } from "@/components/modules/base/CardSkeleton";
 import {
   Table,
   TableBody,
@@ -76,19 +78,6 @@ function ChartSkeleton() {
   );
 }
 
-function KPISkeleton() {
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="rounded-xl border border-border bg-white p-6 shadow-sm animate-pulse">
-          <div className="h-4 w-24 bg-slate-200 rounded mb-3" />
-          <div className="h-8 w-32 bg-slate-100 rounded" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function DashboardPage() {
   const dashboard = useDashboardData();
   const queryClient = useQueryClient();
@@ -143,11 +132,15 @@ export default function DashboardPage() {
       {/* Action Cards */}
       <div>
         <h3 className="mb-4 text-lg font-medium tracking-tight">Ações Rápidas</h3>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <ActionCard title="Nova Venda" description="Abra o PDV para registrar uma nova transação." icon={ShoppingCart} href="/tenant/vendas/pdv" />
-          <ActionCard title="Conciliar Extrato" description="Analise pendências do extrato bancário." icon={ClipboardCheck} href="/tenant/financeiro" />
-          <ActionCard title="Cadastrar Cliente" description="Adicione um novo cliente ao CRM." icon={UserPlus} href="/tenant/crm" />
-        </div>
+        {dashboard.isLoading ? (
+          <CardSkeleton count={3} />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <ActionCard title="Nova Venda" description="Abra o PDV para registrar uma nova transação." icon={ShoppingCart} href="/tenant/vendas/pdv" />
+            <ActionCard title="Conciliar Extrato" description="Analise pendências do extrato bancário." icon={ClipboardCheck} href="/tenant/financeiro" />
+            <ActionCard title="Cadastrar Cliente" description="Adicione um novo cliente ao CRM." icon={UserPlus} href="/tenant/crm" />
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">

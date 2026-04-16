@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
+import { TableSkeleton } from "@/components/modules/base/TableSkeleton";
 import {
   Table,
   TableBody,
@@ -269,11 +270,8 @@ export default function CRMPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-6">
-                  <div className="flex items-center justify-center gap-2 text-slate-500">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-primary" />
-                    Carregando clientes...
-                  </div>
+                <TableCell colSpan={5} className="p-0">
+                  <TableSkeleton rows={5} columns={5} />
                 </TableCell>
               </TableRow>
             ) : error ? (
