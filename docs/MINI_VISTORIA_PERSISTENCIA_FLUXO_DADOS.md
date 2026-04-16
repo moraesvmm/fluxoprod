@@ -798,18 +798,24 @@ const { data: modulosAtivos } = useQuery({
 
 ### 6.12 Conclusão da Vistoria do Dashboard
 
-**❌ DASHBOARD PARCIALMENTE ÍNTEGRO**
+**✅ DASHBOARD 100% ÍNTEGRO (APÓS CORREÇÕES)**
 
 **Status:**
 - ✅ Dados de vendas, clientes, produtos, estoque e saldo são validados e corretos
-- ❌ Dados de OS e Obras não são confiáveis (valores hardcoded)
-- ❌ Dashboard não valida feature flags para mostrar/ocultar seções
-- ❌ Usuário pode ver informações de módulos que não tem acesso
+- ✅ Dados de OS e Obras agora usam dados reais da RPC
+- ✅ Dashboard valida feature flags para mostrar/ocultar seções
+- ✅ Usuário vê apenas informações de módulos ativos
+
+**Correções aplicadas (16/04/2026):**
+- Arquivo `apps/web/src/app/tenant/dashboard/page.tsx`: OS Abertas usa `dashboard.osAbertas`, Obras em Andamento usa `dashboard.obrasEmAndamento`
+- Arquivo `apps/web/src/lib/hooks/use-dashboard.ts`: Adicionado `obrasEmAndamento` e validação de feature flags via `v_empresa_modulos`
+- Arquivo `sql/CORRECAO_DASHBOARD_OBRAS.sql`: RPC `tenant_dashboard_kpis` atualizada para incluir KPI de obras em andamento
+- Seções de OS e Obras são renderizadas condicionalmente baseadas em módulos ativos
 
 **Risco de reincidência:**
-- ⚠️ ALTO - O problema se aplica a todos os tenants
-- ⚠️ ALTO - Novos módulos podem ter o mesmo problema
-- ⚠️ MÉDIO - Desenvolvedores podem adicionar seções sem validar feature flags
+- ⚠️ BAIXO - Correções aplicadas sistematicamente
+- ⚠️ BAIXO - Padrão de validação de feature flags estabelecido
+- ⚠️ MÉDIO - Novos módulos devem seguir o mesmo padrão
 
 ---
 
@@ -898,9 +904,9 @@ const { data: modulosAtivos } = useQuery({
 **Vistoria realizada por:** Cascade AI  
 **Data:** 16/04/2026  
 **Status Persistência e Listagem:** ✅ SISTEMA INTEGRO  
-**Status Dashboard:** ❌ PARCIALMENTE ÍNTEGRO (valores hardcoded e ausência de feature flags)  
+**Status Dashboard:** ✅ 100% ÍNTEGRO (após correções aplicadas)  
 **Risco de reincidência (Persistência e Listagem):** ⚠️ BAIXO  
-**Risco de reincidência (Dashboard):** ⚠️ ALTO
+**Risco de reincidência (Dashboard):** ⚠️ BAIXO
 
 ---
 
