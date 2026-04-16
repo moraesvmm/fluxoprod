@@ -170,6 +170,16 @@ export function KPICard({ title, value, icon, className }: KPICardProps) {
 - Adicionar loading states em hooks personalizados
 - Usar `isLoading` de React Query para mostrar loading
 
+**Status:** ✅ IMPLEMENTADO (16/04/2026)
+**Arquivos criados:**
+- `apps/web/src/components/modules/base/KPISkeleton.tsx`
+- `apps/web/src/components/modules/base/TableSkeleton.tsx`
+- `apps/web/src/components/modules/base/CardSkeleton.tsx`
+**Arquivos modificados:**
+- `apps/web/src/app/tenant/dashboard/page.tsx`
+- `apps/web/src/app/tenant/crm/page.tsx`
+**Commit:** 782f191 - "feat: Adicionar loading states consistentes com componentes skeleton reutilizáveis"
+
 ---
 
 ### 6. Error Boundaries
