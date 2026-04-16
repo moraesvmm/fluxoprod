@@ -4,18 +4,49 @@ import { LucideIcon } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+/**
+ * Props do componente KPICard
+ * @interface KPICardProps
+ */
 interface KPICardProps {
+  /** Título do KPI */
   title: string;
+  /** Valor do KPI (pode ser string ou número) */
   value: string | number;
+  /** Ícone do Lucide React para exibir no card */
   icon: LucideIcon;
+  /** Tendência opcional do KPI (variação percentual) */
   trend?: {
+    /** Valor da tendência em percentual */
     value: number;
+    /** Label da tendência (ex: "vs mês anterior") */
     label: string;
+    /** Indica se a tendência é positiva ou negativa */
     isPositive: boolean;
   };
+  /** Classes CSS adicionais para customização */
   className?: string;
 }
 
+/**
+ * KPICard - Componente para exibir KPIs (Key Performance Indicators)
+ * 
+ * Exibe um cartão com título, valor e ícone, com suporte opcional a tendência.
+ * Utilizado no Dashboard e outras páginas para mostrar métricas importantes.
+ * 
+ * @param {KPICardProps} props - Props do componente
+ * @returns {JSX.Element} Componente KPICard
+ * 
+ * @example
+ * ```tsx
+ * <KPICard 
+ *   title="Faturamento" 
+ *   value="R$ 10.000" 
+ *   icon={Banknote} 
+ *   trend={{ value: 15, label: "vs mês anterior", isPositive: true }}
+ * />
+ * ```
+ */
 export function KPICard({ title, value, icon: Icon, trend, className }: KPICardProps) {
   return (
     <div className={twMerge(clsx("relative overflow-hidden rounded-xl bg-white p-6 border border-border/60 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5", className))}>

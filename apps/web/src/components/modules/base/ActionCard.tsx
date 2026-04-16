@@ -5,15 +5,45 @@ import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 
+/**
+ * Props do componente ActionCard
+ * @interface ActionCardProps
+ */
 interface ActionCardProps {
+  /** Título da ação */
   title: string;
+  /** Descrição da ação */
   description: string;
+  /** Ícone do Lucide React para exibir no card */
   icon: LucideIcon;
+  /** URL de destino quando o card é clicado */
   href: string;
+  /** Texto do botão de ação (padrão: "Acessar") */
   actionText?: string;
+  /** Classes CSS adicionais para customização */
   className?: string;
 }
 
+/**
+ * ActionCard - Componente para exibir ações rápidas
+ * 
+ * Exibe um cartão com título, descrição, ícone e link para uma ação.
+ * Utilizado no Dashboard e outras páginas para facilitar acesso a funcionalidades.
+ * 
+ * @param {ActionCardProps} props - Props do componente
+ * @returns {JSX.Element} Componente ActionCard
+ * 
+ * @example
+ * ```tsx
+ * <ActionCard 
+ *   title="Nova Venda" 
+ *   description="Abra o PDV para registrar uma nova transação." 
+ *   icon={ShoppingCart} 
+ *   href="/tenant/vendas/pdv" 
+ *   actionText="Abrir PDV"
+ * />
+ * ```
+ */
 export function ActionCard({
   title,
   description,
