@@ -139,6 +139,12 @@ export function KPICard({ title, value, icon, className }: KPICardProps) {
 }
 ```
 
+**Status:** ✅ IMPLEMENTADO (16/04/2026)
+**Arquivos modificados:** 
+- `apps/web/src/components/modules/base/KPICard.tsx`
+- `apps/web/src/components/modules/base/ActionCard.tsx`
+**Commit:** 6fde582 - "docs: Adicionar documentação JSDoc aos componentes KPICard e ActionCard"
+
 ---
 
 ### 5. Loading States Consistentes
