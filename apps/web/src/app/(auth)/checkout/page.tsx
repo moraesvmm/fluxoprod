@@ -128,9 +128,13 @@ export default function CheckoutPage() {
        {/* HEADER AMBIENTE DE TRANSAÇÃO */}
        <header className="border-b border-white/5 bg-[#121216]/80 backdrop-blur-md sticky top-0 z-40">
           <div className="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between relative">
-             
-             {/* Esquerda - Ocultada / Genérica para manter Flex justify-between se não tiver nada explícito  */}
-             <div className="flex-1 hidden sm:block"></div>
+
+             {/* Esquerda - Link para Login */}
+             <div className="flex-1 hidden sm:block">
+               <a href="/login" className="text-xs font-medium text-gray-500 hover:text-white transition-colors">
+                 Já tem conta? Entrar
+               </a>
+             </div>
 
              {/* Centro Absoluto - Tipografia/Logo */}
              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3">
@@ -141,7 +145,7 @@ export default function CheckoutPage() {
                  Fluxo ERP
                </h1>
              </div>
-             
+
              {/* Direita - Hierarquia Visual Corrigida */}
              <div className="flex-1 flex sm:hidden"></div>
              <div className="hidden sm:flex items-center justify-end gap-6 text-sm font-medium text-gray-400 flex-1">

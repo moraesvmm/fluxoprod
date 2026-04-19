@@ -24,6 +24,7 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
+import VideoDemo from "@/components/VideoDemo";
 
 /* ─────────────────── DATA ─────────────────── */
 
@@ -398,6 +399,11 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
+      {/* ─────────── VIDEO DEMO ─────────── */}
+      <section className="py-16 sm:py-24">
+        <VideoDemo darkMode={darkMode} />
+      </section>
+
       {/* ─────────── STATS BAR ─────────── */}
       <AnimatedSection className="relative -mt-8 z-10 max-w-5xl mx-auto px-4 sm:px-6">
         <div className={`rounded-2xl border shadow-xl p-6 sm:p-8 ${darkMode ? 'bg-[#1a1a1a] border-slate-700/80 shadow-slate-900/50' : 'bg-white border-slate-200/80 shadow-slate-200/50'}`}>
@@ -579,30 +585,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─────────── FOOTER ─────────── */}
-      <footer className="bg-slate-900 text-slate-400 py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <Image
-                src="/logo-fluxo.png"
-                alt="Fluxo"
-                width={28}
-                height={28}
-                className="object-contain opacity-80"
-              />
-              <span className="text-sm font-semibold text-slate-300">
-                Fluxo
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 text-center sm:text-right">
-              © {new Date().getFullYear()} Fluxo ERP. Todos os direitos reservados.
-              <br className="sm:hidden" />{" "}
-              <span className="hidden sm:inline">·</span> Plataforma B2B SaaS de Gestão Empresarial.
-            </p>
-          </div>
-        </div>
-      </footer>
+      {/* ─────────── COPYRIGHT ─────────── */}
+      <div className="text-center pt-8 pb-6">
+        <p className="text-xs text-slate-500 font-normal">
+          © 2025 Fluxo ERP. Desenvolvido por{" "}
+          <a
+            href="https://www.linkedin.com/in/vitor-moraes"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Perfil do LinkedIn de Vitor Moraes"
+            className="text-violet-600 hover:text-violet-500 hover:underline transition-colors"
+          >
+            Vitor Moraes
+          </a>
+          .
+        </p>
+      </div>
     </div>
   );
 }

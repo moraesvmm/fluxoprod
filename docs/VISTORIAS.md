@@ -1,8 +1,152 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
-**Última atualização:** 18/04/2026  
-**Versão:** 1.3  
+**Última atualização:** 19/04/2026  
+**Versão:** 1.4  
 **Status:** Revisado
+
+---
+
+## VISTORIA 5: Módulo CRM - Gestão de Clientes (19/04/2026)
+
+### Escopo Analisado
+- Estrutura atual do módulo CRM
+- Funcionalidades implementadas
+- Comparação com propostas de melhoria
+- Identificação de funcionalidades novas para implementar
+
+### Estrutura Atual do CRM
+
+**Frontend:**
+- `/Users/macbook/fluxoprod/apps/web/src/app/tenant/crm/page.tsx` (325 linhas)
+- Interface com listagem de clientes, formulário de criação/edição, KPIs básicos
+
+**Hooks:**
+- `/Users/macbook/fluxoprod/apps/web/src/lib/hooks/use-clientes.ts` (38 linhas)
+- useClientes, useCreateCliente, useDeleteCliente, useUpdateCliente
+
+**API:**
+- `/Users/macbook/fluxoprod/apps/web/src/lib/api.ts`
+- Interfaces: Cliente, ClienteCreate, ClienteUpdate
+- Funções: fetchClientes, createCliente, deleteCliente, updateCliente
+
+**Banco de Dados (tabela clientes):**
+- id UUID PRIMARY KEY
+- nome VARCHAR(255) NOT NULL
+- email VARCHAR(255)
+- telefone VARCHAR(50)
+- documento VARCHAR(50)
+- endereco TEXT
+- funil_fase VARCHAR(50) DEFAULT 'lead' (CHECK: lead, prospect, oportunidade, cliente, recuperacao)
+- status VARCHAR(50) DEFAULT 'ativo' (CHECK: ativo, inativo, bloqueado)
+- criado_em TIMESTAMPTZ
+- atualizado_em TIMESTAMPTZ
+
+**RPCs Implementadas:**
+- tenant_listar_clientes (p_limit, p_offset)
+- tenant_criar_cliente (p_nome, p_email, p_telefone, p_funil_fase, p_status, p_idempotency_key)
+- tenant_excluir_cliente (p_cliente_id)
+- tenant_atualizar_cliente (p_cliente_id, p_nome, p_email, p_telefone, p_funil_fase, p_status)
+
+### Funcionalidades Atuais Implementadas
+
+**Funcionalidades básicas:**
+- ✅ Listar clientes (com paginação LIMIT/OFFSET)
+- ✅ Criar cliente (com validação de e-mail)
+- ✅ Editar cliente
+- ✅ Excluir cliente
+- ✅ Envio de e-mail de boas-vindas (via Resend)
+- ✅ KPIs básicos (Clientes Ativos, Inativos 30D+, Taxa de Conversão)
+- ⚠️ Campanha em massa (simulada, não implementada realmente)
+
+**Funil de vendas básico:**
+- ✅ Campo funil_fase com CHECK constraint (lead, prospect, oportunidade, cliente, recuperacao)
+- ✅ Campo status com CHECK constraint (ativo, inativo, bloqueado)
+- ❌ Visualização de pipeline Kanban não implementada
+- ❌ Movimentação automática entre fases não implementada
+
+### Funcionalidades Sugeridas (Documento implementacoes_futuras_melhorias.md)
+
+**1. Histórico de interações** - ❌ NÃO IMPLEMENTADO
+- Registrar contatos, reuniões, chamadas com clientes
+- Necessário: tabela interacoes_clientes com tipo, data, notas, usuario_id
+- Necessário: RPCs para criar/listar interações
+- Necessário: Componente UI para timeline de interações
+
+**2. Segmentação de clientes** - ❌ NÃO IMPLEMENTADO
+- Tags, categorias, classificações (VIP, inativo, etc.)
+- Necessário: tabela cliente_tags ou campo tags JSONB
+- Necessário: Sistema de segmentação com filtros
+- Necessário: Componente UI para gestão de tags
+
+**3. Gestão de oportunidades** - ⚠️ PARCIALMENTE IMPLEMENTADO
+- Pipeline de vendas associado a clientes
+- Funil_fase existe mas sem visualização Kanban
+- Necessário: Componente Kanban para visualizar pipeline
+- Necessário: RPCs para movimentação entre fases
+- Necessário: Dashboard de oportunidades por fase
+
+**4. Documentos de clientes** - ❌ NÃO IMPLEMENTADO
+- Upload de contratos, propostas, documentos legais
+- Necessário: tabela cliente_documentos (similar a obras_documentos)
+- Necessário: Integração com Supabase Storage
+- Necessário: Componente UI para upload/visualização
+
+**5. Dashboard de clientes** - ⚠️ PARCIALMENTE IMPLEMENTADO
+- KPIs de aquisição, retenção, LTV
+- KPIs básicos existem (Clientes Ativos, Inativos, Taxa de Conversão)
+- Necessário: KPIs avançados (LTV, Churn Rate, CAC)
+- Necessário: Gráficos de tendência
+- Necessário: Métricas de segmentação
+
+### Funcionalidades Adicionais Identificadas
+
+**Melhorias arquiteturais (Documento MELHORIAS_FUTURAS.md):**
+- ⚠️ Validação de e-mail já implementada (✅)
+- ❌ Soft delete não implementado em clientes
+- ❌ Paginação cursor-based não implementada (usa LIMIT/OFFSET)
+- ❌ Filtros avançados não implementados
+- ❌ Ordenação flexível não implementada
+
+### Pontos Fortes
+
+**Implementação atual:**
+- **Validação de e-mail:** Implementada no frontend antes de envio
+- **Idempotência:** RPC tenant_criar_cliente usa idempotency_key
+- **Funil de vendas:** Campo funil_fase com CHECK constraint
+- **Status tracking:** Campo status com CHECK constraint
+- **KPIs básicos:** Dashboard com métricas essenciais
+- **Campanha em massa:** Placeholder para implementação futura
+- **Consistência de padrões:** Segue padrões RPC do sistema
+
+### Riscos Técnicos
+
+**Limitações atuais:**
+- **Exclusão permanente:** Não há soft delete em clientes
+- **Paginação LIMIT/OFFSET:** Degrada em grandes volumes
+- **Falta de histórico:** Não há registro de interações
+- **Falta de segmentação:** Não há tags/categorias
+- **Campanha simulada:** Funcionalidade não implementada realmente
+- **Pipeline não visual:** Funil existe mas sem UI Kanban
+
+### Observações
+
+**Estado atual do CRM:**
+- Módulo CRM funcional para CRUD básico de clientes
+- Funil de vendas implementado em nível de banco mas não visual
+- Validação de e-mail implementada corretamente
+- E-mail de boas-vindas enviado automaticamente
+
+**Funcionalidades críticas faltantes:**
+1. Histórico de interações (prioridade ALTA)
+2. Segmentação de clientes (prioridade ALTA)
+3. Visualização Kanban do pipeline (prioridade MÉDIA)
+4. Documentos de clientes (prioridade MÉDIA)
+5. Dashboard avançado (prioridade MÉDIA)
+
+**Recomendação de implementação:**
+1. **Curto prazo (baixo risco):** Implementar soft delete, adicionar filtros básicos
+2. **Médio prazo (médio risco):** Histórico de interações, segmentação, Kanban
+3. **Longo prazo (alto risco):** Dashboard avançado, documentos, analytics
 
 ---
 

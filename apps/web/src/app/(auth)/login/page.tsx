@@ -160,6 +160,14 @@ export default function LoginPage() {
                 Esqueceu sua senha?
               </a>
             </div>
+            <div className="text-center">
+              <p className="text-xs text-slate-500">
+                Ainda não tem conta?{" "}
+                <a href="/checkout" className="text-xs font-medium text-violet-600 hover:text-violet-500 transition-colors">
+                  Assine agora
+                </a>
+              </p>
+            </div>
           </div>
         </form>
       </div>
