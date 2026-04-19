@@ -44,7 +44,7 @@ export default function FinanceiroPage() {
   const [formData, setFormData] = useState({
     descricao: '',
     valor: '',
-    tipo: 'receita',
+    tipo: 'receber',
     categoria: '',
     status: 'pendente'
   });
@@ -64,7 +64,7 @@ export default function FinanceiroPage() {
         categoria: formData.categoria
       });
 
-      setFormData({ descricao: '', valor: '', tipo: 'receita', categoria: '', status: 'pendente' });
+      setFormData({ descricao: '', valor: '', tipo: 'receber', categoria: '', status: 'pendente' });
       setShowForm(false);
       success("Transação criada com sucesso!");
     } catch (err: any) {
@@ -113,7 +113,7 @@ export default function FinanceiroPage() {
 
       await updateFinanceiro.mutateAsync({ id: editId, financeiro: payload });
 
-      setFormData({ descricao: '', valor: '', tipo: 'receita', categoria: '', status: 'pendente' });
+      setFormData({ descricao: '', valor: '', tipo: 'receber', categoria: '', status: 'pendente' });
       setShowEditModal(false);
       setEditId(null);
       success("Transação atualizada com sucesso!");
@@ -149,8 +149,8 @@ export default function FinanceiroPage() {
   };
 
   const verFluxoCaixa = () => {
-    const entradas = transacoes?.filter(t => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0) || 0;
-    const saidas = transacoes?.filter(t => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0) || 0;
+    const entradas = transacoes?.filter(t => t.tipo === 'receber').reduce((sum, t) => sum + t.valor, 0) || 0;
+    const saidas = transacoes?.filter(t => t.tipo === 'pagar').reduce((sum, t) => sum + t.valor, 0) || 0;
     const saldo = entradas - saidas;
 
     const mensagem = `Entradas: ${formatarValor(entradas)} | Saídas: ${formatarValor(saidas)} | Saldo: ${formatarValor(saldo)} | Transações: ${transacoes?.length || 0}`;
@@ -159,8 +159,8 @@ export default function FinanceiroPage() {
   };
 
   // KPIs dinâmicos
-  const totalEntradas = transacoes?.filter(t => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0) || 0;
-  const totalSaidas = transacoes?.filter(t => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0) || 0;
+  const totalEntradas = transacoes?.filter(t => t.tipo === 'receber').reduce((sum, t) => sum + t.valor, 0) || 0;
+  const totalSaidas = transacoes?.filter(t => t.tipo === 'pagar').reduce((sum, t) => sum + t.valor, 0) || 0;
   const pendentes = transacoes?.filter(t => t.status === 'pendente').length || 0;
 
   return (
@@ -264,8 +264,8 @@ export default function FinanceiroPage() {
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   required
                 >
-                  <option value="receita">Receita</option>
-                  <option value="despesa">Despesa</option>
+                  <option value="receber">Receita (a receber)</option>
+                  <option value="pagar">Despesa (a pagar)</option>
                 </select>
               </div>
               <div>
@@ -335,8 +335,8 @@ export default function FinanceiroPage() {
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   required
                 >
-                  <option value="receita">Receita</option>
-                  <option value="despesa">Despesa</option>
+                  <option value="receber">Receita (a receber)</option>
+                  <option value="pagar">Despesa (a pagar)</option>
                 </select>
               </div>
               <div>
@@ -434,11 +434,11 @@ export default function FinanceiroPage() {
                   <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
                   <TableCell className="font-medium text-slate-900">{item.descricao}</TableCell>
                   <TableCell>
-                    <span className={item.tipo === 'receita' ? 'text-emerald-600' : 'text-red-600'}>
-                      {item.tipo === 'receita' ? 'Receita' : 'Despesa'}
+                    <span className={item.tipo === 'receber' ? 'text-emerald-600' : 'text-red-600'}>
+                      {item.tipo === 'receber' ? 'Receita' : 'Despesa'}
                     </span>
                   </TableCell>
-                  <TableCell className={item.tipo === 'receita' ? 'font-medium text-emerald-600' : 'font-medium text-red-600'}>
+                  <TableCell className={item.tipo === 'receber' ? 'font-medium text-emerald-600' : 'font-medium text-red-600'}>
                     {formatarValor(item.valor)}
                   </TableCell>
                   <TableCell>

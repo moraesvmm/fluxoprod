@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
 import { TableSkeleton } from "@/components/modules/base/TableSkeleton";
@@ -25,9 +26,20 @@ import TimelineInteracoes from "@/components/crm/timeline-interacoes";
 import FiltroTags from "@/components/crm/filtro-tags";
 
 export default function CRMPage() {
-  const { data: clientesResult, isLoading: loading, error: queryError } = useClientes();
+  const [buscaCliente, setBuscaCliente] = useState('');
+  const [buscaDebounced, setBuscaDebounced] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setBuscaDebounced(buscaCliente), 300);
+    return () => clearTimeout(timer);
+  }, [buscaCliente]);
+
+  const { data: clientesResult, isLoading: loading, error: queryError } = useClientes({
+    params: buscaDebounced ? { busca: buscaDebounced } : undefined,
+  });
   const clientes = clientesResult?.data || [];
   const createMutation = useCreateCliente();
+  const queryClient = useQueryClient();
   const deleteMutation = useDeleteCliente();
   const updateMutation = useUpdateCliente();
   const [showForm, setShowForm] = useState(false);
@@ -130,9 +142,7 @@ export default function CRMPage() {
   const formatarData = (dataString: string) => new Date(dataString).toLocaleDateString('pt-BR');
 
   const recarregarClientes = () => {
-    // A função useClientes não expõe recarregar diretamente, então invalidamos a query
-    // Isso pode ser melhorado adicionando recarregar ao hook useClientes
-    window.location.reload();
+    queryClient.invalidateQueries({ queryKey: ['clientes'] });
   };
 
   const handleEnviarCampanha = async () => {
@@ -411,7 +421,13 @@ export default function CRMPage() {
           <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50 gap-4">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <input type="search" placeholder="Buscar por nome, telefone ou email..." className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
+              <input
+                type="search"
+                placeholder="Buscar por nome, telefone ou email..."
+                value={buscaCliente}
+                onChange={e => setBuscaCliente(e.target.value)}
+                className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
             </div>
             <FiltroTags onFiltroChange={(tags, operador) => console.log('Filtro:', tags, operador)} />
           </div>
@@ -460,7 +476,16 @@ export default function CRMPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button className="text-emerald-600 hover:text-emerald-700 p-1" title="WhatsApp">
+                        <button
+                          className={`p-1 ${item.telefone ? 'text-emerald-600 hover:text-emerald-700' : 'text-slate-300 opacity-50 cursor-not-allowed'}`}
+                          title={item.telefone ? 'WhatsApp' : 'Telefone não cadastrado'}
+                          disabled={!item.telefone}
+                          onClick={() => {
+                            if (!item.telefone) return;
+                            const num = item.telefone.replace(/\D/g, '');
+                            window.open(`https://wa.me/55${num}`, '_blank');
+                          }}
+                        >
                           <MessageCircle className="h-4 w-4" />
                         </button>
                         <button onClick={() => abrirEdicao(item)} className="text-slate-400 hover:text-blue-600 p-1" title="Editar">

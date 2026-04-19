@@ -37,6 +37,13 @@ export default function ObrasPage() {
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
   const [selectedObra, setSelectedObra] = useState<Obra | null>(null);
   const [activeTab, setActiveTab] = useState<'detalhes' | 'etapas' | 'financeiro' | 'recursos' | 'documentos'>('detalhes');
+
+  // Modais de custo e recurso
+  const [showCustoModal, setShowCustoModal] = useState(false);
+  const [custoForm, setCustoForm] = useState({ descricao: '', valor: '', tipo: 'previsto' as 'previsto' | 'realizado', data: new Date().toISOString().split('T')[0] });
+  const [showRecursoModal, setShowRecursoModal] = useState(false);
+  const [recursoForm, setRecursoForm] = useState({ nome: '', quantidade: '1', unidade: 'un' });
+
   const [formData, setFormData] = useState({
     nome: "",
     cliente_id: "",
@@ -232,8 +239,27 @@ export default function ObrasPage() {
 
   // Handlers para custos
   const handleCreateCustoWrapper = () => {
-    // TODO: Open modal for creating custo
-    toastError("Funcionalidade em desenvolvimento");
+    if (!selectedObra) return;
+    setCustoForm({ descricao: '', valor: '', tipo: 'previsto', data: new Date().toISOString().split('T')[0] });
+    setShowCustoModal(true);
+  };
+
+  const handleSubmitCusto = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedObra || !custoForm.descricao || !custoForm.valor) return;
+    try {
+      await createCustoMutation.mutateAsync({
+        obra_id: selectedObra.id,
+        descricao: custoForm.descricao,
+        valor: parseFloat(custoForm.valor),
+        tipo: custoForm.tipo,
+        data: custoForm.data || undefined,
+      } as ObraCustoCreate);
+      success('Custo adicionado com sucesso!');
+      setShowCustoModal(false);
+    } catch (err: any) {
+      toastError('Erro ao adicionar custo: ' + (err.message || 'Tente novamente.'));
+    }
   };
 
   const handleUpdateCustoWrapper = (custo: ObraCusto) => {
@@ -250,10 +276,27 @@ export default function ObrasPage() {
     }
   };
 
-  // Handlers para recursos
   const handleCreateRecursoWrapper = () => {
-    // TODO: Open modal for creating recurso
-    toastError("Funcionalidade em desenvolvimento");
+    if (!selectedObra) return;
+    setRecursoForm({ nome: '', quantidade: '1', unidade: 'un' });
+    setShowRecursoModal(true);
+  };
+
+  const handleSubmitRecurso = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedObra || !recursoForm.nome) return;
+    try {
+      await createRecursoMutation.mutateAsync({
+        obra_id: selectedObra.id,
+        nome: recursoForm.nome,
+        quantidade: parseInt(recursoForm.quantidade, 10) || 1,
+        unidade: recursoForm.unidade,
+      } as ObraRecursoCreate);
+      success('Recurso alocado com sucesso!');
+      setShowRecursoModal(false);
+    } catch (err: any) {
+      toastError('Erro ao alocar recurso: ' + (err.message || 'Tente novamente.'));
+    }
   };
 
   const handleUpdateRecursoWrapper = (recurso: ObraRecurso) => {
@@ -315,6 +358,106 @@ export default function ObrasPage() {
         cancelText="Cancelar"
         variant="danger"
       />
+
+      {/* Modal: Adicionar Custo */}
+      {showCustoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Adicionar Custo</h3>
+              <button onClick={() => setShowCustoModal(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
+            </div>
+            <form onSubmit={handleSubmitCusto} className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição *</label>
+                <input type="text" required value={custoForm.descricao}
+                  onChange={e => setCustoForm({ ...custoForm, descricao: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: Material de construção" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor (R$) *</label>
+                  <input type="number" step="0.01" min="0" required value={custoForm.valor}
+                    onChange={e => setCustoForm({ ...custoForm, valor: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="0,00" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Tipo *</label>
+                  <select value={custoForm.tipo} onChange={e => setCustoForm({ ...custoForm, tipo: e.target.value as 'previsto' | 'realizado' })}
+                    className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                    <option value="previsto">Previsto</option>
+                    <option value="realizado">Realizado</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Data</label>
+                <input type="date" value={custoForm.data}
+                  onChange={e => setCustoForm({ ...custoForm, data: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button type="submit" disabled={createCustoMutation.isPending}
+                  className="flex-1 bg-primary text-white py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
+                  {createCustoMutation.isPending ? 'Salvando...' : 'Adicionar Custo'}
+                </button>
+                <button type="button" onClick={() => setShowCustoModal(false)}
+                  className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Adicionar Recurso */}
+      {showRecursoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Alocar Recurso</h3>
+              <button onClick={() => setShowRecursoModal(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
+            </div>
+            <form onSubmit={handleSubmitRecurso} className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Recurso *</label>
+                <input type="text" required value={recursoForm.nome}
+                  onChange={e => setRecursoForm({ ...recursoForm, nome: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: Peóes, Betoneira, Cimento" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Quantidade *</label>
+                  <input type="number" min="1" required value={recursoForm.quantidade}
+                    onChange={e => setRecursoForm({ ...recursoForm, quantidade: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Unidade</label>
+                  <input type="text" value={recursoForm.unidade}
+                    onChange={e => setRecursoForm({ ...recursoForm, unidade: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="un, h, kg, m²" />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button type="submit" disabled={createRecursoMutation.isPending}
+                  className="flex-1 bg-primary text-white py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
+                  {createRecursoMutation.isPending ? 'Salvando...' : 'Alocar Recurso'}
+                </button>
+                <button type="button" onClick={() => setShowRecursoModal(false)}
+                  className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

@@ -46,6 +46,18 @@ export function useDashboardData() {
     retry: 2,
   });
 
+  // Série temporal real: faturamento dos últimos 6 meses por mês
+  const { data: kpisPorMes, isLoading: isLoadingChart } = useQuery({
+    queryKey: ["dashboard", "kpis-por-mes"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('tenant_dashboard_kpis_por_mes', { p_meses: 6 });
+      if (error) throw error;
+      return (data as Array<{ mes: string; faturamento: number; total_vendas: number; ticket_medio: number }>) || [];
+    },
+    staleTime: 5 * 60_000,
+    retry: 2,
+  });
+
   // Derive KPIs a partir do resultado da RPC
   const faturamentoHoje = kpis?.[0]?.total_vendas || 0;
   const vendasHoje = kpis?.[0]?.qtd_vendas || 0;
@@ -57,27 +69,18 @@ export function useDashboardData() {
   const estoqueBaixo = kpis?.[0]?.estoque_baixo || 0;
   const saldo = kpis?.[0]?.saldo || 0;
 
-  // Gerar dados do gráfico (simplificado - apenas dados agregados)
-  const chartData = (() => {
-    // Como a RPC retorna dados agregados dos últimos 6 meses,
-    // vamos gerar dados dummy para o gráfico por enquanto
-    // Em uma implementação completa, a RPC deveria retornar dados mensais
-    const buckets: Record<string, number> = {};
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date();
-      d.setMonth(d.getMonth() - i);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
-      // Distribuir o faturamento total dos últimos 6 meses
-      buckets[key] = (faturamentoHoje / 6) * (1 + Math.random() * 0.5);
-    }
-    return Object.entries(buckets).map(([key, total]) => {
-      const [, month] = key.split("-");
-      return { name: MESES[parseInt(month)], total };
-    });
-  })();
+  // Dados do gráfico a partir da RPC de série temporal (sem Math.random)
+  const chartData = (kpisPorMes || []).map(item => {
+    const [, monthStr] = item.mes.split('-');
+    return {
+      name: MESES[parseInt(monthStr, 10) - 1] ?? item.mes,
+      total: item.faturamento ?? 0,
+    };
+  });
 
   return {
     isLoading: isLoading || !kpis,
+    isLoadingChart,
     error: error || vendasError,
     faturamentoHoje,
     vendasHoje,

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PackageOpen, AlertTriangle, Boxes, Plus, Search, Filter, Edit, Trash2, Barcode } from "lucide-react";
-import { useProdutos, useCreateProduto, useDeleteProduto } from "@/lib/hooks/use-produtos";
+import { useProdutos, useCreateProduto, useDeleteProduto, useUpdateProduto } from "@/lib/hooks/use-produtos";
 import { useToast, Toast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -28,17 +28,21 @@ import BarcodeScanner from "@/components/modules/estoque/BarcodeScanner";
 export default function EstoquePage() {
   const [activeTab, setActiveTab] = useState("produtos");
   const { data: produtos = [], isLoading: loading, error: queryError } = useProdutos();
-  const createMutation = useCreateProduto();
-  const deleteMutation = useDeleteProduto();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [exportConfirm, setExportConfirm] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [buscaProduto, setBuscaProduto] = useState('');
+  const [editProdutoId, setEditProdutoId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState({ nome: '', preco_venda: '', estoque_minimo: '', categoria: '' });
   const [formData, setFormData] = useState({
     nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '',
     estoque_atual: '0', estoque_minimo: '10', categoria: ''
   });
   const { toasts, removeToast, success, error: toastError } = useToast();
+  const createMutation = useCreateProduto();
+  const deleteMutation = useDeleteProduto();
+  const updateMutation = useUpdateProduto();
 
   const excluirProduto = async () => {
     if (!deleteId) return;
@@ -78,6 +82,43 @@ export default function EstoquePage() {
     nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '',
     estoque_atual: '0', estoque_minimo: '10', categoria: ''
   });
+
+  const abrirEdicaoProduto = (item: any) => {
+    setEditProdutoId(item.id);
+    setEditFormData({
+      nome: item.nome || '',
+      preco_venda: item.preco_venda ? String(item.preco_venda) : '',
+      estoque_minimo: item.estoque_minimo ? String(item.estoque_minimo) : '',
+      categoria: item.categoria || '',
+    });
+  };
+
+  const handleEditarProduto = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editProdutoId || !editFormData.nome.trim()) return;
+    try {
+      await updateMutation.mutateAsync({
+        id: editProdutoId,
+        produto: {
+          nome: editFormData.nome,
+          preco_venda: editFormData.preco_venda ? parseFloat(editFormData.preco_venda) : undefined,
+          estoque_minimo: editFormData.estoque_minimo ? parseInt(editFormData.estoque_minimo) : undefined,
+          categoria: editFormData.categoria || undefined,
+        },
+      });
+      success('Produto atualizado com sucesso!');
+      setEditProdutoId(null);
+    } catch {
+      toastError('Erro ao atualizar produto. Tente novamente.');
+    }
+  };
+
+  const produtosFiltrados = buscaProduto
+    ? produtos.filter(p =>
+        p.nome.toLowerCase().includes(buscaProduto.toLowerCase()) ||
+        (p.sku && p.sku.toLowerCase().includes(buscaProduto.toLowerCase()))
+      )
+    : produtos;
 
   const handleFecharModal = () => { setIsModalOpen(false); resetForm(); };
 
@@ -151,7 +192,13 @@ export default function EstoquePage() {
             <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <input type="search" placeholder="Buscar SKU ou nome do produto..." className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
+                <input
+                  type="search"
+                  placeholder="Buscar SKU ou nome do produto..."
+                  value={buscaProduto}
+                  onChange={e => setBuscaProduto(e.target.value)}
+                  className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                />
               </div>
               <div className="flex gap-2">
                 <button className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-md bg-white">
@@ -177,10 +224,10 @@ export default function EstoquePage() {
                   </TableCell></TableRow>
                 ) : error ? (
                   <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-red-500">{error}</div></TableCell></TableRow>
-                ) : produtos.length === 0 ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-slate-500">Nenhum produto encontrado</div></TableCell></TableRow>
+                ) : produtosFiltrados.length === 0 ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-slate-500">{buscaProduto ? 'Nenhum produto encontrado para a busca.' : 'Nenhum produto encontrado'}</div></TableCell></TableRow>
                 ) : (
-                  produtos.map((item) => (
+                  produtosFiltrados.map((item) => (
                     <TableRow key={item.id} className="group">
                       <TableCell><StatusBadge status={getStatus(item.estoque_atual, item.estoque_minimo) as any} /></TableCell>
                       <TableCell className="font-mono text-xs text-slate-500">{item.sku || '-'}</TableCell>
@@ -192,7 +239,7 @@ export default function EstoquePage() {
                       <TableCell className="text-right text-emerald-600 font-medium">{formatarPreco(item.preco_venda)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="text-slate-400 hover:text-blue-600 p-1" title="Editar"><Edit className="h-4 w-4" /></button>
+                          <button onClick={() => abrirEdicaoProduto(item)} className="text-slate-400 hover:text-blue-600 p-1" title="Editar"><Edit className="h-4 w-4" /></button>
                           <button onClick={() => setDeleteId(item.id)} className="text-slate-400 hover:text-red-600 p-1" title="Excluir"><Trash2 className="h-4 w-4" /></button>
                         </div>
                       </TableCell>
@@ -276,6 +323,53 @@ export default function EstoquePage() {
           </div>
         </form>
       </Modal>
+
+      {/* Modal de Edição de Produto */}
+      {editProdutoId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">Editar Produto</h3>
+            <form onSubmit={handleEditarProduto} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
+                <input type="text" required value={editFormData.nome}
+                  onChange={e => setEditFormData({ ...editFormData, nome: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Preço de Venda</label>
+                  <input type="number" step="0.01" value={editFormData.preco_venda}
+                    onChange={e => setEditFormData({ ...editFormData, preco_venda: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="0,00" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Estoque Mínimo</label>
+                  <input type="number" value={editFormData.estoque_minimo}
+                    onChange={e => setEditFormData({ ...editFormData, estoque_minimo: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="10" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                <input type="text" value={editFormData.categoria}
+                  onChange={e => setEditFormData({ ...editFormData, categoria: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Ex: Cabos, Eletrônicos" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="submit" disabled={updateMutation.isPending}
+                  className="flex-1 bg-primary text-white py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
+                  {updateMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
+                <button type="button" onClick={() => setEditProdutoId(null)}
+                  className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <BarcodeScanner
         isOpen={scannerOpen}

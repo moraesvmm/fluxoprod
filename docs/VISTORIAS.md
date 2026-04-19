@@ -1,8 +1,427 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
 **Última atualização:** 19/04/2026  
-**Versão:** 1.5  
-**Status:** Revisado
+**Versão:** 1.9  
+**Status:** ✅ Soft Delete implementado em todo o sistema — próxima vistoria recomendada após novas implementações.
+
+---
+
+## VISTORIA 9: Implementação de Soft Delete Global — 19/04/2026
+
+### Escopo da Alteração
+Mudança estrutural: substituição de `DELETE` físico por `UPDATE ... SET deleted_at = NOW()` em todas as entidades com RPCs de exclusão. Cobre 4 schemas tenant + schema public.
+
+### Tabelas Alteradas (coluna `deleted_at` adicionada)
+
+| Tabela | Schemas Cobertos |
+|:---|:---|
+| `clientes` | todos os 4 (já existia — IF NOT EXISTS) |
+| `produtos` | todos os 4 |
+| `vendas` | todos os 4 |
+| `financeiro` | todos os 4 |
+| `funcionarios` | todos os 4 |
+| `kits` | todos os 4 |
+| `kit_itens` | todos os 4 |
+| `alertas_estoque` | todos os 4 |
+| `interacoes_clientes` | todos os 4 |
+| `obras` | tenant_62a495e1 |
+| `obras_etapas` | tenant_62a495e1 |
+| `obras_custos` | tenant_62a495e1 |
+| `obras_recursos` | tenant_62a495e1 |
+| `ordens_servico` | tenant_62a495e1 |
+| `comissoes` | tenant_62a495e1 |
+| `user_profiles` | public |
+| `empresas` | public |
+
+**Total: 43 combinações tabela×schema confirmadas com `has_deleted_at: true`**
+
+### Índices Parciais Criados
+
+9 índices por schema comum (36 total) + 6 exclusivos de tenant_62a495e1 + 2 no schema public = **44 índices parciais** `WHERE deleted_at IS NULL`.
+Nomenclatura: `idx_{prefixo_schema}_{tabela}_not_deleted`
+
+### RPCs de Exclusão Atualizadas (DELETE → Soft Delete)
+
+| RPC | Antes | Depois |
+|:---|:---:|:---:|
+| `tenant_excluir_cliente` | `DELETE` | `UPDATE ... SET deleted_at = NOW()` |
+| `tenant_excluir_produto` | `DELETE` (+ estoque) | `UPDATE` (estoque mantido) |
+| `tenant_excluir_financeiro` | `DELETE` | `UPDATE` |
+| `tenant_excluir_funcionario` | `DELETE` | `UPDATE` |
+| `tenant_excluir_obra` | `DELETE` | `UPDATE` |
+| `tenant_excluir_os` | `DELETE` | `UPDATE` |
+
+Todas retornam `error: 'X não encontrado ou já excluído'` quando `ROW_COUNT = 0`.
+
+### RPCs de Listagem Atualizadas (filtro `WHERE deleted_at IS NULL`)
+
+| RPC | Observação |
+|:---|:---|
+| `tenant_listar_clientes` | Adicionado `WHERE deleted_at IS NULL` |
+| `tenant_listar_produtos` | Filtro em `p.deleted_at IS NULL` |
+| `tenant_listar_financeiro` | Adicionado filtro |
+| `tenant_listar_funcionarios` | Adicionado filtro |
+| `tenant_listar_vendas` | Adicionado filtro |
+| `tenant_listar_ordens_servico` | Adicionado filtro |
+| `tenant_listar_obras` | **Corrigido bug grave** (sem schema no SELECT) + filtro |
+
+### Bug Corrigido Bônus
+- `tenant_listar_obras` tinha `SELECT * FROM obras` sem schema (`v_tenant_schema`), causando erro em todos os tenants. Corrigido para `EXECUTE format('... FROM %I.obras ...', v_tenant_schema)`.
+
+### Arquivo de Migração Gerado
+`apps/api/migrations/add_soft_delete_all_entities.sql`
+
+### Melhorias Futuras (Prioridade Alta)
+- **Suite de Testes Automatizados:** Implementar testes unitários com Vitest para hooks (`use-clientes`, `use-user-profile`, etc.), testes de utilitários e componentes (`BoasVindasBanner`), e testes End-to-End com Playwright (fluxos de Auth, CRM e Vendas).
+- **Rate Limiting no Middleware:** Implementar limitação de requisições baseada em memória (`Map`) para `middleware.ts`, bloqueando requisições abusivas em rotas de auth (5/5min) e limitando tráfego em APIs e páginas, respondendo com HTTP 429.
+
+---
+
+## VISTORIA 8: Sprint de Hardening e Features — 19/04/2026
+
+### Escopo das Alterações
+Implementação das correções e funcionalidades priorizadas na Vistoria 7. Todos os itens críticos e de alta prioridade da sprint foram concluídos.
+
+### Alterações Realizadas
+
+| Item | Arquivo | Tipo | Descrição |
+|:---|:---|:---:|:---|
+| [1] Enum Financeiro | `financeiro/page.tsx` | 🔴 Crítico | Alinhado `receita/despesa` → `receber/pagar` (conformidade com banco) |
+| [2] Dashboard Real | `use-dashboard.ts` + `dashboard/page.tsx` | 🔴 Crítico | Substituído `Math.random()` por RPC `tenant_dashboard_kpis_por_mes`; `isLoadingChart` independente |
+| [3] RPC Dashboard | Supabase (banco) | 🔴 Crítico | `tenant_dashboard_kpis_por_mes` criada e deployada no schema `public` |
+| [4] CRM Anti-pattern | `crm/page.tsx` | 🟠 Alto | `window.location.reload()` → `queryClient.invalidateQueries(['clientes'])` |
+| [5] OS Código Morto | `os/page.tsx` | 🟡 Médio | Removida `confirmarExclusao` duplicada |
+| [6] Obras Modais | `obras/page.tsx` | 🟠 Alto | Implementados modais funcionais de "Adicionar Custo" e "Alocar Recurso" (substituiu TODOs) |
+| [7] CRM Busca Real | `crm/page.tsx` | 🟠 Alto | Input de busca conectado à RPC via `useClientes({ params: { busca } })` com debounce 300ms |
+| [8] CRM WhatsApp | `crm/page.tsx` | 🟠 Alto | Botão WhatsApp com `wa.me/55{num}` sanitizado; desabilitado se telefone ausente |
+| [9] Estoque Edição | `estoque/page.tsx` | 🟠 Alto | Modal de edição de produto com `useUpdateProduto` |
+| [10] Estoque Busca | `estoque/page.tsx` | 🟡 Médio | Busca client-side por nome/SKU com filtragem em `produtosFiltrados` |
+
+### Status Final dos Módulos Pós-Sprint
+
+| Módulo | Status |
+|:---|:---:|
+| Dashboard | ✅ KPIs reais + gráfico real |
+| CRM | ✅ CRUD + busca + WhatsApp + invalidation correta |
+| Financeiro | ✅ Enum alinhado com banco |
+| Estoque | ✅ CRUD completo com edição e busca |
+| Obras | ✅ Modais de custo e recurso funcionais |
+| OS | ✅ Código limpo |
+| Vendas | ⚠️ Geração de PDF pendente |
+| RH | ⚠️ Sem mutations implementadas |
+
+### Backlog Remanescente (Próxima Sprint)
+- **Vendas:** geração de recibo PDF via `jsPDF`
+- **RH:** hooks de mutations para admissão/demissão/férias
+- **Global:** campo `p_busca` nas RPCs de Obras, Estoque, OS
+- **Global:** Soft Delete (flag `deleted_at` em vez de `DELETE` físico)
+- **Infraestrutura:** suíte de testes Vitest/Playwright
+
+---
+
+## VISTORIA 7: Vistoria Geral do Sistema — 19/04/2026
+
+### Escopo Analisado
+- **Frontend:** todos os 8 módulos (`dashboard`, `crm`, `vendas`, `estoque`, `obras`, `os`, `financeiro`, `rh`)
+- **Hooks:** todos os arquivos em `apps/web/src/lib/hooks/`
+- **Camada de API:** `apps/web/src/lib/api.ts` (1.508 linhas, completo)
+- **Middleware:** `apps/web/src/middleware.ts`
+- **Banco de dados:** schema `public` e schemas `tenant_*` via `CORRECOES_CRITICAS_SUPABASE.sql`
+- **Segurança:** RLS policies, permissões de funções, isolamento de schema
+
+### Estrutura Atual do Sistema
+- **8 módulos** frontend cobertos com páginas completas
+- **12 arquivos de hooks** TanStack React Query
+- **~45 RPCs** distintas mapeadas em `api.ts`
+- **6 tabelas no schema `public`** + **14 tabelas por schema `tenant_*`**
+- **1 função de provisionamento** (`provisionar_empresa`) cria todo o schema tenant em runtime
+- **1 mecanismo de idempotência** (`idempotency_control`) nas operações de escrita
+
+### Módulos e Status
+
+| Módulo | Arquivo | Status | Observação |
+|:---|:---|:---:|:---|
+| Dashboard | `tenant/dashboard/page.tsx` | ✅ Implementado | KPIs reais via RPC; gráfico mensal usa `Math.random()` — dados fictícios |
+| CRM | `tenant/crm/page.tsx` | ⚠️ Parcial | CRUD, Kanban, Campanhas OK; busca não conectada; `window.location.reload()` anti-padrão |
+| Vendas | `tenant/vendas/page.tsx` | ⚠️ Parcial | Histórico e PDV OK; KPI "Método Favorito" hardcoded "-"; Recibo PDF visual apenas |
+| Estoque | `tenant/estoque/page.tsx` | ⚠️ Parcial | CRUD, Kits, Scanner OK; botão Editar sem modal; Import/Export sem lógica real |
+| Obras | `tenant/obras/page.tsx` | ⚠️ Parcial | CRUD, Etapas, Docs OK; handlers de Criar Custo e Criar Recurso retornam `toastError("em desenvolvimento")` |
+| OS | `tenant/os/page.tsx` | ⚠️ Parcial | CRUD e Calendário OK; funções `handleDelete` e `confirmarExclusao` duplicadas no mesmo componente |
+| Financeiro | `tenant/financeiro/page.tsx` | ⚠️ Parcial | CRUD OK; enum `receita/despesa` diverge do banco (`pagar/receber`) — **risco de falha silenciosa** |
+| RH | `tenant/rh/page.tsx` | ✅ Implementado | CRUD, CSV, Folha OK; campo de busca não conectado |
+
+### RPCs Mapeadas
+
+**Por domínio — total ~45 RPCs:**
+
+| Grupo | RPCs | Risco |
+|:---|:---|:---|
+| Auth/Tenant | `set_tenant_schema`, `tenant_dashboard_kpis` | `tenant_dashboard_kpis` não retorna série temporal — gráfico usa dados falsos |
+| CRM | `tenant_listar_clientes`, `tenant_criar_cliente`, `tenant_atualizar_cliente`, `tenant_excluir_cliente`, `tenant_listar_tags_cliente`, `tenant_adicionar_tag_cliente`, `tenant_remover_tag_cliente`, `tenant_criar_interacao`, `tenant_listar_interacoes`, `enviar_campanha_massa` | Nenhum crítico |
+| Vendas/PDV | `tenant_listar_vendas`, `tenant_processar_venda`, `tenant_excluir_venda` | `tenant_processar_venda` não deduplica por `idempotency_key` no payload atual |
+| Estoque | `tenant_listar_produtos`, `tenant_criar_produto`, `tenant_excluir_produto`, `tenant_alertas_estoque`, `tenant_listar_kits`, `tenant_criar_kit`, `tenant_listar_transferencias`, `tenant_criar_transferencia`, `tenant_valorizacao_estoque`, `tenant_listar_codigos_produto`, `tenant_previsao_demanda` | Falta `tenant_atualizar_produto` — edição impossível via RPC |
+| OS | `tenant_listar_os`, `tenant_criar_os`, `tenant_atualizar_os`, `tenant_excluir_os` | Nenhum crítico |
+| Obras | `tenant_listar_obras`, `tenant_criar_obra`, `tenant_atualizar_obra`, `tenant_excluir_obra`, `tenant_listar_etapas_obra`, `tenant_criar_etapa_obra`, `tenant_atualizar_etapa_obra`, `tenant_excluir_etapa_obra`, `tenant_progresso_obra`, `tenant_listar_custos_obra`, `tenant_criar_custo_obra`, `tenant_atualizar_custo_obra`, `tenant_excluir_custo_obra`, `tenant_obras_resumo_financeiro`, `tenant_listar_recursos_obra`, `tenant_alocar_recurso_obra`, `tenant_atualizar_recurso_obra`, `tenant_excluir_recurso_obra`, `tenant_listar_documentos_obra`, `tenant_upload_documento_obra`, `tenant_excluir_documento_obra` | Modais de criação de custo/recurso não chamam as RPCs — botões stub no frontend |
+| Financeiro | `tenant_listar_financeiro`, `tenant_criar_financeiro`, `tenant_atualizar_financeiro`, `tenant_excluir_financeiro` | **CRÍTICO:** frontend envia `tipo: "receita"/"despesa"`, banco CHECK aceita só `"pagar"/"receber"` — violação de constraint |
+| RH | `tenant_listar_funcionarios`, `tenant_criar_funcionario`, `tenant_atualizar_funcionario`, `tenant_excluir_funcionario` | Nenhum crítico |
+
+### Banco de Dados
+
+**Schema `public` — Governança Global:**
+
+| Tabela | Constraints | RLS | Soft Delete |
+|:---|:---|:---:|:---:|
+| `empresas` | PK uuid, UNIQUE schema_name | ✅ | ❌ |
+| `modulos_catalogo` | PK uuid, UNIQUE key | ✅ | ❌ |
+| `empresa_modulos` | PK composta (empresa_id, modulo_key), FK duplo | ✅ | ❌ |
+| `user_profiles` | PK user_id, FK auth.users, CHECK role, CHECK empresa obrigatória para tenant | ✅ | ❌ |
+| `logs_provisionamento` | PK uuid, FK empresa | ❌ | ❌ |
+| `v_empresa_modulos` | View (não tabela) | — | — |
+
+**Schema `tenant_*` — Por Empresa:**
+
+| Tabela | Constraints Presentes | Soft Delete | Índices |
+|:---|:---|:---:|:---:|
+| `clientes` | CHECK funil_fase, CHECK status | ❌ | ❌ explícito |
+| `produtos` | CHECK tipo IN (produto, servico), CHECK preco_base >= 0 | ❌ | ❌ |
+| `estoque` | UNIQUE sku, CHECK quantidade >= 0, CHECK quantidade_minima > 0 | ❌ | ❌ |
+| `vendas` | CHECK metodo_pagamento, CHECK status | ❌ | ❌ |
+| `vendas_itens` | FK duplo, CHECK quantidade > 0, `subtotal` GENERATED ALWAYS | ❌ | ❌ |
+| `funcionarios` | CHECK role IN (funcionario, gerente, admin, colaborador) | ❌ | ❌ |
+| `financeiro` | CHECK tipo IN (**pagar, receber**) — diverge do frontend | ❌ | ❌ |
+| `os` | FK clientes, FK funcionarios | ❌ | ❌ |
+| `obras` | FK clientes | ❌ | ❌ |
+| `obras_etapas` | FK obras ON DELETE CASCADE | ❌ | ❌ |
+| `obras_custos` | FK obras | ❌ | ❌ |
+| `obras_recursos` | FK obras | ❌ | ❌ |
+| `obras_documentos` | FK obras | ❌ | ❌ |
+| `idempotency_control` | PK key | — | — |
+
+### Pontos Fortes
+- **Isolamento de schema real:** cada tenant tem schema PostgreSQL exclusivo — sem risco de cross-tenant por SQL acidental
+- **`SECURITY DEFINER` + `search_path` fixo:** todas as RPCs tenant fixam `SET search_path = %I` no momento da criação — proteção contra injection de schema
+- **RLS ativo no schema public:** todas as tabelas de governança têm políticas; `is_master()` bem implementado
+- **Idempotência:** tabela `idempotency_control` presente em todos os tenants
+- **Provisionamento transacional:** `provisionar_empresa_master` é atômico — erro em qualquer etapa faz rollback e loga em `logs_provisionamento`
+- **Padrão de hooks consistente:** todos os 12 arquivos seguem o mesmo padrão `useQuery` + `useMutation` + `invalidateQueries` pós-mutação
+- **Middleware seguro:** `middleware.ts` valida sessão, obtém perfil, chama `set_tenant_schema` e verifica feature flags antes de qualquer rota
+
+### Riscos Técnicos
+- **🔴 CRÍTICO — Inconsistência de enum Financeiro:** `financeiro/page.tsx` envia `tipo: "receita"` e `tipo: "despesa"` mas o banco tem `CHECK tipo IN ('pagar', 'receber')`. INSERTs falham silenciosamente com violação de constraint. Arquivo: `financeiro/page.tsx:59,173` vs `CORRECOES_CRITICAS_SUPABASE.sql:172`
+- **🔴 CRÍTICO — Gráfico do Dashboard com dados falsos:** `use-dashboard.ts:61-77` gera array de receita mensal com `Math.random()`. O dashboard exibe números fictícios como dados reais do negócio
+- **🔴 — `window.location.reload()` no CRM:** `recarregarClientes()` em `crm/page.tsx:132` faz reload completo da página ao invés de `queryClient.invalidateQueries` — perda de estado e UX degradada
+- **🟡 — Funções duplicadas em OS:** `handleDelete` e `confirmarExclusao` em `os/page.tsx:88-110` são idênticas; apenas `handleDelete` é referenciada pelo `ConfirmModal` — código morto
+- **🟡 — Modais stub em Obras:** `handleCreateCustoWrapper` e `handleCreateRecursoWrapper` em `obras/page.tsx:234-261` retornam `toastError("Funcionalidade em desenvolvimento")` — botões visíveis sem função
+- **🟡 — RPC `tenant_atualizar_produto` ausente:** `use-produtos.ts` não tem `useUpdateProduto`; botão Editar no Estoque é visual sem modal ou RPC de destino
+- **🟠 — Ausência total de testes:** zero testes unitários, de integração ou E2E em todo o repositório
+
+### Dívidas Técnicas Identificadas
+- **Campos de busca não conectados** em todos os 8 módulos — inputs presentes mas sem lógica de filtro ou parâmetro passado à RPC
+- **Soft Delete ausente** em todas as entidades tenant — exclusões são permanentes, sem possibilidade de recuperação
+- **Audit Trail ausente** — nenhuma tabela de log de alterações de dados (quem alterou, o quê, quando)
+- **Rate Limiting ausente** — nenhuma proteção contra abuso de RPCs ou brute-force de autenticação
+- **KPI "Método Favorito" hardcoded** como `"-"` em `vendas/page.tsx:91`
+- **Botão WhatsApp no CRM** sem geração de link `wa.me/` — visual apenas
+- **Geração de Recibo PDF** visual apenas em `vendas/page.tsx:165`
+- **"Sincronizar Banco"** em Financeiro dispara `success()` imediato sem lógica real (`financeiro/page.tsx:126-136`)
+- **RPC de série temporal** ausente — `tenant_dashboard_kpis` retorna apenas snapshot atual, sem histórico mensal
+
+### Recomendação de Implementação
+
+1. **Curto prazo (baixo risco — sem risco de quebra):**
+   - Corrigir enum Financeiro: alterar frontend para usar `pagar`/`receber` em `financeiro/page.tsx:59,173`
+   - Substituir `window.location.reload()` por `queryClient.invalidateQueries(['clientes'])` em `crm/page.tsx:132`
+   - Remover função duplicada `confirmarExclusao` de `os/page.tsx`
+   - Conectar campo de busca do módulo CRM passando parâmetro `p_busca` à RPC `tenant_listar_clientes`
+
+2. **Médio prazo (médio risco — exige planejamento e nova RPC):**
+   - Criar RPC `tenant_dashboard_receita_por_mes` retornando série temporal e conectar ao gráfico do Dashboard
+   - Implementar modais de Criar Custo e Criar Recurso em `obras/page.tsx`
+   - Criar `tenant_atualizar_produto` RPC + hook `useUpdateProduto` + modal de edição no Estoque
+   - Implementar link `wa.me/` no botão WhatsApp do CRM
+   - Conectar campos de busca dos demais módulos (Estoque, Vendas, OS, Financeiro, RH, Obras)
+
+3. **Longo prazo (alto risco — refatorações estruturais):**
+   - Soft Delete (`deleted_at TIMESTAMPTZ`) em todas as tabelas tenant via migration + adaptar todas as RPCs de listagem
+   - Audit Trail: tabela `public.audit_log` + triggers nos schemas tenant
+   - Suite de testes: Vitest (unitários) + Playwright (E2E nos fluxos: Login → Criar Cliente → Criar OS → Criar Venda)
+   - Rate Limiting: via Supabase Edge Function de proxy ou middleware Next.js com `upstash/ratelimit`
+
+### Observações
+- Esta vistoria é 100% analítica — nenhum arquivo foi modificado durante a sessão
+- **Riscos das vistorias anteriores verificados:**
+  - Vistoria 5 (CRM): campos de busca ainda **não resolvidos** ⚠️
+  - Vistoria 6 (Banner): campo `nome` em `user_profiles` ✅ Resolvido — confirmado presente no schema
+  - Vistoria 4 (Testes): ausência de testes ainda **não resolvida** ⚠️
+- O módulo Obras é o mais complexo do sistema: 21 RPCs, 5 tabelas relacionadas, 5 hooks separados e 4 sub-componentes dedicados (`EtapasTimeline`, `FinanceiroDashboard`, `RecursosTabela`, `DocumentosGaleria`)
+- A função `provisionar_empresa` em `CORRECOES_CRITICAS_SUPABASE.sql` cria apenas 6 tabelas básicas no schema tenant — tabelas de `os`, `obras` e derivadas são provisionadas por SQL separado não encontrado nesta sessão e devem existir em outro arquivo SQL do repositório
+- Score de saúde estimado: **7.5/10** — arquitetura sólida, execução com gaps de UX e 1 bug crítico de enum
+
+---
+
+
+---
+
+## VISTORIA 7: Auditoria Técnica Completa do Sistema (19/04/2026)
+
+> **Escopo:** Leitura e mapeamento total de todos os módulos frontend, hooks, camada de API, RPCs SQL e estrutura de banco de dados. Sessão 100% analítica — nenhuma implementação realizada nesta vistoria. Objetivo: gerar base de verdade para guiar próximas sprints.
+
+---
+
+### 1. Inventário Completo de Módulos Frontend
+
+| Módulo | Arquivo | Status | Funcionalidades Confirmadas | Pendências / Bugs Encontrados |
+|:---|:---|:---:|:---|:---|
+| **Dashboard** | `tenant/dashboard/page.tsx` | ✅ OK | KPIs via `tenant_dashboard_kpis`, gráfico de faturamento, Últimas Vendas, Banner de Boas-Vindas, Ações Rápidas | Gráfico usa dados **sintéticos** com `Math.random()` — não reflete dados reais de meses anteriores. RPC precisa retornar série temporal. |
+| **CRM** | `tenant/crm/page.tsx` | ✅ OK | CRUD Clientes, Funil Kanban, Campanha em Massa (email/WhatsApp/SMS), Tags, Timeline de Interações, FiltroTags | Campo de busca **não está conectado** a nenhuma lógica de filtro. Botão WhatsApp na tabela é visual apenas (sem link). Status de clientes sempre exibe "ativo" (hardcoded). |
+| **Vendas** | `tenant/vendas/page.tsx` | ✅ OK | Histórico de Vendas, Botão PDV (link `/tenant/vendas/pdv`), Calculadora Flutuante, CRUD básico | KPI "Método Favorito" exibe "-" (hardcoded). Campo de busca não conectado. Geração de Recibo PDF é visual apenas. |
+| **Estoque** | `tenant/estoque/page.tsx` | ✅ OK | CRUD Produtos, Alertas, Kits, Transferências, Valoração, Previsão de Demanda, Scanner de Barcode | Campo busca e botão Filtros não conectados. Botão "Importar/Exportar" dispara apenas um `ConfirmModal` sem lógica real de export/import. Edição de produto na tabela é visual (botão sem modal). |
+| **Obras** | `tenant/obras/page.tsx` | ✅ OK | CRUD Obras, Etapas (Timeline), Financeiro (Custos/Resumo), Recursos, Documentos (Upload/Storage), Calendário | Handlers de "Criar Custo" e "Criar Recurso" no painel de detalhes exibem `toastError("Funcionalidade em desenvolvimento")` — **modais não implementados**. |
+| **OS** | `tenant/os/page.tsx` | ✅ OK | CRUD OS, Calendário, Seleção de Cliente, Seleção de Funcionário Responsável, Histórico | Função `handleDelete` e `confirmarExclusao` são **duplicadas** — ambas chamam `deleteMutation.mutateAsync`. Apenas uma é usada. |
+| **Financeiro** | `tenant/financeiro/page.tsx` | ✅ OK | CRUD Transações (receita/despesa), Edição inline, Fluxo de Caixa (toast informativo), Sincronização (placeholder) | "Sincronizar Banco" é placeholder (`success` imediato sem ação real). Campo de busca não conectado. Tipo no schema do banco é `pagar/receber` mas UI usa `receita/despesa` — **inconsistência de enums**. |
+| **RH** | `tenant/rh/page.tsx` | ✅ OK | CRUD Funcionários, Exportar CSV, Calculadora Flutuante, Folha Estimada | Campo de busca não conectado. |
+
+---
+
+### 2. Inventário de Hooks (TanStack React Query)
+
+| Hook File | Hooks Exportados | Padrão |
+|:---|:---|:---|
+| `use-clientes.ts` | `useClientes`, `useCreateCliente`, `useDeleteCliente`, `useUpdateCliente`, `useClientesComFiltros` | ✅ Cursor-based pagination via `next_cursor` |
+| `use-dashboard.ts` | `useDashboardData` | ✅ Agrega 3 queries: KPIs, Últimas Vendas, Módulos Ativos |
+| `use-vendas.ts` | `useVendas`, `useDeleteVenda` | Padrão OK |
+| `use-produtos.ts` | `useProdutos`, `useCreateProduto`, `useDeleteProduto` | Padrão OK — falta `useUpdateProduto` |
+| `use-financeiro.ts` | `useFinanceiro`, `useCreateFinanceiro`, `useDeleteFinanceiro`, `useUpdateFinanceiro` | ✅ Completo |
+| `use-os.ts` | `useOS`, `useCreateOS`, `useDeleteOS`, `useUpdateOS` | ✅ Completo |
+| `use-obras.ts` | `useObras`, `useCreateObra`, `useDeleteObra`, `useUpdateObra` | ✅ Completo |
+| `use-obras-etapas.ts` | `useObraEtapas`, `useCreateObraEtapa`, `useUpdateObraEtapa`, `useDeleteObraEtapa`, `useObraProgresso` | ✅ Completo |
+| `use-obras-custos.ts` | `useObraCustos`, `useCreateObraCusto`, `useUpdateObraCusto`, `useDeleteObraCusto`, `useObraResumoFinanceiro` | ✅ Completo |
+| `use-obras-recursos.ts` | `useObraRecursos`, `useAlocarRecursoObra`, `useUpdateObraRecurso`, `useDeleteObraRecurso` | ✅ Completo |
+| `use-obras-documentos.ts` | `useObraDocumentos`, `useUploadObraDocumento`, `useDeleteObraDocumento` | ✅ Completo |
+| `use-funcionarios.ts` | `useFuncionarios`, `useCreateFuncionario`, `useDeleteFuncionario`, `useUpdateFuncionario` | ✅ Completo |
+
+---
+
+### 3. Inventário de RPCs — Camada `api.ts`
+
+**Total de RPCs mapeadas no `api.ts`:** ~45 chamadas `.rpc()` distintas.
+
+| Domínio | RPCs Identificadas |
+|:---|:---|
+| **Auth/Tenant** | `set_tenant_schema`, `tenant_dashboard_kpis` |
+| **CRM** | `tenant_listar_clientes`, `tenant_criar_cliente`, `tenant_atualizar_cliente`, `tenant_excluir_cliente`, `tenant_listar_tags_cliente`, `tenant_adicionar_tag_cliente`, `tenant_remover_tag_cliente`, `tenant_criar_interacao`, `tenant_listar_interacoes`, `enviar_campanha_massa` |
+| **Vendas/PDV** | `tenant_listar_vendas`, `tenant_processar_venda`, `tenant_excluir_venda`, `tenant_listar_produtos` (para PDV) |
+| **Estoque** | `tenant_listar_produtos`, `tenant_criar_produto`, `tenant_excluir_produto`, `tenant_alertas_estoque`, `tenant_listar_kits`, `tenant_criar_kit`, `tenant_listar_transferencias`, `tenant_criar_transferencia`, `tenant_valorizacao_estoque`, `tenant_listar_codigos_produto`, `tenant_previsao_demanda` |
+| **OS** | `tenant_listar_os`, `tenant_criar_os`, `tenant_atualizar_os`, `tenant_excluir_os` |
+| **Obras** | `tenant_listar_obras`, `tenant_criar_obra`, `tenant_atualizar_obra`, `tenant_excluir_obra`, `tenant_listar_etapas_obra`, `tenant_criar_etapa_obra`, `tenant_atualizar_etapa_obra`, `tenant_excluir_etapa_obra`, `tenant_progresso_obra`, `tenant_listar_custos_obra`, `tenant_criar_custo_obra`, `tenant_atualizar_custo_obra`, `tenant_excluir_custo_obra`, `tenant_obras_resumo_financeiro`, `tenant_listar_recursos_obra`, `tenant_alocar_recurso_obra`, `tenant_atualizar_recurso_obra`, `tenant_excluir_recurso_obra`, `tenant_listar_documentos_obra`, `tenant_upload_documento_obra`, `tenant_excluir_documento_obra` |
+| **Financeiro** | `tenant_listar_financeiro`, `tenant_criar_financeiro`, `tenant_atualizar_financeiro`, `tenant_excluir_financeiro` |
+| **RH** | `tenant_listar_funcionarios`, `tenant_criar_funcionario`, `tenant_atualizar_funcionario`, `tenant_excluir_funcionario` |
+
+---
+
+### 4. Inventário de Tabelas — Schema Público e Tenant
+
+**Schema `public` (governança global):**
+
+| Tabela | Descrição | Observações |
+|:---|:---|:---|
+| `empresas` | Registro de empresas tenants | RLS ativo |
+| `modulos_catalogo` | Catálogo de módulos disponíveis | RLS ativo |
+| `empresa_modulos` | Feature flags por empresa | RLS ativo |
+| `user_profiles` | Perfil (role, empresa_id, nome) por auth.user | RLS ativo, campo `nome` adicionado na V6 |
+| `logs_provisionamento` | Auditoria de provisionamento de tenants | Sem RLS |
+| `v_empresa_modulos` | View materializada para módulos ativos | Usada no Dashboard hook |
+
+**Schema `tenant_*` (por empresa, provisionado em `provisionar_empresa`):**
+
+| Tabela | Colunas Principais | Constraints |
+|:---|:---|:---|
+| `clientes` | id, nome, email, telefone, funil_fase, status, criado_em | CHECK em funil_fase e status |
+| `produtos` | id, nome, descricao, tipo, preco_base, criado_em | CHECK tipo IN (produto, servico) |
+| `estoque` | id, produto_id, sku, quantidade, quantidade_minima | UNIQUE SKU, CHECK quantidade >= 0 |
+| `vendas` | id, cliente_id, valor_total, metodo_pagamento, status | CHECK metodo_pagamento e status |
+| `vendas_itens` | id, venda_id, produto_id, quantidade, preco_unitario, subtotal | subtotal = GENERATED ALWAYS (computed) |
+| `funcionarios` | id, nome, cargo, salario, role, criado_em | CHECK role IN (funcionario, gerente, admin, colaborador) |
+| `financeiro` | id, tipo, descricao, valor, data_vencimento, status | CHECK tipo IN (pagar, receber) — **diverge da UI** |
+| `os` | id, cliente_id, veiculo_equipamento, descricao_problema, colaborador_id, valor, status | FK para clientes e funcionarios |
+| `obras` | id, nome, cliente_id, endereco, data_inicio, data_fim_prevista, orcamento, status | FK para clientes |
+| `obras_etapas` | id, obra_id, nome, status, data_inicio, data_fim | FK para obras |
+| `obras_custos` | id, obra_id, categoria, tipo, valor_previsto, valor_real | FK para obras |
+| `obras_recursos` | id, obra_id, tipo, descricao, quantidade, custo_unitario | FK para obras |
+| `obras_documentos` | id, obra_id, nome, tipo, tamanho, url, caminho_storage | FK para obras |
+| `idempotency_control` | key, created_at | Controle de deduplicação de escritas |
+
+---
+
+### 5. Achados Críticos — PRIORIDADE ALTA 🔴
+
+| # | Achado | Impacto | Localização |
+|:---|:---|:---|:---|
+| 1 | **Gráfico do Dashboard usa dados sintéticos (`Math.random()`)** | Dashboard exibe dados fictícios de receita por mês, não reflete realidade | `use-dashboard.ts:61-77` |
+| 2 | **Inconsistência de enum Financeiro** | A tabela `financeiro.tipo` usa `pagar/receber` mas o frontend cria transações com `receita/despesa` → INSERTs falham silenciosamente por violação de CHECK | `financeiro/page.tsx:L59,173` vs `CORRECOES_CRITICAS_SUPABASE.sql:L172` |
+| 3 | **Função `handleDelete` duplicada em OS** | `handleDelete` e `confirmarExclusao` são funções idênticas no mesmo componente, apenas `handleDelete` é usada pelo `ConfirmModal` — código morto que pode confundir manutenção | `os/page.tsx:88-110` |
+| 4 | **Modais de Criar/Editar Custo e Recurso não implementados (Obras)** | Botões de Adicionar Custo e Adicionar Recurso no painel de detalhes retornam `toastError("Funcionalidade em desenvolvimento")` | `obras/page.tsx:234-261` |
+| 5 | **`window.location.reload()` no CRM** | `recarregarClientes` usa reload completo de página ao invés de invalidar a query via React Query — UX degradada e anti-padrão | `crm/page.tsx:132-136` |
+| 6 | **Ausência total de testes automatizados** | Qualquer refatoração futura pode introduzir regressões silenciosas sem cobertura de testes | Todo o repositório |
+
+---
+
+### 6. Achados de Melhoria — PRIORIDADE MÉDIA/BAIXA 🟡
+
+| # | Achado | Impacto | Localização |
+|:---|:---|:---|:---|
+| 1 | **Campos de busca não conectados** | Busca em todos os módulos (CRM, Vendas, Estoque, Financeiro, OS, Obras, RH) é visual apenas, sem lógica de filtro | Todos os `page.tsx` |
+| 2 | **Hook `useProdutos` sem `useUpdateProduto`** | Botão de Editar produto na tabela do Estoque não possui modal implementado | `use-produtos.ts`, `estoque/page.tsx` |
+| 3 | **KPI "Método Favorito" em Vendas** | Hardcoded como "-" | `vendas/page.tsx:91` |
+| 4 | **Botão WhatsApp no CRM** | Visual apenas, sem geração de link `wa.me/` | `crm/page.tsx:463` |
+| 5 | **Botão "Geração de Recibo PDF"** | Visual apenas em Vendas | `vendas/page.tsx:165` |
+| 6 | **Sincronizar Banco no Financeiro** | Placeholder que dispara `success()` imediato sem lógica real | `financeiro/page.tsx:126-136` |
+| 7 | **Soft Delete ausente** | Exclusões são permanentes em todas as entidades — sem `deleted_at` para recuperação | Todos os schemas tenant |
+| 8 | **Audit Trail ausente** | Nenhuma tabela de log de alterações de dados sensíveis (quem alterou o quê e quando) | Schema público |
+| 9 | **Rate Limiting ausente** | Nenhuma proteção contra abuso de RPCs ou autenticação | Nível de infraestrutura Supabase |
+| 10 | **RPC de Gráfico Mensal ausente** | `tenant_dashboard_kpis` não retorna série temporal por mês — necessário criar nova RPC | `use-dashboard.ts`, banco de dados |
+
+---
+
+### 7. Ações Prioritárias para Próxima Sprint
+
+> As ações abaixo devem ser executadas em ordem de prioridade:
+
+**🔴 CRÍTICO (fazer imediatamente):**
+1. **Corrigir enum Financeiro:** Alinhar o frontend para usar `pagar/receber` OU alterar o CHECK do banco para aceitar `receita/despesa`. Verificar impacto nas RPCs existentes.
+2. **Implementar dados reais no gráfico do Dashboard:** Criar RPC `tenant_dashboard_kpis_por_mes` que retorne série temporal dos últimos 6 meses e conectar ao hook.
+3. **Implementar `window.location.reload()` → `queryClient.invalidateQueries`** no CRM.
+4. **Remover função duplicada `confirmarExclusao`** do componente OS.
+
+**🟡 MÉDIO PRAZO:**
+5. Implementar modais de Criar Custo e Criar Recurso na aba de detalhes de Obras.
+6. Conectar campos de busca a filtros reais via parâmetros das RPCs (todos os módulos).
+7. Implementar `useUpdateProduto` e modal de edição no Estoque.
+8. Gerar link `wa.me/` no botão de WhatsApp do CRM.
+9. Geração real de Recibo PDF via RPC ou biblioteca client-side.
+
+**🟢 LONGO PRAZO:**
+10. Soft Delete (`deleted_at`) em todas as entidades.
+11. Audit Trail global (tabela `audit_log` no schema public).
+12. Suite de testes (Vitest + Playwright E2E).
+13. Rate Limiting via Supabase Edge Functions ou middleware customizado.
+
+---
+
+### 8. Estado Geral do Sistema
+
+```
+SCORE DE SAÚDE: 7.5/10
+
+✅ Arquitetura multi-tenant: SÓLIDA
+✅ Camada de segurança (RLS + middleware): SÓLIDA  
+✅ Padrão de hooks React Query: CONSISTENTE
+✅ RPCs implementadas: ~45 RPCs cobrindo todos os módulos
+⚠️ UX: Vários elementos visuais sem lógica real
+⚠️ Dados: 1 inconsistência crítica de enum (Financeiro)
+❌ Testes: ZERO cobertura automatizada
+❌ Monitoramento: Sem APM ou logging estruturado
+```
 
 ---
 

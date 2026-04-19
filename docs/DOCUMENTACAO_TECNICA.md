@@ -949,6 +949,8 @@ Documento detalhado em MELHORIAS_FUTURAS.md:
 4. Métricas e observabilidade avançada de negócio (CURTO PRAZO)
 5. Padronização de paginação avançada (cursor-based) (LONGO PRAZO)
 6. Estratégia de rollout seguro de mudanças estruturais (CURTO PRAZO)
+7. Suite de Testes Automatizados (Vitest/Playwright) (PRIORIDADE ALTA)
+8. Rate Limiting no Middleware Next.js (PRIORIDADE ALTA)
 
 ---
 

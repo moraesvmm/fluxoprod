@@ -97,17 +97,6 @@ export default function OSPage() {
     }
   };
 
-  const confirmarExclusao = async () => {
-    if (!deleteId) return;
-    try {
-      await deleteMutation.mutateAsync(deleteId);
-      success("Ordem de serviço excluída com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao excluir ordem de serviço: " + (err.message || "Tente novamente."));
-    } finally {
-      setDeleteId(null);
-    }
-  };
 
   const abrirEdicao = (ordem: any) => {
     setEditId(ordem.id);

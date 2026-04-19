@@ -162,7 +162,7 @@ export default function DashboardPage() {
             <p className="text-sm text-muted-foreground">Evolução de receitas.</p>
           </div>
           <div className="h-[300px] w-full min-h-[300px] flex items-center justify-center">
-            {dashboard.isLoading ? (
+            {dashboard.isLoadingChart ? (
               <ChartSkeleton />
             ) : dashboard.chartData.some((d) => d.total > 0) ? (
               <Suspense fallback={<ChartSkeleton />}>
