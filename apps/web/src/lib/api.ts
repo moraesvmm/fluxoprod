@@ -34,9 +34,14 @@ export interface Cliente {
   nome: string;
   telefone?: string;
   email?: string;
+  documento?: string;
   endereco?: string;
+  funil_fase?: string;
+  status?: string;
+  tags?: string[];
   criado_em: string;
   atualizado_em?: string;
+  deleted_at?: string;
 }
 
 export interface ClienteCreate {
@@ -44,6 +49,8 @@ export interface ClienteCreate {
   telefone?: string;
   email?: string;
   endereco?: string;
+  funil_fase?: string;
+  status?: string;
 }
 
 export interface ClienteUpdate {
@@ -52,6 +59,66 @@ export interface ClienteUpdate {
   email?: string;
   funil_fase?: string;
   status?: string;
+}
+
+export interface ClienteListParams {
+  cursor?: string | null;
+  limit?: number;
+  status?: string | null;
+  funil_fase?: string | null;
+  busca?: string | null;
+  order_by?: string;
+  order_dir?: string;
+  tags?: string[] | null;
+}
+
+export interface ClienteListResult {
+  data: Cliente[];
+  next_cursor?: string | null;
+}
+
+export interface InteracaoCliente {
+  id: string;
+  cliente_id: string;
+  tipo: 'ligacao' | 'email' | 'reuniao' | 'nota' | 'whatsapp' | 'visita';
+  titulo: string;
+  descricao?: string;
+  data_interacao: string;
+  duracao_minutos?: number;
+  usuario_id?: string;
+  metadata?: Record<string, any>;
+  criado_em: string;
+  atualizado_em?: string;
+}
+
+export interface InteracaoClienteCreate {
+  cliente_id: string;
+  tipo: 'ligacao' | 'email' | 'reuniao' | 'nota' | 'whatsapp' | 'visita';
+  titulo: string;
+  descricao?: string;
+  data_interacao?: string;
+  duracao_minutos?: number;
+  usuario_id?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface InteracaoClienteListParams {
+  cliente_id: string;
+  limit?: number;
+  cursor?: string | null;
+}
+
+export interface InteracaoClienteListResult {
+  data: InteracaoCliente[];
+  next_cursor?: string | null;
+}
+
+export interface TagCatalog {
+  id: string;
+  nome: string;
+  cor: string;
+  uso_count: number;
+  criado_em: string;
 }
 
 export interface Produto {
@@ -294,29 +361,6 @@ export interface ObraEtapa {
   criado_em: string;
 }
 
-export interface ObraEtapaCreate {
-  obra_id: string;
-  nome: string;
-  descricao?: string;
-  status?: 'pendente' | 'em_andamento' | 'concluida';
-  data_inicio?: string;
-  data_fim_prevista?: string;
-  ordem?: number;
-  orcamento?: number;
-}
-
-export interface ObraEtapaUpdate {
-  id?: string;
-  obra_id?: string;
-  nome?: string;
-  descricao?: string;
-  status?: 'pendente' | 'em_andamento' | 'concluida';
-  data_inicio?: string;
-  data_fim_prevista?: string;
-  ordem?: number;
-  orcamento?: number;
-}
-
 export interface Empresa {
   id: string;
   cnpj?: string;
@@ -442,11 +486,31 @@ export async function deleteVenda(id: string): Promise<void> {
 }
 
 // CLIENTES - Usar RPCs para operações CRUD
-export async function fetchClientes(): Promise<Cliente[]> {
+export async function fetchClientes(params?: ClienteListParams): Promise<ClienteListResult> {
   const { data, error } = await getSupabase()
-    .rpc('tenant_listar_clientes');
+    .rpc('tenant_listar_clientes', {
+      p_cursor: params?.cursor || null,
+      p_limit: params?.limit || 20,
+      p_status: params?.status || null,
+      p_funil_fase: params?.funil_fase || null,
+      p_busca: params?.busca || null,
+      p_order_by: params?.order_by || 'criado_em',
+      p_order_dir: params?.order_dir || 'DESC',
+      p_tags: params?.tags || null
+    });
   if (error) throw new Error(error.message);
-  return data || [];
+  
+  // Extrair next_cursor do último item
+  const clientes = data || [];
+  const next_cursor = clientes.length > 0 ? clientes[clientes.length - 1].next_cursor : null;
+  
+  // Remover next_cursor dos objetos de cliente
+  const clientesLimpos = clientes.map((c: any) => {
+    const { next_cursor: _, ...rest } = c;
+    return rest;
+  });
+  
+  return { data: clientesLimpos, next_cursor };
 }
 
 export async function createCliente(cliente: ClienteCreate): Promise<Cliente> {
@@ -482,6 +546,91 @@ export async function updateCliente(id: string, cliente: ClienteUpdate): Promise
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
   return data as Cliente;
+}
+
+// INTERAÇÕES DE CLIENTES - Usar RPCs para operações CRUD
+export async function fetchInteracoes(params: InteracaoClienteListParams): Promise<InteracaoClienteListResult> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_listar_interacoes', {
+      p_cliente_id: params.cliente_id,
+      p_limit: params.limit || 20,
+      p_cursor: params.cursor || null
+    });
+  if (error) throw new Error(error.message);
+  
+  // Extrair next_cursor do último item
+  const interacoes = data || [];
+  const next_cursor = interacoes.length > 0 ? interacoes[interacoes.length - 1].next_cursor : null;
+  
+  // Remover next_cursor dos objetos de interação
+  const interacoesLimpos = interacoes.map((i: any) => {
+    const { next_cursor: _, ...rest } = i;
+    return rest;
+  });
+  
+  return { data: interacoesLimpos, next_cursor };
+}
+
+export async function createInteracao(interacao: InteracaoClienteCreate): Promise<InteracaoCliente> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_criar_interacao', {
+      p_cliente_id: interacao.cliente_id,
+      p_tipo: interacao.tipo,
+      p_titulo: interacao.titulo,
+      p_descricao: interacao.descricao || null,
+      p_data_interacao: interacao.data_interacao || new Date().toISOString(),
+      p_duracao_minutos: interacao.duracao_minutos || null,
+      p_usuario_id: interacao.usuario_id || null,
+      p_metadata: interacao.metadata || {}
+    });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+  return { id: data?.interacao_id, ...interacao, criado_em: new Date().toISOString() } as InteracaoCliente;
+}
+
+export async function deleteInteracao(id: string): Promise<void> {
+  const { error } = await getSupabase()
+    .rpc('tenant_excluir_interacao', { p_interacao_id: id });
+  if (error) throw new Error(error.message);
+}
+
+// TAGS - RPCs para gerenciar tags de clientes
+export async function adicionarTag(clienteId: string, tag: string): Promise<{ success: boolean; error?: string }> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_adicionar_tag', { p_cliente_id: clienteId, p_tag: tag });
+  if (error) throw new Error(error.message);
+  return data as { success: boolean; error?: string };
+}
+
+export async function removerTag(clienteId: string, tag: string): Promise<void> {
+  const { error } = await getSupabase()
+    .rpc('tenant_remover_tag', { p_cliente_id: clienteId, p_tag: tag });
+  if (error) throw new Error(error.message);
+}
+
+export async function listarTagsCatalog(busca: string = '', limit: number = 20): Promise<TagCatalog[]> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_listar_tags_catalog', { p_busca: busca, p_limit: limit });
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
+// CAMPANHA EM MASSA - RPC para envio de campanhas
+export async function enviarCampanhaMassa(
+  clienteIds: string[],
+  titulo: string,
+  mensagem: string,
+  tipo: string = 'email'
+): Promise<{ success: boolean; enviados: number; falhas: number; total: number }> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_enviar_campanha', { 
+      p_cliente_ids: clienteIds, 
+      p_titulo: titulo, 
+      p_mensagem: mensagem,
+      p_tipo: tipo
+    });
+  if (error) throw new Error(error.message);
+  return data as { success: boolean; enviados: number; falhas: number; total: number };
 }
 
 // PRODUTOS - Usar RPCs para operações CRUD
@@ -972,20 +1121,6 @@ export async function updateComissao(id: string, comissao: ComissaoUpdate): Prom
     });
   if (error) throw new Error(error.message);
   return data as Comissao;
-}
-
-// ETAPAS DE OBRAS - Usar RPCs para operações CRUD
-export interface ObraEtapa {
-  id: string;
-  obra_id: string;
-  nome: string;
-  descricao?: string;
-  data_prevista: string;
-  data_conclusao?: string;
-  status: 'pendente' | 'em_andamento' | 'concluida';
-  ordem: number;
-  criado_em: string;
-  atualizado_em?: string;
 }
 
 export interface ObraEtapaCreate {

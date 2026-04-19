@@ -116,13 +116,13 @@ BEGIN
     v_schema_name := 'tenant_' || regexp_replace(lower(p_razao_social), '[^a-z0-9]', '', 'g') || '_' || substr(md5(random()::text), 1, 6);
 
     SELECT public.provisionar_empresa_master(
-        v_empresa_id, p_cnpj, p_razao_social, p_porte, p_segmento, v_schema_name, p_modules
+        v_empresa_id, p_cnpj, p_razao_social, p_porte, p_segmento, v_schema_name, p_modules, p_cliente_nome
     ) INTO v_provision_result;
 
     -- 5. Vincular Usuário ao seu Tenant
-    INSERT INTO public.user_profiles (user_id, role, empresa_id)
-    VALUES (v_user_id, 'tenant_admin', v_empresa_id)
-    ON CONFLICT (user_id) DO UPDATE SET role = 'tenant_admin', empresa_id = v_empresa_id;
+    INSERT INTO public.user_profiles (user_id, role, empresa_id, nome)
+    VALUES (v_user_id, 'tenant_admin', v_empresa_id, p_cliente_nome)
+    ON CONFLICT (user_id) DO UPDATE SET role = 'tenant_admin', empresa_id = v_empresa_id, nome = EXCLUDED.nome;
 
     -- Log Sucesso
     INSERT INTO public.webhook_audit_log (external_transaction_id, status, payload, detalhes)

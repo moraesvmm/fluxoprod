@@ -31,6 +31,8 @@ import {
   Building2,
 } from "lucide-react";
 import { useDashboardData } from "@/lib/hooks/use-dashboard";
+import { useUserProfile } from "@/lib/hooks/use-user-profile";
+import BoasVindasBanner from "@/components/modules/base/BoasVindasBanner";
 import { useQueryClient } from "@tanstack/react-query";
 
 // Lazy load Recharts — only loaded when chart data exists
@@ -80,6 +82,7 @@ function ChartSkeleton() {
 
 export default function DashboardPage() {
   const dashboard = useDashboardData();
+  const userProfile = useUserProfile();
   const queryClient = useQueryClient();
 
   const handleRefresh = () => {
@@ -96,6 +99,14 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Banner de Boas-Vindas */}
+      {!userProfile.loading && userProfile.nome && userProfile.userId && (
+        <BoasVindasBanner
+          nome={userProfile.nome}
+          userId={userProfile.userId}
+        />
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Visão Geral</h2>

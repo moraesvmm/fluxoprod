@@ -3953,7 +3953,8 @@ CREATE OR REPLACE FUNCTION public.provisionar_empresa_master(
   p_porte text,
   p_segmento text,
   p_schema_name text,
-  p_modules text[] DEFAULT ARRAY[]::text[]
+  p_modules text[] DEFAULT ARRAY[]::text[],
+  p_nome text DEFAULT NULL
 )
 RETURNS json
 LANGUAGE plpgsql

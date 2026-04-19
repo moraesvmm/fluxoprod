@@ -1,8 +1,84 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
 **Última atualização:** 19/04/2026  
-**Versão:** 1.4  
+**Versão:** 1.5  
 **Status:** Revisado
+
+---
+
+## VISTORIA 6: Banner de Boas-Vindas no Dashboard (19/04/2026)
+
+### Escopo Analisado
+- Implementação de banner de boas-vindas personalizado no dashboard
+- Adição de campo nome em user_profiles
+- Criação de hook useUserProfile para obter dados do usuário
+- Criação de componente BoasVindasBanner com persistência
+- Integração no dashboard de forma simétrica
+
+### Alterações Realizadas
+
+**Banco de Dados (schema public):**
+- Criada migration SQL: `apps/api/migrations/add_nome_user_profiles.sql`
+- Adicionada coluna `nome TEXT` opcional em `public.user_profiles`
+- Migration aplicada com sucesso via psql
+
+**RPCs (supabase_rpc.sql):**
+- Atualizada função `public.provisionar_empresa_master`
+- Adicionado parâmetro opcional `p_nome TEXT DEFAULT NULL`
+- Mantida compatibilidade retroativa
+
+**Webhook Provisionamento (webhook_provisionamento.sql):**
+- Atualizada chamada para `provisionar_empresa_master` passando `p_cliente_nome`
+- Atualizado `INSERT INTO user_profiles` para incluir campo `nome`
+- Adicionado `ON CONFLICT` para atualizar nome em caso de conflito
+
+**Frontend - Hook:**
+- Criado arquivo: `apps/web/src/lib/hooks/use-user-profile.ts`
+- Hook `useUserProfile()` busca dados do usuário via Supabase Auth
+- Resolve nome com fallback:
+  1. `user_profiles.nome` (se preenchido)
+  2. `session.user.user_metadata.full_name`
+  3. `session.user.user_metadata.name`
+  4. Primeira parte do email (antes do @)
+- Exporta: `{ nome, email, role, userId, loading }`
+
+**Frontend - Componente:**
+- Criado arquivo: `apps/web/src/components/modules/base/BoasVindasBanner.tsx`
+- Design: Gradiente `from-violet-500 to-purple-600`
+- Mensagem: "Bem-vindo de volta, {nome}!" + subtexto
+- Botão X para fechar (dismiss)
+- Animação: Tailwind `animate-in fade-in slide-in-from-top-4`
+- Responsivo: `px-4 sm:px-6`
+- Persistência: localStorage com chave `boas_vindas_${userId}`
+- Exibe apenas se chave não existe OU data salva < 7 dias atrás
+
+**Frontend - Dashboard:**
+- Atualizado arquivo: `apps/web/src/app/tenant/dashboard/page.tsx`
+- Importados `useUserProfile` e `BoasVindasBanner`
+- Banner renderizado acima do header "Visão Geral"
+- Condicional: exibe apenas quando nome e userId estão disponíveis
+- Layout preservado - banner não causa layout shift
+
+### Pontos Fortes
+- **Fallback inteligente:** Resolve nome de múltiplas fontes (perfil, metadata, email)
+- **Persistência não invasiva:** localStorage com validação de 7 dias
+- **SSR-safe:** Verifica `typeof window` antes de acessar localStorage
+- **Animação suave:** Tailwind nativo sem dependências externas
+- **Layout simétrico:** Banner posicionado de forma consistente com grid existente
+- **Compatibilidade retroativa:** Parâmetro p_nome opcional mantém compatibilidade
+- **Zero dependências:** Não adiciona framer-motion, date-fns ou outras libs
+
+### Riscos Técnicos
+- **localStorage limpeza:** Se usuário limpar localStorage, banner reaparece (comportamento esperado)
+- **Nome não disponível:** Fallback para email garante que sempre há algo para exibir
+- **SSR hydration:** Verificação de window evita erro de hidratação
+
+### Observações
+- Migration aplicada com sucesso em schema public
+- Hook usa padrão `useEffect` com cleanup para evitar memory leaks
+- Componente usa `animate-in` do Tailwind CSS v4
+- Banner desaparece graciosamente sem layout shift
+- Funcionalidade existente do dashboard preservada intactamente
 
 ---
 

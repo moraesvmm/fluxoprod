@@ -26,6 +26,12 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 1.3;
+    }
+  }, []);
+
   const togglePlay = () => {
     if (videoRef.current) {
       if (isPlaying) {
