@@ -1,7 +1,7 @@
 # DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
 ## ESTADO ATUAL: PRODUCTION-READY
-## ÚLTIMA ATUALIZAÇÃO: 15/04/2026 (Vistoria Profunda)
-## VERSÃO: 2.0
+## ÚLTIMA ATUALIZAÇÃO: 18/04/2026 (Implementações Completas)
+## VERSÃO: 2.1
 
 ---
 
@@ -952,10 +952,80 @@ Documento detalhado em MELHORIAS_FUTURAS.md:
 
 ---
 
+## 🚀 IMPLEMENTAÇÕES RECENTES (18/04/2026)
+
+### Módulo Estoque - Expansão Completa
+- **Alertas de Estoque**: Sistema completo de alertas com verificação automática e resolução
+  - RPCs: `tenant_verificar_alertas_estoque`, `tenant_resolver_alerta_estoque`, `tenant_listar_alertas_estoque`
+  - Componente: `AlertasEstoquePanel` com filtros e ações
+  - Wrappers públicos criados para resolver erro 404
+
+- **Kits de Produtos**: Gestão de agrupamentos de produtos
+  - RPCs: `tenant_criar_kit`, `tenant_listar_kits`, `tenant_atualizar_kit`, `tenant_remover_kit`
+  - Componente: `KitsManager` com CRUD completo
+  - Integração com movimentação de estoque
+
+- **Transferências entre Locais**: Movimentação de estoque
+  - RPCs: `tenant_criar_transferencia`, `tenant_listar_transferencias`, `tenant_concluir_transferencia`
+  - Componente: `TransferenciasManager` com status tracking
+  - Validação de disponibilidade e histórico
+
+- **Valoração de Estoque**: Múltiplos métodos de cálculo
+  - RPCs: `tenant_calcular_valor_estoque`, `tenant_listar_locais_estoque`
+  - Componente: `ValorizacaoDashboard` com gráficos e métricas
+  - Métodos: FIFO, Médio, Custo
+
+- **Previsão de Demanda**: Análise preditiva baseada em histórico
+  - RPCs: `tenant_gerar_previsao_demanda`, `tenant_listar_previsoes_demanda`, `tenant_atualizar_demanda_real`
+  - Componente: `PrevisaoDemandaPanel` com geração e atualização
+  - Algoritmo baseado em média móvel
+
+- **Scanner de Códigos de Barras**: Integração mobile
+  - Biblioteca: `html5-qrcode` instalada
+  - Componente: `BarcodeScanner` com câmera e QR code
+  - Busca automática de produtos por código
+
+### Módulo Obras - Gestão Avançada
+- **Etapas de Obras**: Timeline completo com progresso
+  - RPCs: `tenant_obras_etapas`, `tenant_atualizar_etapa`
+  - Componente: `EtapasTimeline` com status visual
+  - Cálculo automático de progresso físico
+
+- **Financeiro de Obras**: Custos previstos vs realizados
+  - RPCs: `tenant_obras_financeiro`, `tenant_adicionar_custo`
+  - Componente: `FinanceiroDashboard` com gráficos comparativos
+  - Métricas de ROI e desvios
+
+- **Recursos de Obras**: Gestão de materiais e mão de obra
+  - RPCs: `tenant_obras_recursos`, `tenant_alocar_recurso`
+  - Componente: `RecursosTabela` com alocação e consumo
+  - Integração futura com estoque
+
+- **Documentos de Obras**: Gestão de arquivos e anexos
+  - RPCs: `tenant_obras_documentos`, `tenant_uploads_documento`
+  - Componente: `DocumentosGaleria` com visualização
+  - Integração com Supabase Storage
+
+### Correções Críticas Aplicadas
+- **Wrappers Públicos RPC**: Resolvido erro 404 em múltiplas RPCs
+  - Causa: Wrappers iniciais usavam `current_setting('search_path')` inválido
+  - Solução: Novos wrappers chamam `set_tenant_schema()` antes de cada RPC
+  - Arquivos: `WRAPPERS_PUBLIC_FIX_SQL.sql`, `WRAPPERS_ALERTAS_SQL.sql`
+
+- **Hydration Error**: Corrigido erro em FloatingParticles
+  - Causa: `Math.random()` gerava valores diferentes no servidor vs cliente
+  - Solução: `useState` + `useEffect` para gerar valores apenas no cliente
+
+- **TypeScript Safety**: Adicionadas verificações null/undefined
+  - Componente: `PrevisaoDemandaPanel` com `Array.isArray()` e validações
+  - Prevenção de erros de runtime em `.map()` e propriedades opcionais
+
+---
+
 ## 🎯 RESUMO EXECUTIVO
 
 ### Estado Atual
-O sistema FLUXO ERP está **PRODUCTION-READY** após correções implementadas nas Auditorias 5-8. A arquitetura Opção A (Supabase como backend real e fonte da verdade) está completamente implementada com schema routing, idempotência, RLS documentado, RBAC intra-tenant, versionamento de schema e audit log.
+O sistema FLUXO ERP está **PRODUCTION-READY** após implementações completas dos módulos Estoque e Obras. A arquitetura Opção A (Supabase como backend real e fonte da verdade) está totalmente implementada com schema routing, wrappers públicos corrigidos, e funcionalidades avançadas de gestão.
 
 ### Riscos Principais
 1. **VIOLAÇÃO CRÍTICA em PDV**: Acesso direto à tabela produtos em vez de RPC (Auditoria 12)
