@@ -260,6 +260,11 @@ BEGIN
             descricao TEXT,
             tipo VARCHAR(50) DEFAULT ''produto'' CHECK (tipo IN (''produto'', ''servico'')),
             preco_base NUMERIC(10, 2) NOT NULL CHECK (preco_base >= 0),
+            categoria VARCHAR(100),
+            custo_unitario NUMERIC(10, 2) CHECK (custo_unitario >= 0),
+            metodo_valoracao VARCHAR(50) DEFAULT ''custo_medio'' CHECK (metodo_valoracao IN (''custo_medio'', ''fifo'', ''lifo'')),
+            codigo_barras VARCHAR(50),
+            codigo_qr TEXT,
             criado_em TIMESTAMPTZ DEFAULT NOW(),
             atualizado_em TIMESTAMPTZ DEFAULT NOW()
         );
@@ -269,6 +274,8 @@ BEGIN
     EXECUTE format('CREATE INDEX idx_%I_produtos_nome ON %I.produtos(nome);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_produtos_tipo ON %I.produtos(tipo);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_produtos_preco_base ON %I.produtos(preco_base);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_produtos_categoria ON %I.produtos(categoria);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_produtos_codigo_barras ON %I.produtos(codigo_barras);', novo_schema, novo_schema);
 
     -- Adicionar CHECK constraint para garantir preço de venda válido (se houver campo separado)
     -- Nota: Esta constraint será adicionada se a tabela tiver campos de custo e venda separados
@@ -290,6 +297,149 @@ BEGIN
     EXECUTE format('CREATE INDEX idx_%I_estoque_produto ON %I.estoque(produto_id);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_estoque_quantidade ON %I.estoque(quantidade);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_estoque_sku ON %I.estoque(sku);', novo_schema, novo_schema);
+
+    -- 5.1. MÓDULO 5.1: Alertas de Estoque
+    EXECUTE format('
+        CREATE TABLE %I.alertas_estoque (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            produto_id UUID NOT NULL REFERENCES %I.produtos(id) ON DELETE CASCADE,
+            tipo_alerta VARCHAR(50) NOT NULL CHECK (tipo_alerta IN (''estoque_baixo'', ''sem_estoque'', ''reposicao_sugerida'')),
+            estoque_atual INTEGER NOT NULL,
+            estoque_minimo INTEGER NOT NULL,
+            mensagem TEXT,
+            status VARCHAR(50) DEFAULT ''pendente'' CHECK (status IN (''pendente'', ''visualizado'', ''resolvido'')),
+            criado_em TIMESTAMPTZ DEFAULT NOW(),
+            resolvido_em TIMESTAMPTZ
+        );
+    ', novo_schema, novo_schema);
+
+    -- Índices para alertas_estoque
+    EXECUTE format('CREATE INDEX idx_%I_alertas_estoque_produto ON %I.alertas_estoque(produto_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_alertas_estoque_status ON %I.alertas_estoque(status);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_alertas_estoque_criado_em ON %I.alertas_estoque(criado_em DESC);', novo_schema, novo_schema);
+
+    -- 5.2. MÓDULO 5.2: Kits e Bundles
+    EXECUTE format('
+        CREATE TABLE %I.kits (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            produto_id UUID NOT NULL REFERENCES %I.produtos(id) ON DELETE CASCADE,
+            nome VARCHAR(255) NOT NULL,
+            descricao TEXT,
+            ativo BOOLEAN DEFAULT true,
+            criado_em TIMESTAMPTZ DEFAULT NOW(),
+            atualizado_em TIMESTAMPTZ DEFAULT NOW()
+        );
+    ', novo_schema, novo_schema);
+
+    -- Índices para kits
+    EXECUTE format('CREATE INDEX idx_%I_kits_produto ON %I.kits(produto_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_kits_ativo ON %I.kits(ativo);', novo_schema, novo_schema);
+
+    -- Tabela kit_itens
+    EXECUTE format('
+        CREATE TABLE %I.kit_itens (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            kit_id UUID NOT NULL REFERENCES %I.kits(id) ON DELETE CASCADE,
+            produto_id UUID NOT NULL REFERENCES %I.produtos(id) ON DELETE CASCADE,
+            quantidade INTEGER NOT NULL DEFAULT 1 CHECK (quantidade > 0),
+            criado_em TIMESTAMPTZ DEFAULT NOW()
+        );
+    ', novo_schema, novo_schema);
+
+    -- Índices para kit_itens
+    EXECUTE format('CREATE INDEX idx_%I_kit_itens_kit ON %I.kit_itens(kit_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_kit_itens_produto ON %I.kit_itens(produto_id);', novo_schema, novo_schema);
+
+    -- Trigger para atualizar atualizado_em em kits
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION trigger_atualizar_kits()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.atualizado_em = NOW();
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    ', novo_schema);
+
+    EXECUTE format('
+        DROP TRIGGER IF EXISTS trg_atualizar_kits ON %I.kits;
+        CREATE TRIGGER trg_atualizar_kits
+        BEFORE UPDATE ON %I.kits
+        FOR EACH ROW
+        EXECUTE FUNCTION trigger_atualizar_kits();
+    ', novo_schema, novo_schema);
+
+    -- 5.3. MÓDULO 5.3: Locais e Transferências de Estoque
+    EXECUTE format('
+        CREATE TABLE %I.locais_estoque (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            nome VARCHAR(255) NOT NULL,
+            tipo VARCHAR(50) NOT NULL CHECK (tipo IN (''filial'', ''deposito'', ''loja'')),
+            endereco TEXT,
+            ativo BOOLEAN DEFAULT true,
+            criado_em TIMESTAMPTZ DEFAULT NOW()
+        );
+    ', novo_schema);
+
+    -- Índices para locais_estoque
+    EXECUTE format('CREATE INDEX idx_%I_locais_estoque_tipo ON %I.locais_estoque(tipo);', novo_schema, novo_schema);
+
+    -- Tabela estoque_por_local
+    EXECUTE format('
+        CREATE TABLE %I.estoque_por_local (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            produto_id UUID NOT NULL REFERENCES %I.produtos(id) ON DELETE CASCADE,
+            local_id UUID NOT NULL REFERENCES %I.locais_estoque(id) ON DELETE CASCADE,
+            quantidade INTEGER NOT NULL DEFAULT 0,
+            criado_em TIMESTAMPTZ DEFAULT NOW(),
+            atualizado_em TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(produto_id, local_id)
+        );
+    ', novo_schema, novo_schema, novo_schema);
+
+    -- Índices para estoque_por_local
+    EXECUTE format('CREATE INDEX idx_%I_estoque_por_local_produto ON %I.estoque_por_local(produto_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_estoque_por_local_local ON %I.estoque_por_local(local_id);', novo_schema, novo_schema);
+
+    -- Trigger para atualizar atualizado_em em estoque_por_local
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION trigger_atualizar_estoque_por_local()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.atualizado_em = NOW();
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    ', novo_schema);
+
+    EXECUTE format('
+        DROP TRIGGER IF EXISTS trg_atualizar_estoque_por_local ON %I.estoque_por_local;
+        CREATE TRIGGER trg_atualizar_estoque_por_local
+        BEFORE UPDATE ON %I.estoque_por_local
+        FOR EACH ROW
+        EXECUTE FUNCTION trigger_atualizar_estoque_por_local();
+    ', novo_schema, novo_schema);
+
+    -- Tabela transferencias_estoque
+    EXECUTE format('
+        CREATE TABLE %I.transferencias_estoque (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            produto_id UUID NOT NULL REFERENCES %I.produtos(id) ON DELETE CASCADE,
+            local_origem_id UUID NOT NULL REFERENCES %I.locais_estoque(id) ON DELETE CASCADE,
+            local_destino_id UUID NOT NULL REFERENCES %I.locais_estoque(id) ON DELETE CASCADE,
+            quantidade INTEGER NOT NULL,
+            status VARCHAR(50) DEFAULT ''pendente'' CHECK (status IN (''pendente'', ''em_transito'', ''concluida'', ''cancelada'')),
+            observacao TEXT,
+            criado_por UUID NOT NULL,
+            criado_em TIMESTAMPTZ DEFAULT NOW(),
+            concluida_em TIMESTAMPTZ
+        );
+    ', novo_schema, novo_schema, novo_schema);
+
+    -- Índices para transferencias_estoque
+    EXECUTE format('CREATE INDEX idx_%I_transferencias_estoque_status ON %I.transferencias_estoque(status);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_transferencias_estoque_produto ON %I.transferencias_estoque(produto_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_transferencias_estoque_criado_em ON %I.transferencias_estoque(criado_em DESC);', novo_schema, novo_schema);
 
     -- 6. MÓDULO 3: Vendas & PDV
     EXECUTE format('
@@ -327,6 +477,27 @@ BEGIN
     EXECUTE format('CREATE INDEX idx_%I_vendas_itens_venda ON %I.vendas_itens(venda_id);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_vendas_itens_produto ON %I.vendas_itens(produto_id);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_vendas_itens_data ON %I.vendas_itens(criado_em);', novo_schema, novo_schema);
+
+    -- 6.2. Tabela previsoes_demanda (Sessão 6 - Previsão de Demanda)
+    EXECUTE format('
+        CREATE TABLE %I.previsoes_demanda (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            produto_id UUID NOT NULL REFERENCES %I.produtos(id) ON DELETE CASCADE,
+            periodo_inicio DATE NOT NULL,
+            periodo_fim DATE NOT NULL,
+            dias_analise INT NOT NULL,
+            demanda_prevista INT NOT NULL,
+            media_venda_diaria NUMERIC(10, 4) NOT NULL,
+            demanda_real INT,
+            precisao NUMERIC(5, 2),
+            criado_em TIMESTAMPTZ DEFAULT NOW()
+        );
+    ', novo_schema, novo_schema);
+
+    -- Índices para previsoes_demanda
+    EXECUTE format('CREATE INDEX idx_%I_previsoes_demanda_produto ON %I.previsoes_demanda(produto_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_previsoes_demanda_periodo ON %I.previsoes_demanda(periodo_inicio, periodo_fim);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_previsoes_demanda_criado_em ON %I.previsoes_demanda(criado_em DESC);', novo_schema, novo_schema);
 
     -- Trigger para atualizar estoque após venda
     EXECUTE format('
@@ -516,6 +687,147 @@ BEGIN
     EXECUTE format('CREATE INDEX idx_%I_obras_status ON %I.obras(status);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_obras_criado_em ON %I.obras(criado_em DESC);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_obras_ordens_servico_os ON %I.obras_ordens_servico(ordem_servico_id);', novo_schema, novo_schema);
+
+    -- 10.1. MÓDULO 11.1: Etapas de Obras (NOVO)
+    EXECUTE format('
+        CREATE TABLE %I.obras_etapas (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            obra_id UUID NOT NULL REFERENCES %I.obras(id) ON DELETE CASCADE,
+            nome VARCHAR(255) NOT NULL,
+            descricao TEXT,
+            data_prevista DATE NOT NULL,
+            data_conclusao DATE,
+            status VARCHAR(50) DEFAULT ''pendente'' CHECK (status IN (''pendente'', ''em_andamento'', ''concluida'')),
+            ordem INTEGER NOT NULL,
+            criado_em TIMESTAMPTZ DEFAULT NOW(),
+            atualizado_em TIMESTAMPTZ DEFAULT NOW()
+        );
+    ', novo_schema, novo_schema);
+
+    -- Índices para obras_etapas
+    EXECUTE format('CREATE INDEX idx_%I_obras_etapas_obra ON %I.obras_etapas(obra_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_obras_etapas_status ON %I.obras_etapas(status);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_obras_etapas_ordem ON %I.obras_etapas(obra_id, ordem);', novo_schema, novo_schema);
+
+    -- Trigger para atualizar atualizado_em em obras_etapas
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.trigger_atualizar_obras_etapas()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.atualizado_em = NOW();
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    ', novo_schema);
+
+    EXECUTE format('
+        CREATE TRIGGER trg_%I_atualizar_obras_etapas
+        BEFORE UPDATE ON %I.obras_etapas
+        FOR EACH ROW
+        EXECUTE FUNCTION %I.trigger_atualizar_obras_etapas();
+    ', novo_schema, novo_schema, novo_schema);
+
+    -- 10.2. MÓDULO 11.2: Custos de Obras (NOVO)
+    EXECUTE format('
+        CREATE TABLE %I.obras_custos (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            obra_id UUID NOT NULL REFERENCES %I.obras(id) ON DELETE CASCADE,
+            categoria VARCHAR(100) NOT NULL,
+            descricao TEXT,
+            valor_previsto NUMERIC(15, 2) NOT NULL CHECK (valor_previsto >= 0),
+            valor_real NUMERIC(15, 2) CHECK (valor_real >= 0),
+            data DATE NOT NULL,
+            tipo VARCHAR(50) NOT NULL CHECK (tipo IN (''material'', ''mao_de_obra'', ''equipamento'', ''servico'', ''outro'')),
+            fornecedor_id UUID REFERENCES %I.clientes(id) ON DELETE SET NULL,
+            criado_em TIMESTAMPTZ DEFAULT NOW(),
+            atualizado_em TIMESTAMPTZ DEFAULT NOW()
+        );
+    ', novo_schema, novo_schema, novo_schema);
+
+    -- Índices para obras_custos
+    EXECUTE format('CREATE INDEX idx_%I_obras_custos_obra ON %I.obras_custos(obra_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_obras_custos_categoria ON %I.obras_custos(categoria);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_obras_custos_tipo ON %I.obras_custos(tipo);', novo_schema, novo_schema);
+
+    -- Trigger para atualizar atualizado_em em obras_custos
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.trigger_atualizar_obras_custos()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.atualizado_em = NOW();
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    ', novo_schema);
+
+    EXECUTE format('
+        CREATE TRIGGER trg_%I_atualizar_obras_custos
+        BEFORE UPDATE ON %I.obras_custos
+        FOR EACH ROW
+        EXECUTE FUNCTION %I.trigger_atualizar_obras_custos();
+    ', novo_schema, novo_schema, novo_schema);
+
+    -- 10.3. MÓDULO 11.3: Recursos de Obras (NOVO)
+    EXECUTE format('
+        CREATE TABLE %I.obras_recursos (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            obra_id UUID NOT NULL REFERENCES %I.obras(id) ON DELETE CASCADE,
+            tipo VARCHAR(50) NOT NULL CHECK (tipo IN (''material'', ''mao_de_obra'', ''equipamento'')),
+            descricao TEXT NOT NULL,
+            quantidade NUMERIC(10, 2) NOT NULL CHECK (quantidade > 0),
+            unidade VARCHAR(20) DEFAULT ''un'',
+            custo_unitario NUMERIC(15, 2) NOT NULL CHECK (custo_unitario >= 0),
+            custo_total NUMERIC(15, 2) GENERATED ALWAYS AS (quantidade * custo_unitario) STORED,
+            status VARCHAR(50) DEFAULT ''alocado'' CHECK (status IN (''alocado'', ''em_uso'', ''liberado'')),
+            data_alocacao DATE DEFAULT CURRENT_DATE,
+            fornecedor_id UUID REFERENCES %I.clientes(id) ON DELETE SET NULL,
+            criado_em TIMESTAMPTZ DEFAULT NOW(),
+            atualizado_em TIMESTAMPTZ DEFAULT NOW()
+        );
+    ', novo_schema, novo_schema, novo_schema);
+
+    -- Índices para obras_recursos
+    EXECUTE format('CREATE INDEX idx_%I_obras_recursos_obra ON %I.obras_recursos(obra_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_obras_recursos_tipo ON %I.obras_recursos(tipo);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_obras_recursos_status ON %I.obras_recursos(status);', novo_schema, novo_schema);
+
+    -- Trigger para atualizar atualizado_em em obras_recursos (não inclui custo_total pois é GENERATED)
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.trigger_atualizar_obras_recursos()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.atualizado_em = NOW();
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    ', novo_schema);
+
+    EXECUTE format('
+        CREATE TRIGGER trg_%I_atualizar_obras_recursos
+        BEFORE UPDATE ON %I.obras_recursos
+        FOR EACH ROW
+        EXECUTE FUNCTION %I.trigger_atualizar_obras_recursos();
+    ', novo_schema, novo_schema, novo_schema);
+
+    -- 10.4. MÓDULO 11.4: Documentos de Obras (NOVO)
+    EXECUTE format('
+        CREATE TABLE IF NOT EXISTS %I.obras_documentos (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            obra_id UUID NOT NULL REFERENCES %I.obras(id) ON DELETE CASCADE,
+            nome VARCHAR(255) NOT NULL,
+            tipo VARCHAR(100) NOT NULL,
+            tamanho BIGINT NOT NULL,
+            url TEXT NOT NULL,
+            caminho_storage TEXT NOT NULL,
+            descricao TEXT,
+            criado_por UUID NOT NULL,
+            criado_em TIMESTAMPTZ DEFAULT NOW()
+        );
+    ', novo_schema, novo_schema);
+
+    -- Índices para obras_documentos
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_obras_documentos_obra ON %I.obras_documentos(obra_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_obras_documentos_tipo ON %I.obras_documentos(tipo);', novo_schema, novo_schema);
 
     -- 11. MÓDULO 12: Comissões (NOVO)
     EXECUTE format('
@@ -1238,6 +1550,854 @@ BEGIN
         $func$;
     ', novo_schema, novo_schema);
 
+    -- Criar RPC de atualização dentro do schema tenant
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_atualizar_obra(
+          p_obra_id UUID,
+          p_nome VARCHAR(255),
+          p_descricao TEXT,
+          p_endereco TEXT,
+          p_data_inicio DATE,
+          p_data_fim_prevista DATE,
+          p_status VARCHAR(50),
+          p_orcamento_total NUMERIC(10, 2),
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_atualizar_obra'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          -- Atualizar obra
+          UPDATE obras
+          SET 
+            nome = p_nome,
+            descricao = p_descricao,
+            endereco = p_endereco,
+            data_inicio = p_data_inicio,
+            data_fim_prevista = p_data_fim_prevista,
+            status = p_status,
+            orcamento_total = p_orcamento_total,
+            atualizado_em = NOW()
+          WHERE id = p_obra_id;
+
+          IF NOT FOUND THEN
+            RETURN jsonb_build_object(''error'', ''Obra não encontrada'');
+          END IF;
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''UPDATE'', ''obras'', p_obra_id, auth.uid(), 
+            jsonb_build_object(''nome'', p_nome, ''status'', p_status),
+            ''success''
+          );
+
+          v_result := jsonb_build_object(
+            ''success'', true,
+            ''obra_id'', p_obra_id
+          );
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_atualizar_obra'', v_result);
+          END IF;
+
+          RETURN v_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    -- Criar RPCs de etapas de obras dentro do schema tenant
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_criar_etapa_obra(
+          p_obra_id UUID,
+          p_nome VARCHAR(255),
+          p_descricao TEXT,
+          p_data_prevista DATE,
+          p_ordem INTEGER,
+          p_status VARCHAR(50) DEFAULT ''pendente'',
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_etapa_id UUID;
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_criar_etapa_obra'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          INSERT INTO obras_etapas (obra_id, nome, descricao, data_prevista, ordem, status)
+          VALUES (p_obra_id, p_nome, p_descricao, p_data_prevista, p_ordem, p_status)
+          RETURNING id INTO v_etapa_id;
+
+          v_cached_result := jsonb_build_object(
+            ''success'', true,
+            ''etapa_id'', v_etapa_id
+          );
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''CREATE'', ''obras_etapas'', v_etapa_id, auth.uid(), 
+            jsonb_build_object(''nome'', p_nome, ''obra_id'', p_obra_id),
+            ''success''
+          );
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_criar_etapa_obra'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_etapas_obra(p_obra_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+        BEGIN
+          SELECT jsonb_agg(row_to_json(t))
+          INTO v_result
+          FROM (
+            SELECT id, obra_id, nome, descricao, data_prevista, data_conclusao, status, ordem, criado_em, atualizado_em
+            FROM obras_etapas
+            WHERE obra_id = p_obra_id
+            ORDER BY ordem ASC
+          ) t;
+          
+          RETURN COALESCE(v_result, ''[]''::JSONB);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_atualizar_etapa_obra(
+          p_etapa_id UUID,
+          p_nome VARCHAR(255),
+          p_descricao TEXT,
+          p_data_prevista DATE,
+          p_data_conclusao DATE,
+          p_status VARCHAR(50),
+          p_ordem INTEGER,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_atualizar_etapa_obra'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          UPDATE obras_etapas
+          SET 
+            nome = p_nome,
+            descricao = p_descricao,
+            data_prevista = p_data_prevista,
+            data_conclusao = p_data_conclusao,
+            status = p_status,
+            ordem = p_ordem
+          WHERE id = p_etapa_id;
+
+          IF NOT FOUND THEN
+            RETURN jsonb_build_object(''error'', ''Etapa não encontrada'');
+          END IF;
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''UPDATE'', ''obras_etapas'', p_etapa_id, auth.uid(), 
+            jsonb_build_object(''nome'', p_nome, ''status'', p_status),
+            ''success''
+          );
+
+          v_result := jsonb_build_object(
+            ''success'', true,
+            ''etapa_id'', p_etapa_id
+          );
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_atualizar_etapa_obra'', v_result);
+          END IF;
+
+          RETURN v_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_excluir_etapa_obra(p_etapa_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        BEGIN
+          DELETE FROM obras_etapas WHERE id = p_etapa_id;
+          
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''DELETE'', ''obras_etapas'', p_etapa_id, auth.uid(), 
+            jsonb_build_object(''etapa_id'', p_etapa_id),
+            ''success''
+          );
+          
+          RETURN jsonb_build_object(''success'', true);
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_obras_progresso(p_obra_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_total INTEGER;
+          v_concluidas INTEGER;
+          v_em_andamento INTEGER;
+          v_pendentes INTEGER;
+          v_percentual NUMERIC;
+        BEGIN
+          SELECT 
+            COUNT(*) INTO v_total
+          FROM obras_etapas
+          WHERE obra_id = p_obra_id;
+          
+          SELECT 
+            COUNT(*) INTO v_concluidas
+          FROM obras_etapas
+          WHERE obra_id = p_obra_id AND status = ''concluida'';
+          
+          SELECT 
+            COUNT(*) INTO v_em_andamento
+          FROM obras_etapas
+          WHERE obra_id = p_obra_id AND status = ''em_andamento'';
+          
+          SELECT 
+            COUNT(*) INTO v_pendentes
+          FROM obras_etapas
+          WHERE obra_id = p_obra_id AND status = ''pendente'';
+          
+          IF v_total > 0 THEN
+            v_percentual := (v_concluidas::NUMERIC / v_total::NUMERIC) * 100;
+          ELSE
+            v_percentual := 0;
+          END IF;
+          
+          RETURN jsonb_build_object(
+            ''total'', v_total,
+            ''concluidas'', v_concluidas,
+            ''em_andamento'', v_em_andamento,
+            ''pendentes'', v_pendentes,
+            ''percentual'', ROUND(v_percentual, 1)
+          );
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    -- Criar RPCs de custos de obras dentro do schema tenant
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_criar_custo_obra(
+          p_obra_id UUID,
+          p_categoria VARCHAR(100),
+          p_descricao TEXT,
+          p_valor_previsto NUMERIC(15, 2),
+          p_data DATE,
+          p_tipo VARCHAR(50),
+          p_fornecedor_id UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_custo_id UUID;
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_criar_custo_obra'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          INSERT INTO obras_custos (obra_id, categoria, descricao, valor_previsto, data, tipo, fornecedor_id)
+          VALUES (p_obra_id, p_categoria, p_descricao, p_valor_previsto, p_data, p_tipo, p_fornecedor_id)
+          RETURNING id INTO v_custo_id;
+
+          v_cached_result := jsonb_build_object(
+            ''success'', true,
+            ''custo_id'', v_custo_id
+          );
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''CREATE'', ''obras_custos'', v_custo_id, auth.uid(), 
+            jsonb_build_object(''categoria'', p_categoria, ''tipo'', p_tipo, ''valor_previsto'', p_valor_previsto),
+            ''success''
+          );
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_criar_custo_obra'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_custos_obra(p_obra_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+        BEGIN
+          SELECT jsonb_agg(row_to_json(t))
+          INTO v_result
+          FROM (
+            SELECT id, obra_id, categoria, descricao, valor_previsto, valor_real, data, tipo, fornecedor_id, criado_em, atualizado_em
+            FROM obras_custos
+            WHERE obra_id = p_obra_id
+            ORDER BY data DESC
+          ) t;
+          
+          RETURN COALESCE(v_result, ''[]''::JSONB);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_atualizar_custo_obra(
+          p_custo_id UUID,
+          p_categoria VARCHAR(100),
+          p_descricao TEXT,
+          p_valor_previsto NUMERIC(15, 2),
+          p_valor_real NUMERIC(15, 2),
+          p_data DATE,
+          p_tipo VARCHAR(50),
+          p_fornecedor_id UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_atualizar_custo_obra'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          UPDATE obras_custos
+          SET 
+            categoria = p_categoria,
+            descricao = p_descricao,
+            valor_previsto = p_valor_previsto,
+            valor_real = p_valor_real,
+            data = p_data,
+            tipo = p_tipo,
+            fornecedor_id = p_fornecedor_id
+          WHERE id = p_custo_id;
+
+          IF NOT FOUND THEN
+            RETURN jsonb_build_object(''error'', ''Custo não encontrado'');
+          END IF;
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''UPDATE'', ''obras_custos'', p_custo_id, auth.uid(), 
+            jsonb_build_object(''categoria'', p_categoria, ''tipo'', p_tipo),
+            ''success''
+          );
+
+          v_result := jsonb_build_object(
+            ''success'', true,
+            ''custo_id'', p_custo_id
+          );
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_atualizar_custo_obra'', v_result);
+          END IF;
+
+          RETURN v_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_excluir_custo_obra(p_custo_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        BEGIN
+          DELETE FROM obras_custos WHERE id = p_custo_id;
+          
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''DELETE'', ''obras_custos'', p_custo_id, auth.uid(), 
+            jsonb_build_object(''custo_id'', p_custo_id),
+            ''success''
+          );
+          
+          RETURN jsonb_build_object(''success'', true);
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_obras_resumo_financeiro(p_obra_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_orcamento_total NUMERIC;
+          v_total_previsto NUMERIC;
+          v_total_real NUMERIC;
+          v_variacao NUMERIC;
+          v_percentual_utilizado NUMERIC;
+        BEGIN
+          SELECT COALESCE(orcamento_total, 0) INTO v_orcamento_total
+          FROM obras WHERE id = p_obra_id;
+          
+          SELECT COALESCE(SUM(valor_previsto), 0) INTO v_total_previsto
+          FROM obras_custos WHERE obra_id = p_obra_id;
+          
+          SELECT COALESCE(SUM(valor_real), 0) INTO v_total_real
+          FROM obras_custos WHERE obra_id = p_obra_id AND valor_real IS NOT NULL;
+          
+          v_variacao := v_total_real - v_total_previsto;
+          
+          IF v_orcamento_total > 0 THEN
+            v_percentual_utilizado := (v_total_real / v_orcamento_total) * 100;
+          ELSE
+            v_percentual_utilizado := 0;
+          END IF;
+          
+          RETURN jsonb_build_object(
+            ''orcamento_total'', v_orcamento_total,
+            ''total_previsto'', v_total_previsto,
+            ''total_real'', v_total_real,
+            ''variacao'', v_variacao,
+            ''percentual_orcamento_utilizado'', ROUND(v_percentual_utilizado, 1)
+          );
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    -- Criar RPCs de recursos de obras dentro do schema tenant
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_alocar_recurso_obra(
+          p_obra_id UUID,
+          p_tipo VARCHAR(50),
+          p_descricao TEXT,
+          p_quantidade NUMERIC(10, 2),
+          p_unidade VARCHAR(20),
+          p_custo_unitario NUMERIC(15, 2),
+          p_status VARCHAR(50),
+          p_data_alocacao DATE,
+          p_fornecedor_id UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_recurso_id UUID;
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_alocar_recurso_obra'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          INSERT INTO obras_recursos (obra_id, tipo, descricao, quantidade, unidade, custo_unitario, status, data_alocacao, fornecedor_id)
+          VALUES (p_obra_id, p_tipo, p_descricao, p_quantidade, p_unidade, p_custo_unitario, p_status, p_data_alocacao, p_fornecedor_id)
+          RETURNING id INTO v_recurso_id;
+
+          v_cached_result := jsonb_build_object(
+            ''success'', true,
+            ''recurso_id'', v_recurso_id
+          );
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''CREATE'', ''obras_recursos'', v_recurso_id, auth.uid(), 
+            jsonb_build_object(''tipo'', p_tipo, ''descricao'', p_descricao),
+            ''success''
+          );
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_alocar_recurso_obra'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_recursos_obra(p_obra_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+        BEGIN
+          SELECT jsonb_agg(row_to_json(t))
+          INTO v_result
+          FROM (
+            SELECT id, obra_id, tipo, descricao, quantidade, unidade, custo_unitario, custo_total, status, data_alocacao, fornecedor_id, criado_em, atualizado_em
+            FROM obras_recursos
+            WHERE obra_id = p_obra_id
+            ORDER BY data_alocacao DESC
+          ) t;
+          
+          RETURN COALESCE(v_result, ''[]''::JSONB);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_atualizar_recurso_obra(
+          p_recurso_id UUID,
+          p_tipo VARCHAR(50),
+          p_descricao TEXT,
+          p_quantidade NUMERIC(10, 2),
+          p_unidade VARCHAR(20),
+          p_custo_unitario NUMERIC(15, 2),
+          p_status VARCHAR(50),
+          p_data_alocacao DATE,
+          p_fornecedor_id UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_atualizar_recurso_obra'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          UPDATE obras_recursos
+          SET 
+            tipo = p_tipo,
+            descricao = p_descricao,
+            quantidade = p_quantidade,
+            unidade = p_unidade,
+            custo_unitario = p_custo_unitario,
+            status = p_status,
+            data_alocacao = p_data_alocacao,
+            fornecedor_id = p_fornecedor_id
+          WHERE id = p_recurso_id;
+
+          IF NOT FOUND THEN
+            RETURN jsonb_build_object(''error'', ''Recurso não encontrado'');
+          END IF;
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''UPDATE'', ''obras_recursos'', p_recurso_id, auth.uid(), 
+            jsonb_build_object(''tipo'', p_tipo, ''descricao'', p_descricao),
+            ''success''
+          );
+
+          v_result := jsonb_build_object(
+            ''success'', true,
+            ''recurso_id'', p_recurso_id
+          );
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_atualizar_recurso_obra'', v_result);
+          END IF;
+
+          RETURN v_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_excluir_recurso_obra(p_recurso_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        BEGIN
+          DELETE FROM obras_recursos WHERE id = p_recurso_id;
+          
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''DELETE'', ''obras_recursos'', p_recurso_id, auth.uid(), 
+            jsonb_build_object(''recurso_id'', p_recurso_id),
+            ''success''
+          );
+          
+          RETURN jsonb_build_object(''success'', true);
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    -- Criar RPCs de documentos de obras dentro do schema tenant
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_upload_documento_obra(
+          p_obra_id UUID,
+          p_nome VARCHAR(255),
+          p_tipo VARCHAR(100),
+          p_tamanho BIGINT,
+          p_url TEXT,
+          p_caminho_storage TEXT,
+          p_descricao TEXT,
+          p_criado_por UUID
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_documento_id UUID;
+        BEGIN
+          INSERT INTO obras_documentos (obra_id, nome, tipo, tamanho, url, caminho_storage, descricao, criado_por)
+          VALUES (p_obra_id, p_nome, p_tipo, p_tamanho, p_url, p_caminho_storage, p_descricao, p_criado_por)
+          RETURNING id INTO v_documento_id;
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''CREATE'', ''obras_documentos'', v_documento_id, p_criado_por, 
+            jsonb_build_object(''nome'', p_nome, ''tipo'', p_tipo, ''tamanho'', p_tamanho),
+            ''success''
+          );
+          
+          RETURN jsonb_build_object(
+            ''success'', true,
+            ''documento_id'', v_documento_id
+          );
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_documentos_obra(p_obra_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+        BEGIN
+          SELECT jsonb_agg(row_to_json(t))
+          INTO v_result
+          FROM (
+            SELECT id, obra_id, nome, tipo, tamanho, url, caminho_storage, descricao, criado_por, criado_em
+            FROM obras_documentos
+            WHERE obra_id = p_obra_id
+            ORDER BY criado_em DESC
+          ) t;
+          
+          RETURN COALESCE(v_result, ''[]''::JSONB);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_excluir_documento_obra(p_documento_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_caminho_storage TEXT;
+          v_criado_por UUID;
+        BEGIN
+          SELECT caminho_storage, criado_por INTO v_caminho_storage, v_criado_por
+          FROM obras_documentos
+          WHERE id = p_documento_id;
+          
+          IF v_caminho_storage IS NULL THEN
+            RETURN jsonb_build_object(''error'', ''Documento não encontrado'');
+          END IF;
+          
+          DELETE FROM obras_documentos WHERE id = p_documento_id;
+          
+          -- Registrar em audit_log
+          INSERT INTO audit_log (
+            operation_type, resource, resource_id, user_id, details, status
+          )
+          VALUES (
+            ''DELETE'', ''obras_documentos'', p_documento_id, v_criado_por, 
+            jsonb_build_object(''caminho_storage'', v_caminho_storage),
+            ''success''
+          );
+          
+          RETURN jsonb_build_object(''success'', true, ''caminho_storage'', v_caminho_storage);
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
     -- Criar RPCs de exclusão dentro do schema tenant
     EXECUTE format('
         CREATE OR REPLACE FUNCTION %I.tenant_excluir_cliente(p_cliente_id UUID)
@@ -1268,6 +2428,1148 @@ BEGIN
           RETURN json_build_object(''success'', true);
         EXCEPTION WHEN OTHERS THEN
           RAISE;
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_verificar_alertas_estoque()
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_alertas_criados INT;
+          v_tipo_alerta VARCHAR(50);
+          v_mensagem TEXT;
+        BEGIN
+          -- Criar alertas para produtos com estoque abaixo do mínimo
+          INSERT INTO alertas_estoque (produto_id, tipo_alerta, estoque_atual, estoque_minimo, mensagem, status)
+          SELECT 
+            e.produto_id,
+            CASE 
+              WHEN e.quantidade = 0 THEN ''sem_estoque''
+              ELSE ''estoque_baixo''
+            END as tipo_alerta,
+            e.quantidade as estoque_atual,
+            e.quantidade_minima as estoque_minimo,
+            CONCAT(''Estoque do produto "'', p.nome, ''" está abaixo do mínimo. Atual: '', e.quantidade, '', Mínimo: '', e.quantidade_minima) as mensagem,
+            ''pendente'' as status
+          FROM estoque e
+          JOIN produtos p ON e.produto_id = p.id
+          WHERE e.quantidade <= e.quantidade_minima
+            AND e.quantidade_minima > 0
+            AND NOT EXISTS (
+              SELECT 1 FROM alertas_estoque a
+              WHERE a.produto_id = e.produto_id
+                AND a.status = ''pendente''
+                AND a.criado_em > NOW() - INTERVAL ''24 hours''
+            );
+          
+          GET DIAGNOSTICS v_alertas_criados = ROW_COUNT;
+          
+          RETURN jsonb_build_object(''success'', true, ''alertas_criados'', v_alertas_criados);
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_alertas_estoque(p_status VARCHAR DEFAULT NULL, p_limit INT DEFAULT 100, p_offset INT DEFAULT 0)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        BEGIN
+          RETURN COALESCE(
+            (SELECT jsonb_agg(
+              jsonb_build_object(
+                ''id'', a.id,
+                ''produto_id'', a.produto_id,
+                ''produto_nome'', p.nome,
+                ''tipo_alerta'', a.tipo_alerta,
+                ''estoque_atual'', a.estoque_atual,
+                ''estoque_minimo'', a.estoque_minimo,
+                ''mensagem'', a.mensagem,
+                ''status'', a.status,
+                ''criado_em'', a.criado_em,
+                ''resolvido_em'', a.resolvido_em
+              )
+            )
+            FROM alertas_estoque a
+            JOIN produtos p ON a.produto_id = p.id
+            WHERE (p_status IS NULL OR a.status = p_status)
+            ORDER BY a.criado_em DESC
+            LIMIT p_limit OFFSET p_offset),
+            ''[]''::JSONB
+          );
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_resolver_alerta_estoque(
+          p_alerta_id UUID,
+          p_status VARCHAR,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_resolver_alerta_estoque'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          -- Atualizar alerta
+          UPDATE alertas_estoque
+          SET status = p_status,
+              resolvido_em = CASE WHEN p_status = ''resolvido'' THEN NOW() ELSE NULL END
+          WHERE id = p_alerta_id;
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''UPDATE'', ''alertas_estoque'', p_alerta_id, auth.uid(), jsonb_build_object(''status'', p_status), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true);
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_resolver_alerta_estoque'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_criar_kit(
+          p_produto_id UUID,
+          p_nome VARCHAR(255),
+          p_descricao TEXT,
+          p_itens JSONB,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_kit_id UUID;
+          v_item JSONB;
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_criar_kit'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          -- Criar kit
+          INSERT INTO kits (produto_id, nome, descricao)
+          VALUES (p_produto_id, p_nome, p_descricao)
+          RETURNING id INTO v_kit_id;
+
+          -- Inserir itens do kit
+          FOR v_item IN SELECT * FROM jsonb_array_elements(p_itens) LOOP
+            INSERT INTO kit_itens (kit_id, produto_id, quantidade)
+            VALUES (
+              v_kit_id,
+              (v_item->>''produto_id'')::UUID,
+              (v_item->>''quantidade'')::INT
+            );
+          END LOOP;
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''CREATE'', ''kits'', v_kit_id, auth.uid(), jsonb_build_object(''nome'', p_nome, ''itens'', p_itens), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true, ''kit_id'', v_kit_id);
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_criar_kit'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_kits()
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+        BEGIN
+          SELECT COALESCE(
+            jsonb_agg(
+              jsonb_build_object(
+                ''id'', k.id,
+                ''produto_id'', k.produto_id,
+                ''produto_nome'', p.nome,
+                ''nome'', k.nome,
+                ''descricao'', k.descricao,
+                ''ativo'', k.ativo,
+                ''criado_em'', k.criado_em,
+                ''atualizado_em'', k.atualizado_em,
+                ''itens'', (
+                  SELECT jsonb_agg(
+                    jsonb_build_object(
+                      ''id'', ki.id,
+                      ''produto_id'', ki.produto_id,
+                      ''produto_nome'', pi.nome,
+                      ''quantidade'', ki.quantidade
+                    )
+                  )
+                  FROM kit_itens ki
+                  JOIN produtos pi ON ki.produto_id = pi.id
+                  WHERE ki.kit_id = k.id
+                )
+              )
+            ),
+            ''[]''::JSONB
+          ) INTO v_result
+          FROM kits k
+          JOIN produtos p ON k.produto_id = p.id
+          WHERE k.ativo = true
+          ORDER BY k.criado_em DESC;
+
+          RETURN v_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_excluir_kit(
+          p_kit_id UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_excluir_kit'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          -- Soft delete
+          UPDATE kits SET ativo = false WHERE id = p_kit_id;
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''DELETE'', ''kits'', p_kit_id, auth.uid(), jsonb_build_object(''soft_delete'', true), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true);
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_excluir_kit'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_vender_kit(
+          p_kit_id UUID,
+          p_quantidade INT DEFAULT 1,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_item RECORD;
+          v_qtd_baixar INT;
+          v_estoque_atual INT;
+          v_produto_nome VARCHAR(255);
+          v_cached_result JSONB;
+        BEGIN
+          -- Verificar idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_vender_kit'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          -- Verificar estoque de cada item
+          FOR v_item IN 
+            SELECT ki.produto_id, ki.quantidade, p.nome as produto_nome
+            FROM kit_itens ki
+            JOIN produtos p ON ki.produto_id = p.id
+            WHERE ki.kit_id = p_kit_id
+          LOOP
+            -- Obter estoque atual do produto
+            SELECT e.quantidade INTO v_estoque_atual
+            FROM estoque e
+            WHERE e.produto_id = v_item.produto_id;
+
+            v_qtd_baixar := v_item.quantidade * p_quantidade;
+
+            IF v_estoque_atual < v_qtd_baixar THEN
+              RETURN jsonb_build_object(''error'', ''Estoque insuficiente para '' || v_item.produto_nome);
+            END IF;
+          END LOOP;
+
+          -- Baixar estoque de cada item
+          FOR v_item IN 
+            SELECT ki.produto_id, ki.quantidade
+            FROM kit_itens ki
+            WHERE ki.kit_id = p_kit_id
+          LOOP
+            v_qtd_baixar := v_item.quantidade * p_quantidade;
+
+            -- Atualizar estoque
+            UPDATE estoque
+            SET quantidade = quantidade - v_qtd_baixar,
+                atualizado_em = NOW()
+            WHERE produto_id = v_item.produto_id;
+
+            -- Registrar movimento de estoque
+            INSERT INTO estoque (produto_id, quantidade, quantidade_minima)
+            VALUES (v_item.produto_id, -v_qtd_baixar, 10);
+          END LOOP;
+
+          -- Registrar em audit_log
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''UPDATE'', ''kits'', p_kit_id, auth.uid(), jsonb_build_object(''quantidade'', p_quantidade), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true);
+
+          -- Armazenar resultado para idempotência
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_vender_kit'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_criar_local_estoque(
+          p_nome VARCHAR(255),
+          p_tipo VARCHAR(50),
+          p_endereco TEXT,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_local_id UUID;
+          v_cached_result JSONB;
+        BEGIN
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_criar_local_estoque'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          INSERT INTO locais_estoque (nome, tipo, endereco)
+          VALUES (p_nome, p_tipo, p_endereco)
+          RETURNING id INTO v_local_id;
+
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''CREATE'', ''locais_estoque'', v_local_id, auth.uid(), jsonb_build_object(''nome'', p_nome, ''tipo'', p_tipo), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true, ''local_id'', v_local_id);
+
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_criar_local_estoque'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_locais_estoque()
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+        BEGIN
+          SELECT COALESCE(
+            jsonb_agg(
+              jsonb_build_object(
+                ''id'', l.id,
+                ''nome'', l.nome,
+                ''tipo'', l.tipo,
+                ''endereco'', l.endereco,
+                ''ativo'', l.ativo,
+                ''criado_em'', l.criado_em
+              )
+            ),
+            ''[]''::JSONB
+          ) INTO v_result
+          FROM locais_estoque l
+          WHERE l.ativo = true
+          ORDER BY l.criado_em DESC;
+
+          RETURN v_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_desativar_local_estoque(
+          p_local_id UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_cached_result JSONB;
+          v_total_estoque INT;
+        BEGIN
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_desativar_local_estoque'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          SELECT COALESCE(SUM(quantidade), 0) INTO v_total_estoque
+          FROM estoque_por_local
+          WHERE local_id = p_local_id;
+
+          IF v_total_estoque > 0 THEN
+            RETURN jsonb_build_object(''error'', ''Não é possível desativar local com estoque. Estoque atual: '' || v_total_estoque);
+          END IF;
+
+          UPDATE locais_estoque SET ativo = false WHERE id = p_local_id;
+
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''UPDATE'', ''locais_estoque'', p_local_id, auth.uid(), jsonb_build_object(''soft_delete'', true), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true);
+
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_desativar_local_estoque'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_criar_transferencia(
+          p_produto_id UUID,
+          p_local_origem_id UUID,
+          p_local_destino_id UUID,
+          p_quantidade INT,
+          p_observacao TEXT,
+          p_criado_por UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_transferencia_id UUID;
+          v_estoque_origem INT;
+          v_cached_result JSONB;
+        BEGIN
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_criar_transferencia'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          IF p_local_origem_id = p_local_destino_id THEN
+            RETURN jsonb_build_object(''error'', ''Local de origem e destino devem ser diferentes'');
+          END IF;
+
+          SELECT COALESCE(quantidade, 0) INTO v_estoque_origem
+          FROM estoque_por_local
+          WHERE produto_id = p_produto_id AND local_id = p_local_origem_id;
+
+          IF v_estoque_origem IS NULL OR v_estoque_origem < p_quantidade THEN
+            RETURN jsonb_build_object(''error'', ''Estoque insuficiente na origem. Disponível: '' || COALESCE(v_estoque_origem, 0));
+          END IF;
+
+          INSERT INTO transferencias_estoque (
+            produto_id, local_origem_id, local_destino_id, quantidade, 
+            observacao, criado_por, status
+          )
+          VALUES (
+            p_produto_id, p_local_origem_id, p_local_destino_id, p_quantidade,
+            p_observacao, p_criado_por, ''pendente''
+          )
+          RETURNING id INTO v_transferencia_id;
+
+          UPDATE estoque_por_local
+          SET quantidade = quantidade - p_quantidade,
+              atualizado_em = NOW()
+          WHERE produto_id = p_produto_id AND local_id = p_local_origem_id;
+
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''CREATE'', ''transferencias_estoque'', v_transferencia_id, p_criado_por, jsonb_build_object(''quantidade'', p_quantidade), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true, ''transferencia_id'', v_transferencia_id);
+
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_criar_transferencia'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_concluir_transferencia(
+          p_transferencia_id UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_produto_id UUID;
+          v_local_destino_id UUID;
+          v_quantidade INT;
+          v_cached_result JSONB;
+        BEGIN
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_concluir_transferencia'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          SELECT produto_id, local_destino_id, quantidade
+          INTO v_produto_id, v_local_destino_id, v_quantidade
+          FROM transferencias_estoque
+          WHERE id = p_transferencia_id AND status = ''pendente'';
+
+          IF NOT FOUND THEN
+            RETURN jsonb_build_object(''error'', ''Transferência não encontrada ou já processada'');
+          END IF;
+
+          UPDATE transferencias_estoque
+          SET status = ''concluida'', concluida_em = NOW()
+          WHERE id = p_transferencia_id;
+
+          INSERT INTO estoque_por_local (produto_id, local_id, quantidade, criado_em, atualizado_em)
+          VALUES (v_produto_id, v_local_destino_id, v_quantidade, NOW(), NOW())
+          ON CONFLICT (produto_id, local_id) 
+          DO UPDATE SET 
+            quantidade = estoque_por_local.quantidade + EXCLUDED.quantidade,
+            atualizado_em = NOW();
+
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''UPDATE'', ''transferencias_estoque'', p_transferencia_id, auth.uid(), jsonb_build_object(''quantidade'', v_quantidade), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true);
+
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_concluir_transferencia'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_cancelar_transferencia(
+          p_transferencia_id UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_local_origem_id UUID;
+          v_produto_id UUID;
+          v_quantidade INT;
+          v_cached_result JSONB;
+        BEGIN
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_cancelar_transferencia'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          SELECT local_origem_id, produto_id, quantidade
+          INTO v_local_origem_id, v_produto_id, v_quantidade
+          FROM transferencias_estoque
+          WHERE id = p_transferencia_id AND status = ''pendente'';
+
+          IF NOT FOUND THEN
+            RETURN jsonb_build_object(''error'', ''Transferência não encontrada ou já processada'');
+          END IF;
+
+          UPDATE transferencias_estoque
+          SET status = ''cancelada''
+          WHERE id = p_transferencia_id;
+
+          UPDATE estoque_por_local
+          SET quantidade = quantidade + v_quantidade,
+              atualizado_em = NOW()
+          WHERE produto_id = v_produto_id AND local_id = v_local_origem_id;
+
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''UPDATE'', ''transferencias_estoque'', p_transferencia_id, auth.uid(), jsonb_build_object(''quantidade'', v_quantidade), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true);
+
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_cancelar_transferencia'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_transferencias(p_status VARCHAR DEFAULT NULL, p_limit INT DEFAULT 100, p_offset INT DEFAULT 0)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+        BEGIN
+          SELECT COALESCE(
+            jsonb_agg(
+              jsonb_build_object(
+                ''id'', t.id,
+                ''produto_id'', t.produto_id,
+                ''produto_nome'', p.nome,
+                ''local_origem_id'', t.local_origem_id,
+                ''local_origem_nome'', lo.nome,
+                ''local_destino_id'', t.local_destino_id,
+                ''local_destino_nome'', ld.nome,
+                ''quantidade'', t.quantidade,
+                ''status'', t.status,
+                ''observacao'', t.observacao,
+                ''criado_por'', t.criado_por,
+                ''criado_em'', t.criado_em,
+                ''concluida_em'', t.concluida_em
+              )
+            ),
+            ''[]''::JSONB
+          ) INTO v_result
+          FROM transferencias_estoque t
+          JOIN produtos p ON t.produto_id = p.id
+          JOIN locais_estoque lo ON t.local_origem_id = lo.id
+          JOIN locais_estoque ld ON t.local_destino_id = ld.id
+          WHERE (p_status IS NULL OR t.status = p_status)
+          ORDER BY t.criado_em DESC
+          LIMIT p_limit OFFSET p_offset;
+
+          RETURN v_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_calcular_valor_estoque(p_metodo VARCHAR DEFAULT ''custo_medio'')
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_valor_total NUMERIC;
+          v_produtos_sem_custo INT;
+        BEGIN
+          IF p_metodo = ''custo_medio'' THEN
+            SELECT COALESCE(SUM(e.quantidade * COALESCE(p.custo_unitario, 0)), 0) INTO v_valor_total
+            FROM estoque e
+            JOIN produtos p ON e.produto_id = p.id;
+            
+            SELECT COUNT(*) INTO v_produtos_sem_custo
+            FROM produtos
+            WHERE custo_unitario IS NULL;
+            
+            RETURN jsonb_build_object(
+              ''valor_total'', v_valor_total,
+              ''metodo'', p_metodo,
+              ''produtos_sem_custo'', v_produtos_sem_custo
+            );
+            
+          ELSIF p_metodo = ''fifo'' OR p_metodo = ''lifo'' THEN
+            RETURN jsonb_build_object(
+              ''error'', ''Método '' || p_metodo || '' requer tabela de movimentações de estoque com campo custo_entrada. Implementação pendente.'',
+              ''metodo'', p_metodo
+            );
+          ELSE
+            RETURN jsonb_build_object(
+              ''error'', ''Método inválido. Use: custo_medio, fifo ou lifo''
+            );
+          END IF;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_atualizar_custo_produto(
+          p_produto_id UUID,
+          p_custo_unitario NUMERIC,
+          p_metodo_valoracao VARCHAR DEFAULT ''custo_medio'',
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_cached_result JSONB;
+        BEGIN
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key
+              AND operation_type = ''tenant_atualizar_custo_produto'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          UPDATE produtos
+          SET custo_unitario = p_custo_unitario,
+              metodo_valoracao = p_metodo_valoracao,
+              atualizado_em = NOW()
+          WHERE id = p_produto_id;
+
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''UPDATE'', ''produtos'', p_produto_id, auth.uid(), jsonb_build_object(''custo_unitario'', p_custo_unitario, ''metodo_valoracao'', p_metodo_valoracao), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true);
+
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_atualizar_custo_produto'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_gerar_codigo_barras(
+          p_produto_id UUID,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_codigo VARCHAR(50);
+          v_cached_result JSONB;
+        BEGIN
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key
+              AND operation_type = ''tenant_gerar_codigo_barras'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          -- Verificar se já tem codigo_barras
+          SELECT codigo_barras INTO v_codigo
+          FROM produtos
+          WHERE id = p_produto_id;
+
+          IF v_codigo IS NOT NULL THEN
+            RETURN jsonb_build_object(''success'', true, ''codigo_barras'', v_codigo, ''ja_existia'', true);
+          END IF;
+
+          -- Gerar código: PROD + 10 primeiros caracteres do UUID com zeros à esquerda
+          v_codigo := ''PROD'' || LPAD(SUBSTRING(p_produto_id::TEXT, 1, 10), 10, ''0'');
+
+          UPDATE produtos
+          SET codigo_barras = v_codigo,
+              codigo_qr = v_codigo,
+              atualizado_em = NOW()
+          WHERE id = p_produto_id;
+
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''UPDATE'', ''produtos'', p_produto_id, auth.uid(), jsonb_build_object(''codigo_barras'', v_codigo), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true, ''codigo_barras'', v_codigo);
+
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_gerar_codigo_barras'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_buscar_produto_por_codigo(p_codigo VARCHAR)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+        BEGIN
+          SELECT jsonb_build_object(
+            ''id'', p.id,
+            ''nome'', p.nome,
+            ''descricao'', p.descricao,
+            ''tipo'', p.tipo,
+            ''preco_base'', p.preco_base,
+            ''categoria'', p.categoria,
+            ''custo_unitario'', p.custo_unitario,
+            ''metodo_valoracao'', p.metodo_valoracao,
+            ''codigo_barras'', p.codigo_barras,
+            ''codigo_qr'', p.codigo_qr,
+            ''criado_em'', p.criado_em,
+            ''atualizado_em'', p.atualizado_em
+          ) INTO v_result
+          FROM produtos p
+          WHERE p.codigo_barras = p_codigo OR p.codigo_qr = p_codigo;
+
+          IF v_result IS NULL THEN
+            RETURN jsonb_build_object(''error'', ''Produto não encontrado'');
+          END IF;
+
+          RETURN v_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_gerar_previsao_demanda(
+          p_produto_id UUID,
+          p_dias_analise INT DEFAULT 30,
+          p_dias_previsao INT DEFAULT 30,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_cached_result JSONB;
+          v_media_venda_diaria NUMERIC(10, 4);
+          v_demanda_prevista INT;
+          v_previsao_id UUID;
+          v_periodo_inicio DATE;
+          v_periodo_fim DATE;
+          v_produto_existe BOOLEAN;
+        BEGIN
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key
+              AND operation_type = ''tenant_gerar_previsao_demanda'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          -- Verificar se o produto existe
+          SELECT EXISTS(SELECT 1 FROM produtos WHERE id = p_produto_id) INTO v_produto_existe;
+          IF NOT v_produto_existe THEN
+            RETURN jsonb_build_object(''error'', ''Produto não encontrado'');
+          END IF;
+
+          -- Calcular média de venda diária usando vendas_itens
+          SELECT COALESCE(SUM(vi.quantidade), 0.0) / p_dias_analise INTO v_media_venda_diaria
+          FROM vendas_itens vi
+          JOIN vendas v ON vi.venda_id = v.id
+          WHERE vi.produto_id = p_produto_id
+            AND v.status = ''concluido''
+            AND vi.criado_em >= NOW() - (p_dias_analise || '' days'')::INTERVAL;
+
+          -- Calcular demanda prevista
+          v_demanda_prevista := ROUND(v_media_venda_diaria * p_dias_previsao);
+
+          -- Definir período
+          v_periodo_inicio := CURRENT_DATE;
+          v_periodo_fim := CURRENT_DATE + p_dias_previsao;
+
+          -- Inserir previsão
+          INSERT INTO previsoes_demanda (
+            produto_id, periodo_inicio, periodo_fim, dias_analise,
+            demanda_prevista, media_venda_diaria
+          ) VALUES (
+            p_produto_id, v_periodo_inicio, v_periodo_fim, p_dias_analise,
+            v_demanda_prevista, v_media_venda_diaria
+          ) RETURNING id INTO v_previsao_id;
+
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''INSERT'', ''previsoes_demanda'', v_previsao_id, auth.uid(), jsonb_build_object(''demanda_prevista'', v_demanda_prevista, ''media_venda_diaria'', v_media_venda_diaria), ''success'');
+
+          v_cached_result := jsonb_build_object(
+            ''success'', true,
+            ''demanda_prevista'', v_demanda_prevista,
+            ''media_venda_diaria'', v_media_venda_diaria,
+            ''previsao_id'', v_previsao_id
+          );
+
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_gerar_previsao_demanda'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_previsoes_demanda(p_produto_id UUID DEFAULT NULL, p_limit INT DEFAULT 50, p_offset INT DEFAULT 0)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_result JSONB;
+        BEGIN
+          SELECT COALESCE(jsonb_agg(
+            jsonb_build_object(
+              ''id'', pd.id,
+              ''produto_id'', pd.produto_id,
+              ''produto_nome'', p.nome,
+              ''periodo_inicio'', pd.periodo_inicio,
+              ''periodo_fim'', pd.periodo_fim,
+              ''dias_analise'', pd.dias_analise,
+              ''demanda_prevista'', pd.demanda_prevista,
+              ''media_venda_diaria'', pd.media_venda_diaria,
+              ''demanda_real'', pd.demanda_real,
+              ''precisao'', pd.precisao,
+              ''dias_para_zerar'', CASE WHEN pd.media_venda_diaria > 0 THEN ROUND(e.quantidade / pd.media_venda_diaria) ELSE NULL END,
+              ''criado_em'', pd.criado_em
+            )
+          ), ''[]''::JSONB) INTO v_result
+          FROM previsoes_demanda pd
+          JOIN produtos p ON pd.produto_id = p.id
+          LEFT JOIN estoque e ON p.id = e.produto_id
+          WHERE (p_produto_id IS NULL OR pd.produto_id = p_produto_id)
+          ORDER BY pd.criado_em DESC
+          LIMIT p_limit OFFSET p_offset;
+
+          RETURN v_result;
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_atualizar_demanda_real(
+          p_previsao_id UUID,
+          p_demanda_real INT,
+          p_idempotency_key TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_cached_result JSONB;
+          v_precisao NUMERIC(5, 2);
+          v_demanda_prevista INT;
+        BEGIN
+          IF p_idempotency_key IS NOT NULL THEN
+            SELECT result INTO v_cached_result
+            FROM idempotency_control
+            WHERE idempotency_key = p_idempotency_key
+              AND operation_type = ''tenant_atualizar_demanda_real'';
+            
+            IF v_cached_result IS NOT NULL THEN
+              RETURN v_cached_result;
+            END IF;
+          END IF;
+
+          -- Buscar demanda_prevista para cálculo
+          SELECT demanda_prevista INTO v_demanda_prevista
+          FROM previsoes_demanda
+          WHERE id = p_previsao_id;
+
+          IF v_demanda_prevista IS NULL THEN
+            RETURN jsonb_build_object(''error'', ''Previsão não encontrada'');
+          END IF;
+
+          -- Calcular precisão
+          IF v_demanda_prevista > 0 THEN
+            v_precisao := ROUND(100 - (ABS(v_demanda_prevista - p_demanda_real)::NUMERIC / v_demanda_prevista * 100), 2);
+          ELSE
+            v_precisao := NULL;
+          END IF;
+
+          -- Atualizar previsão
+          UPDATE previsoes_demanda
+          SET demanda_real = p_demanda_real,
+              precisao = v_precisao
+          WHERE id = p_previsao_id;
+
+          INSERT INTO audit_log (operation_type, resource, resource_id, user_id, details, status)
+          VALUES (''UPDATE'', ''previsoes_demanda'', p_previsao_id, auth.uid(), jsonb_build_object(''demanda_real'', p_demanda_real, ''precisao'', v_precisao), ''success'');
+
+          v_cached_result := jsonb_build_object(''success'', true, ''precisao'', v_precisao);
+
+          IF p_idempotency_key IS NOT NULL THEN
+            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
+            VALUES (p_idempotency_key, ''tenant_atualizar_demanda_real'', v_cached_result);
+          END IF;
+
+          RETURN v_cached_result;
+
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
         END;
         $func$;
     ', novo_schema, novo_schema);

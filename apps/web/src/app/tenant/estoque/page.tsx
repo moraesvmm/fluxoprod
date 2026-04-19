@@ -11,19 +11,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PackageOpen, AlertTriangle, Boxes, Plus, Search, Filter, Edit, Trash2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PackageOpen, AlertTriangle, Boxes, Plus, Search, Filter, Edit, Trash2, Barcode } from "lucide-react";
 import { useProdutos, useCreateProduto, useDeleteProduto } from "@/lib/hooks/use-produtos";
 import { useToast, Toast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import AlertasEstoquePanel from "@/components/modules/estoque/AlertasEstoquePanel";
+import KitsManager from "@/components/modules/estoque/KitsManager";
+import TransferenciasManager from "@/components/modules/estoque/TransferenciasManager";
+import ValorizacaoDashboard from "@/components/modules/estoque/ValorizacaoDashboard";
+import CodigosPanel from "@/components/modules/estoque/CodigosPanel";
+import PrevisaoDemandaPanel from "@/components/modules/estoque/PrevisaoDemandaPanel";
+import BarcodeScanner from "@/components/modules/estoque/BarcodeScanner";
 
 export default function EstoquePage() {
+  const [activeTab, setActiveTab] = useState("produtos");
   const { data: produtos = [], isLoading: loading, error: queryError } = useProdutos();
   const createMutation = useCreateProduto();
   const deleteMutation = useDeleteProduto();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [exportConfirm, setExportConfirm] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [formData, setFormData] = useState({
     nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '',
     estoque_atual: '0', estoque_minimo: '10', categoria: ''
@@ -87,7 +97,7 @@ export default function EstoquePage() {
   const error = queryError ? "Erro ao carregar produtos. Tente novamente." : null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {toasts.map(toast => (
         <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
       ))}
@@ -108,6 +118,9 @@ export default function EstoquePage() {
           <p className="text-muted-foreground">Controle de inventário e alertas de reposição.</p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => setScannerOpen(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-border hover:bg-slate-50 text-slate-700 h-10 px-4 py-2">
+            <Barcode className="mr-2 h-4 w-4" /> Scanner
+          </button>
           <button onClick={() => setExportConfirm(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-border hover:bg-slate-50 text-slate-700 h-10 px-4 py-2">
             Importar/Exportar
           </button>
@@ -123,61 +136,95 @@ export default function EstoquePage() {
         <KPICard title="Itens Críticos" value={String(itensCriticos)} icon={PackageOpen} className="border-red-200 bg-red-50/10" />
       </div>
 
-      <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <input type="search" placeholder="Buscar SKU ou nome do produto..." className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
-          </div>
-          <div className="flex gap-2">
-            <button className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-md bg-white">
-              <Filter className="h-4 w-4" /> Filtros
-            </button>
-          </div>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Status</TableHead><TableHead>SKU</TableHead><TableHead>Produto</TableHead>
-              <TableHead className="text-right">Qtd. Atual</TableHead><TableHead className="text-right">Mínimo</TableHead>
-              <TableHead className="text-right">Preço</TableHead><TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-6">
-                <div className="flex items-center justify-center gap-2 text-slate-500">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-primary" />
-                  Carregando produtos...
-                </div>
-              </TableCell></TableRow>
-            ) : error ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-red-500">{error}</div></TableCell></TableRow>
-            ) : produtos.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-slate-500">Nenhum produto encontrado</div></TableCell></TableRow>
-            ) : (
-              produtos.map((item) => (
-                <TableRow key={item.id} className="group">
-                  <TableCell><StatusBadge status={getStatus(item.estoque_atual, item.estoque_minimo) as any} /></TableCell>
-                  <TableCell className="font-mono text-xs text-slate-500">{item.sku || '-'}</TableCell>
-                  <TableCell className="font-medium text-slate-900">{item.nome}</TableCell>
-                  <TableCell className="text-right font-bold text-slate-700">
-                    <span className={item.estoque_atual <= item.estoque_minimo ? "text-red-600" : ""}>{item.estoque_atual}</span>
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground">{item.estoque_minimo}</TableCell>
-                  <TableCell className="text-right text-emerald-600 font-medium">{formatarPreco(item.preco_venda)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="text-slate-400 hover:text-blue-600 p-1" title="Editar"><Edit className="h-4 w-4" /></button>
-                      <button onClick={() => setDeleteId(item.id)} className="text-slate-400 hover:text-red-600 p-1" title="Excluir"><Trash2 className="h-4 w-4" /></button>
-                    </div>
-                  </TableCell>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="inline-flex rounded-lg bg-muted p-1">
+          <TabsTrigger value="produtos" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Produtos</TabsTrigger>
+          <TabsTrigger value="alertas" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Alertas</TabsTrigger>
+          <TabsTrigger value="kits" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Kits</TabsTrigger>
+          <TabsTrigger value="transferencias" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Transferências</TabsTrigger>
+          <TabsTrigger value="valoracao" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Valoração</TabsTrigger>
+          <TabsTrigger value="previsao" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Previsão</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="produtos" className="mt-4">
+          <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
+              <div className="relative w-full max-w-sm">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <input type="search" placeholder="Buscar SKU ou nome do produto..." className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
+              </div>
+              <div className="flex gap-2">
+                <button className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-md bg-white">
+                  <Filter className="h-4 w-4" /> Filtros
+                </button>
+              </div>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Status</TableHead><TableHead>SKU</TableHead><TableHead>Produto</TableHead>
+                  <TableHead className="text-right">Qtd. Atual</TableHead><TableHead className="text-right">Mínimo</TableHead>
+                  <TableHead className="text-right">Preço</TableHead><TableHead className="text-right">Ações</TableHead>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-6">
+                    <div className="flex items-center justify-center gap-2 text-slate-500">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-primary" />
+                      Carregando produtos...
+                    </div>
+                  </TableCell></TableRow>
+                ) : error ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-red-500">{error}</div></TableCell></TableRow>
+                ) : produtos.length === 0 ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-slate-500">Nenhum produto encontrado</div></TableCell></TableRow>
+                ) : (
+                  produtos.map((item) => (
+                    <TableRow key={item.id} className="group">
+                      <TableCell><StatusBadge status={getStatus(item.estoque_atual, item.estoque_minimo) as any} /></TableCell>
+                      <TableCell className="font-mono text-xs text-slate-500">{item.sku || '-'}</TableCell>
+                      <TableCell className="font-medium text-slate-900">{item.nome}</TableCell>
+                      <TableCell className="text-right font-bold text-slate-700">
+                        <span className={item.estoque_atual <= item.estoque_minimo ? "text-red-600" : ""}>{item.estoque_atual}</span>
+                      </TableCell>
+                      <TableCell className="text-right text-muted-foreground">{item.estoque_minimo}</TableCell>
+                      <TableCell className="text-right text-emerald-600 font-medium">{formatarPreco(item.preco_venda)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="text-slate-400 hover:text-blue-600 p-1" title="Editar"><Edit className="h-4 w-4" /></button>
+                          <button onClick={() => setDeleteId(item.id)} className="text-slate-400 hover:text-red-600 p-1" title="Excluir"><Trash2 className="h-4 w-4" /></button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="alertas" className="mt-4">
+          <AlertasEstoquePanel />
+        </TabsContent>
+
+        <TabsContent value="kits" className="mt-4">
+          <KitsManager />
+        </TabsContent>
+
+        <TabsContent value="transferencias" className="mt-4">
+          <TransferenciasManager />
+        </TabsContent>
+
+        <TabsContent value="valoracao" className="mt-4 space-y-6">
+          <ValorizacaoDashboard />
+          <CodigosPanel />
+        </TabsContent>
+
+        <TabsContent value="previsao" className="mt-4">
+          <PrevisaoDemandaPanel />
+        </TabsContent>
+      </Tabs>
 
       <Modal isOpen={isModalOpen} onClose={handleFecharModal} title="Novo Produto">
         <form onSubmit={handleSalvarProduto} className="space-y-4">
@@ -229,6 +276,14 @@ export default function EstoquePage() {
           </div>
         </form>
       </Modal>
+
+      <BarcodeScanner
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onProdutoEncontrado={(produto) => {
+          // Opcional: fazer algo quando produto é encontrado
+        }}
+      />
     </div>
   );
 }

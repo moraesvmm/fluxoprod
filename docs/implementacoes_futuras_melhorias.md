@@ -907,4 +907,117 @@ export function KPICard({ title, value, icon, className }: KPICardProps) {
 
 ---
 
+## FUNCIONALIDADES POR MÓDULO (SUGERIDAS EM 18/04/2026)
+
+### Módulo Clientes (CRM)
+
+**Funcionalidades sugeridas:**
+1. **Histórico de interações** - Registrar contatos, reuniões, chamadas com clientes
+2. **Segmentação de clientes** - Tags, categorias, classificações (VIP, inativo, etc.)
+3. **Gestão de oportunidades** - Pipeline de vendas associado a clientes
+4. **Documentos de clientes** - Upload de contratos, propostas, documentos legais
+5. **Dashboard de clientes** - KPIs de aquisição, retenção, LTV
+
+**Prioridade sugerida:** Alta - Impacto direto em vendas e relacionamento
+
+---
+
+### Módulo Produtos/Estoque
+
+**Funcionalidades sugeridas:**
+1. **Alertas de estoque mínimo** - Notificações quando estoque abaixo do mínimo
+2. **Gestão de kits/bundles** - Produtos compostos por múltiplos itens
+3. **Movimentação entre locais** - Transferência de estoque entre filiais/depositos
+4. **Valoração de estoque** - Custo médio, FIFO, LIFO
+5. **Previsão de demanda** - Análise histórica para prever necessidade de reposição
+6. **Códigos de barras/QR** - Geração e leitura para gestão física
+
+**Prioridade sugerida:** Alta - Impacto direto em operação e custos
+
+---
+
+### Módulo Vendas
+
+**Funcionalidades sugeridas:**
+1. **Orçamentos/Propostas** - Converter orçamentos em vendas
+2. **Multiplas formas de pagamento** - Parcelamento, boleto, cartão, PIX
+3. **Gestão de comissões** - Cálculo automático para vendedores
+4. **Nota fiscal eletrônica** - Integração com SEFAZ
+5. **Dashboard de vendas** - Métricas por período, produto, vendedor
+6. **Recorrência/Assinaturas** - Vendas recorrentes mensais
+
+**Prioridade sugerida:** Alta - Impacto direto em receita
+
+---
+
+### Módulo Financeiro
+
+**Funcionalidades sugeridas:**
+1. **Conciliação bancária** - Importação OFX, reconciliação automática
+2. **Fluxo de caixa projetado** - Previsão baseada em contas a pagar/receber
+3. **Gestão de contas a pagar/receber** - Vencimentos, parcelas, juros
+4. **Centro de custos** - Classificação por departamento/projeto
+5. **Integração bancária** - Sincronização automática de transações
+6. **Relatórios DRE/fluxo** - Demonstrações financeiras completas
+
+**Prioridade sugerida:** Alta - Impacto direto em controle financeiro
+
+---
+
+### Módulo Funcionários (RH)
+
+**Funcionalidades sugeridas:**
+1. **Gestão de ponto** - Registro de entrada/saída, horas trabalhadas
+2. **Folha de pagamento** - Cálculo de salários, benefícios, descontos
+3. **Gestão de férias/ferias** - Solicitações, aprovação, saldo
+4. **Avaliação de desempenho** - Reviews periódicos, metas, KPIs
+5. **Treinamentos** - Registro de capacitações, certificações
+6. **Benefícios** - Gestão de plano de saúde, vale transporte, etc.
+
+**Prioridade sugerida:** Média - Compliance e gestão
+
+---
+
+### Módulo Ordens de Serviço (OS)
+
+**Funcionalidades sugeridas:**
+1. **Agendamento de técnicos** - Calendário de atendimentos
+2. **Gestão de peças/materiais** - Baixa de estoque na execução
+3. **Checklists de serviço** - Procedimentos padrão por tipo de OS
+4. **Assinatura digital** - Cliente assina conclusão no app
+5. **Geolocalização** - Rota otimizada para técnicos
+6. **Fotos/Anexos** - Registro visual do serviço executado
+
+**Prioridade sugerida:** Alta - Melhoria operacional
+
+---
+
+### Módulo Configurações
+
+**Funcionalidades sugeridas:**
+1. **Gestão de permissões granular** - Controle por módulo/ação
+2. **Logs de auditoria avançado** - Filtros, exportação, alertas
+3. **Webhooks** - Integração com sistemas externos
+4. **Customização de campos** - Campos personalizados por tenant
+5. **Templates de documentos** - Configuração de layouts de impressão
+6. **Backup/Restore** - Gestão de backups do tenant
+
+**Prioridade sugerida:** Média - Melhoria administrativa
+
+---
+
+### Funcionalidades Transversais
+
+**Funcionalidades sugeridas:**
+1. **Notificações** - Push, email, SMS por evento
+2. **Relatórios customizados** - Builder de relatórios drag-and-drop
+3. **API pública** - Endpoints para integrações externas
+4. **Gestão de arquivos geral** - Storage organizado por módulo
+5. **Chat interno** - Comunicação entre usuários do tenant
+6. **Dashboard executivo** - Visão consolidada de todos os módulos
+
+**Prioridade sugerida:** Média - Melhoria geral do sistema
+
+---
+
 **Fim do Documento**

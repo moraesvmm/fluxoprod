@@ -11,13 +11,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Building2, Plus, Search, Calendar, MapPin, Trash2, Edit, LayoutGrid } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Building2, Plus, Search, Calendar, MapPin, Trash2, Edit, LayoutGrid, X } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/modules/base/Calendar";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
 import { useObras, useCreateObra, useDeleteObra, useUpdateObra } from "@/lib/hooks/use-obras";
 import { useClientes } from "@/lib/hooks/use-clientes";
+import { useObraEtapas, useCreateObraEtapa, useUpdateObraEtapa, useDeleteObraEtapa, useObraProgresso } from "@/lib/hooks/use-obras-etapas";
+import { useObraCustos, useCreateObraCusto, useUpdateObraCusto, useDeleteObraCusto, useObraResumoFinanceiro } from "@/lib/hooks/use-obras-custos";
+import { useObraRecursos, useAlocarRecursoObra, useUpdateObraRecurso, useDeleteObraRecurso } from "@/lib/hooks/use-obras-recursos";
+import { useObraDocumentos, useUploadObraDocumento, useDeleteObraDocumento } from "@/lib/hooks/use-obras-documentos";
+import { EtapasTimeline } from "@/components/modules/obras/EtapasTimeline";
+import { FinanceiroDashboard } from "@/components/modules/obras/FinanceiroDashboard";
+import { RecursosTabela } from "@/components/modules/obras/RecursosTabela";
+import { DocumentosGaleria } from "@/components/modules/obras/DocumentosGaleria";
+import type { Obra, ObraEtapaCreate, ObraEtapaUpdate, ObraCusto, ObraCustoCreate, ObraCustoUpdate, ObraRecurso, ObraRecursoCreate, ObraRecursoUpdate, ObraDocumento } from "@/lib/api";
 
 export default function ObrasPage() {
   const [showModal, setShowModal] = useState(false);
@@ -25,6 +35,8 @@ export default function ObrasPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
+  const [selectedObra, setSelectedObra] = useState<Obra | null>(null);
+  const [activeTab, setActiveTab] = useState<'detalhes' | 'etapas' | 'financeiro' | 'recursos' | 'documentos'>('detalhes');
   const [formData, setFormData] = useState({
     nome: "",
     cliente_id: "",
@@ -33,6 +45,7 @@ export default function ObrasPage() {
     data_fim_prevista: "",
     orcamento: "",
     descricao: "",
+    status: "planejada" as 'planejada' | 'andamento' | 'concluida' | 'suspensa',
   });
 
   const { toasts, removeToast, success, error: toastError } = useToast();
@@ -42,6 +55,28 @@ export default function ObrasPage() {
   const createMutation = useCreateObra();
   const deleteMutation = useDeleteObra();
   const updateMutation = useUpdateObra();
+
+  // Hooks para módulos da obra selecionada
+  const { data: etapas } = useObraEtapas(selectedObra?.id || '');
+  const { data: progresso } = useObraProgresso(selectedObra?.id || '');
+  const createEtapaMutation = useCreateObraEtapa();
+  const updateEtapaMutation = useUpdateObraEtapa();
+  const deleteEtapaMutation = useDeleteObraEtapa();
+
+  const { data: custos } = useObraCustos(selectedObra?.id || '');
+  const { data: resumoFinanceiro } = useObraResumoFinanceiro(selectedObra?.id || '');
+  const createCustoMutation = useCreateObraCusto();
+  const updateCustoMutation = useUpdateObraCusto();
+  const deleteCustoMutation = useDeleteObraCusto();
+
+  const { data: recursos } = useObraRecursos(selectedObra?.id || '');
+  const createRecursoMutation = useAlocarRecursoObra();
+  const updateRecursoMutation = useUpdateObraRecurso();
+  const deleteRecursoMutation = useDeleteObraRecurso();
+
+  const { data: documentos } = useObraDocumentos(selectedObra?.id || '');
+  const uploadDocumentoMutation = useUploadObraDocumento();
+  const deleteDocumentoMutation = useDeleteObraDocumento();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +103,7 @@ export default function ObrasPage() {
         data_fim_prevista: "",
         orcamento: "",
         descricao: "",
+        status: "planejada",
       });
     } catch (err: any) {
       toastError("Erro ao criar Obra: " + (err.message || "Tente novamente"));
@@ -119,8 +155,19 @@ export default function ObrasPage() {
       data_fim_prevista: obra.data_fim_prevista || '',
       orcamento: obra.orcamento ? String(obra.orcamento) : '',
       descricao: obra.descricao || '',
+      status: obra.status || 'planejada',
     });
     setShowEditModal(true);
+  };
+
+  const selecionarObra = (obra: Obra) => {
+    setSelectedObra(obra);
+    setActiveTab('detalhes');
+  };
+
+  const fecharDetalhes = () => {
+    setSelectedObra(null);
+    setActiveTab('detalhes');
   };
 
   const editarObra = async (e: React.FormEvent) => {
@@ -136,17 +183,115 @@ export default function ObrasPage() {
         data_fim_prevista: formData.data_fim_prevista || undefined,
         orcamento: formData.orcamento ? parseFloat(formData.orcamento) : undefined,
         descricao: formData.descricao,
+        status: formData.status,
       };
 
       await updateMutation.mutateAsync({ id: editId, obra: payload });
 
-      setFormData({ nome: '', cliente_id: '', endereco: '', data_inicio: '', data_fim_prevista: '', orcamento: '', descricao: '' });
+      if (selectedObra?.id === editId) {
+        setSelectedObra({ ...selectedObra, ...payload });
+      }
+
+      setFormData({ nome: '', cliente_id: '', endereco: '', data_inicio: '', data_fim_prevista: '', orcamento: '', descricao: '', status: 'planejada' });
       setShowEditModal(false);
       setEditId(null);
       success("Obra atualizada com sucesso!");
     } catch (err: any) {
       toastError("Erro ao atualizar obra: " + (err.message || "Tente novamente."));
     }
+  };
+
+  // Handlers para etapas
+  const handleCreateEtapa = async (etapa: ObraEtapaCreate) => {
+    try {
+      await createEtapaMutation.mutateAsync(etapa);
+      success("Etapa criada com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao criar etapa: " + (err.message || "Tente novamente."));
+    }
+  };
+
+  const handleUpdateEtapa = async (etapa: ObraEtapaUpdate) => {
+    if (!selectedObra || !etapa.id) return;
+    try {
+      await updateEtapaMutation.mutateAsync({ etapaId: etapa.id, etapa });
+      success("Etapa atualizada com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao atualizar etapa: " + (err.message || "Tente novamente."));
+    }
+  };
+
+  const handleDeleteEtapa = async (etapaId: string) => {
+    try {
+      await deleteEtapaMutation.mutateAsync(etapaId);
+      success("Etapa excluída com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao excluir etapa: " + (err.message || "Tente novamente."));
+    }
+  };
+
+  // Handlers para custos
+  const handleCreateCustoWrapper = () => {
+    // TODO: Open modal for creating custo
+    toastError("Funcionalidade em desenvolvimento");
+  };
+
+  const handleUpdateCustoWrapper = (custo: ObraCusto) => {
+    // TODO: Open modal for updating custo
+    toastError("Funcionalidade em desenvolvimento");
+  };
+
+  const handleDeleteCusto = async (custoId: string) => {
+    try {
+      await deleteCustoMutation.mutateAsync(custoId);
+      success("Custo excluído com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao excluir custo: " + (err.message || "Tente novamente."));
+    }
+  };
+
+  // Handlers para recursos
+  const handleCreateRecursoWrapper = () => {
+    // TODO: Open modal for creating recurso
+    toastError("Funcionalidade em desenvolvimento");
+  };
+
+  const handleUpdateRecursoWrapper = (recurso: ObraRecurso) => {
+    // TODO: Open modal for updating recurso
+    toastError("Funcionalidade em desenvolvimento");
+  };
+
+  const handleDeleteRecurso = async (recursoId: string) => {
+    try {
+      await deleteRecursoMutation.mutateAsync(recursoId);
+      success("Recurso excluído com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao excluir recurso: " + (err.message || "Tente novamente."));
+    }
+  };
+
+  // Handlers para documentos
+  const handleUploadDocumento = async (file: File, descricao?: string) => {
+    if (!selectedObra) return;
+    try {
+      await uploadDocumentoMutation.mutateAsync({ file, obraId: selectedObra.id, descricao });
+      success("Documento enviado com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao enviar documento: " + (err.message || "Tente novamente."));
+    }
+  };
+
+  const handleDeleteDocumento = async (documentoId: string) => {
+    try {
+      await deleteDocumentoMutation.mutateAsync(documentoId);
+      success("Documento excluído com sucesso!");
+    } catch (err: any) {
+      toastError("Erro ao excluir documento: " + (err.message || "Tente novamente."));
+    }
+  };
+
+  const handleDownloadDocumento = (documento: ObraDocumento) => {
+    window.open(documento.url, '_blank');
   };
 
   const planejadas = obras?.filter(o => o.status === "planejada").length || 0;
@@ -253,7 +398,11 @@ export default function ObrasPage() {
               </TableRow>
             ) : (
                 obras?.map((obra) => (
-                  <TableRow key={obra.id}>
+                  <TableRow 
+                    key={obra.id} 
+                    className={selectedObra?.id === obra.id ? "bg-blue-50" : "cursor-pointer hover:bg-slate-50"}
+                    onClick={() => selecionarObra(obra)}
+                  >
                     <TableCell className="font-medium text-slate-900">{obra.nome}</TableCell>
                     <TableCell>{obra.cliente?.nome || "—"}</TableCell>
                     <TableCell>
@@ -273,10 +422,18 @@ export default function ObrasPage() {
                     <TableCell className="font-medium text-emerald-700">{formatarMoeda(obra.orcamento)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => abrirEdicao(obra)} className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); abrirEdicao(obra); }} 
+                          className="text-slate-400 hover:text-blue-600 p-1 transition-colors" 
+                          title="Editar"
+                        >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button onClick={() => setDeleteId(obra.id)} className="text-slate-400 hover:text-red-600 p-1 transition-colors" title="Excluir">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setDeleteId(obra.id); }} 
+                          className="text-slate-400 hover:text-red-600 p-1 transition-colors" 
+                          title="Excluir"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -471,6 +628,19 @@ export default function ObrasPage() {
               placeholder="Descrição detalhada da obra..."
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="planejada">Planejada</option>
+              <option value="andamento">Em Andamento</option>
+              <option value="concluida">Concluída</option>
+              <option value="suspensa">Suspensa</option>
+            </select>
+          </div>
           <div className="flex gap-3 pt-4">
             <button
                type="submit"
@@ -489,6 +659,135 @@ export default function ObrasPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Painel de Detalhes da Obra Selecionada */}
+      {selectedObra && (
+        <div className="fixed inset-y-0 right-0 w-96 bg-white border-l border-border shadow-lg overflow-hidden z-50">
+          <div className="h-full flex flex-col">
+            {/* Header */}
+            <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50">
+              <h3 className="font-semibold text-lg">{selectedObra.nome}</h3>
+              <button
+                onClick={fecharDetalhes}
+                className="p-1 hover:bg-slate-200 rounded-md transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
+              <div className="p-4 border-b border-border">
+                <TabsList className="w-full">
+                  <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
+                  <TabsTrigger value="etapas">Etapas</TabsTrigger>
+                  <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
+                  <TabsTrigger value="recursos">Recursos</TabsTrigger>
+                  <TabsTrigger value="documentos">Documentos</TabsTrigger>
+                </TabsList>
+              </div>
+
+              {/* Tab Content */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <TabsContent value="detalhes">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Nome</label>
+                      <p className="text-sm text-slate-900">{selectedObra.nome}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
+                      <p className="text-sm text-slate-900">{selectedObra.cliente?.nome || '—'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+                      <p className="text-sm text-slate-900">{selectedObra.endereco || '—'}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Data Início</label>
+                        <p className="text-sm text-slate-900">{formatarData(selectedObra.data_inicio)}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Data Fim Prevista</label>
+                        <p className="text-sm text-slate-900">{formatarData(selectedObra.data_fim_prevista)}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Orçamento</label>
+                      <p className="text-sm text-slate-900">{formatarMoeda(selectedObra.orcamento)}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                      <StatusBadge
+                        status={selectedObra.status === 'planejada' ? 'warning' : selectedObra.status === 'concluida' ? 'success' : 'info'}
+                        label={selectedObra.status === 'planejada' ? 'Planejada' : selectedObra.status === 'concluida' ? 'Concluída' : selectedObra.status === 'andamento' ? 'Em Andamento' : 'Suspensa'}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+                      <p className="text-sm text-slate-900 whitespace-pre-wrap">{selectedObra.descricao || '—'}</p>
+                    </div>
+                    <div className="pt-4">
+                      <button
+                        onClick={() => abrirEdicao(selectedObra)}
+                        className="w-full bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+                      >
+                        Editar Obra
+                      </button>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="etapas">
+                  {progresso && etapas && (
+                    <EtapasTimeline
+                      etapas={etapas}
+                      progresso={progresso}
+                      onEdit={handleUpdateEtapa}
+                      onDelete={handleDeleteEtapa}
+                    />
+                  )}
+                </TabsContent>
+
+                <TabsContent value="financeiro">
+                  {resumoFinanceiro && custos && (
+                    <FinanceiroDashboard
+                      resumo={resumoFinanceiro}
+                      custos={custos}
+                      onAdd={handleCreateCustoWrapper}
+                      onEdit={handleUpdateCustoWrapper}
+                      onDelete={handleDeleteCusto}
+                    />
+                  )}
+                </TabsContent>
+
+                <TabsContent value="recursos">
+                  {recursos && (
+                    <RecursosTabela
+                      recursos={recursos}
+                      onAdd={handleCreateRecursoWrapper}
+                      onEdit={handleUpdateRecursoWrapper}
+                      onDelete={handleDeleteRecurso}
+                    />
+                  )}
+                </TabsContent>
+
+                <TabsContent value="documentos">
+                  {documentos && (
+                    <DocumentosGaleria
+                      documentos={documentos}
+                      onUpload={handleUploadDocumento}
+                      onDelete={handleDeleteDocumento}
+                      onDownload={handleDownloadDocumento}
+                    />
+                  )}
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

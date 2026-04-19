@@ -1,14 +1,143 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
-**Última atualização:** 15/04/2026  
-**Versão:** 1.0  
+**Última atualização:** 18/04/2026  
+**Versão:** 1.3  
 **Status:** Revisado
+
+---
+
+## VISTORIA 4: Módulo Obras - Gestão Avançada (18/04/2026)
+
+### Escopo Analisado
+- Expansão integral do módulo de Obras
+- Implementação de sub-módulos: Etapas, Financeiro, Recursos e Documentos
+- Criação de RPCs especializadas para cada sub-módulo
+- Interface de usuário com abas dinâmicas e painel lateral de detalhes
+
+### Alterações Realizadas
+**Banco de dados (schemas tenant):**
+- Criadas tabelas: `obras_etapas`, `obras_custos`, `obras_recursos`.
+- Implementada lógica de cálculo de progresso físico e financeiro (previsto vs real).
+- Criadas RPCs: `tenant_obras_etapas`, `tenant_obras_financeiro`, `tenant_obras_recursos`.
+- Adicionado sistema de upload/gestão de documentos vinculados a obras.
+
+**Frontend:**
+- Atualizada `apps/web/src/app/tenant/obras/page.tsx` com novo Layout de Detalhes.
+- Criados hooks customizados: `use-obras-etapas.ts`, `use-obras-custos.ts`, `use-obras-recursos.ts`, `use-obras-documentos.ts`.
+- Desenvolvidos componentes: `EtapasTimeline`, `FinanceiroDashboard`, `RecursosTabela`, `DocumentosGaleria`.
+
+**Documentação:**
+- Atualizado `SESSION_STATE.md` com o status final da implementação de Obras.
+- Criados scripts SQL de suporte: `APLICAR_ETAPAS_OBRAS.sql`, `APLICAR_CUSTOS_OBRAS.sql`, etc.
+
+### Pontos Fortes
+- **Visibilidade proativa:** Painel lateral permite navegação rápida sem perder o contexto da lista.
+- **Controle financeiro granular:** Diferenciação clara entre custos previstos e realizados.
+- **Cronograma visual:** Timeline de etapas com indicadores de status e datas.
+- **Modularização:** Lógica de cada sub-aba isolada em hooks e componentes específicos.
+
+### Riscos Técnicos
+- **Volume de dados:** Documentos (anexos) podem ocupar espaço excessivo se não houver compressão ou limite de upload (atualmente depende do Supabase Storage).
+
+### Observações
+- Módulo Obras transformado em uma ferramenta de gestão completa, deixando de ser apenas um registro de status.
+- Integração nativa com o estoque para futura baixa automática de recursos (preparado).
 
 ---
 
 ## REGRAS OBRIGATÓRIAS
 
 Toda vez que este documento for lido, editado ou consultado, ele deve ser automaticamente atualizado, versionado ou registrado como revisado.
+
+---
+
+## VISTORIA 3: Módulo Produtos/Estoque - Gestão de Kits/Bundles (18/04/2026)
+
+### Escopo Analisado
+- Implementação do sistema de kits/bundles
+- Criação de tabelas kits e kit_itens
+- Criação de 4 RPCs para gestão de kits
+- Integração frontend com hooks e componentes
+
+### Alterações Realizadas
+**Banco de dados (schemas tenant):**
+- Criada tabela `kits` com colunas: id, produto_id, nome, descricao, ativo, criado_em, atualizado_em
+- Criados 2 índices: idx_kits_produto, idx_kits_ativo
+- Criada tabela `kit_itens` com colunas: id, kit_id, produto_id, quantidade, criado_em
+- Criados 2 índices: idx_kit_itens_kit, idx_kit_itens_produto
+- Criado trigger trg_atualizar_kits para atualizar atualizado_em
+- Criadas 4 RPCs: tenant_criar_kit, tenant_listar_kits, tenant_excluir_kit, tenant_vender_kit
+
+**Frontend:**
+- Adicionadas interfaces Kit, KitItem, KitCreate em `apps/web/src/lib/api.ts`
+- Adicionadas 4 funções API: criarKit(), fetchKits(), excluirKit(), venderKit()
+- Criado hook `apps/web/src/lib/hooks/use-kits.ts`
+- Criado componente `apps/web/src/components/modules/estoque/KitsManager.tsx`
+- Integrado componente na página `apps/web/src/app/tenant/estoque/page.tsx`
+
+**Documentação:**
+- Atualizado `SESSION_STATE_PRODUTOS_ESTOQUE.md` com estado atual da Sessão 2
+- Criados scripts SQL: APLICAR_KITS.sql, RPCS_KITS_TENANT_*.sql
+
+### Pontos Fortes
+- **Idempotência implementada:** RPCs de escrita usam idempotency_key
+- **Audit log:** Registro de todas as operações de kits
+- **Verificação de estoque:** tenant_vender_kit verifica estoque antes de baixar
+- **Soft delete:** tenant_excluir_kit usa soft delete (ativo = false) para preservar histórico
+- **Componente UI intuitivo:** Permite criar kits com múltiplos itens dinamicamente
+- **Consistência de padrões:** Segue padrões RPC do sistema (JSONB, Security DEFINER, search_path)
+
+### Riscos Técnicos
+- **Nenhum identificado:** Implementação segue padrões estabelecidos do sistema
+
+### Observações
+- Aplicado em 4 schemas tenant: tenant_3ad04037, tenant_62a495e1, tenant_71148b59, tenant_84e7a845
+- Sistema pronto para uso: kits podem ser criados, listados, excluídos e vendidos
+- Venda de kit baixa automaticamente o estoque de todos os componentes
+
+---
+
+## VISTORIA 2: Módulo Produtos/Estoque - Alertas de Estoque Mínimo (18/04/2026)
+
+### Escopo Analisado
+- Implementação do sistema de alertas de estoque mínimo
+- Resolução de inconsistências de preço e categoria
+- Criação de tabela `alertas_estoque` e RPCs associadas
+- Integração frontend com hooks e componentes
+
+### Alterações Realizadas
+**Banco de dados (schemas tenant):**
+- Adicionadas colunas `categoria VARCHAR(100)` e `custo_unitario NUMERIC(10,2)` à tabela `produtos`
+- Criado índice `idx_produtos_categoria`
+- Criada tabela `alertas_estoque` com colunas: id, produto_id, tipo_alerta, estoque_atual, estoque_minimo, mensagem, status, criado_em, resolvido_em
+- Criados 3 índices: idx_alertas_estoque_produto, idx_alertas_estoque_status, idx_alertas_estoque_criado_em
+- Criadas 3 RPCs: tenant_verificar_alertas_estoque, tenant_listar_alertas_estoque, tenant_resolver_alerta_estoque
+
+**Frontend:**
+- Adicionada interface `AlertaEstoque` em `apps/web/src/lib/api.ts`
+- Adicionadas 3 funções API: verificarAlertasEstoque(), fetchAlertasEstoque(), resolverAlertaEstoque()
+- Criado hook `apps/web/src/lib/hooks/use-alertas-estoque.ts`
+- Criado componente `apps/web/src/components/modules/estoque/AlertasEstoquePanel.tsx`
+- Integrado componente na página `apps/web/src/app/tenant/estoque/page.tsx`
+
+**Documentação:**
+- Atualizado `SESSION_STATE_PRODUTOS_ESTOQUE.md` com estado atual da Sessão 1
+- Criados scripts SQL: APLICAR_ALERTAS_ESTOQUE.sql, RPCS_TENANT_*.sql
+
+### Pontos Fortes
+- **Idempotência implementada:** RPC tenant_resolver_alerta_estoque usa idempotency_key
+- **Audit log:** Registro de todas as operações de resolução de alertas
+- **Idempotência nativa:** tenant_verificar_alertas_estoque evita alertas duplicados nas últimas 24 horas
+- **Componente UI intuitivo:** Alertas pendentes exibidos com ações de visualizar e resolver
+- **Consistência de padrões:** Segue padrões RPC do sistema (JSONB, Security DEFINER, search_path)
+
+### Riscos Técnicos
+- **Nenhum identificado:** Implementação segue padrões estabelecidos do sistema
+
+### Observações
+- Aplicado em 4 schemas tenant: tenant_3ad04037, tenant_62a495e1, tenant_71148b59, tenant_84e7a845
+- Inconsistências de preço e categoria resolvidas (categoria e custo_unitario adicionados)
+- Sistema pronto para uso: alertas são criados automaticamente quando estoque <= mínimo
 
 ---
 

@@ -112,6 +112,16 @@ function AnimatedSection({
 /* ─────────────── FLOATING PARTICLES ─────────────── */
 
 function FloatingParticles() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div className="absolute inset-0 overflow-hidden pointer-events-none" />;
+  }
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {[...Array(6)].map((_, i) => (
