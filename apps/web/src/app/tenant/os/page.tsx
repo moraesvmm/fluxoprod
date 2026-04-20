@@ -314,7 +314,7 @@ export default function OSPage() {
               required
             >
               <option value="">Selecione...</option>
-              {clientes?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              {clientes?.data?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
             </select>
           </div>
           <div>
@@ -393,7 +393,7 @@ export default function OSPage() {
               required
             >
               <option value="">Selecione...</option>
-              {clientes?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              {clientes?.data?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
             </select>
           </div>
           <div>

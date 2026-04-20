@@ -97,14 +97,16 @@ export function EtapasTimeline({ etapas, progresso, onEdit, onDelete }: EtapasTi
                       <p className="text-sm text-muted-foreground mb-2">{etapa.descricao}</p>
                     )}
                     <div className="text-xs text-muted-foreground space-y-1">
-                      <div>
-                        <span className="font-medium">Prevista:</span>{" "}
-                        {new Date(etapa.data_prevista).toLocaleDateString("pt-BR")}
-                      </div>
-                      {etapa.data_conclusao && (
+                      {etapa.data_fim_prevista && (
                         <div>
-                          <span className="font-medium">Conclusão:</span>{" "}
-                          {new Date(etapa.data_conclusao).toLocaleDateString("pt-BR")}
+                          <span className="font-medium">Prevista:</span>{" "}
+                          {new Date(etapa.data_fim_prevista).toLocaleDateString("pt-BR")}
+                        </div>
+                      )}
+                      {etapa.data_inicio && (
+                        <div>
+                          <span className="font-medium">Início:</span>{" "}
+                          {new Date(etapa.data_inicio).toLocaleDateString("pt-BR")}
                         </div>
                       )}
                     </div>

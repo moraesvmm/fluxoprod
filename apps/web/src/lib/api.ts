@@ -157,6 +157,8 @@ export interface ProdutoUpdate {
   preco_base?: number;
   sku?: string;
   preco_custo?: number;
+  preco_venda?: number;
+  estoque_minimo?: number;
   categoria?: string;
 }
 
@@ -1133,6 +1135,7 @@ export interface ObraEtapaCreate {
 }
 
 export interface ObraEtapaUpdate {
+  id?: string;
   nome?: string;
   descricao?: string;
   data_prevista?: string;

@@ -250,11 +250,12 @@ export default function ObrasPage() {
     try {
       await createCustoMutation.mutateAsync({
         obra_id: selectedObra.id,
+        categoria: custoForm.tipo || 'outro',
         descricao: custoForm.descricao,
-        valor: parseFloat(custoForm.valor),
-        tipo: custoForm.tipo,
-        data: custoForm.data || undefined,
-      } as ObraCustoCreate);
+        valor_previsto: parseFloat(custoForm.valor),
+        tipo: custoForm.tipo === 'previsto' || custoForm.tipo === 'realizado' ? 'outro' : custoForm.tipo,
+        data: custoForm.data || new Date().toISOString(),
+      });
       success('Custo adicionado com sucesso!');
       setShowCustoModal(false);
     } catch (err: any) {
@@ -288,10 +289,14 @@ export default function ObrasPage() {
     try {
       await createRecursoMutation.mutateAsync({
         obra_id: selectedObra.id,
-        nome: recursoForm.nome,
+        tipo: 'material',
+        descricao: recursoForm.nome,
         quantidade: parseInt(recursoForm.quantidade, 10) || 1,
         unidade: recursoForm.unidade,
-      } as ObraRecursoCreate);
+        custo_unitario: 0,
+        status: 'alocado',
+        data_alocacao: new Date().toISOString(),
+      });
       success('Recurso alocado com sucesso!');
       setShowRecursoModal(false);
     } catch (err: any) {
@@ -622,7 +627,7 @@ export default function ObrasPage() {
                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">Selecione...</option>
-              {clientes?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              {clientes?.data?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
             </select>
           </div>
           <div>
@@ -717,7 +722,7 @@ export default function ObrasPage() {
                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">Selecione...</option>
-              {clientes?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              {clientes?.data?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
             </select>
           </div>
           <div>
