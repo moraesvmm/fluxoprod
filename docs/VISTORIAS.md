@@ -1,8 +1,8 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
-**Última atualização:** 20/04/2026  
-**Versão:** 2.0  
-**Status:** ✅ Deploy Netlify corrigido + Build TypeScript resolvido — sistema estável.
+**Última atualização:** 20/04/2026
+**Versão:** 1.1
+**Status:** ⚠️ VISTORIA PENDENTE - 3 alterações no código-fonte realizadas (Node.js 20 → 22)
 
 ---
 
