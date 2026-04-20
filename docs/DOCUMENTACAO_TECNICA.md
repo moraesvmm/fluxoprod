@@ -971,7 +971,7 @@ Documento detalhado em MELHORIAS_FUTURAS.md:
   command = "npm run build"
 
 [build.environment]
-  NODE_VERSION = "20.19.0"
+  NODE_VERSION = "22.0.0"
   NPM_VERSION = "10.9.0"
   NEXT_TELEMETRY_DISABLED = "1"
 
