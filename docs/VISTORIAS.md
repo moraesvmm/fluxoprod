@@ -6,49 +6,19 @@
 
 ---
 
-## VISTORIA 14: Resolução de Conflitos de Caminhos (Publish Directory) e Análise Retrospectiva — 20/04/2026
+## VISTORIA 14: Resolução de Conflitos de Caminhos (Netlify) — 20/04/2026
 
-### Escopo Analisado
-- Histórico de falhas de deploy (últimas 10 tentativas).
-- Erro específico: `Your publish directory was not found at: .../.next`.
-- Estrutura de Monorepo vs Configurações de Build na Netlify CLI.
-
-### Motivos Reais das Falhas (Retrospectiva)
-1. **Infraestrutura (Engine):** Conflito de flags de runtime no GitHub Actions (`ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION` vs `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`). O runner não conseguia decidir qual camada de compatibilidade usar.
-2. **Sintaxe/Tipagem (Front):** Atributo `loading="lazy"` em elemento `<video>` causava erro de compilação TypeScript (TS2322), impedindo a geração da pasta `.next`.
-3. **Mapeamento (Netlify):** Caminho de publicação (`publish`) no `netlify.toml` apontava para a raiz absoluta, enquanto o processo de build do monorepo (com `base="apps/web"`) gerava os artefatos na subpasta.
-
-### Ações e Correções
-**1. Ajuste de Mapeamento de Publicação**
-- Modificado `netlify.toml` da raiz para `publish = "apps/web/.next"`. Isso garante que, independente do contexto de execução da CLI (raiz vs base), o plugin `@netlify/plugin-nextjs` localize exatamente onde os artefatos foram gerados.
-
-**2. Consolidação de Workflow**
-- Upgrade definitivo das Actions para `@v6` garantindo suporte nativo ao Node 24 sem necessidade de hacks de ambiente.
+> [!NOTE]
+> Os detalhes técnicos desta vistoria foram migrados para a Retrospectiva do **[Plano de Prevenção de Deploy](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PLANO_PREVENCAO_DEPLOY.md)**.
+> **Assunto:** Erro de Publish Directory (Monorepo) corrigido.
 
 ---
 
-## VISTORIA 13: Correção Pipeline Netlify e Update Actions Node 24 — 20/04/2026
+## VISTORIA 13: Pipeline Netlify e Actions Node 24 — 20/04/2026
 
-### Escopo Analisado
-- Falha no deploy automático da Netlify via GitHub Actions (Aviso de depreciação do Node 20 e exit code 1 no step `deploy`).
-- Concorrência de escopos de build no `netlify.toml` do root vs diretório de trabalho das actions.
-
-### Problemas Identificados
-**1. Diretório de Execução do cli: `netlify deploy` (CRÍTICO)**
-- O comando `netlify deploy` estava rodando dentro de `working-directory: apps/web`, porém o `netlify.toml` contendo o plugin `@netlify/plugin-nextjs` e diretrizes de build encontrava-se na pasta raiz. O CLI falhava silenciosamente causando o `exit code 1` ao não encontrar o diretório correto de envio.
-
-**2. Depreciação Oculta de Runners (ALTO)**
-- Versões v4 das Actions (`checkout@v4`, `setup-node@v4`) executam internamente rotinas em Node 20, que sofreram soft-deprecation forçada para Node 24 a partir de junho de 2026. A tag do workflow falhava nos logs.
-
-### Ações e Correções
-**1. Unificação de Build e Deploy**
-- Alterado fluxo de `.github/workflows/deploy-netlify.yml`: 
-  - Removido step de Build isolado em `apps/web`.
-  - Step de deploy migrado para ser focado na raiz.
-  - Substituição para `netlify deploy --build --prod`, instruindo o CLI a ler ativamente o `netlify.toml` da raiz que já possui o `base="apps/web"` e `publish=".next"` contendo as definições coretas.
-
-**2. Supressão e Migração do Runner**
-- Inserção da env tracker `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` mitigando falhas nativas de rotina do GitHub Engine e adequando para os padrões atuais do projeto.
+> [!NOTE]
+> Os detalhes técnicos desta vistoria foram migrados para a Retrospectiva do **[Plano de Prevenção de Deploy](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PLANO_PREVENCAO_DEPLOY.md)**.
+> **Assunto:** Unificação de Build/Deploy e upgrade para Node 24.
 
 ---
 
@@ -123,122 +93,11 @@
 
 ---
 
-## VISTORIA 10: Deploy Netlify e Erros de Build TypeScript — 20/04/2026
+## VISTORIA 10: Deploy Netlify e Erros Next.js — 20/04/2026
 
-### Escopo Analisado
-- Configuração de deploy automático para Netlify via GitHub
-- Erros de TypeScript impedindo build do Next.js
-- Conflito de arquivos de configuração Netlify
-- Sincronização de interfaces TypeScript com código de uso
-
-### Problemas Identificados
-
-**1. Conflito de Arquivos netlify.toml (CRÍTICO)**
-- **Causa:** Existiam dois arquivos `netlify.toml` no projeto:
-  - Um na raiz: `/Users/macbook/fluxoprod/netlify.toml`
-  - Um duplicado em `apps/web/netlify.toml`
-- **Impacto:** Netlify não conseguia determinar qual configuração usar, causando falha no deploy automático
-- **Solução:** Removido arquivo duplicado em `apps/web/`, mantendo apenas configuração consolidada na raiz
-
-**2. Erros de TypeScript Impedindo Build (CRÍTICO)**
-- **Causa:** Interfaces TypeScript em `apps/web/src/lib/api.ts` desatualizadas em relação ao código de uso
-- **Erros específicos:**
-  - `ProdutoUpdate` faltava campos `preco_venda` e `estoque_minimo`
-  - `ObraEtapaUpdate` faltava campo `id`
-  - `ObraCustoCreate` faltava campos obrigatórios (`categoria`, `valor_previsto`)
-  - `ObraRecursoCreate` faltava campos obrigatórios (`tipo`, `descricao`, `custo_unitario`)
-  - Acesso incorreto a `ClienteListResult` (usava `clientes?.map()` em vez de `clientes?.data?.map()`)
-  - Nome de campo incorreto em `EtapasTimeline.tsx` (`data_prevista` em vez de `data_fim_prevista`)
-- **Impacto:** Build do Next.js falhava com erros de type checking
-- **Solução:** Atualizadas interfaces e código para sincronização completa
-
-### Alterações Realizadas
-
-**Arquivos Modificados:**
-1. `apps/web/src/lib/api.ts` - Atualizadas interfaces:
-   - `ProdutoUpdate`: adicionados `preco_venda` e `estoque_minimo`
-   - `ObraEtapaUpdate`: adicionado `id`
-2. `apps/web/src/app/tenant/obras/page.tsx` - Corrigidos:
-   - `ObraCustoCreate` uso com campos corretos
-   - `ObraRecursoCreate` uso com campos corretos
-   - `clientes?.data?.map()` em vez de `clientes?.map()`
-3. `apps/web/src/app/tenant/os/page.tsx` - Corrigido:
-   - `clientes?.data?.map()` em vez de `clientes?.map()`
-4. `apps/web/src/components/modules/obras/EtapasTimeline.tsx` - Corrigido:
-   - `data_fim_prevista` em vez de `data_prevista`
-
-**Arquivo Removido:**
-- `apps/web/netlify.toml` - Arquivo duplicado de configuração Netlify
-
-### Configuração Netlify Correta
-
-**Arquivo Único (raiz/netlify.toml):**
-```toml
-[build]
-  base = "apps/web"
-  publish = ".next"
-  command = "npm run build"
-
-[build.environment]
-  NODE_VERSION = "20.19.0"
-  NPM_VERSION = "10.9.0"
-  NEXT_TELEMETRY_DISABLED = "1"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-```
-
-**Workflow GitHub Actions:**
-- Localizado em `.github/workflows/deploy-netlify.yml`
-- Requer secrets configuradas no GitHub:
-  - `NETLIFY_AUTH_TOKEN`
-  - `NETLIFY_SITE_ID`
-
-### Boas Práticas Estabelecidas
-
-**Configuração Netlify:**
-1. Manter apenas UM arquivo `netlify.toml` na raiz do projeto
-2. NUNCA criar arquivo `netlify.toml` em subdiretórios
-3. Verificar configuração de base directory no painel Netlify (deve ser `apps/web`)
-
-**Sincronização de Interfaces TypeScript:**
-1. Manter interfaces em `apps/web/src/lib/api.ts` sempre sincronizadas com código de uso
-2. Quando adicionar campos em componentes, atualizar interfaces correspondentes imediatamente
-3. Executar `npm run build` localmente antes de push para branch main
-
-**Erros Comuns e Prevenção:**
-
-| Erro | Causa | Solução |
-|:---|:---|:---|
-| `Property 'X' does not exist on type 'YUpdate'` | Campo ausente em interface | Adicionar campo à interface em `api.ts` |
-| `Property 'map' does not exist on type 'ClienteListResult'` | Acesso incorreto a tipo composto | Usar `clientes?.data?.map()` |
-| `Property 'data_prevista' does not exist` | Nome de campo incorreto | Verificar nome correto na interface |
-
-### Checklist Pré-Deploy
-
-1. ✅ Executar `npm run build` localmente
-2. ✅ Corrigir todos os erros de TypeScript
-3. ✅ Verificar se há apenas um arquivo `netlify.toml` (na raiz)
-4. ✅ Confirmar que secrets do GitHub estão configuradas
-5. ✅ Fazer commit e push para branch `main`
-
-### Pontos Fortes
-
-- **Resolução rápida:** Problema identificado e corrigido em menos de 1 hora
-- **Build bem-sucedido:** Next.js build concluído sem erros após correções
-- **Deploy automático restaurado:** Push para GitHub agora aciona deploy Netlify corretamente
-- **Documentação atualizada:** Boas práticas registradas em DOCUMENTACAO_TECNICA.md
-
-### Riscos Técnicos
-
-- **Nenhum identificado pós-correção:** Sistema está estável
-
-### Observações
-
-- Deploy automático via GitHub Actions está configurado e funcional
-- Build do Next.js agora passa sem erros de TypeScript
-- Configuração Netlify está consolidada e correta
-- Interfaces TypeScript estão sincronizadas com código de uso
+> [!NOTE]
+> Os detalhes técnicos desta vistoria foram migrados para a Retrospectiva do **[Plano de Prevenção de Deploy](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PLANO_PREVENCAO_DEPLOY.md)**.
+> **Assunto:** Conflito de `netlify.toml` e correções de TypeScript.
 
 ---
 

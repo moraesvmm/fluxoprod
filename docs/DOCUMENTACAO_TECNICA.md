@@ -702,31 +702,13 @@ $$;
 
 ---
 
-## 🚀 DEPLOYMENT
+## 🚀 DEPLOYMENT E CI/CD
 
-### Frontend (Netlify)
-- **Framework:** Next.js 16.2.2
-- **Build:** `npm run build`
-- **Deploy:** Netlify (configurado via netlify.toml)
-- **Environment Variables:** NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-### Backend (Supabase)
-- **Database:** PostgreSQL (gerenciado pelo Supabase)
-- **RPCs:** Deploy via SQL Editor ou CLI
-- **Edge Functions:** Deploy via dashboard (CLI não disponível)
-- **Environment Variables:** RESEND_API_KEY, RESEND_FROM_EMAIL
-
-### Provisionamento de Tenant
-- **Script:** PROVISIONAR_TENANT_62A495E1.sql
-- **RPC:** `provisionar_empresa(p_cnpj, p_razao_social, p_porte, p_segmento, p_modulos)`
-- **Processo:**
-  1. Cria empresa na tabela `empresas`
-  2. Cria schema `tenant_*`
-  3. Cria tabelas no schema do tenant
-  4. Cria RPCs no schema do tenant
-  5. Cria RPCs de roteamento no schema `public`
-  6. Popula dados seed (roles, permissões)
-  7. Registra log de provisionamento
+> [!IMPORTANT]
+> Todas as informações de infraestrutura de deploy, histórico de incidentes e protocolos de atualização foram migrados para o documento mestre:
+> **[docs/PLANO_PREVENCAO_DEPLOY.md](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PLANO_PREVENCAO_DEPLOY.md)**
+>
+> Siga o walkthrough lá descrito antes de qualquer alteração estrutural no pipeline.
 
 ---
   2. Autentica usuário via supabase.auth.getUser()
