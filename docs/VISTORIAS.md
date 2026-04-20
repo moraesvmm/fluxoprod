@@ -1,8 +1,29 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
 **Última atualização:** 20/04/2026
-**Versão:** 1.2
-**Status:** ✅ VISTORIA REALIZADA - Correção CI/CD GitHub Actions e Netlify
+**Versão:** 1.3
+**Status:** ✅ VISTORIA REALIZADA - Correção de Caminhos de Deploy e Sincronia de Monorepo
+
+---
+
+## VISTORIA 14: Resolução de Conflitos de Caminhos (Publish Directory) e Análise Retrospectiva — 20/04/2026
+
+### Escopo Analisado
+- Histórico de falhas de deploy (últimas 10 tentativas).
+- Erro específico: `Your publish directory was not found at: .../.next`.
+- Estrutura de Monorepo vs Configurações de Build na Netlify CLI.
+
+### Motivos Reais das Falhas (Retrospectiva)
+1. **Infraestrutura (Engine):** Conflito de flags de runtime no GitHub Actions (`ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION` vs `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`). O runner não conseguia decidir qual camada de compatibilidade usar.
+2. **Sintaxe/Tipagem (Front):** Atributo `loading="lazy"` em elemento `<video>` causava erro de compilação TypeScript (TS2322), impedindo a geração da pasta `.next`.
+3. **Mapeamento (Netlify):** Caminho de publicação (`publish`) no `netlify.toml` apontava para a raiz absoluta, enquanto o processo de build do monorepo (com `base="apps/web"`) gerava os artefatos na subpasta.
+
+### Ações e Correções
+**1. Ajuste de Mapeamento de Publicação**
+- Modificado `netlify.toml` da raiz para `publish = "apps/web/.next"`. Isso garante que, independente do contexto de execução da CLI (raiz vs base), o plugin `@netlify/plugin-nextjs` localize exatamente onde os artefatos foram gerados.
+
+**2. Consolidação de Workflow**
+- Upgrade definitivo das Actions para `@v6` garantindo suporte nativo ao Node 24 sem necessidade de hacks de ambiente.
 
 ---
 
