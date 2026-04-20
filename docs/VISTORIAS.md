@@ -1,8 +1,33 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
 **Última atualização:** 20/04/2026
-**Versão:** 1.1
-**Status:** ⚠️ VISTORIA PENDENTE - 3 alterações no código-fonte realizadas (Node.js 20 → 22)
+**Versão:** 1.2
+**Status:** ✅ VISTORIA REALIZADA - Correção CI/CD GitHub Actions e Netlify
+
+---
+
+## VISTORIA 13: Correção Pipeline Netlify e Update Actions Node 24 — 20/04/2026
+
+### Escopo Analisado
+- Falha no deploy automático da Netlify via GitHub Actions (Aviso de depreciação do Node 20 e exit code 1 no step `deploy`).
+- Concorrência de escopos de build no `netlify.toml` do root vs diretório de trabalho das actions.
+
+### Problemas Identificados
+**1. Diretório de Execução do cli: `netlify deploy` (CRÍTICO)**
+- O comando `netlify deploy` estava rodando dentro de `working-directory: apps/web`, porém o `netlify.toml` contendo o plugin `@netlify/plugin-nextjs` e diretrizes de build encontrava-se na pasta raiz. O CLI falhava silenciosamente causando o `exit code 1` ao não encontrar o diretório correto de envio.
+
+**2. Depreciação Oculta de Runners (ALTO)**
+- Versões v4 das Actions (`checkout@v4`, `setup-node@v4`) executam internamente rotinas em Node 20, que sofreram soft-deprecation forçada para Node 24 a partir de junho de 2026. A tag do workflow falhava nos logs.
+
+### Ações e Correções
+**1. Unificação de Build e Deploy**
+- Alterado fluxo de `.github/workflows/deploy-netlify.yml`: 
+  - Removido step de Build isolado em `apps/web`.
+  - Step de deploy migrado para ser focado na raiz.
+  - Substituição para `netlify deploy --build --prod`, instruindo o CLI a ler ativamente o `netlify.toml` da raiz que já possui o `base="apps/web"` e `publish=".next"` contendo as definições coretas.
+
+**2. Supressão e Migração do Runner**
+- Inserção da env tracker `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` mitigando falhas nativas de rotina do GitHub Engine e adequando para os padrões atuais do projeto.
 
 ---
 

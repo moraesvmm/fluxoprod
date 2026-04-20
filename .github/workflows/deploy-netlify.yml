@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,17 +31,11 @@ jobs:
         working-directory: apps/web
         run: npm ci
 
-      - name: Build Next.js
-        working-directory: apps/web
-        run: npm run build
+      - name: Build and Deploy to Netlify
+        run: netlify deploy --build --prod --message="Deploy from GitHub Actions"
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-
-      - name: Deploy to Netlify
-        working-directory: apps/web
-        run: netlify deploy --prod --message="Deploy from GitHub Actions"
-        env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
