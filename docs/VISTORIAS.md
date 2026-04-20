@@ -1,8 +1,127 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
-**Última atualização:** 19/04/2026  
-**Versão:** 1.9  
-**Status:** ✅ Soft Delete implementado em todo o sistema — próxima vistoria recomendada após novas implementações.
+**Última atualização:** 20/04/2026  
+**Versão:** 2.0  
+**Status:** ✅ Deploy Netlify corrigido + Build TypeScript resolvido — sistema estável.
+
+---
+
+## VISTORIA 10: Deploy Netlify e Erros de Build TypeScript — 20/04/2026
+
+### Escopo Analisado
+- Configuração de deploy automático para Netlify via GitHub
+- Erros de TypeScript impedindo build do Next.js
+- Conflito de arquivos de configuração Netlify
+- Sincronização de interfaces TypeScript com código de uso
+
+### Problemas Identificados
+
+**1. Conflito de Arquivos netlify.toml (CRÍTICO)**
+- **Causa:** Existiam dois arquivos `netlify.toml` no projeto:
+  - Um na raiz: `/Users/macbook/fluxoprod/netlify.toml`
+  - Um duplicado em `apps/web/netlify.toml`
+- **Impacto:** Netlify não conseguia determinar qual configuração usar, causando falha no deploy automático
+- **Solução:** Removido arquivo duplicado em `apps/web/`, mantendo apenas configuração consolidada na raiz
+
+**2. Erros de TypeScript Impedindo Build (CRÍTICO)**
+- **Causa:** Interfaces TypeScript em `apps/web/src/lib/api.ts` desatualizadas em relação ao código de uso
+- **Erros específicos:**
+  - `ProdutoUpdate` faltava campos `preco_venda` e `estoque_minimo`
+  - `ObraEtapaUpdate` faltava campo `id`
+  - `ObraCustoCreate` faltava campos obrigatórios (`categoria`, `valor_previsto`)
+  - `ObraRecursoCreate` faltava campos obrigatórios (`tipo`, `descricao`, `custo_unitario`)
+  - Acesso incorreto a `ClienteListResult` (usava `clientes?.map()` em vez de `clientes?.data?.map()`)
+  - Nome de campo incorreto em `EtapasTimeline.tsx` (`data_prevista` em vez de `data_fim_prevista`)
+- **Impacto:** Build do Next.js falhava com erros de type checking
+- **Solução:** Atualizadas interfaces e código para sincronização completa
+
+### Alterações Realizadas
+
+**Arquivos Modificados:**
+1. `apps/web/src/lib/api.ts` - Atualizadas interfaces:
+   - `ProdutoUpdate`: adicionados `preco_venda` e `estoque_minimo`
+   - `ObraEtapaUpdate`: adicionado `id`
+2. `apps/web/src/app/tenant/obras/page.tsx` - Corrigidos:
+   - `ObraCustoCreate` uso com campos corretos
+   - `ObraRecursoCreate` uso com campos corretos
+   - `clientes?.data?.map()` em vez de `clientes?.map()`
+3. `apps/web/src/app/tenant/os/page.tsx` - Corrigido:
+   - `clientes?.data?.map()` em vez de `clientes?.map()`
+4. `apps/web/src/components/modules/obras/EtapasTimeline.tsx` - Corrigido:
+   - `data_fim_prevista` em vez de `data_prevista`
+
+**Arquivo Removido:**
+- `apps/web/netlify.toml` - Arquivo duplicado de configuração Netlify
+
+### Configuração Netlify Correta
+
+**Arquivo Único (raiz/netlify.toml):**
+```toml
+[build]
+  base = "apps/web"
+  publish = ".next"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20.19.0"
+  NPM_VERSION = "10.9.0"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+```
+
+**Workflow GitHub Actions:**
+- Localizado em `.github/workflows/deploy-netlify.yml`
+- Requer secrets configuradas no GitHub:
+  - `NETLIFY_AUTH_TOKEN`
+  - `NETLIFY_SITE_ID`
+
+### Boas Práticas Estabelecidas
+
+**Configuração Netlify:**
+1. Manter apenas UM arquivo `netlify.toml` na raiz do projeto
+2. NUNCA criar arquivo `netlify.toml` em subdiretórios
+3. Verificar configuração de base directory no painel Netlify (deve ser `apps/web`)
+
+**Sincronização de Interfaces TypeScript:**
+1. Manter interfaces em `apps/web/src/lib/api.ts` sempre sincronizadas com código de uso
+2. Quando adicionar campos em componentes, atualizar interfaces correspondentes imediatamente
+3. Executar `npm run build` localmente antes de push para branch main
+
+**Erros Comuns e Prevenção:**
+
+| Erro | Causa | Solução |
+|:---|:---|:---|
+| `Property 'X' does not exist on type 'YUpdate'` | Campo ausente em interface | Adicionar campo à interface em `api.ts` |
+| `Property 'map' does not exist on type 'ClienteListResult'` | Acesso incorreto a tipo composto | Usar `clientes?.data?.map()` |
+| `Property 'data_prevista' does not exist` | Nome de campo incorreto | Verificar nome correto na interface |
+
+### Checklist Pré-Deploy
+
+1. ✅ Executar `npm run build` localmente
+2. ✅ Corrigir todos os erros de TypeScript
+3. ✅ Verificar se há apenas um arquivo `netlify.toml` (na raiz)
+4. ✅ Confirmar que secrets do GitHub estão configuradas
+5. ✅ Fazer commit e push para branch `main`
+
+### Pontos Fortes
+
+- **Resolução rápida:** Problema identificado e corrigido em menos de 1 hora
+- **Build bem-sucedido:** Next.js build concluído sem erros após correções
+- **Deploy automático restaurado:** Push para GitHub agora aciona deploy Netlify corretamente
+- **Documentação atualizada:** Boas práticas registradas em DOCUMENTACAO_TECNICA.md
+
+### Riscos Técnicos
+
+- **Nenhum identificado pós-correção:** Sistema está estável
+
+### Observações
+
+- Deploy automático via GitHub Actions está configurado e funcional
+- Build do Next.js agora passa sem erros de TypeScript
+- Configuração Netlify está consolidada e correta
+- Interfaces TypeScript estão sincronizadas com código de uso
 
 ---
 

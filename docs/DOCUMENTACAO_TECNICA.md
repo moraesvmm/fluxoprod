@@ -954,6 +954,69 @@ Documento detalhado em MELHORIAS_FUTURAS.md:
 
 ---
 
+## 🚀 BOAS PRÁTICAS DE DEPLOY E BUILD (20/04/2026)
+
+### Configuração Netlify
+
+**Arquivo Único de Configuração:**
+- Manter apenas UM arquivo `netlify.toml` na raiz do projeto
+- NÃO criar arquivo `netlify.toml` em subdiretórios (ex: `apps/web/`)
+- Conflito de arquivos causa falha no deploy automático
+
+**Configuração Correta (raiz/netlify.toml):**
+```toml
+[build]
+  base = "apps/web"
+  publish = ".next"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20.19.0"
+  NPM_VERSION = "10.9.0"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+```
+
+**Workflow GitHub Actions:**
+- Localizado em `.github/workflows/deploy-netlify.yml`
+- Requer secrets configuradas no GitHub:
+  - `NETLIFY_AUTH_TOKEN`
+  - `NETLIFY_SITE_ID`
+- Build command: `npm run build` em `apps/web`
+
+### Prevenção de Erros de Build TypeScript
+
+**Sincronização de Interfaces:**
+- Manter interfaces TypeScript em `apps/web/src/lib/api.ts` sempre sincronizadas com o código de uso
+- Quando adicionar campos em componentes, atualizar interfaces correspondentes
+- Exemplo: `ProdutoUpdate` deve ter todos os campos usados em forms de edição
+
+**Erros Comuns e Soluções:**
+
+1. **Campo ausente em interface:**
+   - Erro: `Property 'X' does not exist on type 'YUpdate'`
+   - Solução: Adicionar campo à interface em `api.ts`
+
+2. **Acesso incorreto a tipos compostos:**
+   - Erro: `Property 'map' does not exist on type 'ClienteListResult'`
+   - Solução: Usar `clientes?.data?.map()` em vez de `clientes?.map()`
+   - `ClienteListResult` tem estrutura `{ data: Cliente[], next_cursor? }`
+
+3. **Nome de campo incorreto:**
+   - Erro: `Property 'data_prevista' does not exist on type 'ObraEtapa'`
+   - Solução: Verificar nome correto na interface (ex: `data_fim_prevista`)
+
+**Checklist Pré-Deploy:**
+1. Executar `npm run build` localmente
+2. Corrigir todos os erros de TypeScript
+3. Verificar se há apenas um arquivo `netlify.toml` (na raiz)
+4. Confirmar que secrets do GitHub estão configuradas
+5. Fazer commit e push para branch `main`
+
+---
+
 ## 🚀 IMPLEMENTAÇÕES RECENTES (18/04/2026)
 
 ### Módulo Estoque - Expansão Completa
