@@ -1,5 +1,8 @@
 # PROBLEMAS A RESOLVER - VISTORIA COMPLETA MÓDULO ESTOQUE
 
+**ATENÇÃO:** Este documento deve ser rigorosamente atualizado a cada resolução de problema. Deve ser atualizado com o seguinte formato:
+- [ ] Problema resolvido
+- [ ] Problema não resolvido
 **Data:** 18/04/2026  
 **Vistoria:** Completa (Frontend, RPCs, Supabase)  
 **Foco:** Erro "alertas de estoque" e diagnóstico profundo  
