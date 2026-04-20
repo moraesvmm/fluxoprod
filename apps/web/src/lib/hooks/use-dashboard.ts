@@ -52,7 +52,9 @@ export function useDashboardData() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_dashboard_kpis_por_mes', { p_meses: 6 });
       if (error) throw error;
-      return (data as Array<{ mes: string; faturamento: number; total_vendas: number; ticket_medio: number }>) || [];
+      // Normalização defensiva: garantir que sempre retorne array
+      const normalized = Array.isArray(data) ? data : (data?.data ?? data?.kpis ?? []);
+      return (normalized as Array<{ mes: string; faturamento: number; total_vendas: number; ticket_medio: number }>) || [];
     },
     staleTime: 5 * 60_000,
     retry: 2,

@@ -164,7 +164,7 @@ export default function DashboardPage() {
           <div className="h-[300px] w-full min-h-[300px] flex items-center justify-center">
             {dashboard.isLoadingChart ? (
               <ChartSkeleton />
-            ) : dashboard.chartData.some((d) => d.total > 0) ? (
+            ) : Array.isArray(dashboard.chartData) && dashboard.chartData.some((d) => d.total > 0) ? (
               <Suspense fallback={<ChartSkeleton />}>
                 <LazyAreaChart data={dashboard.chartData} formatarMoeda={formatarMoeda} />
               </Suspense>
