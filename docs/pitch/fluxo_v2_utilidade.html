@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluxo ERP — Utilidade dos Módulos & Valor Operacional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #0b0d14;
+      --navy-mid:  #10121c;
+      --navy-card: #161825;
+      --navy-bdr:  #252840;
+      --slate:     #8b8faa;
+      --silver:    #b0b4cc;
+      --white:     #e8eaf4;
+      --accent:    #7c3aed;
+      --accent-lt: #a78bfa;
+      --accent-glow: rgba(124,58,237,.15);
+      --violet:    #6d28d9;
+      --purple-mid:#5b21b6;
+      --green:     #10b981;
+      --green-lt:  #34d399;
+      --amber:     #f59e0b;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── SLIDE ── */
+    .slide {
+      width: 1280px;
+      min-height: 720px;
+      margin: 0 auto 4px;
+      padding: 60px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+      border-bottom: 1px solid var(--navy-bdr);
+    }
+    @page {
+      size: 1280px 720px;
+      margin: 0;
+    }
+    @media print {
+      html, body { width: 1280px; }
+      .slide { margin: 0; border-bottom: none; width: 1280px; min-height: 720px; max-height: 720px; overflow: hidden; }
+    }
+
+    .slide::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+
+    .slide-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--accent-lt); margin-bottom: 20px;
+    }
+
+    h1 { font-size: 52px; font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; }
+    h2 { font-size: 38px; font-weight: 700; line-height: 1.2; letter-spacing: -0.8px; }
+    h3 { font-size: 18px; font-weight: 600; line-height: 1.3; }
+    .subtitle { font-size: 17px; font-weight: 400; color: var(--slate); margin-top: 16px; max-width: 660px; }
+
+    .text-accent { color: var(--accent-lt); }
+    .text-green  { color: var(--green-lt); }
+    .text-amber  { color: var(--amber); }
+    .text-slate  { color: var(--slate); }
+
+    .divider { height: 1px; background: var(--navy-bdr); margin: 28px 0; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-bdr);
+      border-radius: 12px;
+      padding: 24px 28px;
+    }
+
+    /* ── GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+    /* ── PILLS ── */
+    .pill {
+      display: inline-block;
+      background: rgba(124,58,237,.12);
+      border: 1px solid rgba(124,58,237,.3);
+      color: var(--accent-lt);
+      font-size: 11px; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px;
+    }
+    .pill-green {
+      background: rgba(16,185,129,.10);
+      border-color: rgba(16,185,129,.25);
+      color: var(--green-lt);
+    }
+    .pill-amber {
+      background: rgba(245,158,11,.10);
+      border-color: rgba(245,158,11,.25);
+      color: var(--amber);
+    }
+    .pill-accent {
+      background: rgba(124,58,237,.15);
+      border-color: rgba(124,58,237,.3);
+      color: var(--accent-lt);
+    }
+
+    /* ── MODULE CARD ── */
+    .mod-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-bdr);
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .mod-icon { font-size: 20px; line-height: 1; }
+    .mod-name { font-size: 13px; font-weight: 700; color: var(--white); }
+    .mod-desc { font-size: 11px; color: var(--slate); line-height: 1.5; }
+    .mod-who  { font-size: 10px; color: var(--accent-lt); font-weight: 600; }
+
+    /* ── PROBLEM ROW ── */
+    .prob-row {
+      display: flex; align-items: flex-start; gap: 20px;
+      padding: 16px 20px;
+      background: var(--navy-card);
+      border: 1px solid var(--navy-bdr);
+      border-radius: 10px;
+    }
+    .prob-icon { font-size: 22px; flex-shrink: 0; width: 38px; text-align: center; }
+    .prob-body { flex: 1; }
+    .prob-title { font-size: 14px; font-weight: 600; color: var(--white); }
+    .prob-desc  { font-size: 12px; color: var(--slate); margin-top: 3px; }
+    .prob-solve { font-size: 12px; color: var(--accent-lt); margin-top: 5px; font-weight: 500; }
+
+    /* ── INFRA ITEM ── */
+    .infra-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 16px;
+      background: var(--navy-card);
+      border: 1px solid var(--navy-bdr);
+      border-radius: 8px;
+    }
+    .infra-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-lt); flex-shrink: 0; margin-top: 6px;
+    }
+    .infra-name { font-size: 13px; font-weight: 600; color: var(--white); }
+    .infra-desc { font-size: 12px; color: var(--slate); margin-top: 2px; }
+
+    /* ── SECTOR TABLE ── */
+    .sec-table { width: 100%; border-collapse: collapse; }
+    .sec-table th {
+      text-align: left; font-size: 10px; font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--slate); padding: 10px 16px;
+      border-bottom: 1px solid var(--navy-bdr);
+    }
+    .sec-table td {
+      padding: 12px 16px; font-size: 13px; color: var(--silver);
+      border-bottom: 1px solid var(--navy-bdr); vertical-align: top;
+    }
+    .sec-table tr:last-child td { border-bottom: none; }
+    .sec-table td:first-child { font-weight: 600; color: var(--white); }
+    .sec-table .mod-list { color: var(--accent-lt); font-size: 12px; }
+
+    /* ── SECURITY ROW ── */
+    .sec-row {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 0; border-bottom: 1px solid var(--navy-bdr);
+    }
+    .sec-row:last-child { border-bottom: none; }
+    .sec-icon { font-size: 18px; flex-shrink: 0; width: 30px; }
+    .sec-name { font-size: 13px; font-weight: 600; color: var(--white); }
+    .sec-desc { font-size: 12px; color: var(--slate); margin-top: 3px; }
+
+    /* ── LOGO ── */
+    .logo-mark { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 44px; }
+    .logo-box {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--violet));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800; color: #fff;
+      box-shadow: 0 0 24px rgba(124,58,237,.4);
+    }
+    .logo-text { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+
+    /* ── COVER / CLOSE ── */
+    .slide-cover { background: radial-gradient(ellipse at 15% 50%, #130b2e 0%, var(--navy) 65%); }
+    .slide-close {
+      background: radial-gradient(ellipse at 80% 50%, #0d0820 0%, var(--navy) 65%);
+      align-items: flex-start;
+    }
+    .grid-bg {
+      position: absolute; top: 0; right: 0;
+      width: 55%; height: 100%;
+      background-image:
+        linear-gradient(var(--navy-bdr) 1px, transparent 1px),
+        linear-gradient(90deg, var(--navy-bdr) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to left, rgba(0,0,0,0.2), transparent 80%);
+      opacity: 0.35;
+    }
+    .glow-orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); opacity: 0.12; pointer-events: none;
+    }
+
+    /* ── FOOTER ── */
+    .slide-footer { position: absolute; bottom: 28px; right: 48px; display: flex; align-items: center; gap: 16px; }
+    .slide-footer .brand { font-size: 11px; font-weight: 600; color: var(--navy-bdr); letter-spacing: 1px; text-transform: uppercase; }
+    .slide-footer .page  { font-size: 11px; color: var(--navy-bdr); }
+  </style>
+</head>
+<body>
+
+<!-- ══ SLIDE 1 — COVER ═══════════════════════════════════════ -->
+<section class="slide slide-cover">
+  <div class="grid-bg"></div>
+  <div class="glow-orb" style="width:500px;height:500px;background:var(--accent);top:-100px;right:80px;"></div>
+
+  <div class="logo-mark">
+    <div class="logo-box">F</div>
+    <span class="logo-text">Fluxo</span>
+  </div>
+
+  <div class="slide-label">Versão 2 — Utilidade dos Módulos & Valor Operacional</div>
+
+  <h1>Cada módulo.<br>Um problema<br><span class="text-accent">resolvido.</span></h1>
+
+  <p class="subtitle">
+    Como o Fluxo centraliza a operação empresarial — módulo a módulo, adoção progressiva, sem retrabalho.
+  </p>
+
+  <div style="margin-top: 48px; display: flex; gap: 12px; flex-wrap: wrap;">
+    <span class="pill">11 Módulos Integrados</span>
+    <span class="pill">Multi-Tenant Real</span>
+    <span class="pill">Adoção Progressiva</span>
+    <span class="pill">Dados Centralizados</span>
+  </div>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">01 / 10</span>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 2 — PROBLEMAS QUE O MERCADO ENFRENTA ════════════ -->
+<section class="slide">
+  <div class="glow-orb" style="width:380px;height:380px;background:var(--accent);top:-80px;right:-40px;"></div>
+  <div class="slide-label">Diagnóstico Operacional</div>
+  <h2>Problemas reais.<br><span class="text-accent">Respostas concretas.</span></h2>
+
+  <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 32px;">
+
+    <div class="prob-row">
+      <div class="prob-icon">📋</div>
+      <div class="prob-body">
+        <div class="prob-title">Dados espalhados em planilhas e sistemas desconectados</div>
+        <div class="prob-desc">Clientes em um lugar, vendas em outro, financeiro em um terceiro. Nenhum sistema conversa com o outro.</div>
+        <div class="prob-solve">→ CRM + Vendas + Financeiro integrados nativamente. Um único repositório de clientes alimenta todos os módulos.</div>
+      </div>
+    </div>
+
+    <div class="prob-row">
+      <div class="prob-icon">🔧</div>
+      <div class="prob-body">
+        <div class="prob-title">Ordens de serviço sem rastreabilidade, sem histórico</div>
+        <div class="prob-desc">OS abertas à mão, sem controle de responsável ou status. Atendimento inconsistente e impossível de auditar.</div>
+        <div class="prob-solve">→ Módulo OS com número sequencial, colaborador responsável, histórico de ações e status em tempo real.</div>
+      </div>
+    </div>
+
+    <div class="prob-row">
+      <div class="prob-icon">💸</div>
+      <div class="prob-body">
+        <div class="prob-title">Comissões calculadas manualmente — com erro e conflito</div>
+        <div class="prob-desc">Vendedores contestam valores, retrabalho no fechamento mensal, desgaste de equipe recorrente.</div>
+        <div class="prob-solve">→ Comissões calculadas automaticamente a cada venda finalizada — auditável, rastreável, por vendedor.</div>
+      </div>
+    </div>
+
+    <div class="prob-row">
+      <div class="prob-icon">📦</div>
+      <div class="prob-body">
+        <div class="prob-title">Estoque desatualizado — venda confirmada de produto indisponível</div>
+        <div class="prob-desc">Baixa manual no final do dia, divergências que geram ruptura e frustração do cliente.</div>
+        <div class="prob-solve">→ PDV transacional: a venda decrementa o estoque em tempo real, de forma atômica, irreversível em caso de falha.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">02 / 10</span>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 3 — 11 MÓDULOS VISÃO GERAL ══════════════════════ -->
+<section class="slide">
+  <div class="slide-label">Visão Geral dos Módulos</div>
+  <h2>11 módulos.<br><span class="text-accent">Uma operação integrada.</span></h2>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 28px;">
+
+    <div class="mod-card" style="border-top: 2px solid var(--accent-lt);">
+      <div class="mod-icon">📊</div>
+      <div class="mod-name">Dashboard</div>
+      <div class="mod-desc">KPIs em tempo real. Faturamento, OS pendentes, saldo, estoque baixo.</div>
+      <div class="mod-who">Gestores · Diretores</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--accent-lt);">
+      <div class="mod-icon">👥</div>
+      <div class="mod-name">CRM</div>
+      <div class="mod-desc">Cadastro de clientes com funil de vendas. Base central de todos os módulos.</div>
+      <div class="mod-who">Comercial · Atendimento</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--accent);">
+      <div class="mod-icon">🛒</div>
+      <div class="mod-name">Vendas / PDV</div>
+      <div class="mod-desc">PDV com transação atômica. Venda → Estoque → Comissão em uma operação.</div>
+      <div class="mod-who">Vendedores · Caixa</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--accent);">
+      <div class="mod-icon">🗂️</div>
+      <div class="mod-name">Catálogo</div>
+      <div class="mod-desc">Dicionário de produtos com SKU, preço e estoque mínimo configurável.</div>
+      <div class="mod-who">Gestores de Produto</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--violet);">
+      <div class="mod-icon">📦</div>
+      <div class="mod-name">Estoque</div>
+      <div class="mod-desc">Movimentações, histórico e alertas de ruptura. Rastreável por produto.</div>
+      <div class="mod-who">Almoxarife · Compras</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--green);">
+      <div class="mod-icon">🔧</div>
+      <div class="mod-name">Ordens de Serviço</div>
+      <div class="mod-desc">OS numerada com colaborador, status e histórico. Para serviços pontuais.</div>
+      <div class="mod-who">Técnicos · Recepção</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--green);">
+      <div class="mod-icon">🏗️</div>
+      <div class="mod-name">Obras</div>
+      <div class="mod-desc">Projetos com endereço, prazo, orçamento e status. Para projetos de longa duração.</div>
+      <div class="mod-who">Engenheiros · Construtoras</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--amber);">
+      <div class="mod-icon">💰</div>
+      <div class="mod-name">Financeiro</div>
+      <div class="mod-desc">Receitas, despesas, vencimentos e saldo. Fluxo de caixa em tempo real.</div>
+      <div class="mod-who">Financeiro · Contabilidade</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--amber);">
+      <div class="mod-icon">👔</div>
+      <div class="mod-name">RH</div>
+      <div class="mod-desc">Colaboradores, cargo e status. Viabiliza atribuição em OS e cálculo de comissões.</div>
+      <div class="mod-who">RH · Gestores de Equipe</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--amber);">
+      <div class="mod-icon">💸</div>
+      <div class="mod-name">Comissões</div>
+      <div class="mod-desc">Cálculo automático integrado ao PDV. Auditável e organizado por vendedor.</div>
+      <div class="mod-who">Comercial · Financeiro</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--accent-lt);">
+      <div class="mod-icon">📈</div>
+      <div class="mod-name">Relatórios</div>
+      <div class="mod-desc">Consolidação de dados operacionais em visão estratégica exportável.</div>
+      <div class="mod-who">Diretores · Análise</div>
+    </div>
+
+    <div class="mod-card" style="border-top: 2px solid var(--slate);">
+      <div class="mod-icon">⚙️</div>
+      <div class="mod-name">Configurações</div>
+      <div class="mod-desc">Personalização por empresa via chave-valor. Sem intervenção técnica.</div>
+      <div class="mod-who">Admin do Tenant</div>
+    </div>
+
+  </div>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">03 / 10</span>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 4 — CRM COMO BASE CENTRAL ═══════════════════════ -->
+<section class="slide">
+  <div class="slide-label">Módulo Central</div>
+  <h2>O CRM não é<br>um módulo isolado.<br><span class="text-accent">É a fundação de tudo.</span></h2>
+
+  <div class="grid-2" style="margin-top: 36px; gap: 32px; align-items: start;">
+
+    <div>
+      <p style="font-size:15px;color:var(--silver);line-height:1.7;margin-bottom:20px;">
+        No Fluxo, o cadastro de cliente é feito <strong style="color:var(--white);">uma única vez</strong>. Esse registro alimenta automaticamente Vendas, OS e Obras — sem duplicação, sem divergência.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--navy-card);border:1px solid var(--navy-bdr);border-radius:8px;">
+          <span style="font-size:18px;">👥</span>
+          <span style="font-size:13px;color:var(--white);font-weight:600;">CRM</span>
+          <span style="font-size:13px;color:var(--slate);">→ cadastro único, indexado por telefone</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--navy-card);border:1px solid rgba(124,58,237,.25);border-radius:8px;margin-left:24px;">
+          <span style="font-size:16px;color:var(--accent-lt);">↳</span>
+          <span style="font-size:13px;color:var(--accent-lt);font-weight:600;">Vendas</span>
+          <span style="font-size:13px;color:var(--slate);">associa cliente à venda</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--navy-card);border:1px solid rgba(124,58,237,.25);border-radius:8px;margin-left:24px;">
+          <span style="font-size:16px;color:var(--accent-lt);">↳</span>
+          <span style="font-size:13px;color:var(--accent-lt);font-weight:600;">OS</span>
+          <span style="font-size:13px;color:var(--slate);">vincula cliente à ordem de serviço</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--navy-card);border:1px solid rgba(124,58,237,.25);border-radius:8px;margin-left:24px;">
+          <span style="font-size:16px;color:var(--accent-lt);">↳</span>
+          <span style="font-size:13px;color:var(--accent-lt);font-weight:600;">Obras</span>
+          <span style="font-size:13px;color:var(--slate);">associa cliente ao projeto/obra</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="card" style="border-left: 2px solid var(--accent);">
+        <h3 style="font-size:14px;margin-bottom:8px;">Funil de Vendas Integrado</h3>
+        <p style="font-size:13px;color:var(--slate);">
+          Cada cliente tem uma fase no funil (lead, contato, proposta, fechado). Acompanhamento de leads que ainda não converteram — sem sair do sistema.
+        </p>
+      </div>
+      <div class="card" style="border-left: 2px solid var(--accent);">
+        <h3 style="font-size:14px;margin-bottom:8px;">Busca Indexada por Telefone</h3>
+        <p style="font-size:13px;color:var(--slate);">
+          Índice nativo em <code style="font-size:11px;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;">telefone</code>, <code style="font-size:11px;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;">status</code> e <code style="font-size:11px;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;">funil_fase</code>. Um cliente localizado em milissegundos, mesmo em bases de milhares de registros.
+        </p>
+      </div>
+      <div class="card" style="border-left: 2px solid var(--accent);">
+        <h3 style="font-size:14px;margin-bottom:8px;">Sem Duplicação de Dados</h3>
+        <p style="font-size:13px;color:var(--slate);">
+          O PDV permite cadastrar ou buscar o cliente no momento da venda — eliminando registros duplicados entre módulos.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">04 / 10</span>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 5 — PDV TRANSACIONAL ════════════════════════════ -->
+<section class="slide">
+  <div class="slide-label">Fluxo Crítico de Negócio</div>
+  <h2>Uma venda.<br><span class="text-accent">Seis operações atômicas.</span></h2>
+
+  <p class="subtitle" style="margin-bottom:36px; font-size:14px;">
+    O PDV do Fluxo não é um formulário. É uma transação SQL completa — se qualquer etapa falhar, tudo é revertido.
+  </p>
+
+  <div style="display:flex;align-items:stretch;gap:6px;margin-bottom:20px;">
+
+    <div style="flex:1;background:var(--navy-card);border:1px solid var(--navy-bdr);border-radius:8px;padding:16px 12px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent-lt);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">① Idempotência</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.5;">Verifica chave única — sem duplicatas em duplo clique</div>
+    </div>
+
+    <div style="display:flex;align-items:center;color:var(--navy-bdr);font-size:18px;">›</div>
+
+    <div style="flex:1;background:var(--navy-card);border:1px solid var(--navy-bdr);border-radius:8px;padding:16px 12px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent-lt);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">② Cliente</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.5;">Busca ou cadastra o cliente em tempo real</div>
+    </div>
+
+    <div style="display:flex;align-items:center;color:var(--navy-bdr);font-size:18px;">›</div>
+
+    <div style="flex:1;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:16px 12px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent-lt);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">③ Venda</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.5;">Insere registro de venda com valor e método</div>
+    </div>
+
+    <div style="display:flex;align-items:center;color:var(--navy-bdr);font-size:18px;">›</div>
+
+    <div style="flex:1;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:16px 12px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent-lt);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">④ Itens</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.5;">Insere cada item com preço unitário e subtotal</div>
+    </div>
+
+    <div style="display:flex;align-items:center;color:var(--navy-bdr);font-size:18px;">›</div>
+
+    <div style="flex:1;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.3);border-radius:8px;padding:16px 12px;text-align:center; box-shadow:0 0 16px rgba(124,58,237,.1);">
+      <div style="font-size:11px;font-weight:700;color:var(--green-lt);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">⑤ Estoque</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.5;">Decremento atômico — sem corrida de dados</div>
+    </div>
+
+    <div style="display:flex;align-items:center;color:var(--navy-bdr);font-size:18px;">›</div>
+
+    <div style="flex:1;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.3);border-radius:8px;padding:16px 12px;text-align:center; box-shadow:0 0 16px rgba(124,58,237,.1);">
+      <div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">⑥ Comissão</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.5;">Calcula e registra automaticamente para o vendedor</div>
+    </div>
+
+  </div>
+
+  <div style="padding:14px 22px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:8px;">
+    <p style="font-size:13px;color:var(--silver);">
+      <span style="color:var(--green-lt);font-weight:600;">Garantia transacional SQL:</span>
+      Todas as 6 etapas executam dentro de uma única transação PostgreSQL. Se qualquer uma falhar, o banco reverte completamente. Nenhum dado fica em estado inconsistente.
+    </p>
+  </div>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">05 / 10</span>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 6 — OS vs OBRAS ══════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-label">Módulos Diferenciados</div>
+  <h2>OS e Obras:<br><span class="text-accent">verticais exclusivas.</span></h2>
+
+  <p class="subtitle" style="margin-bottom:32px; font-size:14px;">
+    Nenhum concorrente direto de ticket acessível cobre os dois. É o diferencial que abre novos segmentos de mercado.
+  </p>
+
+  <div class="grid-2" style="gap: 32px;">
+
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+        <span style="font-size:26px;">🔧</span>
+        <div>
+          <div style="font-size:16px;font-weight:700;">Ordens de Serviço</div>
+          <div style="font-size:12px;color:var(--slate);">Para serviços pontuais e recorrentes</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px;">
+        <div class="infra-item"><div class="infra-dot"></div><div><div class="infra-name">Número sequencial automático</div><div class="infra-desc">Protocolo rastreável para cada atendimento</div></div></div>
+        <div class="infra-item"><div class="infra-dot"></div><div><div class="infra-name">Colaborador responsável</div><div class="infra-desc">Integrado ao módulo RH — sem cadastros duplicados</div></div></div>
+        <div class="infra-item"><div class="infra-dot"></div><div><div class="infra-name">Histórico de ações</div><div class="infra-desc">Cada mudança de status registrada com usuário e data</div></div></div>
+        <div class="infra-item"><div class="infra-dot"></div><div><div class="infra-name">Orçamento e calendário</div><div class="infra-desc">Valor aprovado e visualização temporal integrada</div></div></div>
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;background:var(--accent-glow);border-radius:6px;border:1px solid rgba(124,58,237,.2);">
+        <p style="font-size:11px;color:var(--slate);">Segmentos: oficinas, assistências técnicas, manutenção predial, TI</p>
+      </div>
+    </div>
+
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+        <span style="font-size:26px;">🏗️</span>
+        <div>
+          <div style="font-size:16px;font-weight:700;">Obras / Projetos</div>
+          <div style="font-size:12px;color:var(--slate);">Para projetos de maior duração e complexidade</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px;">
+        <div class="infra-item"><div class="infra-dot" style="background:var(--green);"></div><div><div class="infra-name">Endereço e datas de prazo</div><div class="infra-desc">Localização física e cronograma de início e entrega</div></div></div>
+        <div class="infra-item"><div class="infra-dot" style="background:var(--green);"></div><div><div class="infra-name">Orçamento total do projeto</div><div class="infra-desc">Controle financeiro vinculado ao módulo Financeiro</div></div></div>
+        <div class="infra-item"><div class="infra-dot" style="background:var(--green);"></div><div><div class="infra-name">Status do projeto</div><div class="infra-desc">Planejamento, execução, concluído, cancelado</div></div></div>
+        <div class="infra-item"><div class="infra-dot" style="background:var(--green);"></div><div><div class="infra-name">Vinculação com cliente</div><div class="infra-desc">Base do CRM — sem duplicação do contratante</div></div></div>
+      </div>
+      <div style="margin-top:12px;padding:10px 14px;background:rgba(16,185,129,.06);border-radius:6px;border:1px solid rgba(16,185,129,.15);">
+        <p style="font-size:11px;color:var(--slate);">Segmentos: construtoras, reformas, instalações, engenharia</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">06 / 10</span>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 7 — JORNADA DE MATURIDADE ═══════════════════════ -->
+<section class="slide">
+  <div class="slide-label">Adoção Progressiva</div>
+  <h2>A empresa cresce.<br><span class="text-accent">O sistema acompanha.</span></h2>
+
+  <p class="subtitle" style="margin-bottom:36px; font-size:14px;">
+    O Fluxo é adotado progressivamente. Cada fase adiciona valor sem exigir reconfiguração do que já funciona.
+  </p>
+
+  <div style="display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr 24px 1fr;align-items:start;gap:4px;margin-top:8px;">
+
+    <div style="text-align:center;">
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(124,58,237,.12);border:2px solid rgba(124,58,237,.4);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:18px;">📋</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--slate);margin-bottom:6px;">Fase 1</div>
+      <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:8px;">Visibilidade</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.7;">Dashboard<br>CRM<br>Catálogo<br>Estoque</div>
+      <div style="margin-top:12px;"><span class="pill" style="font-size:10px;background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2);">Starter</span></div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:center;padding-top:22px;color:var(--navy-bdr);font-size:20px;">›</div>
+
+    <div style="text-align:center;">
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(124,58,237,.18);border:2px solid rgba(124,58,237,.6);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:18px; box-shadow:0 0 14px rgba(124,58,237,.2);">💰</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--slate);margin-bottom:6px;">Fase 2</div>
+      <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:8px;">Operação</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.7;">+ Vendas / PDV<br>+ Financeiro<br>+ RH</div>
+      <div style="margin-top:12px;"><span class="pill" style="font-size:10px;">Business</span></div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:center;padding-top:22px;color:var(--navy-bdr);font-size:20px;">›</div>
+
+    <div style="text-align:center;">
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(124,58,237,.25);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:18px; box-shadow:0 0 20px rgba(124,58,237,.3);">🔧</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--slate);margin-bottom:6px;">Fase 3</div>
+      <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:8px;">Verticalização</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.7;">+ OS<br>+ Obras<br>+ Comissões<br>+ Relatórios</div>
+      <div style="margin-top:12px;"><span class="pill" style="font-size:10px;">Pro</span></div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:center;padding-top:22px;color:var(--navy-bdr);font-size:20px;">›</div>
+
+    <div style="text-align:center;">
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(245,158,11,.12);border:2px solid var(--amber);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:18px;">📈</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--slate);margin-bottom:6px;">Fase 4</div>
+      <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:8px;">Escala</div>
+      <div style="font-size:11px;color:var(--slate);line-height:1.7;">Onboarding assistido<br>Suporte dedicado<br>White-label<br>SLA garantido</div>
+      <div style="margin-top:12px;"><span class="pill-amber pill" style="font-size:10px;">Enterprise</span></div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:28px;padding:14px 22px;background:var(--navy-card);border:1px solid var(--navy-bdr);border-radius:8px;">
+    <p style="font-size:13px;color:var(--silver);">
+      <span style="color:var(--accent-lt);font-weight:600;">Arquitetura compatível com crescimento:</span>
+      Feature flags nativas permitem ativar novos módulos sem reconfiguração. O sistema não precisa ser reimplementado — apenas expandido.
+    </p>
+  </div>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">07 / 10</span>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 8 — MÓDULOS POR SEGMENTO ════════════════════════ -->
+<section class="slide">
+  <div class="slide-label">Segmentação de Mercado</div>
+  <h2>Cada negócio.<br><span class="text-accent">Um conjunto de módulos.</span></h2>
+
+  <table class="sec-table" style="margin-top: 32px;">
+    <thead>
+      <tr>
+        <th>Tipo de Empresa</th>
+        <th>Módulos Prioritários</th>
+        <th>Diferencial do Fluxo</th>
+        <th>Plano Natural</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>🏪 Loja / Varejo</td>
+        <td class="mod-list">Catálogo · Estoque · PDV · CRM · Financeiro · Comissões</td>
+        <td>PDV com atualização atômica de estoque e cálculo automático de comissão</td>
+        <td><span class="pill" style="font-size:10px;">Business</span></td>
+      </tr>
+      <tr>
+        <td>🔧 Oficina / Assistência</td>
+        <td class="mod-list">CRM · OS · RH · Financeiro · Catálogo</td>
+        <td>OS com histórico de ações e colaborador responsável — ausente em ERPs de ticket similar</td>
+        <td><span class="pill" style="font-size:10px;">Pro</span></td>
+      </tr>
+      <tr>
+        <td>🏗️ Construtora / Reforma</td>
+        <td class="mod-list">CRM · Obras · RH · Financeiro</td>
+        <td>Módulo Obras com prazo, endereço e orçamento — preenche gap do Omie e Sienge</td>
+        <td><span class="pill" style="font-size:10px;">Pro</span></td>
+      </tr>
+      <tr>
+        <td>📦 Distribuidora</td>
+        <td class="mod-list">Catálogo · Estoque · Vendas · CRM · Financeiro</td>
+        <td>Alertas de estoque mínimo e movimentação rastreável por produto e data</td>
+        <td><span class="pill" style="font-size:10px;">Business</span></td>
+      </tr>
+      <tr>
+        <td>💼 Empresa de Serviços</td>
+        <td class="mod-list">CRM · OS · RH · Financeiro · Comissões</td>
+        <td>Ciclo completo: cliente → OS → colaborador → comissão → financeiro</td>
+        <td><span class="pill" style="font-size:10px;">Pro</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">08 / 10</span>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 9 — CONFIABILIDADE TÉCNICA ══════════════════════ -->
+<section class="slide">
+  <div class="slide-label">Confiabilidade Técnica</div>
+  <h2>O que o usuário<br><span class="text-accent">não precisa se preocupar.</span></h2>
+
+  <p class="subtitle" style="margin-bottom:32px; font-size:14px;">
+    Por trás de cada módulo, mecanismos técnicos garantem consistência, segurança e isolamento — totalmente transparentes ao usuário final.
+  </p>
+
+  <div class="grid-2" style="gap: 24px;">
+
+    <div style="display:flex;flex-direction:column;gap:0;">
+      <div class="sec-row" style="border-top:1px solid var(--navy-bdr);padding-top:14px;">
+        <div class="sec-icon">🔒</div>
+        <div>
+          <div class="sec-name">Isolamento por Schema PostgreSQL</div>
+          <div class="sec-desc">Cada empresa tem seu próprio schema dedicado. Dados de tenants distintos nunca se cruzam — nem em caso de falha.</div>
+        </div>
+      </div>
+      <div class="sec-row">
+        <div class="sec-icon">🔑</div>
+        <div>
+          <div class="sec-name">RBAC Intra-Tenant</div>
+          <div class="sec-desc">Admin e usuário têm permissões distintas dentro da mesma empresa. Operações destrutivas protegidas por design.</div>
+        </div>
+      </div>
+      <div class="sec-row">
+        <div class="sec-icon">⚡</div>
+        <div>
+          <div class="sec-name">Idempotência nas Escritas</div>
+          <div class="sec-desc">Duplo clique no "Finalizar Venda" cria apenas uma venda. Chave única por operação — proteção contra rede instável.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:0;">
+      <div class="sec-row" style="border-top:1px solid var(--navy-bdr);padding-top:14px;">
+        <div class="sec-icon">🛡️</div>
+        <div>
+          <div class="sec-name">Feature Flags por Empresa</div>
+          <div class="sec-desc">Módulos não contratados são bloqueados em camada de banco e middleware — impossível acessar por URL direta.</div>
+        </div>
+      </div>
+      <div class="sec-row">
+        <div class="sec-icon">📋</div>
+        <div>
+          <div class="sec-name">Audit Log de Operações</div>
+          <div class="sec-desc">Cada operação registra quem fez, o quê e quando. Base para compliance, debugging e reversão assistida.</div>
+        </div>
+      </div>
+      <div class="sec-row">
+        <div class="sec-icon">🔄</div>
+        <div>
+          <div class="sec-name">Versionamento de Schema</div>
+          <div class="sec-desc">Migrações coordenadas em todos os tenants. Evolução do banco sem inconsistências entre versões.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">09 / 10</span>
+  </div>
+</section>
+
+
+<!-- ══ SLIDE 10 — FECHAMENTO ══════════════════════════════════ -->
+<section class="slide slide-close">
+  <div class="grid-bg"></div>
+  <div class="glow-orb" style="width:600px;height:600px;background:var(--accent);bottom:-200px;right:-100px;"></div>
+
+  <div class="logo-mark" style="margin-bottom: 32px;">
+    <div class="logo-box">F</div>
+    <span class="logo-text">Fluxo</span>
+  </div>
+
+  <div class="slide-label">Posicionamento Final</div>
+
+  <h2 style="font-size:40px;max-width:740px;line-height:1.25;">
+    "O Fluxo não é vendido<br>por funcionalidades.<br>
+    <span class="text-accent">É adotado pela utilidade<br>e expandido pelo valor."</span>
+  </h2>
+
+  <div class="divider" style="max-width:540px;"></div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:600px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="color:var(--accent-lt);font-size:16px;">✓</span>
+      <span style="font-size:15px;color:var(--silver);">Um sistema que cresce com a maturidade operacional da empresa</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="color:var(--accent-lt);font-size:16px;">✓</span>
+      <span style="font-size:15px;color:var(--silver);">Cada módulo resolve um problema real — sem funcionalidades decorativas</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="color:var(--accent-lt);font-size:16px;">✓</span>
+      <span style="font-size:15px;color:var(--silver);">Adoção progressiva: começa simples, expande sem retrabalho</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="color:var(--accent-lt);font-size:16px;">✓</span>
+      <span style="font-size:15px;color:var(--silver);">Isolamento real de dados — pronto para multi-tenant em escala</span>
+    </div>
+  </div>
+
+  <div style="margin-top:40px;display:flex;gap:12px;flex-wrap:wrap;">
+    <span class="pill">CRM Central</span>
+    <span class="pill">PDV Transacional</span>
+    <span class="pill">OS + Obras</span>
+    <span class="pill">Comissões Automáticas</span>
+    <span class="pill">Feature Flags Nativas</span>
+    <span class="pill">Audit Log</span>
+  </div>
+
+  <div class="slide-footer">
+    <span class="brand">FLUXO ERP</span>
+    <span class="page">10 / 10</span>
+  </div>
+</section>
+
+</body>
+</html>

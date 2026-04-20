@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluxo ERP — Modelo de Compra & Pricing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --navy: #0b0d14;
+      --navy-mid: #10121c;
+      --navy-card: #161825;
+      --navy-bdr: #252840;
+      --slate: #8b8faa;
+      --silver: #b0b4cc;
+      --white: #e8eaf4;
+      --accent: #7c3aed;
+      --accent-lt: #a78bfa;
+      --accent-glow: rgba(124, 58, 237, .18);
+      --violet: #6d28d9;
+      --green: #10b981;
+      --green-lt: #34d399;
+      --amber: #f59e0b;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── SLIDE CONTAINER ── */
+    .slide {
+      width: 1280px;
+      min-height: 720px;
+      margin: 0 auto 4px;
+      padding: 64px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+      border-bottom: 1px solid var(--navy-bdr);
+    }
+
+    @page {
+      size: 1280px 720px;
+      margin: 0;
+    }
+    @media print {
+      html, body { width: 1280px; }
+      .slide { margin: 0; border-bottom: none; width: 1280px; min-height: 720px; max-height: 720px; overflow: hidden; }
+    }
+
+    .slide::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+
+    .slide-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--accent-lt);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+    }
+
+    h2 {
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.8px;
+    }
+
+    h3 {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--slate);
+      margin-top: 16px;
+      max-width: 640px;
+    }
+
+    .caption {
+      font-size: 12px;
+      color: var(--slate);
+    }
+
+    .text-accent {
+      color: var(--accent-lt);
+    }
+
+    .text-green {
+      color: var(--green-lt);
+    }
+
+    .text-amber {
+      color: var(--amber);
+    }
+
+    .text-slate {
+      color: var(--slate);
+    }
+
+    .card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-bdr);
+      border-radius: 12px;
+      padding: 28px 32px;
+    }
+
+    .card-accent {
+      border-top: 2px solid var(--accent);
+    }
+
+    .card-green {
+      border-top: 2px solid var(--green);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* ── PRICING TIER ── */
+    .tier {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-bdr);
+      border-radius: 14px;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .tier.featured {
+      border-color: var(--accent);
+      background: linear-gradient(145deg, #1a0f2e, var(--navy-card));
+    }
+
+    .tier-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, var(--accent), var(--violet));
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+    }
+
+    .tier-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--slate);
+    }
+
+    .tier-price {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .tier-price span {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--slate);
+    }
+
+    .tier-modules {
+      font-size: 13px;
+      color: var(--silver);
+      line-height: 1.8;
+    }
+
+    .tier-modules li {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .tier-modules li::before {
+      content: '›  ';
+      color: var(--accent-lt);
+    }
+
+    /* ── TABLE ── */
+    .cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .cmp-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--slate);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--navy-bdr);
+    }
+
+    .cmp-table td {
+      padding: 14px 16px;
+      font-size: 14px;
+      color: var(--silver);
+      border-bottom: 1px solid var(--navy-bdr);
+    }
+
+    .cmp-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .cmp-table .highlight {
+      color: var(--accent-lt);
+      font-weight: 600;
+    }
+
+    .cmp-table td:first-child {
+      font-weight: 500;
+      color: var(--white);
+    }
+
+    /* ── STAT ── */
+    .stat-block {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--slate);
+      margin-top: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--navy-bdr);
+      margin: 32px 0;
+    }
+
+    /* ── PILLS ── */
+    .pill {
+      display: inline-block;
+      background: rgba(124, 58, 237, .12);
+      border: 1px solid rgba(124, 58, 237, .3);
+      color: var(--accent-lt);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .pill-green {
+      background: rgba(16, 185, 129, .12);
+      border-color: rgba(16, 185, 129, .25);
+      color: var(--green-lt);
+    }
+
+    .pill-amber {
+      background: rgba(245, 158, 11, .10);
+      border-color: rgba(245, 158, 11, .25);
+      color: var(--amber);
+    }
+
+    /* ── STEPS ── */
+    .step-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-body {
+      flex: 1;
+    }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .step-desc {
+      font-size: 13px;
+      color: var(--slate);
+      margin-top: 4px;
+    }
+
+    /* ── MRR BARS ── */
+    .mrr-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .mrr-label {
+      font-size: 13px;
+      color: var(--silver);
+      width: 100px;
+      flex-shrink: 0;
+    }
+
+    .mrr-bar-bg {
+      flex: 1;
+      height: 10px;
+      background: var(--navy-bdr);
+      border-radius: 5px;
+    }
+
+    .mrr-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+    }
+
+    .mrr-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+      min-width: 90px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── LOGO ── */
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 48px;
+    }
+
+    .logo-box {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--violet));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 24px rgba(124, 58, 237, .4);
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    /* ── COVER / CLOSE ── */
+    .slide-cover {
+      background: radial-gradient(ellipse at 20% 50%, #130b2e 0%, var(--navy) 65%);
+    }
+
+    .slide-close {
+      background: radial-gradient(ellipse at 80% 50%, #0d0820 0%, var(--navy) 65%);
+      align-items: flex-start;
+    }
+
+    .grid-bg {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 55%;
+      height: 100%;
+      background-image:
+        linear-gradient(var(--navy-bdr) 1px, transparent 1px),
+        linear-gradient(90deg, var(--navy-bdr) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to left, rgba(0, 0, 0, 0.25), transparent 80%);
+      opacity: 0.35;
+    }
+
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    /* ── FOOTER ── */
+    .slide-footer {
+      position: absolute;
+      bottom: 28px;
+      right: 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .slide-footer .brand {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--navy-bdr);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .slide-footer .page {
+      font-size: 11px;
+      color: var(--navy-bdr);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ SLIDE 1 — COVER ═══════════════════════════════════════ -->
+  <section class="slide slide-cover">
+    <div class="grid-bg"></div>
+    <div class="glow-orb" style="width:500px;height:500px;background:var(--accent);top:-100px;right:100px;"></div>
+
+    <div class="logo-mark">
+      <div class="logo-box">F</div>
+      <span class="logo-text">Fluxo</span>
+    </div>
+
+    <div class="slide-label">Versão 1 — Modelo de Compra & Pricing</div>
+
+    <h1>Uma plataforma.<br><span class="text-accent">Múltiplos negócios.</span><br>Um modelo escalável.</h1>
+
+    <p class="subtitle">
+      Estrutura de planos, justificativa de valor e estratégia de crescimento sustentável para decisores financeiros e
+      executivos.
+    </p>
+
+    <div style="margin-top: 48px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <span class="pill">SaaS B2B — Nível 2</span>
+      <span class="pill">Multi-Tenant</span>
+      <span class="pill">Modular</span>
+      <span class="pill">White-Label Opcional</span>
+    </div>
+
+    <div class="slide-footer">
+      <span class="brand">FLUXO ERP</span>
+      <span class="page">01 / 08</span>
+    </div>
+  </section>
+
+
+  <!-- ══ SLIDE 2 — POSICIONAMENTO ══════════════════════════════ -->
+  <section class="slide">
+    <div class="glow-orb" style="width:400px;height:400px;background:var(--accent);top:-60px;right:-60px;"></div>
+    <div class="slide-label">Posicionamento</div>
+    <h2>O Fluxo não é um software.<br><span class="text-accent">É uma operação centralizada.</span></h2>
+
+    <div class="divider"></div>
+
+    <div class="grid-3" style="margin-top: 8px;">
+      <div class="card card-accent">
+        <div class="pill" style="margin-bottom: 16px;">Arquitetura</div>
+        <h3 style="font-size: 17px;">Multi-Tenant Real</h3>
+        <p style="font-size: 13px; color: var(--slate); margin-top: 10px;">
+          Isolamento por schema PostgreSQL. Cada empresa opera em ambiente completamente separado — sem compartilhamento
+          de dados, sem risco cruzado.
+        </p>
+      </div>
+      <div class="card card-accent">
+        <div class="pill" style="margin-bottom: 16px;">Modelo</div>
+        <h3 style="font-size: 17px;">Modular por Feature Flag</h3>
+        <p style="font-size: 13px; color: var(--slate); margin-top: 10px;">
+          Cada empresa ativa apenas os módulos que contratou. O controle é nativo no banco — impossível acessar módulos
+          não pagos mesmo por URL direta.
+        </p>
+      </div>
+      <div class="card card-accent">
+        <div class="pill" style="margin-bottom: 16px;">Custo Operacional</div>
+        <h3 style="font-size: 17px;">Infraestrutura Enxuta</h3>
+        <p style="font-size: 13px; color: var(--slate); margin-top: 10px;">
+          Deploy em Netlify + Supabase. Custo operacional baixo com escalabilidade nativa. Novos tenants provisionados
+          em segundos, sem intervenção manual.
+        </p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="display: flex; gap: 40px; align-items: center;">
+      <div class="stat-block">
+        <div class="stat-value text-accent">11</div>
+        <div class="stat-label">Módulos funcionais integrados</div>
+      </div>
+      <div style="width: 1px; height: 60px; background: var(--navy-bdr);"></div>
+      <div class="stat-block">
+        <div class="stat-value text-green">3</div>
+        <div class="stat-label">Roles de acesso distintos</div>
+      </div>
+      <div style="width: 1px; height: 60px; background: var(--navy-bdr);"></div>
+      <div class="stat-block">
+        <div class="stat-value text-accent">1</div>
+        <div class="stat-label">RPC transacional atômica para venda</div>
+      </div>
+      <div style="width: 1px; height: 60px; background: var(--navy-bdr);"></div>
+      <div class="stat-block">
+        <div class="stat-value" style="font-size:28px;">∞</div>
+        <div class="stat-label">Tenants simultâneos sem reescrever código</div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="brand">FLUXO ERP</span>
+      <span class="page">02 / 08</span>
+    </div>
+  </section>
+
+
+  <!-- ══ SLIDE 3 — MERCADO ══════════════════════════════════════ -->
+  <section class="slide">
+    <div class="slide-label">Mercado & Competidores</div>
+    <h2>O mercado já paga.<br><span class="text-accent">O Fluxo entrega mais.</span></h2>
+
+    <p class="subtitle" style="margin-bottom: 32px; font-size: 15px;">
+      ERPs líderes para PMEs brasileiras cobram entre R$&nbsp;99 e R$&nbsp;3.000/mês. O Fluxo compete diretamente nos
+      segmentos de maior crescimento.
+    </p>
+
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Segmento-alvo</th>
+          <th>Faixa de preço</th>
+          <th>Diferencial Fluxo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Omie</td>
+          <td>Serviços, Indústria</td>
+          <td>R$ 299–999/mês</td>
+          <td class="highlight">Módulo Obras (não presente no Omie)</td>
+        </tr>
+        <tr>
+          <td>GestãoClick</td>
+          <td>Prestadores de serviço</td>
+          <td>R$ 99–399/mês</td>
+          <td class="highlight">PDV transacional + Comissões integradas</td>
+        </tr>
+        <tr>
+          <td>Bling</td>
+          <td>E-commerce, Varejo</td>
+          <td>R$ 199–499/mês</td>
+          <td class="highlight">Multi-tenant nativo + RBAC intra-empresa</td>
+        </tr>
+        <tr>
+          <td>Sienge</td>
+          <td>Construção civil</td>
+          <td>R$ 800–3.000+/mês</td>
+          <td class="highlight">Ticket acessível para construtoras menores</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div
+      style="margin-top: 28px; padding: 18px 24px; background: var(--accent-glow); border: 1px solid rgba(124,58,237,.25); border-radius: 10px;">
+      <p style="font-size: 13px; color: var(--silver);">
+        <span class="text-accent" style="font-weight:600;">Posição estratégica:</span>
+        O Fluxo ocupa o espaço entre GestãoClick e Omie — maior profundidade técnica que o primeiro, ticket mais
+        acessível que o segundo — com módulos verticalizados (OS + Obras) que nenhum dos dois cobre integralmente.
+      </p>
+    </div>
+
+    <div class="slide-footer">
+      <span class="brand">FLUXO ERP</span>
+      <span class="page">03 / 08</span>
+    </div>
+  </section>
+
+
+  <!-- ══ SLIDE 4 — ESTRUTURA DOS PLANOS ════════════════════════ -->
+  <section class="slide">
+    <div class="slide-label">Estrutura de Planos</div>
+    <h2>Entrada acessível.<br><span class="text-accent">Expansão natural.</span></h2>
+
+    <div class="grid-4" style="margin-top: 36px;">
+
+      <div class="tier">
+        <div class="tier-name">Starter</div>
+        <div class="tier-price">R$&nbsp;249<span>/mês</span></div>
+        <ul class="tier-modules">
+          <li>Dashboard</li>
+          <li>CRM</li>
+          <li>Catálogo</li>
+          <li>Estoque</li>
+        </ul>
+        <div style="margin-top: auto;"><span class="pill-green pill" style="font-size:10px;">Entrada</span></div>
+      </div>
+
+      <div class="tier featured">
+        <div class="tier-badge">Mais Popular</div>
+        <div class="tier-name">Business</div>
+        <div class="tier-price">R$&nbsp;499<span>/mês</span></div>
+        <ul class="tier-modules">
+          <li>Tudo do Starter</li>
+          <li>Vendas / PDV</li>
+          <li>Financeiro</li>
+          <li>RH</li>
+        </ul>
+        <div style="margin-top: auto;"><span class="pill" style="font-size:10px;">Operação Central</span></div>
+      </div>
+
+      <div class="tier">
+        <div class="tier-name">Pro</div>
+        <div class="tier-price">R$&nbsp;849<span>/mês</span></div>
+        <ul class="tier-modules">
+          <li>Tudo do Business</li>
+          <li>Ordens de Serviço</li>
+          <li>Obras</li>
+          <li>Comissões</li>
+          <li>Relatórios</li>
+        </ul>
+        <div style="margin-top: auto;"><span class="pill" style="font-size:10px;">Vertical Completo</span></div>
+      </div>
+
+      <div class="tier">
+        <div class="tier-name">Enterprise</div>
+        <div class="tier-price" style="font-size:26px;">R$&nbsp;1.200<span style="font-size:13px;">/mês+</span></div>
+        <ul class="tier-modules">
+          <li>Tudo do Pro</li>
+          <li>Onboarding assistido</li>
+          <li>Suporte dedicado</li>
+          <li>White-label opcional</li>
+          <li>SLA garantido</li>
+        </ul>
+        <div style="margin-top: auto;"><span class="pill-amber pill" style="font-size:10px;">Custom</span></div>
+      </div>
+
+    </div>
+
+    <p style="margin-top: 20px; font-size: 12px; color: var(--slate);">
+      Usuários adicionais: + R$&nbsp;30–80/mês por usuário acima do limite do plano. &nbsp;|&nbsp; Todos os planos
+      incluem isolamento por schema PostgreSQL e RBAC nativo.
+    </p>
+
+    <div class="slide-footer">
+      <span class="brand">FLUXO ERP</span>
+      <span class="page">04 / 08</span>
+    </div>
+  </section>
+
+
+  <!-- ══ SLIDE 5 — ESCADA DE VALOR ═════════════════════════════ -->
+  <section class="slide">
+    <div class="slide-label">Lógica de Crescimento</div>
+    <h2>O valor cresce<br><span class="text-accent">junto com o negócio.</span></h2>
+
+    <p class="subtitle" style="margin-bottom: 40px; font-size: 14px;">
+      Cada plano foi projetado para o momento certo da empresa. A migração entre tiers é natural — não forçada.
+    </p>
+
+    <div style="display: flex; align-items: flex-end; gap: 0; height: 200px; margin-bottom: 16px;">
+
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;">
+        <div
+          style="width:100%; height:60px; background: linear-gradient(135deg,#2d1454,#200e3d); border-radius:8px 8px 0 0; display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:1px;">STARTER</span>
+        </div>
+      </div>
+
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;">
+        <div
+          style="width:100%; height:105px; background: linear-gradient(135deg,#3d1a6e,#2e1254); border-radius:8px 8px 0 0; display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:1px;">BUSINESS</span>
+        </div>
+      </div>
+
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;">
+        <div
+          style="width:100%; height:150px; background: linear-gradient(135deg,#5b21b6,#4527a0); border-radius:8px 8px 0 0; display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.9);letter-spacing:1px;">PRO</span>
+        </div>
+      </div>
+
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;">
+        <div
+          style="width:100%; height:200px; background: linear-gradient(135deg,#7c3aed,#6d28d9); border-radius:8px 8px 0 0; display:flex;align-items:center;justify-content:center; box-shadow: 0 0 30px rgba(124,58,237,.35);">
+          <span style="font-size:11px;font-weight:700;color:#fff;letter-spacing:1px;">ENTERPRISE</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;text-align:center;">
+      <div>
+        <div style="font-size:15px;font-weight:700;">R$&nbsp;249</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:4px;">Cadastro + Visibilidade</div>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--accent-lt);">R$&nbsp;499</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:4px;">Venda + Finanças</div>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700;">R$&nbsp;849</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:4px;">Serviços + Projetos</div>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:var(--amber);">R$&nbsp;1.200+</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:4px;">Operação Crítica</div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="brand">FLUXO ERP</span>
+      <span class="page">05 / 08</span>
+    </div>
+  </section>
+
+
+  <!-- ══ SLIDE 6 — PROJEÇÃO DE MRR ═════════════════════════════ -->
+  <section class="slide">
+    <div class="slide-label">Projeção Financeira</div>
+    <h2>MRR projetado<br><span class="text-accent">com 50 clientes pagantes.</span></h2>
+
+    <div class="grid-2" style="margin-top: 36px; gap: 40px; align-items: start;">
+
+      <div>
+        <h3
+          style="font-size:14px;color:var(--slate);margin-bottom:20px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase;">
+          Cenário Conservador</h3>
+        <div class="mrr-bar-wrap">
+          <span class="mrr-label">Starter (30%)</span>
+          <div class="mrr-bar-bg">
+            <div class="mrr-bar-fill" style="width:42%;background:linear-gradient(90deg,#3d1a6e,#2e1254);"></div>
+          </div>
+          <span class="mrr-val">~R$&nbsp;3.735</span>
+        </div>
+        <div class="mrr-bar-wrap">
+          <span class="mrr-label">Business (50%)</span>
+          <div class="mrr-bar-bg">
+            <div class="mrr-bar-fill" style="width:68%;background:linear-gradient(90deg,#5b21b6,#4527a0);"></div>
+          </div>
+          <span class="mrr-val">~R$&nbsp;12.475</span>
+        </div>
+        <div class="mrr-bar-wrap">
+          <span class="mrr-label">Pro (20%)</span>
+          <div class="mrr-bar-bg">
+            <div class="mrr-bar-fill" style="width:52%;background:linear-gradient(90deg,#7c3aed,#6d28d9);"></div>
+          </div>
+          <span class="mrr-val">~R$&nbsp;8.490</span>
+        </div>
+        <div class="divider" style="margin:20px 0;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--slate);">Total estimado / mês</span>
+          <span style="font-size:26px;font-weight:800;color:var(--green-lt);">R$&nbsp;24.700</span>
+        </div>
+      </div>
+
+      <div>
+        <h3
+          style="font-size:14px;color:var(--slate);margin-bottom:20px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase;">
+          Cenário Otimista</h3>
+        <div class="mrr-bar-wrap">
+          <span class="mrr-label">Starter (20%)</span>
+          <div class="mrr-bar-bg">
+            <div class="mrr-bar-fill" style="width:28%;background:linear-gradient(90deg,#3d1a6e,#2e1254);"></div>
+          </div>
+          <span class="mrr-val">~R$&nbsp;2.490</span>
+        </div>
+        <div class="mrr-bar-wrap">
+          <span class="mrr-label">Business (40%)</span>
+          <div class="mrr-bar-bg">
+            <div class="mrr-bar-fill" style="width:58%;background:linear-gradient(90deg,#5b21b6,#4527a0);"></div>
+          </div>
+          <span class="mrr-val">~R$&nbsp;9.980</span>
+        </div>
+        <div class="mrr-bar-wrap">
+          <span class="mrr-label">Pro (40%)</span>
+          <div class="mrr-bar-bg">
+            <div class="mrr-bar-fill" style="width:100%;background:linear-gradient(90deg,#7c3aed,#6d28d9);"></div>
+          </div>
+          <span class="mrr-val">~R$&nbsp;16.980</span>
+        </div>
+        <div class="divider" style="margin:20px 0;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--slate);">Total estimado / mês</span>
+          <span style="font-size:26px;font-weight:800;color:var(--green-lt);">R$&nbsp;29.450</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div
+      style="margin-top:28px;padding:16px 24px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px;">
+      <p style="font-size:13px;color:var(--silver);">
+        <span style="color:var(--green-lt);font-weight:600;">ARR estimado:</span>
+        Entre <strong style="color:var(--white);">R$&nbsp;296.400</strong> e <strong
+          style="color:var(--white);">R$&nbsp;353.400</strong> ao ano com 50 clientes ativos — sem considerar upsell de
+        usuários adicionais ou plano Enterprise.
+      </p>
+    </div>
+
+    <div class="slide-footer">
+      <span class="brand">FLUXO ERP</span>
+      <span class="page">06 / 08</span>
+    </div>
+  </section>
+
+
+  <!-- ══ SLIDE 7 — MODELOS DE VENDA ════════════════════════════ -->
+  <section class="slide">
+    <div class="slide-label">Modelos de Comercialização</div>
+    <h2>Três caminhos.<br><span class="text-accent">Um sistema.</span></h2>
+
+    <div class="grid-3" style="margin-top: 36px;">
+
+      <div class="card">
+        <div class="pill" style="margin-bottom:16px; font-size:10px;">Modelo 1</div>
+        <h3 style="font-size:16px; margin-bottom:12px;">SaaS Recorrente</h3>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:20px;">
+          Operação própria como plataforma. Receita previsível, escalável e com baixo custo marginal por novo tenant.
+        </p>
+        <div
+          style="display:flex;justify-content:space-between;align-items:baseline;padding-top:16px;border-top:1px solid var(--navy-bdr);">
+          <span style="font-size:11px;color:var(--slate);">Ticket médio</span>
+          <span style="font-size:20px;font-weight:700;color:var(--accent-lt);">R$&nbsp;299–999<span
+              style="font-size:11px;color:var(--slate);">/mês</span></span>
+        </div>
+      </div>
+
+      <div class="card card-green">
+        <div class="pill-green pill" style="margin-bottom:16px; font-size:10px;">Modelo 2 — Recomendado</div>
+        <h3 style="font-size:16px; margin-bottom:12px;">Licença White-Label</h3>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:20px;">
+          Venda da licença para agências ou dev/ops que queiram operar o sistema com sua própria marca e base de
+          clientes.
+        </p>
+        <div
+          style="display:flex;justify-content:space-between;align-items:baseline;padding-top:16px;border-top:1px solid var(--navy-bdr);">
+          <span style="font-size:11px;color:var(--slate);">Valor da licença</span>
+          <span style="font-size:20px;font-weight:700;color:var(--green-lt);">R$&nbsp;20–50K</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="pill-amber pill" style="margin-bottom:16px; font-size:10px;">Modelo 3</div>
+        <h3 style="font-size:16px; margin-bottom:12px;">Implantação Corporativa</h3>
+        <p style="font-size:13px;color:var(--slate);margin-bottom:20px;">
+          Sistema instalado na infraestrutura própria da empresa contratante. Licença perpétua + manutenção anual.
+        </p>
+        <div
+          style="display:flex;justify-content:space-between;align-items:baseline;padding-top:16px;border-top:1px solid var(--navy-bdr);">
+          <span style="font-size:11px;color:var(--slate);">Venda única</span>
+          <span style="font-size:20px;font-weight:700;color:var(--amber);">R$&nbsp;12–35K</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div
+      style="margin-top:28px;padding:14px 22px;background:var(--navy-card);border:1px solid var(--navy-bdr);border-radius:8px;display:flex;align-items:center;gap:16px;">
+      <span style="font-size:13px;color:var(--silver);">
+        <span style="color:var(--white);font-weight:600;">Expansão futura:</span>
+        Integração NF-e, módulo Analytics/BI e landing page com demonstração ao vivo são os principais vetores de
+        ampliação do ticket médio e da taxa de conversão.
+      </span>
+    </div>
+
+    <div class="slide-footer">
+      <span class="brand">FLUXO ERP</span>
+      <span class="page">07 / 08</span>
+    </div>
+  </section>
+
+
+  <!-- ══ SLIDE 8 — FECHAMENTO ══════════════════════════════════ -->
+  <section class="slide slide-close">
+    <div class="grid-bg"></div>
+    <div class="glow-orb" style="width:600px;height:600px;background:var(--accent);bottom:-200px;right:-100px;"></div>
+
+    <div class="logo-mark" style="margin-bottom: 32px;">
+      <div class="logo-box">F</div>
+      <span class="logo-text">Fluxo</span>
+    </div>
+
+    <div class="slide-label">Consideração Final</div>
+
+    <h2 style="font-size:40px;max-width:700px;line-height:1.25;">
+      "O Fluxo não é vendido<br>por funcionalidades.<br>
+      <span class="text-accent">É adotado pela utilidade<br>e expandido pelo valor."</span>
+    </h2>
+
+    <div class="divider" style="max-width:500px;"></div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+      <span class="pill">Multi-Tenant PostgreSQL</span>
+      <span class="pill">11 Módulos Integrados</span>
+      <span class="pill">PDV Transacional</span>
+      <span class="pill">Feature Flags Nativas</span>
+      <span class="pill">White-Label Opcional</span>
+    </div>
+
+    <div
+      style="margin-top:48px;padding:20px 28px;background:var(--navy-card);border:1px solid var(--navy-bdr);border-radius:12px;max-width:540px;">
+      <p style="font-size:13px;color:var(--slate);">Documento preparado em <strong
+          style="color:var(--white);">abril/2026</strong> com base em análise técnica profunda do sistema. Valores e
+        projeções baseados em benchmarks do mercado brasileiro de ERP para PMEs.</p>
+    </div>
+
+    <div class="slide-footer">
+      <span class="brand">FLUXO ERP</span>
+      <span class="page">08 / 08</span>
+    </div>
+  </section>
+
+</body>
+
+</html>

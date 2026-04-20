@@ -141,6 +141,9 @@
   .animate-slide-up {
     animation: slideUp 0.3s ease-out;
   }
+  .animate-page-enter {
+    animation: pageEnter 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
 }
 
 @keyframes fadeIn {
@@ -160,5 +163,25 @@
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@keyframes pageEnter {
+  from {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes loading-bar {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }

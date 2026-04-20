@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { useMemo } from "react";
+import { useSidebarData } from "@/lib/hooks/use-sidebar-data";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -47,64 +49,11 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [activeKeys, setActiveKeys] = useState<string[] | null>(null);
-  const [empresaNome, setEmpresaNome] = useState<string>("");
-  const [empresaIniciais, setEmpresaIniciais] = useState<string>("");
+  const { data, isLoading } = useSidebarData();
 
-  useEffect(() => {
-    const supabase = createClient();
-    let cancelled = false;
-
-    async function load() {
-      const { data: userRes } = await supabase.auth.getUser();
-      const user = userRes?.user;
-      if (!user) {
-        if (!cancelled) setActiveKeys([]);
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("user_profiles")
-        .select("role, empresa_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!profile || profile.role === "master" || !profile.empresa_id) {
-        if (!cancelled) setActiveKeys([]);
-        return;
-      }
-
-      // Carregar nome da empresa
-      const { data: empresa } = await supabase
-        .from("empresas")
-        .select("razao_social")
-        .eq("id", profile.empresa_id)
-        .maybeSingle();
-
-      if (!cancelled && empresa) {
-        const nome = empresa.razao_social || "Empresa";
-        setEmpresaNome(nome);
-        // Gerar iniciais: pegar primeira letra de cada palavra (máx 2)
-        const palavras = nome.split(/\s+/).filter(Boolean);
-        const iniciais = palavras.length >= 2
-          ? (palavras[0][0] + palavras[1][0]).toUpperCase()
-          : nome.substring(0, 2).toUpperCase();
-        setEmpresaIniciais(iniciais);
-      }
-
-      const { data: mods } = await supabase
-        .from("v_empresa_modulos")
-        .select("modulo_key, ativo")
-        .eq("empresa_id", profile.empresa_id);
-
-      if (!cancelled) setActiveKeys((mods || []).filter((m: any) => m.ativo).map((m: any) => m.modulo_key));
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []); // Array vazio para executar apenas uma vez ao montar
+  const activeKeys = data?.activeKeys ?? null;
+  const empresaNome = data?.empresaNome ?? "";
+  const empresaIniciais = data?.empresaIniciais ?? "";
 
   const visibleNavigation = useMemo(() => {
     if (activeKeys === null) return [];
@@ -117,10 +66,13 @@ export function Sidebar() {
       <div className="flex h-16 shrink-0 items-center px-6 border-b border-sidebar-border/40">
         <Link href="/tenant/dashboard" className="flex items-center gap-3 group">
           <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105 relative">
-            <img 
+            <Image 
               src="/logo-fluxo.png" 
               alt="Fluxo Logo" 
-              className="w-11 h-11 object-contain drop-shadow-[0_0_10px_rgba(192,132,252,0.4)] relative z-10" 
+              width={44}
+              height={44}
+              priority
+              className="object-contain drop-shadow-[0_0_10px_rgba(192,132,252,0.4)] relative z-10" 
             />
           </div>
           <div className="flex flex-col mt-1">
@@ -140,9 +92,15 @@ export function Sidebar() {
           <span className="text-[10px] font-semibold text-slate-500/60 uppercase tracking-[0.12em]">Módulos</span>
         </div>
         <ul role="list" className="flex flex-1 flex-col gap-y-0.5">
-          {activeKeys !== null && visibleNavigation.length === 0 && (
+          {activeKeys !== null && visibleNavigation.length === 0 && !isLoading && (
             <li className="px-3 py-3 text-sm text-slate-400/80">
               Nenhum módulo ativo. Solicite ativação ao administrador do sistema.
+            </li>
+          )}
+          {isLoading && (
+            <li className="px-3 py-3 flex gap-x-3 items-center">
+              <div className="h-4 w-4 bg-slate-800 rounded animate-pulse"></div>
+              <div className="h-4 w-24 bg-slate-800 rounded animate-pulse"></div>
             </li>
           )}
           {visibleNavigation.map((item) => {

@@ -102,7 +102,8 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
           ref={videoRef}
           src="/videofluxo.mp4"
           className="w-full aspect-video object-cover"
-          preload="metadata"
+          preload="none"
+          loading="lazy"
           onEnded={handleVideoEnded}
           onClick={togglePlay}
         />

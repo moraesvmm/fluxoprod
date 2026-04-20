@@ -6,6 +6,77 @@
 
 ---
 
+## VISTORIA 12: Otimização de Performance Web (Landing Page e Módulos Tenant) — 20/04/2026
+
+### Escopo Analisado
+- Tempo de carregamento da Landing Page relatado como lento.
+- Transições abruptas entre os módulos da plataforma (Tenant).
+- Pesos de arquivos estáticos (`logo-fluxo.png` e favicons).
+
+### Problemas Identificados
+**1. Peso Excessivo de Arquivos Estáticos (CRÍTICO)**
+- O `logo-fluxo.png` possuía dimensões originais massivas e não-comprimidas de **2612x1632** pesando respeitáveis **1.24 MB**. Isso não só atrasava a pintura inicial da tela de login, landing page e sidebar, mas consumia muita banda. O mesmo logo pesado era utilizado para a meta-tag `icon.png`.
+
+**2. Falta de SSR (Server-Side Rendering) e Video Preload (ALTO)**
+- Todo o corpo da `page.tsx` estava como `"use client"`.
+- O `<video>` carregava todo o meta-dado imediatamente através do `preload="metadata"`, estourando a fila de download durante o First Contentful Paint.
+- Renderização do componente de partículas gerava warnings nativos do React (Hydration Mismatch) devido ao cálculo de posições randômicas ocorrendo no render do cliente mas não do servidor.
+
+**3. Navegação Inter-Módulos sem Cache e Feedback (MÉDIO)**
+- O `loading.tsx` apresentava apenas um spinner estático e não-agradável esteticamente.
+- Ao clicar em links da Sidebar, a rota transitava secamente sem animações, tirando a percepção "Premium" do sistema.
+- A própria `Sidebar` possuía um hook `useEffect` executando 3 RPCs do Supabase sequencialmente (Perfil -> Empresa -> Módulos) **sem nenhuma estratégia de cache**, re-puxando tudo da rede a cada reload de rota.
+
+### Ações e Correções
+
+**1. Compressão Rigorosa e Troca de Tags (Componente 1)**
+- Redimensionamento e compressão lossless (algoritmo Lanczos via Pillow) da logo de **1.24MB para ~64KB** e do icon.png para **~5KB**. 
+- Configuração do `next.config.ts` liberando as diretrizes de otimização de imagem avançada (WebP/AVIF).
+- Substituição de tags `<img src="...">` cruas pelas propriedades super otimizadas do `<Image>` no `Sidebar.tsx` e `Header.tsx`.
+
+**2. Revisão de Performance da Page.tsx e Vídeos (Componente 2)**
+- `VideoDemo.tsx` isolado e lazy-loadado via `next/dynamic()`, bloqueando preloads do `<video>` e definindo `loading="lazy"`.
+- Remoção do hydration mismatch do fundo dinâmico extraindo os cálculos randômicos de Math para dentro de um `useMemo()`.
+
+**3. Cache de Sidebar e Animações Premium (Componente 3 e 4)**
+- Criado o hook customizado `@/lib/hooks/use-sidebar-data.ts` atrelado ao `useQuery` de modo a manter um `staleTime` da sidebar de 5 minutos, parando os múltiplos fetchings desnecessários no banco de dados. 
+- Substituição do `loading.tsx` primitivo para um visual super Premium exibindo um esqueleto e uma barra de carregamento dinâmica `cubic-bezier`.
+- Instalação das utilidades CSS de transição no `globals.css` e uso do provider `<PageTransition>` no Layout Base (fade + slideUp simultâneos e orgânicos em 300ms a cada mudança de módulo).
+
+---
+
+## VISTORIA 11: Módulo de CRM - Erros 404/400 (RPCs Ausentes ou Assinaturas Erradas) — 20/04/2026
+
+### Escopo Analisado
+- Erros de requisição `404 Not Found` no endpoint `tenant_listar_clientes` e `tenant_listar_tags_catalog`.
+- Erros de requisição `400 Bad Request` no endpoint `tenant_dashboard_kpis_por_mes`.
+- Falha na visualização de KPI de vendas e CRM Dashboard devido a chamadas em RPCs inexistentes no ambiente local/remoto do tenant.
+
+### Problemas Identificados
+
+**1. Wrappers Public Ausentes (CRÍTICO)**
+- **Causa:** O sistema utiliza multi-tenant e espera rotear todas as chamadas Supabase pelas funções da role `public`. Contudo, os wrappers `public.tenant_listar_tags_catalog` e `public.tenant_dashboard_metricas` estavam ausentes. Isto resulta em HTTP 404 diretamente durante a chamada.
+- **Impacto:** O Dashboard do CRM não carregava os cálculos de LTV Médio, Churn, Velocidade Média, entre outros.
+
+**2. Assinatura Incompatível em tenant_listar_clientes (ALTO)**
+- **Causa:** O front-end enviava 8 argumentos explícitos (`p_cursor`, `p_limit`, `p_status`, `p_funil_fase`, `p_busca`, `p_order_by`, `p_order_dir`, `p_tags`) para a RPC de clientes. O wrapper do Supabase não possuía o parâmetro `p_tags TEXT[]`, gerando incompatibilidade de assinatura e um falso 404 (Supabase não encontra a função).
+- **Impacto:** A listagem de clientes falhava silenciosamente, impedindo filtro ou paginação.
+
+### Ações e Correções
+
+**1. Criação do Script de Migração Consolidado**
+- Desenvolvido o script `apps/api/migrations/rpc_crm_fixes.sql` que engloba:
+  - Criação de `public.tenant_listar_tags_catalog`.
+  - Criação de `public.tenant_dashboard_metricas`.
+  - Recriação de `public.tenant_listar_clientes(..., p_tags TEXT[])`.
+  - Garantia de permissões (GRANT EXECUTE TO authenticated).
+
+**2. Verificação Frontend e Conectividade**
+- Validamos o arquivo `apps/web/src/lib/api.ts` e confirmamos que a API do front-end está com as assinaturas precisas correspondendo a migração fornecida.
+- **Atenção (Deployment):** As restrições de IPv6/DNS do ambiente de terminal inviabilizaram a execução automática das migrações via scripts locais do Supabase. O script `rpc_crm_fixes.sql` precisa ser inserido manualmente no Editor SQL do painel do Supabase.
+
+---
+
 ## VISTORIA 10: Deploy Netlify e Erros de Build TypeScript — 20/04/2026
 
 ### Escopo Analisado

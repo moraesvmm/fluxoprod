@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
@@ -24,9 +24,12 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
-import VideoDemo from "@/components/VideoDemo";
+import dynamic from "next/dynamic";
 
-/* ─────────────────── DATA ─────────────────── */
+const VideoDemo = dynamic(() => import("@/components/VideoDemo"), {
+  ssr: false,
+  loading: () => <div className="w-full aspect-video rounded-2xl bg-slate-900/10 animate-pulse"></div>
+});/* ─────────────────── DATA ─────────────────── */
 
 const features = [
   {
@@ -114,6 +117,17 @@ function AnimatedSection({
 
 function FloatingParticles() {
   const [mounted, setMounted] = useState(false);
+  const particles = useMemo(() => {
+    return [...Array(6)].map((_, i) => ({
+      id: i,
+      size: Math.random() * 4 + 2,
+      opacity: Math.random() * 0.3 + 0.1,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: Math.random() * 4 + 4,
+      delay: Math.random() * 2,
+    }));
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -125,25 +139,25 @@ function FloatingParticles() {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(6)].map((_, i) => (
+      {particles.map((p) => (
         <motion.div
-          key={i}
+          key={p.id}
           className="absolute rounded-full"
           style={{
-            width: `${Math.random() * 4 + 2}px`,
-            height: `${Math.random() * 4 + 2}px`,
-            background: `rgba(139, 92, 246, ${Math.random() * 0.3 + 0.1})`,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            background: `rgba(139, 92, 246, ${p.opacity})`,
+            left: `${p.left}%`,
+            top: `${p.top}%`,
           }}
           animate={{
             y: [0, -30, 0],
             opacity: [0.2, 0.6, 0.2],
           }}
           transition={{
-            duration: Math.random() * 4 + 4,
+            duration: p.duration,
             repeat: Infinity,
-            delay: Math.random() * 2,
+            delay: p.delay,
             ease: "easeInOut",
           }}
         />

@@ -3,6 +3,7 @@
 import { Bell, Search, LogOut } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface HeaderProps {
   onSearchClick?: () => void;
@@ -27,10 +28,13 @@ export function Header({ onSearchClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border/60 bg-white/90 backdrop-blur-lg px-4 sm:gap-x-6 sm:px-6 lg:px-8 shadow-sm">
       <div className="flex items-center gap-2 lg:hidden">
-        <img 
-          src="/logo-fluxo.png?v=2" 
+        <Image 
+          src="/logo-fluxo.png" 
           alt="Fluxo Logo" 
-          className="h-8 w-8 object-contain drop-shadow-sm" 
+          width={32}
+          height={32}
+          priority
+          className="object-contain drop-shadow-sm" 
         />
         <span 
           className="text-2xl font-normal text-slate-800"
