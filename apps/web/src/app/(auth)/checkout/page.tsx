@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ShieldCheck, CreditCard, ArrowRight, Loader2, Building2, UserCircle2, Server, X } from "lucide-react";
 import Image from "next/image";
 import AppIcon from "../../icon.png";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PaymentGatewayService, PaymentTransactionPayload } from "@/services/PaymentGatewayService";
 
 const PLANOS = [
@@ -24,9 +25,30 @@ const MODULOS_AVULSOS = [
 const PRECO_MODULO_AVULSO = 79.9;
 
 export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
+  );
+}
+
+function CheckoutContent() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      setSuccess(true);
+    }
+  }, [searchParams]);
 
   // Modais Form/Alert
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -105,7 +127,10 @@ export default function CheckoutPage() {
                <p className="text-sm text-gray-400 mb-1">Acesso à Plataforma:</p>
                <p className="font-medium text-indigo-400 truncate">{customerEmail}</p>
             </div>
-            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-4 rounded-xl transition-colors">
+            <button 
+              onClick={() => router.push("/login")}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-4 rounded-xl transition-colors"
+            >
                Ir para o Login
             </button>
          </motion.div>

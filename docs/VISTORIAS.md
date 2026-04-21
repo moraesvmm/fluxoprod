@@ -1,10 +1,32 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
-**Última atualização:** 20/04/2026
-**Versão:** 1.3
-**Status:** ✅ VISTORIA REALIZADA - Correção de Caminhos de Deploy e Sincronia de Monorepo
+**Última atualização:** 21/04/2026
+**Versão:** 1.4
+**Status:** ⚠️ PENDENTE VISTORIA - Implementação de Redirecionamento Pós-Pagamento
 
 ---
+
+## VISTORIA 15: Redirecionamento Pós-Pagamento e UX de Checkout — 21/04/2026
+
+> [!IMPORTANT]
+> **Status:** ⚠️ PENDENTE DE VISTORIA TÉCNICA
+> **Assunto:** Implementação de redirecionamento automático pós-pagamento (Asaas) e tratamento de sucesso no frontend.
+
+### Alterações Realizadas
+- **PaymentGatewayService.ts**: Adicionado objeto `callback` na criação de transações Asaas para suportar redirecionamento automático via `successUrl` e `autoRedirect: true`.
+- **CheckoutPage.tsx**: 
+  - Implementado hook `useSearchParams` para detectar o parâmetro `?success=true`.
+  - Ativado estado de sucesso para exibir a tela de "Pagamento Aprovado!" automaticamente após o retorno do gateway.
+  - Vinculado botão de login à rota `/login`.
+  - Refatorado componente com `Suspense` boundary para conformidade com as diretrizes do Next.js (Turbo/App Router).
+
+### Verificações Pendentes
+- Testar redirecionamento real em ambiente de Sandbox do Asaas.
+- Validar se o `Suspense` não causa flashes indesejados no carregamento inicial do checkout.
+- Confirmar se o link `successUrl` gerado dinamicamente via `window.location.origin` funciona em produção (Vercel/Netlify).
+
+---
+
 
 ## VISTORIA 14: Resolução de Conflitos de Caminhos (Netlify) — 20/04/2026
 

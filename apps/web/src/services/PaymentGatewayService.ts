@@ -91,6 +91,10 @@ export class PaymentGatewayService {
             planName: payload.planName,
             modules: JSON.stringify(payload.modules),
             password: payload.metadata?.password
+          },
+          callback: {
+            successUrl: window.location.origin + "/checkout?success=true",
+            autoRedirect: true
           }
         })
       });
