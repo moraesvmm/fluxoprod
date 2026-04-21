@@ -1,6 +1,10 @@
 import { createBrowserClient } from '@supabase/ssr'
 
 export function createClient() {
+  // Log para debug de variáveis de ambiente no client-side
+  console.log('[CLIENT] NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET')
+  console.log('[CLIENT] NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET')
+  
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
