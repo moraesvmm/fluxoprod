@@ -25,8 +25,6 @@ export interface PaymentGatewayResponse {
 export class PaymentGatewayService {
   private static readonly LOCAL_API_URL = "/api/asaas";
 
-  // Removida a chave de API do cliente por segurança. Agora é gerida nas API Routes.
-  private static readonly API_KEY = "";
 
   /**
    * Finaliza a compra chamando o Gateway de Pagamento (Asaas).
@@ -36,9 +34,6 @@ export class PaymentGatewayService {
    */
   public static async createTransaction(payload: any): Promise<PaymentGatewayResponse> {
     try {
-      if (!this.API_KEY) {
-        throw new Error("Chave de API do Gateway não configurada.");
-      }
 
       // 1. Criar ou buscar Cliente no Asaas via Proxy Interno
       const customerResponse = await fetch(`${this.LOCAL_API_URL}/customers`, {
