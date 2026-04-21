@@ -7,6 +7,15 @@ const supabase = createClient();
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 export function useDashboardData() {
+  // Obter userId do auth para usar como guard
+  const { data: authData } = useQuery({
+    queryKey: ["auth", "user"],
+    queryFn: async () => supabase.auth.getUser(),
+    staleTime: Infinity,
+  });
+
+  const userId = authData?.data?.user?.id;
+
   // Usar RPC tenant_dashboard_kpis para obter todos os KPIs calculados no banco
   const { data: kpis, isLoading, error } = useQuery({
     queryKey: ["dashboard", "kpis"],
@@ -17,6 +26,7 @@ export function useDashboardData() {
     },
     staleTime: 5 * 60_000,
     retry: 2,
+    enabled: !!userId, // Só executar se usuário estiver autenticado
   });
 
   // Buscar últimas vendas separadamente (já existe RPC para isso)
@@ -29,6 +39,7 @@ export function useDashboardData() {
     },
     staleTime: 60_000,
     retry: 2,
+    enabled: !!userId, // Só executar se usuário estiver autenticado
   });
 
   // Buscar módulos ativos para validar feature flags
@@ -44,6 +55,7 @@ export function useDashboardData() {
     },
     staleTime: 10 * 60_000,
     retry: 2,
+    enabled: !!userId, // Só executar se usuário estiver autenticado
   });
 
   // Série temporal real: faturamento dos últimos 6 meses por mês
@@ -58,6 +70,7 @@ export function useDashboardData() {
     },
     staleTime: 5 * 60_000,
     retry: 2,
+    enabled: !!userId, // Só executar se usuário estiver autenticado
   });
 
   // Derive KPIs a partir do resultado da RPC

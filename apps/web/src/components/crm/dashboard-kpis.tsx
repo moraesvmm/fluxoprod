@@ -37,9 +37,20 @@ async function fetchDashboardMetricas(): Promise<DashboardMetricas> {
 }
 
 export default function DashboardKPIs() {
+  // Obter userId do auth para usar como guard
+  const supabase = createClient();
+  const { data: authData } = useQuery({
+    queryKey: ["auth", "user"],
+    queryFn: async () => supabase.auth.getUser(),
+    staleTime: Infinity,
+  });
+
+  const userId = authData?.data?.user?.id;
+
   const { data: metricas, isLoading, error } = useQuery({
     queryKey: ['dashboard-metricas'],
     queryFn: fetchDashboardMetricas,
+    enabled: !!userId, // Só executar se usuário estiver autenticado
   });
 
   if (isLoading) {
