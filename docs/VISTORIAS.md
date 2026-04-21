@@ -1248,3 +1248,22 @@ Toda vez que este documento for lido, editado ou consultado, ele deve ser automa
 ---
 
 **Fim da Vistoria Profunda**
+
+---
+
+## PENDÊNCIA DE VISTORIA: Automação de Vídeo Comercial (21/04/2026)
+
+### Resumo das Alterações
+- **Substituição de Vídeo:** Vídeo comercial da Landing Page atualizado com versão otimizada (Lily @ 1.4x).
+- **Limpeza de Repositório:** Remoção de componentes de teste, planos de desenvolvimento obsoletos e +100MB de ativos de áudio experimentais.
+- **Correção de Sintaxe:** Ajuste no componente `VideoDemo.tsx` para garantir estabilidade do build.
+- **Novas Funcionalidades:** Implementação de suporte a narração sincronizada e mixagem de áudio via ElevenLabs.
+
+### Itens para Vistoria Imediata
+- [ ] Verificar performance de carregamento com o novo vídeo de alta velocidade.
+- [ ] Validar integridade do componente `VideoDemo.tsx` em resoluções mobile.
+- [ ] Revisar logs de build para garantir que a remoção das pastas de teste não afetou dependências.
+
+**STATUS: Pendente de Vistoria de Produção.**
+
+---

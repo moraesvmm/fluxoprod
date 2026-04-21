@@ -26,11 +26,6 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.playbackRate = 1.3;
-    }
-  }, []);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -141,11 +136,7 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
               onClick={togglePlay}
               className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white"
             >
-              {isPlaying ? (
-                <Play className="w-5 h-5 ml-0.5" />
-              ) : (
-                <Play className="w-5 h-5 ml-0.5" />
-              )}
+              <Play className="w-5 h-5 ml-0.5" />
             </button>
 
             {/* Mute */}
