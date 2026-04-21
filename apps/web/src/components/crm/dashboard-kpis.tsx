@@ -5,6 +5,7 @@ import { KPICard } from "@/components/modules/base/KPICard";
 import { TableSkeleton } from "@/components/modules/base/TableSkeleton";
 import { DollarSign, TrendingDown, TrendingUp, Clock, BarChart3 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
 interface DashboardMetricas {
   total_clientes: number;
@@ -38,14 +39,7 @@ async function fetchDashboardMetricas(): Promise<DashboardMetricas> {
 
 export default function DashboardKPIs() {
   // Obter userId do auth para usar como guard
-  const supabase = createClient();
-  const { data: authData } = useQuery({
-    queryKey: ["auth", "user"],
-    queryFn: async () => supabase.auth.getUser(),
-    staleTime: Infinity,
-  });
-
-  const userId = authData?.data?.user?.id;
+  const { userId } = useUserProfile();
 
   const { data: metricas, isLoading, error } = useQuery({
     queryKey: ['dashboard-metricas'],

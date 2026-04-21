@@ -2,19 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
+import { useUserProfile } from "./use-user-profile";
 
 const supabase = createClient();
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 export function useDashboardData() {
   // Obter userId do auth para usar como guard
-  const { data: authData } = useQuery({
-    queryKey: ["auth", "user"],
-    queryFn: async () => supabase.auth.getUser(),
-    staleTime: Infinity,
-  });
-
-  const userId = authData?.data?.user?.id;
+  const { userId } = useUserProfile();
 
   // Usar RPC tenant_dashboard_kpis para obter todos os KPIs calculados no banco
   const { data: kpis, isLoading, error } = useQuery({

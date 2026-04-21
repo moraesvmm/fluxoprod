@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchClientes, createCliente, deleteCliente, updateCliente, type ClienteCreate, type ClienteUpdate, type ClienteListParams, type ClienteListResult } from "@/lib/api";
-import { createClient } from "@/utils/supabase/client";
+import { useUserProfile } from "./use-user-profile";
 
 const CLIENTES_KEY = ["clientes"] as const;
-const supabase = createClient();
 
 interface UseClientesOptions {
   params?: ClienteListParams;
@@ -14,13 +13,7 @@ interface UseClientesOptions {
 
 export function useClientes(options?: UseClientesOptions) {
   // Obter userId do auth para usar como guard
-  const { data: authData } = useQuery({
-    queryKey: ["auth", "user"],
-    queryFn: async () => supabase.auth.getUser(),
-    staleTime: Infinity,
-  });
-
-  const userId = authData?.data?.user?.id;
+  const { userId } = useUserProfile();
 
   return useQuery<ClienteListResult>({
     queryKey: [...CLIENTES_KEY, options?.params],
