@@ -147,8 +147,11 @@ O erro "No API key found in request" indica que as chamadas RPC estão sendo fei
 ## PRÓXIMOS PASSOS
 
 1. **Verificar se as variáveis de ambiente estão sendo carregadas no runtime da Vercel**
-   - Adicionar log no middleware para imprimir as variáveis de ambiente
-   - Verificar se as variáveis estão disponíveis no console da Vercel
+   - ✅ Adicionar log no middleware para imprimir as variáveis de ambiente
+   - ✅ Adicionar log no client-side para imprimir as variáveis de ambiente
+   - ✅ Adicionar log no page.tsx para imprimir as variáveis de ambiente
+   - ✅ Fazer deploy para testar logs
+   - ⏳ Acessar site e verificar console do browser
 
 2. **Verificar se há um problema com o middleware**
    - O middleware pode estar interceptando as chamadas RPC
@@ -167,4 +170,4 @@ O erro "No API key found in request" indica que as chamadas RPC estão sendo fei
 **VISTORIA 3:** ✅ Concluída  
 **VISTORIA 4:** ✅ Concluída  
 
-**Próximo passo:** Investigar se as variáveis de ambiente estão sendo carregadas no runtime da Vercel.
+**Próximo passo:** Acessar site e verificar console do browser para ver se as variáveis de ambiente estão sendo carregadas.
