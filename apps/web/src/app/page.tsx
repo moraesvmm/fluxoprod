@@ -183,6 +183,12 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  // DEBUG: Verificar se as variáveis de ambiente estão disponíveis no browser
+  useEffect(() => {
+    console.log('[DEBUG - PAGE] NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET');
+    console.log('[DEBUG - PAGE] NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET');
+  }, []);
+
   useEffect(() => {
     // Carregar preferência do localStorage
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';

@@ -5,13 +5,8 @@ export async function middleware(request: NextRequest) {
   const hasSupabaseEnv =
     !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // Log para debug de variáveis de ambiente
-  console.log('[MIDDLEWARE] NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET')
-  console.log('[MIDDLEWARE] NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET')
-
   // Allow the app to boot even without env configured (shows /setup).
   if (!hasSupabaseEnv) {
-    console.log('[MIDDLEWARE] Variáveis de ambiente não configuradas, redirecionando para /setup')
     if (!request.nextUrl.pathname.startsWith('/setup')) {
       return NextResponse.redirect(new URL('/setup', request.url))
     }
