@@ -52,13 +52,16 @@ export class PaymentGatewayService {
       let customerData = await customerResponse.json();
 
       if (!customerData.id) {
-        // Se falhou ou já existir, tentar buscar pelo e-mail
+        // Se falhou, tentar buscar pelo e-mail (pode ser que o cliente já exista)
         const searchResponse = await fetch(`${this.LOCAL_API_URL}/customers?email=${payload.customerEmail}`);
         const searchData = await searchResponse.json();
+        
         if (searchData.data?.[0]?.id) {
           customerData = searchData.data[0];
         } else {
-          throw new Error("Falha ao criar/identificar cliente no Asaas.");
+          // Se nem a criação nem a busca funcionaram, pegamos o erro original da criação se houver
+          const asaasErrorMessage = customerData.errors?.[0]?.description || "Falha ao criar/identificar cliente no Asaas.";
+          throw new Error(asaasErrorMessage);
         }
       }
 
