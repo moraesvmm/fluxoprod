@@ -1267,3 +1267,21 @@ Toda vez que este documento for lido, editado ou consultado, ele deve ser automa
 **STATUS: Pendente de Vistoria de Produção.**
 
 ---
+
+---
+
+## VISTORIA 15: Integração do Gateway de Pagamento Real (Asaas) (21/04/2026)
+
+### Resumo das Alterações
+- **Migração de Gateway:** Substituído o ambiente de simulação pela integração real com a API do Asaas.
+- **Webhook Seguro:** Implementada validação de assinatura (`asaas-access-token`) e mapeamento de payload para provisionamento atômico.
+- **Fluxo de Checkout:** Refatorado para redirecionamento direto para faturas do gateway e suporte a PIX em produção.
+- **Configuração Vercel:** Chaves de API e Segredo do Webhook configurados como variáveis de ambiente criptografadas.
+
+### Itens para Vistoria Imediata
+- [ ] Validar recebimento de Webhook `PAYMENT_RECEIVED` em produção.
+- [ ] Verificar logs da RPC `webhook_provisionar_assinatura` para garantir criação de tenant sem falhas.
+- [ ] Testar fluxo de redirecionamento mobile para o checkout do Asaas.
+
+**STATUS: PENDENTE_VALIDACAO_PRODUCAO (Realizar vistoria o mais rápido possível).**
+

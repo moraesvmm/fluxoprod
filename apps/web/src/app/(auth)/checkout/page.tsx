@@ -70,32 +70,22 @@ export default function CheckoutPage() {
     try {
       const payload: PaymentTransactionPayload = {
         customerName, customerEmail, planName: selectedPlan.name, amount: totalValue,
-        modules: selectedModules, companyName, companyDocument, companySize, companySegment
+        modules: selectedModules, companyName, companyDocument, companySize, companySegment,
+        metadata: { password }
       };
-      const payloadReal = { ...payload, metadata: { password } };
-      const response = await PaymentGatewayService.createTransaction(payloadReal);
 
-      if (response.success) {
-        fetch('/api/webhook/payment', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json', 'x-gateway-signature': 'simulated_dev_signature' },
-           body: JSON.stringify({
-              id: response.transactionId,
-              type: 'payment.succeeded',
-              amount: totalValue,
-              customer: { name: customerName, email: customerEmail, document: companyDocument },
-              metadata: { companyName, companySize, companySegment, planName: selectedPlan.name, modules: selectedModules, password }
-           })
-        }).catch(err => console.log('Ping interno webhook mock falhou:', err));
+      const response = await PaymentGatewayService.createTransaction(payload);
 
-        setSuccess(true);
+      if (response.success && response.redirectUrl) {
+        // No cenário real, redirecionamos para o checkout do gateway (Asaas Invoice)
+        window.location.href = response.redirectUrl;
       } else {
-        alert("Erro no checkout: " + response.error);
+        alert("Erro no checkout: " + (response.error || "Falha ao gerar link de pagamento"));
+        setLoading(false);
       }
     } catch (err) {
       console.error(err);
-      alert("Houve um problema de rede de simulação.");
-    } finally {
+      alert("Houve um problema ao processar seu pagamento. Por favor, tente novamente.");
       setLoading(false);
     }
   };
@@ -302,7 +292,7 @@ export default function CheckoutPage() {
                     <CreditCard className="w-48 h-48"/>
                   </div>
                   <h2 className="text-2xl font-bold mb-2">Detalhes do Pagamento</h2>
-                  <p className="text-gray-400 mb-8 max-w-sm">Este é um ambiente simulado de processamento preparado para Cloud API Gateways.</p>
+                  <p className="text-gray-400 mb-8 max-w-sm">Seu pagamento será processado com segurança via <strong>Asaas Gateway</strong>.</p>
 
                   <div className="bg-[#0a0a0c] border border-white/5 rounded-xl p-6 mb-8 relative z-10">
                      <div className="flex justify-between items-center mb-4">
