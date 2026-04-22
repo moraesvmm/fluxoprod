@@ -1,8 +1,203 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
-**Última atualização:** 21/04/2026
-**Versão:** 1.4
-**Status:** ⚠️ PENDENTE VISTORIA - Implementação de Redirecionamento Pós-Pagamento
+**Última atualização:** 22/04/2026
+**Versão:** 1.5
+**Status:** ✅ Revisado
+
+---
+
+## VISTORIA 16: Logística de Checkout e Pagamento — 22/04/2026
+
+### Escopo Analisado
+- Fluxo completo de checkout (frontend)
+- Integração com Gateway de Pagamento Asaas
+- Backend: API routes e RPCs de processamento
+- Banco de dados: tabelas de checkout, vendas e webhook
+- Webhook de provisionamento de tenants
+
+### Arquitetura do Fluxo de Checkout
+
+**Frontend (CheckoutPage.tsx):**
+- 3 steps: Plano → Cadastro → Pagamento
+- Seleção de planos (Starter, Business, Pro)
+- Seleção de módulos avulsos (OS, Obras, Comissões, Relatórios, RH)
+- Coleta de dados: cliente (nome, email, senha), empresa (razão social, CNPJ, porte, segmento)
+- Redirecionamento para Asaas Invoice
+- Tratamento de sucesso via query param `?success=true`
+
+**Service Layer (PaymentGatewayService.ts):**
+- Proxy para API do Asaas (evita CORS, protege API key)
+- Criação de cliente no Asaas (POST /customers)
+- Criação de pagamento no Asaas (POST /payments)
+- Suporte a PIX (QR code)
+- Configuração de callback (successUrl + autoRedirect)
+
+**Backend (API Routes):**
+- `/api/asaas/customers` - Proxy para criação/busca de clientes
+- `/api/asaas/payments` - Proxy para criação de pagamentos e QR code PIX
+- Modo sandbox/production configurado via env
+
+**RPCs de Processamento:**
+- `tenant_processar_venda` - RPC transacional para PDV (não usada no checkout SaaS)
+- `webhook_provisionar_assinatura` - RPC transacional para provisionamento pós-pagamento
+
+**Banco de Dados:**
+- `public.checkout_vendas` - Rastreabilidade global de vendas SaaS
+- `public.webhook_audit_log` - Auditoria de webhooks
+- `tenant.vendas` - Tabela de vendas por tenant (PDV)
+- `tenant.vendas_itens` - Itens de venda por tenant (PDV)
+
+### Pontos Fortes
+
+**1. Arquitetura Bem Definida (ALTO)**
+- Separação clara de responsabilidades (Frontend → Service → API → RPC)
+- Proxy server-side protege API key do Asaas
+- Idempotência implementada em RPCs críticas
+
+**2. Transações Atômicas (CRÍTICO)**
+- `webhook_provisionar_assinatura` usa transação completa
+- Rollback automático em caso de falha
+- Provisionamento de tenant + criação de usuário em uma única transação
+
+**3. Auditoria e Rastreabilidade (MÉDIO)**
+- `webhook_audit_log` registra todos os eventos
+- `checkout_vendas` rastreia vendas globais
+- Idempotência evita processamento duplicado
+
+**4. UX de Checkout (MÉDIO)**
+- 3 steps claros e intuitivos
+- Resumo sticky bar com valor total
+- Modal informativo de módulos
+- Feedback visual de loading e sucesso
+
+**5. Integração com Gateway (MÉDIO)**
+- Suporte a PIX e Invoice
+- Redirecionamento automático pós-pagamento
+- Configuração de ambiente (sandbox/production)
+
+### Riscos Técnicos
+
+**1. Endpoint de Webhook Ausente (CRÍTICO)**
+- **Causa:** Não há API route para receber webhooks do Asaas
+- **Impacto:** Pagamentos não são processados automaticamente
+- **Consequência:** Tenants não são provisionados após pagamento
+- **Solução:** Criar `/api/webhooks/asaas` com validação de assinatura e chamada a `webhook_provisionar_assinatura`
+
+**2. Criptografia de Senha Fraca (ALTO)**
+- **Causa:** `webhook_provisionamento.sql` usa `crypt(p_senha, gen_salt('bf'))` (bcrypt)
+- **Problema:** Supabase Auth usa criptografia própria (pbkdf2), não bcrypt
+- **Impacto:** Senha pode não funcionar no login do Supabase
+- **Solução:** Usar Supabase Admin API ou edge function para criar usuário
+
+**3. Falta de Validação de Dados (MÉDIO)**
+- **Causa:** CheckoutPage não valida CNPJ, email forte, senha forte
+- **Impacto:** Dados inválidos podem causar falhas no provisionamento
+- **Solução:** Adicionar validações com Zod antes de enviar para gateway
+
+**4. Dependência de Webhook para Provisionamento (ALTO)**
+- **Causa:** Provisionamento só ocorre via webhook do Asaas
+- **Problema:** Se webhook falhar ou não for entregue, tenant não é criado
+- **Impacto:** Cliente paga mas não tem acesso ao sistema
+- **Solução:** Implementar polling ou retry mechanism
+
+**5. Inconsistência de Nomenclatura (BAIXO)**
+- **Causa:** `tenant_processar_venda` usa `p_forma_pagamento` mas auditoria diz que deveria ser `p_metodo_pagamento`
+- **Impacto:** Confusão em manutenção futura
+- **Solução:** Padronizar nomenclatura em todas as RPCs
+
+**6. Falta de Retry em Webhook (MÉDIO)**
+- **Causa:** `webhook_provisionar_assinatura` não tem retry automático
+- **Impacto:** Falhas temporárias não são recuperadas
+- **Solução:** Implementar fila de retry ou dead letter queue
+
+**7. Logs de Erro Insuficientes (BAIXO)**
+- **Causa:** `webhook_audit_log` registra sucesso mas não detalhes de erro
+- **Impacto:** Dificuldade em debugar falhas de provisionamento
+- **Solução:** Adicionar campos de error_code, error_message, stack_trace
+
+### Dívidas Técnicas
+
+**1. Endpoint de Webhook (CRÍTICO)**
+- Criar `/api/webhooks/asaas` com validação de assinatura
+- Implementar chamada a `webhook_provisionar_assinatura`
+- Adicionar tratamento de erros e retry
+
+**2. Validação de Dados (MÉDIO)**
+- Adicionar validação de CNPJ (formato e dígitos verificadores)
+- Adicionar validação de email (formato e domínio)
+- Adicionar validação de senha (complexidade)
+- Usar Zod para validação de schema
+
+**3. Tratamento de Falhas (MÉDIO)**
+- Implementar retry automático para webhook
+- Adicionar dead letter queue para falhas permanentes
+- Implementar dashboard de monitoramento de webhooks
+
+**4. Testes de Integração (ALTO)**
+- Testar webhook em sandbox do Asaas
+- Testar provisionamento completo end-to-end
+- Testar cenários de erro (pagamento falhado, webhook duplicado)
+
+**5. Documentação de API (BAIXO)**
+- Documentar API routes do Asaas
+- Documentar payload esperado do webhook
+- Documentar erros possíveis e soluções
+
+### Compreensão Funcional
+
+**Fluxo Atual (INCOMPLETO):**
+1. Usuário seleciona plano e módulos
+2. Usuário preenche cadastro
+3. Usuário clica em "Confirmar e Assinar"
+4. PaymentGatewayService cria cliente e pagamento no Asaas
+5. Usuário é redirecionado para checkout do Asaas
+6. Usuário paga no Asaas
+7. Asaas envia webhook (ENDPOINT NÃO IMPLEMENTADO)
+8. ❌ Webhook não é recebido
+9. ❌ Tenant não é provisionado
+
+**Fluxo Esperado (COMPLETO):**
+1. Usuário seleciona plano e módulos
+2. Usuário preenche cadastro
+3. Usuário clica em "Confirmar e Assinar"
+4. PaymentGatewayService cria cliente e pagamento no Asaas
+5. Usuário é redirecionado para checkout do Asaas
+6. Usuário paga no Asaas
+7. Asaas envia webhook para `/api/webhooks/asaas`
+8. ✅ Webhook valida assinatura
+9. ✅ Webhook chama `webhook_provisionar_assinatura`
+10. ✅ Tenant é provisionado
+11. ✅ Usuário é criado no Supabase Auth
+12. ✅ Usuário recebe email de boas-vindas
+13. ✅ Usuário pode fazer login
+
+### Recomendações Imediatas
+
+**Prioridade CRÍTICA:**
+1. Criar endpoint `/api/webhooks/asaas` para receber webhooks do Asaas
+2. Implementar validação de assinatura do webhook
+3. Corrigir criação de usuário no Supabase Auth (usar Admin API)
+4. Testar fluxo completo em sandbox
+
+**Prioridade ALTA:**
+1. Adicionar validação de dados no checkout (CNPJ, email, senha)
+2. Implementar retry automático para webhook
+3. Adicionar monitoramento de webhooks
+4. Documentar API de webhook
+
+**Prioridade MÉDIA:**
+1. Padronizar nomenclatura de RPCs
+2. Melhorar logs de erro em webhook_audit_log
+3. Adicionar dashboard de provisionamento
+4. Implementar polling como fallback
+
+### Observações
+
+- A arquitetura de provisionamento via webhook está bem desenhada (transacional, idempotente)
+- O maior risco é a falta do endpoint de webhook, que impede o funcionamento completo
+- A criptografia de senha precisa ser corrigida para usar Supabase Admin API
+- A UX de checkout está bem implementada, mas precisa de validações
+- A integração com Asaas está correta, mas precisa do webhook para ser funcional
 
 ---
 
