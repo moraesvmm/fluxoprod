@@ -83,11 +83,35 @@ function CheckoutContent() {
     return selectedPlan.price + (selectedModules.length * PRECO_MODULO_AVULSO);
   }, [selectedPlan, selectedModules]);
 
+  const emailValido = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const documentoNormalizado = companyDocument.replace(/\D/g, "");
+  const passwordValida = password.trim().length >= 8;
+
   const toggleModule = (id: string) => {
     setSelectedModules(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
   };
 
   const handleCheckout = async () => {
+    if (!customerName.trim() || !companyName.trim()) {
+      alert("Preencha seu nome e os dados da empresa antes de continuar.");
+      return;
+    }
+
+    if (!emailValido(customerEmail)) {
+      alert("Informe um e-mail válido.");
+      return;
+    }
+
+    if (!passwordValida) {
+      alert("A senha deve ter pelo menos 8 caracteres.");
+      return;
+    }
+
+    if (documentoNormalizado.length < 11) {
+      alert("Informe um CNPJ ou documento válido.");
+      return;
+    }
+
     setLoading(true);
     try {
       const payload: PaymentTransactionPayload = {
@@ -268,6 +292,7 @@ function CheckoutContent() {
                      <div className="md:col-span-2">
                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">Definir Senha do ERP</label>
                        <input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-indigo-500 outline-none hover:border-white/20 transition-colors" placeholder="••••••••" />
+                       <p className="mt-2 text-xs text-gray-500">Minimo de 8 caracteres. A senha nao e enviada ao gateway de pagamento.</p>
                      </div>
                    </div>
 
@@ -301,7 +326,7 @@ function CheckoutContent() {
                    <button onClick={() => setStep(1)} className="text-gray-400 hover:text-white px-4 py-2 font-medium transition-colors">Voltar</button>
                    <button 
                       onClick={() => setStep(3)} 
-                      disabled={!customerName || !password || !customerEmail || !companyName}
+                       disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11}
                       className="bg-white text-black disabled:opacity-50 hover:bg-gray-200 font-medium py-3 px-8 rounded-xl flex items-center gap-2 group transition-all"
                    >
                      Ir para Pagamento <ArrowRight className="w-4 h-4" />
@@ -383,7 +408,7 @@ function CheckoutContent() {
                  {step === 2 && (
                    <button 
                      onClick={() => setStep(3)} 
-                     disabled={!customerName || !password || !customerEmail || !companyName}
+                      disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11}
                      className="w-full sm:w-auto bg-emerald-500 text-white disabled:opacity-50 disabled:bg-gray-600 font-bold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-colors"
                    >
                      Revisar e Pagar

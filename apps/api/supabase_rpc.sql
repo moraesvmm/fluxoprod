@@ -1282,6 +1282,106 @@ BEGIN
         $func$;
     ', novo_schema, novo_schema);
 
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_listar_regras_comissao(p_limit INT DEFAULT 1000, p_offset INT DEFAULT 0)
+        RETURNS TABLE (
+          id UUID,
+          colaborador_id UUID,
+          tipo_calculo VARCHAR(20),
+          valor NUMERIC(10, 2),
+          ativo BOOLEAN,
+          criado_em TIMESTAMPTZ
+        )
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        BEGIN
+          RETURN QUERY
+          SELECT id, colaborador_id, tipo_calculo, valor, ativo, criado_em
+          FROM regras_comissao
+          ORDER BY criado_em DESC
+          LIMIT p_limit OFFSET p_offset;
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_criar_regra_comissao(
+          p_colaborador_id UUID,
+          p_tipo_calculo VARCHAR(20),
+          p_valor NUMERIC(10, 2),
+          p_ativo BOOLEAN DEFAULT TRUE
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_regra_id UUID;
+        BEGIN
+          INSERT INTO regras_comissao (
+            colaborador_id,
+            tipo_calculo,
+            valor,
+            ativo
+          ) VALUES (
+            p_colaborador_id,
+            p_tipo_calculo,
+            p_valor,
+            COALESCE(p_ativo, TRUE)
+          )
+          RETURNING id INTO v_regra_id;
+
+          RETURN jsonb_build_object(''success'', TRUE, ''regra_id'', v_regra_id);
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_excluir_regra_comissao(p_regra_id UUID)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        BEGIN
+          DELETE FROM regras_comissao WHERE id = p_regra_id;
+          RETURN jsonb_build_object(''success'', TRUE);
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_atualizar_comissao(
+          p_comissao_id UUID,
+          p_status_pagamento VARCHAR(50),
+          p_data_pagamento DATE DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        BEGIN
+          UPDATE comissoes
+          SET
+            status_pagamento = COALESCE(p_status_pagamento, status_pagamento),
+            data_pagamento = COALESCE(p_data_pagamento, data_pagamento)
+          WHERE id = p_comissao_id;
+
+          RETURN jsonb_build_object(''success'', TRUE, ''comissao_id'', p_comissao_id);
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
     -- Criar RPCs de escrita dentro do schema tenant
     EXECUTE format('
         CREATE OR REPLACE FUNCTION %I.tenant_criar_cliente(

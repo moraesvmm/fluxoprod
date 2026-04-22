@@ -49,6 +49,9 @@
 }
 
 :root {
+  --font-sans: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-mono: "Consolas", "SFMono-Regular", "Liberation Mono", monospace;
+  --font-brand: "Georgia", "Times New Roman", serif;
   --background: oklch(0.985 0.002 260); /* slate-50 */
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

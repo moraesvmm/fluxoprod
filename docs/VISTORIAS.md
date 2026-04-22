@@ -1,5 +1,67 @@
 # VISTORIAS - Vistoria Profunda do Sistema
 
+> Atualizacao de correcoes em 22/04/2026: checkout/webhook, relatorios, comissoes, scanner e build foram saneados e validados em `tsc --noEmit` + `next build`; permanece pendente re-vistoria urgente apos a publicacao SQL das RPCs de regras de comissao no banco live.
+
+> Atualizacao da Vistoria 17 em 22/04/2026: nova vistoria completa registrada neste documento; ver secao imediatamente abaixo de status/metadados.
+
+## VISTORIA 17: Vistoria Completa de Arquitetura, Banco, RPCs e Frontend - 22/04/2026
+
+### Metodologia Executada
+- 4 passagens documentais incrementais em `docs/`, cruzando documentacao principal, auditorias, estudos e retrospectivas.
+- 4 passagens tecnicas incrementais no sistema, cobrindo `apps/api/supabase_rpc.sql`, `apps/api/webhook_provisionamento.sql`, `apps/web/src`, hooks, middleware e paginas tenant.
+- Validacao live do banco com `service_role` via REST do Supabase para tabelas e views publicas de governanca.
+
+### Limites da Vistoria
+- O MCP do Supabase nao estava configurado neste ambiente durante a inspecao.
+- A API Management do Supabase nao retornou acesso autorizado com a credencial fornecida, entao a vistoria live do banco ficou restrita ao REST exposto do projeto.
+- Os schemas tenant nao estao expostos no REST; a API retornou `PGRST106`, informando exposicao apenas de `public` e `graphql_public`.
+
+### Evidencias Confirmadas no Banco Live
+- `public.modulos_catalogo` esta populada com 12 modulos e a shape observada foi `key`, `nome`, `descricao`, `criado_em`.
+- `public.v_empresa_modulos` esta populada e apresenta combinacoes reais de feature flags ativas e inativas por empresa.
+- `public.empresas` expoe `atualizado_em` e `deleted_at`, alem dos campos ja documentados.
+- `public.user_profiles` expoe `nome` e `deleted_at`, alem de `user_id`, `empresa_id`, `role` e `criado_em`.
+- `public.checkout_vendas` e `public.webhook_audit_log` existem, mas estavam vazias no momento da vistoria.
+
+### Achados Criticos
+- Checkout transporta senha em texto puro para o gateway e para o webhook.
+  Evidencia: `apps/web/src/services/PaymentGatewayService.ts:84-94` e `apps/web/src/app/api/webhook/payment/route.ts:55-71`.
+- Provisionamento grava diretamente em `auth.users` com `crypt(..., gen_salt('bf'))`.
+  Evidencia: `apps/api/webhook_provisionamento.sql:90-111`.
+- Modulos `relatorios` e `comissoes` seguem fora do padrao RPC/Opcao A.
+  Evidencia: `apps/web/src/app/tenant/relatorios/page.tsx:57-127` e `apps/web/src/app/tenant/comissoes/page.tsx:72-151`.
+
+### Achados Altos
+- Webhook administrativo falha em modo fail-open de credencial.
+  Evidencia: `apps/web/src/app/api/webhook/payment/route.ts:6-19`.
+- Ha drift relevante entre frontend e contrato SQL principal.
+  Evidencia de consumo: `apps/web/src/lib/api.ts:540-610` e `apps/web/src/lib/api.ts:1030-1125`.
+- Na inspecao do `apps/api/supabase_rpc.sql`, nao foram encontrados contratos para `tenant_atualizar_cliente`, `tenant_listar_interacoes`, `tenant_criar_interacao`, `tenant_excluir_interacao`, `tenant_adicionar_tag`, `tenant_remover_tag`, `tenant_listar_tags_catalog`, `tenant_enviar_campanha`, `tenant_criar_funcionario`, `tenant_atualizar_funcionario`, `tenant_excluir_funcionario`, `tenant_atualizar_financeiro`, `tenant_atualizar_comissao`, `tenant_dashboard_kpis_por_mes` e `tenant_dashboard_metricas`.
+
+### Achados Medios
+- `modulos_catalogo` esta documentado com shape divergente do banco live.
+- `empresas` e `user_profiles` estao documentados com menos campos que o estado live.
+- O fluxo de checkout segue sem validacao forte antes do gateway.
+
+### Conclusao da Vistoria 17
+- A arquitetura central continua coerente, mas o estado real nao sustenta mais a afirmacao de production-ready sem ressalvas.
+- As pendencias criticas concentram-se em checkout/provisionamento, aderencia arquitetural de `relatorios` e `comissoes` e consolidacao do contrato SQL canonico.
+
+### Prioridade Recomendada
+1. Remover senha do metadata do gateway e tirar a criacao manual de `auth.users` do SQL.
+2. Reescrever `relatorios` e `comissoes` para consumir RPCs compativeis com a Opcao A.
+3. Consolidar no `apps/api/supabase_rpc.sql` todas as RPCs realmente consumidas pelo frontend ou eliminar chamadas mortas.
+4. Reexecutar vistoria tecnica apos as correcoes acima.
+
+### Atualizacao Pos-Correcao - 22/04/2026
+- `apps/web/src/app/api/checkout/session/route.ts` passou a persistir o estado do checkout no banco e a manter a senha apenas cifrada no servidor; o gateway nao recebe mais `password` em `metadata`.
+- `apps/web/src/app/api/webhook/payment/route.ts` deixou de depender da RPC legada `webhook_provisionar_assinatura` e agora orquestra o provisionamento no backend com `provisionar_empresa_master`, `user_profiles`, `checkout_vendas` e `webhook_audit_log`.
+- `apps/web/src/app/tenant/relatorios/page.tsx` e `apps/web/src/app/tenant/comissoes/page.tsx` foram migrados para a camada `@/lib/api`, removendo o acesso direto a tabelas tenant no browser.
+- `apps/web/src/components/modules/estoque/BarcodeScanner.tsx`, `apps/web/src/app/layout.tsx`, `apps/web/src/components/layout/Sidebar.tsx` e `apps/web/src/app/globals.css` foram ajustados para remover dependencias de build em `html5-qrcode` ausente e em fontes remotas do Google.
+- Validacao executada com sucesso em 22/04/2026: `tsc --noEmit` e `next build`.
+- Pendencia remanescente: o banco live ainda nao publicou `tenant_listar_regras_comissao`, `tenant_criar_regra_comissao` e `tenant_excluir_regra_comissao`; por isso a gestao de regras de comissao fica degradada com mensagem explicita ate a aplicacao de `apps/api/migrations/rpc_comissoes_regras.sql`.
+- Re-vistoria obrigatoria pendente: devido ao volume de alteracoes no codigo-fonte, deve ser executada uma nova vistoria tecnica completa o mais rapido possivel apos a publicacao SQL remanescente.
+
 **Última atualização:** 22/04/2026
 **Versão:** 1.5
 **Status:** ✅ Revisado

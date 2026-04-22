@@ -18,19 +18,9 @@ import {
   Wrench,
   Building2,
   DollarSign,
-  LogOut,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { createClient } from "@/utils/supabase/client";
-import { Meow_Script } from "next/font/google";
-
-const meowScript = Meow_Script({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-meow",
-});
 
 const navigation = [
   { key: "dashboard", name: "Dashboard", href: "/tenant/dashboard", icon: LayoutDashboard },
@@ -38,13 +28,13 @@ const navigation = [
   { key: "estoque", name: "Estoque", href: "/tenant/estoque", icon: Package },
   { key: "crm", name: "Clientes & CRM", href: "/tenant/crm", icon: Users },
   { key: "financeiro", name: "Financeiro", href: "/tenant/financeiro", icon: Wallet },
-  { key: "catalogo", name: "Catálogo", href: "/tenant/catalogo", icon: Tags },
+  { key: "catalogo", name: "Catalogo", href: "/tenant/catalogo", icon: Tags },
   { key: "rh", name: "RH & Equipe", href: "/tenant/rh", icon: Briefcase },
-  { key: "os", name: "Ordem de Serviço", href: "/tenant/os", icon: Wrench },
+  { key: "os", name: "Ordem de Servico", href: "/tenant/os", icon: Wrench },
   { key: "obras", name: "Obras", href: "/tenant/obras", icon: Building2 },
-  { key: "comissoes", name: "Comissões", href: "/tenant/comissoes", icon: DollarSign },
-  { key: "relatorios", name: "Relatórios", href: "/tenant/relatorios", icon: FileText },
-  { key: "configuracoes", name: "Configurações", href: "/tenant/configuracoes", icon: Settings },
+  { key: "comissoes", name: "Comissoes", href: "/tenant/comissoes", icon: DollarSign },
+  { key: "relatorios", name: "Relatorios", href: "/tenant/relatorios", icon: FileText },
+  { key: "configuracoes", name: "Configuracoes", href: "/tenant/configuracoes", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -61,24 +51,26 @@ export function Sidebar() {
   }, [activeKeys]);
 
   return (
-    <div className="flex h-full w-64 flex-col overflow-y-auto border-r border-sidebar-border/60 text-sidebar-foreground transition-all duration-300 shadow-lg" style={{ background: 'linear-gradient(180deg, #0f0a1e 0%, #1a1145 40%, #0d1b2a 100%)' }}>
-      {/* Logo — Premium UI */}
-      <div className="flex h-16 shrink-0 items-center px-6 border-b border-sidebar-border/40">
-        <Link href="/tenant/dashboard" className="flex items-center gap-3 group">
-          <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105 relative">
-            <Image 
-              src="/logo-fluxo.png" 
-              alt="Fluxo Logo" 
+    <div
+      className="flex h-full w-64 flex-col overflow-y-auto border-r border-sidebar-border/60 text-sidebar-foreground shadow-lg transition-all duration-300"
+      style={{ background: "linear-gradient(180deg, #0f0a1e 0%, #1a1145 40%, #0d1b2a 100%)" }}
+    >
+      <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border/40 px-6">
+        <Link href="/tenant/dashboard" className="group flex items-center gap-3">
+          <div className="relative flex items-center justify-center transition-all duration-300 group-hover:scale-105">
+            <Image
+              src="/logo-fluxo.png"
+              alt="Fluxo Logo"
               width={44}
               height={44}
               priority
-              className="object-contain drop-shadow-[0_0_10px_rgba(192,132,252,0.4)] relative z-10" 
+              className="relative z-10 object-contain drop-shadow-[0_0_10px_rgba(192,132,252,0.4)]"
             />
           </div>
-          <div className="flex flex-col mt-1">
-            <span 
-              className={`${meowScript.className} text-3xl font-normal text-white leading-none tracking-normal`}
-              style={{ textShadow: "0 2px 8px rgba(192, 132, 252, 0.35)" }}
+          <div className="mt-1 flex flex-col">
+            <span
+              className="text-3xl font-normal leading-none tracking-normal text-white"
+              style={{ fontFamily: "var(--font-brand)", textShadow: "0 2px 8px rgba(192, 132, 252, 0.35)" }}
             >
               Fluxo
             </span>
@@ -86,21 +78,20 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* Navigation */}
       <nav className="flex flex-1 flex-col px-3 py-5">
         <div className="mb-2 px-3">
-          <span className="text-[10px] font-semibold text-slate-500/60 uppercase tracking-[0.12em]">Módulos</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500/60">Modulos</span>
         </div>
         <ul role="list" className="flex flex-1 flex-col gap-y-0.5">
           {activeKeys !== null && visibleNavigation.length === 0 && !isLoading && (
             <li className="px-3 py-3 text-sm text-slate-400/80">
-              Nenhum módulo ativo. Solicite ativação ao administrador do sistema.
+              Nenhum modulo ativo. Solicite ativacao ao administrador do sistema.
             </li>
           )}
           {isLoading && (
-            <li className="px-3 py-3 flex gap-x-3 items-center">
-              <div className="h-4 w-4 bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 w-24 bg-slate-800 rounded animate-pulse"></div>
+            <li className="flex items-center gap-x-3 px-3 py-3">
+              <div className="h-4 w-4 animate-pulse rounded bg-slate-800"></div>
+              <div className="h-4 w-24 animate-pulse rounded bg-slate-800"></div>
             </li>
           )}
           {visibleNavigation.map((item) => {
@@ -122,7 +113,9 @@ export function Sidebar() {
                     className={twMerge(
                       clsx(
                         "h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110",
-                        isActive ? "text-sidebar-primary-foreground" : "text-slate-400/80 group-hover:text-sidebar-accent-foreground"
+                        isActive
+                          ? "text-sidebar-primary-foreground"
+                          : "text-slate-400/80 group-hover:text-sidebar-accent-foreground"
                       )
                     )}
                     aria-hidden="true"
@@ -135,14 +128,13 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      {/* Tenant Indicator — dados reais */}
-      <div className="p-4 border-t border-sidebar-border/40">
+      <div className="border-t border-sidebar-border/40 p-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-[11px] font-bold text-white shadow-sm ring-1 ring-white/10">
-            {empresaIniciais || "—"}
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-violet-700 text-[11px] font-bold text-white shadow-sm ring-1 ring-white/10">
+            {empresaIniciais || "-"}
           </div>
-          <div className="flex flex-col flex-1 min-w-0">
-            <span className="text-[13px] font-semibold text-white/90 truncate">
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="truncate text-[13px] font-semibold text-white/90">
               {empresaNome || "Carregando..."}
             </span>
           </div>

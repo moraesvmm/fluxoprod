@@ -454,6 +454,22 @@ export interface Comissao {
   criado_em: string;
 }
 
+export interface RegraComissao {
+  id: string;
+  colaborador_id: string;
+  tipo_calculo: string;
+  valor: number;
+  ativo: boolean;
+  criado_em: string;
+}
+
+export interface RegraComissaoCreate {
+  colaborador_id: string;
+  tipo_calculo: string;
+  valor: number;
+  ativo?: boolean;
+}
+
 export interface ComissaoUpdate {
   status_pagamento?: string;
   data_pagamento?: string;
@@ -464,6 +480,10 @@ export interface ComissaoUpdate {
 // NOW ALL OPERATIONS USE RPCs (Opção A - Database as Source of Truth)
 
 const getSupabase = () => createClient();
+
+function isMissingRpcError(message: string) {
+  return message.includes("PGRST202") || message.includes("Could not find the function");
+}
 
 // VENDAS - Usar RPC tenant_listar_vendas para leitura
 export async function fetchVendas(): Promise<Venda[]> {
@@ -1112,6 +1132,55 @@ export async function fetchComissoes(): Promise<Comissao[]> {
     .rpc('tenant_listar_comissoes');
   if (error) throw new Error(error.message);
   return data || [];
+}
+
+export async function fetchRegrasComissao(): Promise<RegraComissao[]> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_listar_regras_comissao');
+  if (error) {
+    if (isMissingRpcError(error.message)) {
+      return [];
+    }
+    throw new Error(error.message);
+  }
+  return data || [];
+}
+
+export async function createRegraComissao(regra: RegraComissaoCreate): Promise<RegraComissao> {
+  const { data, error } = await getSupabase().rpc('tenant_criar_regra_comissao', {
+    p_colaborador_id: regra.colaborador_id,
+    p_tipo_calculo: regra.tipo_calculo,
+    p_valor: regra.valor,
+    p_ativo: regra.ativo ?? true,
+  });
+  if (error) {
+    if (isMissingRpcError(error.message)) {
+      throw new Error('A funcao de regras de comissao ainda nao foi publicada neste ambiente.');
+    }
+    throw new Error(error.message);
+  }
+  if (data?.error) throw new Error(data.error);
+  return {
+    id: data?.regra_id,
+    colaborador_id: regra.colaborador_id,
+    tipo_calculo: regra.tipo_calculo,
+    valor: regra.valor,
+    ativo: regra.ativo ?? true,
+    criado_em: new Date().toISOString(),
+  };
+}
+
+export async function deleteRegraComissao(regraId: string): Promise<void> {
+  const { data, error } = await getSupabase().rpc('tenant_excluir_regra_comissao', {
+    p_regra_id: regraId,
+  });
+  if (error) {
+    if (isMissingRpcError(error.message)) {
+      throw new Error('A funcao de regras de comissao ainda nao foi publicada neste ambiente.');
+    }
+    throw new Error(error.message);
+  }
+  if (data?.error) throw new Error(data.error);
 }
 
 export async function updateComissao(id: string, comissao: ComissaoUpdate): Promise<Comissao> {

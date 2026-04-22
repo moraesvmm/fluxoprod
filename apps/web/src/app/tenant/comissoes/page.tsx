@@ -1,8 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
+import { Calculator, DollarSign, Percent, Plus, Wallet } from "lucide-react";
+
 import { KPICard } from "@/components/modules/base/KPICard";
-import { StatusBadge } from "@/components/modules/base/StatusBadge";
+import { Toast, useToast } from "@/components/ui/toast";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { Modal } from "@/components/ui/modal";
 import {
   Table,
   TableBody,
@@ -11,130 +15,86 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DollarSign, Plus, Search, Percent, Calculator, Calendar, Wallet, Trash2, Edit, Check } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
-import { Modal } from "@/components/ui/modal";
-import { ConfirmModal } from "@/components/ui/confirm-modal";
-import { useToast, Toast } from "@/components/ui/toast";
+import {
+  useComissoes,
+  useCreateRegraComissao,
+  useDeleteRegraComissao,
+  useRegrasComissao,
+  useUpdateComissao,
+} from "@/lib/hooks/use-comissoes";
+import { useFuncionarios } from "@/lib/hooks/use-funcionarios";
 
-interface Funcionario {
-  id: string;
-  nome: string;
-  cargo: string;
+function formatarMoeda(valor: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(valor || 0);
 }
 
-interface RegraComissao {
-  id: string;
-  funcionario_id: string;
-  funcionario_nome?: string;
-  tipo_calculo: string; // 'percentual' | 'valor_fixo'
-  valor: number;
-  ativo: boolean;
-  criado_em: string;
-}
-
-interface Comissao {
-  id: string;
-  funcionario_id: string;
-  funcionario_nome?: string;
-  venda_id: string;
-  valor_venda: number;
-  valor_comissao: number;
-  status: string; // 'pendente' | 'pago' | 'cancelado'
-  periodo?: string;
-  criado_em: string;
+function formatarData(data?: string) {
+  return data ? new Date(data).toLocaleDateString("pt-BR") : "—";
 }
 
 export default function ComissoesPage() {
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState<"regras" | "historico">("regras");
-  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
-  const [regras, setRegras] = useState<RegraComissao[]>([]);
-  const [comissoes, setComissoes] = useState<Comissao[]>([]);
-  const [loading, setLoading] = useState(true);
   const [deleteRegraId, setDeleteRegraId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    funcionario_id: "",
+    colaborador_id: "",
     tipo_calculo: "percentual",
     valor: "",
   });
+
+  const { data: funcionarios = [] } = useFuncionarios();
+  const { data: regras = [], isLoading: loadingRegras } = useRegrasComissao();
+  const { data: comissoes = [], isLoading: loadingComissoes } = useComissoes();
+  const createRegra = useCreateRegraComissao();
+  const deleteRegra = useDeleteRegraComissao();
+  const updateComissao = useUpdateComissao();
   const { toasts, removeToast, success, error: toastError } = useToast();
-  const supabase = createClient();
 
-  useEffect(() => {
-    carregarDados();
-  }, []);
+  const funcionarioPorId = useMemo(
+    () => new Map(funcionarios.map((funcionario) => [funcionario.id, funcionario.nome])),
+    [funcionarios]
+  );
 
-  const carregarDados = async () => {
-    setLoading(true);
-    try {
-      // Carregar funcionários
-      const { data: funcs } = await supabase
-        .from("funcionarios")
-        .select("id, nome, cargo")
-        .order("nome");
-      setFuncionarios(funcs || []);
-
-      // Carregar regras de comissão
-      const { data: regrasData } = await supabase
-        .from("comissoes_regras")
-        .select("*")
-        .order("criado_em", { ascending: false });
-
-      // Enriquecer com nomes de funcionários
-      const regrasEnriquecidas = (regrasData || []).map(r => ({
-        ...r,
-        funcionario_nome: (funcs || []).find(f => f.id === r.funcionario_id)?.nome || "Desconhecido",
-      }));
-      setRegras(regrasEnriquecidas);
-
-      // Carregar histórico de comissões
-      const { data: comissoesData } = await supabase
-        .from("comissoes")
-        .select("*")
-        .order("criado_em", { ascending: false });
-
-      const comissoesEnriquecidas = (comissoesData || []).map(c => ({
-        ...c,
-        funcionario_nome: (funcs || []).find(f => f.id === c.funcionario_id)?.nome || "Desconhecido",
-      }));
-      setComissoes(comissoesEnriquecidas);
-    } catch {
-      // Tabelas podem não existir ainda — graceful fallback
-    } finally {
-      setLoading(false);
-    }
-  };
+  const totalAPagar = comissoes
+    .filter((item) => item.status_pagamento === "pendente")
+    .reduce((sum, item) => sum + (item.valor_comissao || 0), 0);
+  const pagoNoMes = comissoes
+    .filter((item) => item.status_pagamento === "pago")
+    .reduce((sum, item) => sum + (item.valor_comissao || 0), 0);
+  const colaboradoresComComissao = new Set(comissoes.map((item) => item.colaborador_id)).size;
+  const mediaPorColaborador =
+    colaboradoresComComissao > 0
+      ? comissoes.reduce((sum, item) => sum + (item.valor_comissao || 0), 0) /
+        colaboradoresComComissao
+      : 0;
 
   const criarRegra = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.funcionario_id || !formData.valor) return;
+    if (!formData.colaborador_id || !formData.valor) return;
 
     try {
-      const { error } = await supabase.from("comissoes_regras").insert({
-        funcionario_id: formData.funcionario_id,
+      await createRegra.mutateAsync({
+        colaborador_id: formData.colaborador_id,
         tipo_calculo: formData.tipo_calculo,
-        valor: parseFloat(formData.valor),
+        valor: Number(formData.valor),
         ativo: true,
       });
-
-      if (error) throw error;
-
-      setFormData({ funcionario_id: "", tipo_calculo: "percentual", valor: "" });
+      setFormData({ colaborador_id: "", tipo_calculo: "percentual", valor: "" });
       setShowModal(false);
-      await carregarDados();
       success("Regra de comissão criada com sucesso!");
     } catch (err: any) {
       toastError("Erro ao criar regra: " + (err.message || "Tente novamente."));
     }
   };
 
-  const excluirRegra = async () => {
+  const confirmarExclusaoRegra = async () => {
     if (!deleteRegraId) return;
+
     try {
-      const { error } = await supabase.from("comissoes_regras").delete().eq("id", deleteRegraId);
-      if (error) throw error;
-      setRegras(regras.filter(r => r.id !== deleteRegraId));
+      await deleteRegra.mutateAsync(deleteRegraId);
       success("Regra excluída com sucesso!");
     } catch (err: any) {
       toastError("Erro ao excluir regra: " + (err.message || "Tente novamente."));
@@ -145,43 +105,33 @@ export default function ComissoesPage() {
 
   const marcarComoPago = async (comissaoId: string) => {
     try {
-      const { error } = await supabase
-        .from("comissoes")
-        .update({ status: "pago" })
-        .eq("id", comissaoId);
-      if (error) throw error;
-      setComissoes(comissoes.map(c => c.id === comissaoId ? { ...c, status: "pago" } : c));
+      await updateComissao.mutateAsync({
+        id: comissaoId,
+        comissao: {
+          status_pagamento: "pago",
+          data_pagamento: new Date().toISOString(),
+        },
+      });
       success("Comissão marcada como paga!");
     } catch (err: any) {
       toastError("Erro ao atualizar comissão: " + (err.message || "Tente novamente."));
     }
   };
 
-  const formatarMoeda = (v: number) =>
-    new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
-
-  const formatarData = (d: string) =>
-    d ? new Date(d).toLocaleDateString("pt-BR") : "—";
-
-  // KPIs
-  const totalAPagar = comissoes.filter(c => c.status === "pendente").reduce((s, c) => s + (c.valor_comissao || 0), 0);
-  const pagoNoMes = comissoes.filter(c => c.status === "pago").reduce((s, c) => s + (c.valor_comissao || 0), 0);
-  const funcComComissao = new Set(comissoes.map(c => c.funcionario_id)).size;
-  const mediaPorColaborador = funcComComissao > 0
-    ? comissoes.reduce((s, c) => s + (c.valor_comissao || 0), 0) / funcComComissao
-    : 0;
-
   return (
     <div className="space-y-8">
-      {/* Toasts */}
-      {toasts.map(toast => (
-        <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => removeToast(toast.id)}
+        />
       ))}
 
-      {/* Confirm Modal */}
       <ConfirmModal
         isOpen={!!deleteRegraId}
-        onConfirm={excluirRegra}
+        onConfirm={confirmarExclusaoRegra}
         onCancel={() => setDeleteRegraId(null)}
         title="Excluir regra"
         message="Tem certeza que deseja excluir esta regra de comissão?"
@@ -190,49 +140,64 @@ export default function ComissoesPage() {
         variant="danger"
       />
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Comissões</h2>
-          <p className="text-muted-foreground">Regras de comissão e cálculo automático por colaborador.</p>
+          <p className="text-muted-foreground">
+            Regras de comissão e histórico de pagamentos via camada RPC.
+          </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Plus className="mr-2 h-4 w-4" />
           Nova Regra
         </button>
       </div>
 
-      {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-4">
-        <KPICard title="Total a Pagar" value={formatarMoeda(totalAPagar)} icon={Wallet} className="border-amber-200 bg-amber-50/10" />
-        <KPICard title="Pago no Mês" value={formatarMoeda(pagoNoMes)} icon={DollarSign} className="border-emerald-200 bg-emerald-50/10" />
-        <KPICard title="Média por Colaborador" value={formatarMoeda(mediaPorColaborador)} icon={Calculator} />
-        <KPICard title="Colaboradores Ativos" value={String(funcComComissao)} icon={Percent} />
+        <KPICard title="Total a Pagar" value={formatarMoeda(totalAPagar)} icon={Wallet} />
+        <KPICard title="Pago no Mês" value={formatarMoeda(pagoNoMes)} icon={DollarSign} />
+        <KPICard
+          title="Média por Colaborador"
+          value={formatarMoeda(mediaPorColaborador)}
+          icon={Calculator}
+        />
+        <KPICard
+          title="Colaboradores Ativos"
+          value={String(colaboradoresComComissao)}
+          icon={Percent}
+        />
       </div>
 
-      {/* Tabs */}
       <div className="border-b border-border">
         <nav className="flex gap-4">
           <button
             onClick={() => setActiveTab("regras")}
-            className={`pb-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "regras" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`pb-4 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "regras"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
           >
             Regras de Comissão ({regras.length})
           </button>
           <button
             onClick={() => setActiveTab("historico")}
-            className={`pb-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "historico" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`pb-4 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "historico"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
           >
             Histórico de Pagamentos ({comissoes.length})
           </button>
         </nav>
       </div>
 
-      {/* Tab: Regras */}
       {activeTab === "regras" && (
-        <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
@@ -244,44 +209,37 @@ export default function ComissoesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
+              {loadingRegras ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    <div className="text-slate-500">Carregando regras...</div>
+                  <TableCell colSpan={5} className="py-8 text-center">
+                    Carregando regras...
                   </TableCell>
                 </TableRow>
               ) : regras.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12">
-                    <div className="flex flex-col items-center gap-2">
-                      <Percent className="h-10 w-10 text-slate-200" />
-                      <p className="text-slate-500 text-sm">Nenhuma regra de comissão cadastrada</p>
-                      <p className="text-slate-400 text-xs">Clique em &quot;Nova Regra&quot; para configurar comissões.</p>
-                    </div>
+                  <TableCell colSpan={5} className="py-8 text-center">
+                    Nenhuma regra cadastrada.
                   </TableCell>
                 </TableRow>
               ) : (
                 regras.map((regra) => (
                   <TableRow key={regra.id}>
-                    <TableCell className="font-medium">{regra.funcionario_nome}</TableCell>
+                    <TableCell>{funcionarioPorId.get(regra.colaborador_id) || "Desconhecido"}</TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
-                        {regra.tipo_calculo === "percentual" ? "Percentual" : "Valor Fixo"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {regra.tipo_calculo === "percentual" ? `${regra.valor}%` : formatarMoeda(regra.valor)}
+                      {regra.tipo_calculo === "percentual" ? "Percentual" : "Valor Fixo"}
                     </TableCell>
                     <TableCell>
-                      <StatusBadge status={regra.ativo ? "success" : "warning"} label={regra.ativo ? "Ativo" : "Inativo"} />
+                      {regra.tipo_calculo === "percentual"
+                        ? `${regra.valor}%`
+                        : formatarMoeda(regra.valor)}
                     </TableCell>
+                    <TableCell>{regra.ativo ? "Ativo" : "Inativo"}</TableCell>
                     <TableCell className="text-right">
                       <button
                         onClick={() => setDeleteRegraId(regra.id)}
-                        className="text-slate-400 hover:text-red-600 p-1 transition-colors"
-                        title="Excluir"
+                        className="text-sm font-medium text-red-600 transition-colors hover:text-red-700"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Excluir
                       </button>
                     </TableCell>
                   </TableRow>
@@ -292,57 +250,53 @@ export default function ComissoesPage() {
         </div>
       )}
 
-      {/* Tab: Histórico */}
       {activeTab === "historico" && (
-        <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Colaborador</TableHead>
                 <TableHead>Venda</TableHead>
-                <TableHead>Valor da Venda</TableHead>
+                <TableHead>Valor Venda</TableHead>
                 <TableHead>Comissão</TableHead>
-                <TableHead>Data</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Data</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
+              {loadingComissoes ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    <div className="text-slate-500">Carregando comissões...</div>
+                  <TableCell colSpan={7} className="py-8 text-center">
+                    Carregando comissões...
                   </TableCell>
                 </TableRow>
               ) : comissoes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12">
-                    <div className="flex flex-col items-center gap-2">
-                      <DollarSign className="h-10 w-10 text-slate-200" />
-                      <p className="text-slate-500 text-sm">Nenhuma comissão registrada</p>
-                      <p className="text-slate-400 text-xs">As comissões serão calculadas automaticamente ao concluir vendas com vendedor.</p>
-                    </div>
+                  <TableCell colSpan={7} className="py-8 text-center">
+                    Nenhuma comissão encontrada.
                   </TableCell>
                 </TableRow>
               ) : (
-                comissoes.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.funcionario_nome}</TableCell>
-                    <TableCell className="text-sm font-mono text-slate-500">{c.venda_id.substring(0, 8)}...</TableCell>
-                    <TableCell>{formatarMoeda(c.valor_venda)}</TableCell>
-                    <TableCell className="font-medium text-emerald-700">{formatarMoeda(c.valor_comissao)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{formatarData(c.criado_em)}</TableCell>
+                comissoes.map((comissao) => (
+                  <TableRow key={comissao.id}>
                     <TableCell>
-                      <StatusBadge status={c.status as any} />
+                      {funcionarioPorId.get(comissao.colaborador_id) || comissao.colaborador_id}
                     </TableCell>
+                    <TableCell>
+                      {comissao.venda_id ? `${comissao.venda_id.slice(0, 8)}...` : "—"}
+                    </TableCell>
+                    <TableCell>{formatarMoeda(comissao.valor_venda || 0)}</TableCell>
+                    <TableCell>{formatarMoeda(comissao.valor_comissao || 0)}</TableCell>
+                    <TableCell>{comissao.status_pagamento || "—"}</TableCell>
+                    <TableCell>{formatarData(comissao.data_pagamento || comissao.criado_em)}</TableCell>
                     <TableCell className="text-right">
-                      {c.status === "pendente" && (
+                      {comissao.status_pagamento !== "pago" && (
                         <button
-                          onClick={() => marcarComoPago(c.id)}
-                          className="text-slate-400 hover:text-emerald-600 p-1 transition-colors"
-                          title="Marcar como Pago"
+                          onClick={() => marcarComoPago(comissao.id)}
+                          className="text-sm font-medium text-emerald-600 transition-colors hover:text-emerald-700"
                         >
-                          <Check className="h-4 w-4" />
+                          Marcar como pago
                         </button>
                       )}
                     </TableCell>
@@ -354,68 +308,60 @@ export default function ComissoesPage() {
         </div>
       )}
 
-      {/* Modal de Nova Regra */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title="Nova Regra de Comissão"
-      >
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Nova Regra de Comissão">
         <form onSubmit={criarRegra} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Colaborador *</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Colaborador</label>
             <select
-              value={formData.funcionario_id}
-              onChange={(e) => setFormData({ ...formData, funcionario_id: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              value={formData.colaborador_id}
+              onChange={(e) => setFormData((prev) => ({ ...prev, colaborador_id: e.target.value }))}
+              className="w-full rounded-md border px-3 py-2 text-sm"
               required
             >
-              <option value="">Selecione um colaborador...</option>
-              {funcionarios.map(f => (
-                <option key={f.id} value={f.id}>{f.nome} — {f.cargo}</option>
+              <option value="">Selecione</option>
+              {funcionarios.map((funcionario) => (
+                <option key={funcionario.id} value={funcionario.id}>
+                  {funcionario.nome}
+                </option>
               ))}
             </select>
-            {funcionarios.length === 0 && (
-              <p className="text-xs text-amber-600 mt-1">Cadastre colaboradores no módulo RH primeiro.</p>
-            )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Cálculo</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Tipo de Cálculo</label>
             <select
               value={formData.tipo_calculo}
-              onChange={(e) => setFormData({ ...formData, tipo_calculo: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              onChange={(e) => setFormData((prev) => ({ ...prev, tipo_calculo: e.target.value }))}
+              className="w-full rounded-md border px-3 py-2 text-sm"
             >
-              <option value="percentual">Percentual (%)</option>
-              <option value="valor_fixo">Valor Fixo (R$)</option>
+              <option value="percentual">Percentual</option>
+              <option value="valor_fixo">Valor Fixo</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              {formData.tipo_calculo === "percentual" ? "Percentual (%)" : "Valor Fixo (R$)"} *
-            </label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Valor</label>
             <input
               type="number"
               step="0.01"
               value={formData.valor}
-              onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder={formData.tipo_calculo === "percentual" ? "Ex: 10" : "Ex: 50.00"}
+              onChange={(e) => setFormData((prev) => ({ ...prev, valor: e.target.value }))}
+              className="w-full rounded-md border px-3 py-2 text-sm"
               required
             />
           </div>
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              Criar Regra
-            </button>
+          <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="rounded-md border px-4 py-2 text-sm font-medium text-slate-700"
             >
               Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={createRegra.isPending}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            >
+              {createRegra.isPending ? "Criando..." : "Criar Regra"}
             </button>
           </div>
         </form>

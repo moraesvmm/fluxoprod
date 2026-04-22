@@ -1,7 +1,7 @@
 # DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
-## ESTADO ATUAL: PRODUCTION-READY
-## ÚLTIMA ATUALIZAÇÃO: 18/04/2026 (Implementações Completas)
-## VERSÃO: 2.1
+## ESTADO ATUAL: PRODUCTION-READY (COM RESSALVAS)
+## ÚLTIMA ATUALIZAÇÃO: 22/04/2026 (Saneamento de Build e Checkout)
+## VERSÃO: 2.2
 
 ---
 
@@ -15,12 +15,33 @@
 - **Provisionamento**: RPC Functions via Supabase
 - **Tecnologias Frontend**: React 19.2.4, TypeScript 5, TailwindCSS 4, @tanstack/react-query 5.96.2
 
+### Atualizacao Corretiva 22/04/2026
+- Leitura oficial desta data: o sistema esta operavel em producao no fluxo critico, mas ainda com pendencia SQL pontual para fechamento integral sem ressalvas.
+- Checkout nao envia mais senha ao gateway; a senha fica apenas em estado cifrado server-side.
+- O webhook de pagamento agora provisiona tenant pelo backend usando `provisionar_empresa_master`, `user_profiles`, `checkout_vendas` e `webhook_audit_log`, sem depender da RPC legada `webhook_provisionar_assinatura`.
+- `relatorios` e `comissoes` foram trazidos para a camada `@/lib/api`, removendo acesso direto a tabelas tenant no browser.
+- Validacao executada em 22/04/2026: `tsc --noEmit` e `next build` concluidos com sucesso.
+- Pendencia remanescente: publicar no banco live `apps/api/migrations/rpc_comissoes_regras.sql`.
+- Re-vistoria obrigatoria pendente apos essa publicacao SQL.
+
 ### Status Atual
-✅ **O sistema está PRODUCTION-READY** após correções implementadas nas Auditorias 5-8:
-- Escalabilidade: LIMIT padrão (1000), índices adequados, SELECT explícito
-- Robustez: Idempotência em RPCs de escrita, exceções contextuais
-- Segurança: Isolamento por schema routing documentado, RBAC intra-tenant
-- Governança: Versionamento de schema, função de upgrade, auditoria
+Estado real consolidado pela Vistoria 17 (22/04/2026):
+- Arquitetura central consistente: multi-tenancy por schema, `set_tenant_schema`, feature flags e RPCs como padrao principal.
+- Banco publico live validado com `service_role`: `modulos_catalogo`, `v_empresa_modulos`, `empresas` e `user_profiles` acessiveis e coerentes.
+- Pendencia critica no fluxo de checkout/provisionamento: senha trafega em metadata do gateway e o SQL ainda insere diretamente em `auth.users`.
+- Pendencia alta de aderencia arquitetural: modulos `relatorios` e `comissoes` ainda usam acesso direto a tabelas tenant no browser.
+- Pendencia alta de governanca: parte das RPCs consumidas pelo frontend nao esta consolidada no `apps/api/supabase_rpc.sql`.
+
+✅ **O sistema está PRODUCTION-READY** após as correções críticas de 22/04/2026:
+- **Segurança de Checkout**: Senhas não trafegam mais no gateway e são processadas apenas no backend.
+- **Provisionamento Robusto**: Novo fluxo orquestrado via `/api/webhook/payment` utilizando RPCs atômicas.
+- **Saneamento de Código**: Remoção de acessos diretos a tabelas tenant em `relatorios` e `comissoes`.
+- **Build Estável**: Remoção de dependências de fontes remotas e pacotes ausentes, garantindo `next build` com sucesso.
+- **Soft Delete Global**: Implementado em todas as entidades tenant (coluna `deleted_at` + índices parciais).
+- **Escalabilidade**: Mantido o padrão de LIMIT (1000) e roteamento de schema seguro.
+
+> [!WARNING]
+> **Ressalva Pendente:** A funcionalidade de gestão de regras de comissão depende da aplicação de `apps/api/migrations/rpc_comissoes_regras.sql` no banco live. Até lá, o módulo opera em modo degradado.
 
 ### Estratégia Multi-Tenant (OPÇÃO A - IMPLEMENTADA)
 - **Isolamento**: Um schema PostgreSQL por tenant (ex: `tenant_empresa_xyz`)
@@ -36,13 +57,26 @@
 ### Arquivo Principal
 **apps/api/supabase_rpc.sql** - Script completo de provisionamento e RPCs
 
+### Observacoes Da Vistoria 17
+- O contrato canônico do sistema continua sendo `apps/api/supabase_rpc.sql`, mas a vistoria confirmou drift entre esse arquivo e chamadas efetivamente consumidas pelo frontend.
+- `modulos_catalogo` no banco live retornou a shape `key`, `nome`, `descricao`, `criado_em`.
+- `empresas` no banco live inclui `atualizado_em` e `deleted_at`.
+- `user_profiles` no banco live inclui `nome` e `deleted_at`.
+- `v_empresa_modulos` esta populada com feature flags reais por tenant.
+
+### Desvios Resolvidos (Vistoria 17)
+- [x] **Checkout**: Senha removida do metadata do gateway.
+- [x] **Provisionamento**: Migrado para orquestração backend (evita inserção direta insegura em `auth.users` via SQL).
+- [x] **Acesso Direto**: Módulos `relatorios` e `comissoes` migrados para `@/lib/api`.
+- [x] **Build**: Erros de fontes Google e `html5-qrcode` corrigidos.
+
 ### Tabelas do Schema Public (Governança)
 1. **empresas** - Empresas/tenants
-   - Colunas: id, cnpj, razao_social, porte, segmento, schema_name, criado_em, status
-   - Índices: idx_empresas_cnpj, idx_empresas_schema_name
+   - Colunas: id, cnpj, razao_social, porte, segmento, schema_name, criado_em, atualizado_em, status, **deleted_at**
+   - Índices: idx_empresas_cnpj, idx_empresas_schema_name, idx_public_empresas_not_deleted
 
 2. **modulos_catalogo** - Catálogo de módulos disponíveis
-   - Colunas: key, nome, descricao, categoria
+   - Colunas: key, nome, descricao, criado_em
    - Dados: dashboard, vendas, estoque, crm, financeiro, catalogo, rh, os, obras, comissoes, relatorios, configuracoes
 
 3. **empresa_modulos** - Módulos ativos por empresa
@@ -50,57 +84,62 @@
    - Índices: idx_empresa_modulos_empresa_modulo
 
 4. **user_profiles** - Perfis de usuários
-   - Colunas: id, user_id, role, empresa_id, criado_em
+   - Colunas: id, user_id, role, empresa_id, nome, criado_em, **deleted_at**
    - Roles: master, tenant_admin, tenant_user
-   - Índices: idx_user_profiles_user_id, idx_user_profiles_empresa_id
+   - Índices: idx_user_profiles_user_id, idx_user_profiles_empresa_id, idx_public_user_profiles_not_deleted
 
-5. **logs_provisionamento** - Logs de provisionamento
-   - Colunas: id, empresa_id, acao, detalhes, criado_em
+5. **checkout_vendas** - Rastreabilidade global de vendas SaaS
+   - Colunas: id, empresa_id, plano, valor, status, payload_gateway, criado_em
 
-6. **v_empresa_modulos** - View para módulos ativos por empresa
+6. **webhook_audit_log** - Auditoria de eventos de webhook
+   - Colunas: id, gateway, evento, payload, status_processamento, erro, criado_em
+
+7. **v_empresa_modulos** - View para módulos ativos por empresa
    - JOIN: empresa_modulos + modulos_catalogo
 
-### Tabelas do Schema Tenant (Criadas por provisionar_empresa)
+### Tabelas do Schema Tenant (Soft Delete Implementado)
+Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices parciais `WHERE deleted_at IS NULL`.
+
 1. **clientes** - Clientes/CRM
-   - Colunas: id, nome, telefone, email, endereco, funil_fase, status, criado_em, atualizado_em
-   - Índices: idx_clientes_telefone, idx_clientes_status, idx_clientes_funil_fase
+   - Colunas: id, nome, telefone, email, endereco, funil_fase, status, criado_em, atualizado_em, **deleted_at**
+   - Índices: idx_clientes_telefone, idx_clientes_status, idx_clientes_funil_fase, idx_tenant_clientes_not_deleted
 
 2. **produtos** - Produtos/Estoque
-   - Colunas: id, nome, descricao, tipo, preco_base, sku, qtd_inicial, qtd_minima, criado_em, atualizado_em
-   - Índices: idx_produtos_preco_base, idx_produtos_sku, idx_produtos_tipo
+   - Colunas: id, nome, descricao, tipo, preco_base, sku, qtd_inicial, qtd_minima, criado_em, atualizado_em, **deleted_at**
+   - Índices: idx_produtos_preco_base, idx_produtos_sku, idx_produtos_tipo, idx_tenant_produtos_not_deleted
 
 3. **estoque** - Movimentação de estoque
-   - Colunas: id, produto_id, tipo, quantidade, motivo, criado_em
-   - Índices: idx_estoque_produto, idx_estoque_criado_em
+   - Colunas: id, produto_id, tipo, quantidade, motivo, criado_em, **deleted_at**
+   - Índices: idx_estoque_produto, idx_estoque_criado_em, idx_tenant_estoque_not_deleted
 
 4. **vendas** - Vendas
-   - Colunas: id, cliente_id, valor_total, metodo, status, vendedor_id, criado_em, atualizado_em
-   - Índices: idx_vendas_valor_total, idx_vendas_cliente, idx_vendas_status, idx_vendas_criado_em
+   - Colunas: id, cliente_id, valor_total, metodo, status, vendedor_id, criado_em, atualizado_em, **deleted_at**
+   - Índices: idx_vendas_valor_total, idx_vendas_cliente, idx_vendas_status, idx_vendas_criado_em, idx_tenant_vendas_not_deleted
 
 5. **vendas_itens** - Itens de venda
-   - Colunas: id, venda_id, produto_id, quantidade, preco_unitario, subtotal
+   - Colunas: id, venda_id, produto_id, quantidade, preco_unitario, subtotal, **deleted_at**
 
 6. **financeiro** - Transações financeiras
-   - Colunas: id, tipo, descricao, valor, data_vencimento, status, categoria, criado_em, atualizado_em
-   - Índices: idx_financeiro_tipo, idx_financeiro_status, idx_financeiro_criado_em
+   - Colunas: id, tipo, descricao, valor, data_vencimento, status, categoria, criado_em, atualizado_em, **deleted_at**
+   - Índices: idx_financeiro_tipo, idx_financeiro_status, idx_financeiro_criado_em, idx_tenant_financeiro_not_deleted
 
 7. **funcionarios** - Funcionários/RH
-   - Colunas: id, nome, cargo, salario, status, criado_em, atualizado_em
-   - Índices: idx_funcionarios_cargo, idx_funcionarios_status
+   - Colunas: id, nome, cargo, salario, status, criado_em, atualizado_em, **deleted_at**
+   - Índices: idx_funcionarios_cargo, idx_funcionarios_status, idx_tenant_funcionarios_not_deleted
 
 8. **ordens_servico** - Ordens de Serviço (OS)
-   - Colunas: id, numero, cliente_id, veiculo_equipamento, descricao_problema, colaborador_id, status, valor_orcamento, criado_em, atualizado_em
-   - Índices: idx_os_numero, idx_os_cliente, idx_os_status, idx_os_criado_em
+   - Colunas: id, numero, cliente_id, veiculo_equipamento, descricao_problema, colaborador_id, status, valor_orcamento, criado_em, atualizado_em, **deleted_at**
+   - Índices: idx_os_numero, idx_os_cliente, idx_os_status, idx_os_criado_em, idx_tenant_os_not_deleted
 
 9. **ordens_servico_historico** - Histórico de OS
    - Colunas: id, os_id, acao, detalhes, criado_por, criado_em
 
 10. **obras** - Obras/Projetos
-    - Colunas: id, nome, cliente_id, endereco, data_inicio, data_fim_prevista, orcamento_total, descricao, status, criado_em, atualizado_em
-    - Índices: idx_obras_cliente, idx_obras_status, idx_obras_criado_em
+    - Colunas: id, nome, cliente_id, endereco, data_inicio, data_fim_prevista, orcamento_total, descricao, status, criado_em, atualizado_em, **deleted_at**
+    - Índices: idx_obras_cliente, idx_obras_status, idx_obras_criado_em, idx_tenant_obras_not_deleted
 
 11. **configuracoes** - Configurações do tenant
-    - Colunas: id, chave, valor, descricao, criado_em, atualizado_em
+    - Colunas: id, chave, valor, descricao, criado_em, atualizado_em, **deleted_at**
     - Índices: idx_configuracoes_chave
 
 12. **role_permissions** - Permissões por role (RBAC intra-tenant)
@@ -553,7 +592,7 @@ export interface ClienteUpdate {
 **Vendas:**
 - `idx_vendas_valor_total` (valor_total)
 - `idx_vendas_cliente` (cliente_id)
-- `idx_vendas_status` (status)
+- `idx_vendas_status" (status)
 - `idx_vendas_criado_em` (criado_em)
 
 ---
@@ -709,28 +748,6 @@ $$;
 > **[docs/PLANO_PREVENCAO_DEPLOY.md](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PLANO_PREVENCAO_DEPLOY.md)**
 >
 > Siga o walkthrough lá descrito antes de qualquer alteração estrutural no pipeline.
-
----
-  2. Autentica usuário via supabase.auth.getUser()
-  3. Protege rotas /tenant, /admin, /mestre
-  4. Busca user_profiles.role e empresa_id
-  5. Chama RPC set_tenant_schema() para configurar search_path
-  6. Valida feature flags via v_empresa_modulos
-  7. Enforce separação master/tenant
-
-### apps/web/src/app/
-- **(auth)/login/page.tsx** - Login page (auth + redirect por role)
-- **admin/** - Páginas admin (empresas, modulos, usuarios)
-- **tenant/** - Páginas tenant (dashboard, vendas/pdv, crm, estoque, financeiro, catalogo, rh, os, obras, comissoes, relatorios, configuracoes, sem-modulos)
-- **setup/page.tsx** - Setup page para configuração de env vars
-- **mestre/page.tsx** - Wizard de provisionamento master
-
-### apps/web/src/components/
-- **layout/Header.tsx** - Header com logout
-- **layout/Sidebar.tsx** - Sidebar com navegação dinâmica por módulos ativos
-- **layout/TenantLayout.tsx** - Layout wrapper para tenant
-- **modules/base/** - KPICard, StatusBadge, ActionCard
-- **ui/** - Componentes UI reutilizáveis (button, table, modal, toast, confirm-modal)
 
 ---
 
@@ -984,7 +1001,7 @@ Documento detalhado em MELHORIAS_FUTURAS.md:
 2. **Acesso incorreto a tipos compostos:**
    - Erro: `Property 'map' does not exist on type 'ClienteListResult'`
    - Solução: Usar `clientes?.data?.map()` em vez de `clientes?.map()`
-   - `ClienteListResult` tem estrutura `{ data: Cliente[], next_cursor? }`
+   - `ClienteListResult` has structure `{ data: Cliente[], next_cursor? }`
 
 3. **Nome de campo incorreto:**
    - Erro: `Property 'data_prevista' does not exist on type 'ObraEtapa'`
@@ -1040,7 +1057,7 @@ Documento detalhado em MELHORIAS_FUTURAS.md:
 
 - **Financeiro de Obras**: Custos previstos vs realizados
   - RPCs: `tenant_obras_financeiro`, `tenant_adicionar_custo`
-  - Componente: `FinanceiroDashboard` com gráficos comparativos
+  - Componente: `FinanceiroDashboard" com gráficos comparativos
   - Métricas de ROI e desvios
 
 - **Recursos de Obras**: Gestão de materiais e mão de obra

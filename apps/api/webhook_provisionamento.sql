@@ -37,9 +37,9 @@ ALTER TABLE public.webhook_audit_log ENABLE ROW LEVEL SECURITY;
 -- ==========================================
 CREATE OR REPLACE FUNCTION public.webhook_provisionar_assinatura(
     p_transaction_id TEXT,
+    p_user_id UUID DEFAULT NULL,
     p_cliente_nome TEXT,
     p_email TEXT,
-    p_senha TEXT,
     p_cnpj TEXT,
     p_razao_social TEXT,
     p_porte TEXT,
@@ -57,7 +57,6 @@ DECLARE
     v_checkout_id UUID;
     v_current_status TEXT;
     v_user_id UUID;
-    v_encrypted_pw TEXT;
     v_empresa_id UUID;
     v_schema_name TEXT;
     v_provision_result JSON;
@@ -87,28 +86,18 @@ BEGIN
         WHERE id = v_checkout_id;
     END IF;
 
-    -- 3. Inserir o Cliente no auth.users do Supabase diretamente (Transação de banco!)
-    -- Se o cliente já tiver um e-mail cadastrado, nós o captamos. Senão, criamos.
-    SELECT id INTO v_user_id FROM auth.users WHERE email = p_email LIMIT 1;
-    
-    IF v_user_id IS NULL THEN
-        v_user_id := gen_random_uuid();
-        v_encrypted_pw := crypt(p_senha, gen_salt('bf'));
+    -- 3. Resolver usuário já criado no Auth pelo backend.
+    v_user_id := p_user_id;
 
-        INSERT INTO auth.users (
-            instance_id, id, aud, role, email, encrypted_password, 
-            email_confirmed_at, created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change, raw_app_meta_data
-        ) VALUES (
-            '00000000-0000-0000-0000-000000000000', v_user_id, 'authenticated', 'authenticated', p_email, v_encrypted_pw, 
-            NOW(), NOW(), NOW(), '', '', '', '', '{"provider":"email","providers":["email"]}'::jsonb
-        );
-        
-        -- Identity exigido pelo goTrue
-        INSERT INTO auth.identities (
-            id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at
-        ) VALUES (
-            v_user_id, v_user_id, format('{"sub":"%s","email":"%s"}', v_user_id::text, p_email)::jsonb, 'email', NOW(), NOW(), NOW()
-        );
+    IF v_user_id IS NULL THEN
+        SELECT id INTO v_user_id
+        FROM auth.users
+        WHERE email = p_email
+        LIMIT 1;
+    END IF;
+
+    IF v_user_id IS NULL THEN
+        RAISE EXCEPTION 'Usuario auth nao encontrado para o email informado';
     END IF;
 
     -- 4. Provisionamento Master (Gira as regras da Opt A da arquitetura técnica)
