@@ -77,107 +77,97 @@
 
 ### Riscos Técnicos
 
-**1. Endpoint de Webhook Ausente (CRÍTICO)**
-- **Causa:** Não há API route para receber webhooks do Asaas
-- **Impacto:** Pagamentos não são processados automaticamente
-- **Consequência:** Tenants não são provisionados após pagamento
-- **Solução:** Criar `/api/webhooks/asaas` com validação de assinatura e chamada a `webhook_provisionar_assinatura`
-
-**2. Criptografia de Senha Fraca (ALTO)**
+**1. Criptografia de Senha Fraca (ALTO)**
 - **Causa:** `webhook_provisionamento.sql` usa `crypt(p_senha, gen_salt('bf'))` (bcrypt)
 - **Problema:** Supabase Auth usa criptografia própria (pbkdf2), não bcrypt
 - **Impacto:** Senha pode não funcionar no login do Supabase
 - **Solução:** Usar Supabase Admin API ou edge function para criar usuário
 
-**3. Falta de Validação de Dados (MÉDIO)**
+**2. Falta de Validação de Dados (MÉDIO)**
 - **Causa:** CheckoutPage não valida CNPJ, email forte, senha forte
 - **Impacto:** Dados inválidos podem causar falhas no provisionamento
 - **Solução:** Adicionar validações com Zod antes de enviar para gateway
 
-**4. Dependência de Webhook para Provisionamento (ALTO)**
+**3. Dependência de Webhook para Provisionamento (ALTO)**
 - **Causa:** Provisionamento só ocorre via webhook do Asaas
 - **Problema:** Se webhook falhar ou não for entregue, tenant não é criado
 - **Impacto:** Cliente paga mas não tem acesso ao sistema
 - **Solução:** Implementar polling ou retry mechanism
 
-**5. Inconsistência de Nomenclatura (BAIXO)**
+**4. Inconsistência de Nomenclatura (BAIXO)**
 - **Causa:** `tenant_processar_venda` usa `p_forma_pagamento` mas auditoria diz que deveria ser `p_metodo_pagamento`
 - **Impacto:** Confusão em manutenção futura
 - **Solução:** Padronizar nomenclatura em todas as RPCs
 
-**6. Falta de Retry em Webhook (MÉDIO)**
+**5. Falta de Retry em Webhook (MÉDIO)**
 - **Causa:** `webhook_provisionar_assinatura` não tem retry automático
 - **Impacto:** Falhas temporárias não são recuperadas
 - **Solução:** Implementar fila de retry ou dead letter queue
 
-**7. Logs de Erro Insuficientes (BAIXO)**
+**6. Logs de Erro Insuficientes (BAIXO)**
 - **Causa:** `webhook_audit_log` registra sucesso mas não detalhes de erro
 - **Impacto:** Dificuldade em debugar falhas de provisionamento
 - **Solução:** Adicionar campos de error_code, error_message, stack_trace
 
 ### Dívidas Técnicas
 
-**1. Endpoint de Webhook (CRÍTICO)**
-- Criar `/api/webhooks/asaas` com validação de assinatura
-- Implementar chamada a `webhook_provisionar_assinatura`
-- Adicionar tratamento de erros e retry
-
-**2. Validação de Dados (MÉDIO)**
+**1. Validação de Dados (MÉDIO)**
 - Adicionar validação de CNPJ (formato e dígitos verificadores)
 - Adicionar validação de email (formato e domínio)
 - Adicionar validação de senha (complexidade)
 - Usar Zod para validação de schema
 
-**3. Tratamento de Falhas (MÉDIO)**
+**2. Tratamento de Falhas (MÉDIO)**
 - Implementar retry automático para webhook
 - Adicionar dead letter queue para falhas permanentes
 - Implementar dashboard de monitoramento de webhooks
 
-**4. Testes de Integração (ALTO)**
+**3. Testes de Integração (ALTO)**
 - Testar webhook em sandbox do Asaas
 - Testar provisionamento completo end-to-end
 - Testar cenários de erro (pagamento falhado, webhook duplicado)
 
-**5. Documentação de API (BAIXO)**
+**4. Documentação de API (BAIXO)**
 - Documentar API routes do Asaas
 - Documentar payload esperado do webhook
 - Documentar erros possíveis e soluções
 
 ### Compreensão Funcional
 
-**Fluxo Atual (INCOMPLETO):**
+**Fluxo Atual (IMPLEMENTADO):**
 1. Usuário seleciona plano e módulos
 2. Usuário preenche cadastro
 3. Usuário clica em "Confirmar e Assinar"
 4. PaymentGatewayService cria cliente e pagamento no Asaas
 5. Usuário é redirecionado para checkout do Asaas
 6. Usuário paga no Asaas
-7. Asaas envia webhook (ENDPOINT NÃO IMPLEMENTADO)
-8. ❌ Webhook não é recebido
-9. ❌ Tenant não é provisionado
-
-**Fluxo Esperado (COMPLETO):**
-1. Usuário seleciona plano e módulos
-2. Usuário preenche cadastro
-3. Usuário clica em "Confirmar e Assinar"
-4. PaymentGatewayService cria cliente e pagamento no Asaas
-5. Usuário é redirecionado para checkout do Asaas
-6. Usuário paga no Asaas
-7. Asaas envia webhook para `/api/webhooks/asaas`
+7. Asaas envia webhook para `/api/webhook/payment`
 8. ✅ Webhook valida assinatura
 9. ✅ Webhook chama `webhook_provisionar_assinatura`
+10. ⚠️ Tenant é provisionado (mas pode falhar devido a criptografia de senha)
+11. ⚠️ Usuário é criado no Supabase Auth (mas senha pode não funcionar)
+
+**Fluxo Esperado (CORRIGIDO):**
+1. Usuário seleciona plano e módulos
+2. Usuário preenche cadastro (com validações)
+3. Usuário clica em "Confirmar e Assinar"
+4. PaymentGatewayService cria cliente e pagamento no Asaas
+5. Usuário é redirecionado para checkout do Asaas
+6. Usuário paga no Asaas
+7. Asaas envia webhook para `/api/webhook/payment`
+8. ✅ Webhook valida assinatura
+9. ✅ Webhook chama `webhook_provisionar_assinatura` (com correção de senha)
 10. ✅ Tenant é provisionado
-11. ✅ Usuário é criado no Supabase Auth
+11. ✅ Usuário é criado no Supabase Auth (com senha correta)
 12. ✅ Usuário recebe email de boas-vindas
 13. ✅ Usuário pode fazer login
 
 ### Recomendações Imediatas
 
 **Prioridade CRÍTICA:**
-1. Criar endpoint `/api/webhooks/asaas` para receber webhooks do Asaas
-2. Implementar validação de assinatura do webhook
-3. Corrigir criação de usuário no Supabase Auth (usar Admin API)
-4. Testar fluxo completo em sandbox
+1. Corrigir criação de usuário no Supabase Auth (usar Admin API em vez de bcrypt)
+2. Testar fluxo completo em sandbox para verificar se senha funciona no login
+3. Validar se webhook URL está configurado corretamente no painel do Asaas
 
 **Prioridade ALTA:**
 1. Adicionar validação de dados no checkout (CNPJ, email, senha)
@@ -194,10 +184,11 @@
 ### Observações
 
 - A arquitetura de provisionamento via webhook está bem desenhada (transacional, idempotente)
-- O maior risco é a falta do endpoint de webhook, que impede o funcionamento completo
-- A criptografia de senha precisa ser corrigida para usar Supabase Admin API
+- O endpoint de webhook `/api/webhook/payment` já existe e está implementado
+- O maior risco é a criptografia de senha (bcrypt vs Supabase pbkdf2), que pode impedir login
 - A UX de checkout está bem implementada, mas precisa de validações
-- A integração com Asaas está correta, mas precisa do webhook para ser funcional
+- A integração com Asaas está correta e funcional
+- É necessário validar se webhook URL está configurado no painel do Asaas
 
 ---
 
