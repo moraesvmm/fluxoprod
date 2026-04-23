@@ -4,6 +4,27 @@
 
 > Atualizacao da Vistoria 17 em 22/04/2026: nova vistoria completa registrada neste documento; ver secao imediatamente abaixo de status/metadados.
 
+## VISTORIA 21: Ajustes de Branding, SEO e UI do Checkout — 23/04/2026
+
+### Escopo
+- Correção de sobreposição do selo PROMO no checkout
+- Restauração do Favicon oficial
+- Atualização de Metadados de SEO e Título da Página
+
+### O que foi feito
+- **Checkout**: O selo `PROMO` foi movido do canto superior esquerdo para o direito. Adicionada lógica de `right-12` quando o plano está selecionado para não colidir com o ícone de check (`right-4`).
+- **Favicon**: Removidos arquivos órfãos de ícone na pasta `app` e gerado novo `icon.png` a partir do `public/logo-fluxo.png`.
+- **SEO/Metadata**: Título alterado para "Fluxo ERP | Gestão Empresarial Inteligente", adicionadas keywords e tags OpenGraph para melhor ranqueamento e compartilhamento social.
+
+### Arquivos Modificados
+- `apps/web/src/app/(auth)/checkout/page.tsx` [MODIFICADO]
+- `apps/web/src/app/icon.png` [NOVO/SUBSTITUÍDO]
+- `apps/web/src/app/layout.tsx` [MODIFICADO]
+
+### Status
+> [!IMPORTANT]
+> **Pendente:** Realizar vistoria técnica de integridade após as 3 alterações acima para garantir que o layout de checkout permanece responsivo em mobile.
+
 ## VISTORIA 20: Painel Administrativo de Preços (Master) — 23/04/2026
 
 ### Escopo
