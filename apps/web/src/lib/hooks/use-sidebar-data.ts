@@ -7,6 +7,7 @@ interface SidebarData {
   empresaNome: string;
   empresaIniciais: string;
   activeKeys: string[];
+  role?: string;
 }
 
 export function useSidebarData() {
@@ -25,8 +26,21 @@ export function useSidebarData() {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (!profile || profile.role === "master" || !profile.empresa_id) {
+      if (!profile) {
         return { empresaNome: "", empresaIniciais: "", activeKeys: [] };
+      }
+
+      if (profile.role === "master") {
+        return { 
+          empresaNome: "Administrador Master", 
+          empresaIniciais: "AM", 
+          activeKeys: ["dashboard"],
+          role: "master"
+        };
+      }
+
+      if (!profile.empresa_id) {
+        return { empresaNome: "", empresaIniciais: "", activeKeys: [], role: profile.role };
       }
 
       // Execute in parallel for better performance

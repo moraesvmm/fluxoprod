@@ -17,12 +17,17 @@
 - **Painel Master**: Novo componente `PricingPanel.tsx` com edição inline, preço promocional, badges visuais e histórico de audit trail. Página reestruturada com abas animadas.
 - **Checkout**: Constantes `PLANOS`, `MODULOS_AVULSOS` e `PRECO_MODULO_AVULSO` removidas. Agora consome RPCs com fallback silencioso. Suporte a preço promocional (preço riscado + novo em verde) e selo PROMO nos cards.
 - **Preço individual por módulo**: Cada módulo avulso agora pode ter seu próprio preço (não mais R$ 79,90 fixo para todos).
+- **Visibilidade Master**: Corrigido redirecionamento de login e adicionados links "Setup Master" no `/admin` e Sidebar do tenant para o usuário mestre.
 
 ### Arquivos Modificados
 - `apps/api/migrations/pricing_tables.sql` [NOVO]
 - `apps/web/src/app/mestre/PricingPanel.tsx` [NOVO]
 - `apps/web/src/app/mestre/page.tsx` [MODIFICADO]
 - `apps/web/src/app/(auth)/checkout/page.tsx` [MODIFICADO]
+- `apps/web/src/app/(auth)/login/page.tsx` [MODIFICADO]
+- `apps/web/src/app/admin/layout.tsx` [MODIFICADO]
+- `apps/web/src/components/layout/Sidebar.tsx` [MODIFICADO]
+- `apps/web/src/lib/hooks/use-sidebar-data.ts` [MODIFICADO]
 
 ### Validação
 - `tsc --noEmit`: zero erros

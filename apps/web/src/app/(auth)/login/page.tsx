@@ -43,7 +43,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push(profile.role === "master" ? "/admin" : "/tenant/dashboard");
+    router.push(profile.role === "master" ? "/mestre" : "/tenant/dashboard");
     router.refresh();
   };
 

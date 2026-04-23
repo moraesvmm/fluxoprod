@@ -18,6 +18,7 @@ import {
   Wrench,
   Building2,
   DollarSign,
+  ShieldAlert,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -47,8 +48,20 @@ export function Sidebar() {
 
   const visibleNavigation = useMemo(() => {
     if (activeKeys === null) return [];
-    return navigation.filter((n) => activeKeys.includes(n.key));
-  }, [activeKeys]);
+    const base = navigation.filter((n) => activeKeys.includes(n.key));
+    
+    // Injetar link mestre se o usuário for master
+    if (data?.role === "master") {
+      base.unshift({ 
+        key: "mestre", 
+        name: "Setup Master", 
+        href: "/mestre", 
+        icon: ShieldAlert 
+      });
+    }
+    
+    return base;
+  }, [activeKeys, data?.role]);
 
   return (
     <div

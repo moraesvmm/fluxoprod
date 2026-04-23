@@ -25,8 +25,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               <Link className="text-slate-700 hover:text-slate-900" href="/admin/usuarios">
                 Usuários
               </Link>
-              <Link className="text-slate-700 hover:text-slate-900" href="/mestre">
-                Onboarding
+              <Link className="text-slate-700 hover:text-slate-900 font-semibold" href="/mestre">
+                Setup Master
               </Link>
             </nav>
             <LogoutButton />
