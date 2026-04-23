@@ -267,7 +267,9 @@ function CheckoutContent() {
                          <div className="absolute top-4 right-4 bg-indigo-500 rounded-full p-1"><Check className="w-4 h-4 text-white"/></div>
                        )}
                        {p.preco_promocional && (
-                         <div className="absolute top-4 left-4 flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full"><Percent className="w-3 h-3" /> PROMO</div>
+                         <div className={`absolute top-4 ${selectedPlan.key === p.key ? 'right-12' : 'right-4'} flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full transition-all duration-300`}>
+                           <Percent className="w-3 h-3" /> PROMO
+                         </div>
                        )}
                        <h3 className="text-xl font-bold mb-1">{p.nome}</h3>
                        <p className="text-gray-400 text-sm mb-6">{p.descricao}</p>
