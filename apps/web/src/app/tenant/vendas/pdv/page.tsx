@@ -38,7 +38,7 @@ export default function PDVPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [metodoPagamento, setMetodoPagamento] = useState<string>('cartao');
+  const [metodoPagamento, setMetodoPagamento] = useState<string>('cartao_credito');
   const [cliente, setCliente] = useState('Cliente Avulso');
   const [vendedorId, setVendedorId] = useState('');
   const [userEmpresaId, setUserEmpresaId] = useState('');
@@ -59,7 +59,7 @@ export default function PDVPage() {
 
         // Mapear dados da RPC para o formato esperado pelo PDV
         const produtosMapeados = (data || []).map((item: any) => ({
-          id: item.produto_id,
+          id: item.id,
           nome: item.produto_nome,
           preco_venda: item.produto_preco_base,
           estoque_atual: item.quantidade,
@@ -99,7 +99,7 @@ export default function PDVPage() {
 
   // Filtrar produtos por busca
   const produtosFiltrados = produtos.filter(p =>
-    p.nome.toLowerCase().includes(busca.toLowerCase()) ||
+    (p.nome || '').toLowerCase().includes(busca.toLowerCase()) ||
     (p.sku && p.sku.toLowerCase().includes(busca.toLowerCase()))
   );
 
@@ -144,6 +144,22 @@ export default function PDVPage() {
 
   const removeFromCart = (id: string) => {
     setCart(prev => prev.filter(i => i.id !== id));
+  };
+
+  const updateCartQtd = (id: string, newQtdStr: string) => {
+    const qtd = parseInt(newQtdStr, 10);
+    if (isNaN(qtd)) return;
+    
+    setCart(prev => prev.map(item => {
+      if (item.id === id) {
+        if (qtd > item.estoque_disponivel) {
+          warning(`Quantidade máxima disponível: ${item.estoque_disponivel}`);
+          return { ...item, qtd: item.estoque_disponivel };
+        }
+        return { ...item, qtd: qtd < 1 ? 1 : qtd };
+      }
+      return item;
+    }));
   };
 
   const finalizarPagamento = async () => {
@@ -340,8 +356,18 @@ export default function PDVPage() {
                 <div key={item.id} className="flex gap-3 justify-between items-center group bg-slate-50 p-2 rounded-lg border border-slate-100">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-900 truncate">{item.nome}</p>
-                    <p className="text-xs text-slate-500">{item.qtd}x R$ {item.preco.toFixed(2)}</p>
-                    <p className="text-xs text-muted-foreground">Disp: {item.estoque_disponivel}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <input 
+                        type="number" 
+                        min="1" 
+                        max={item.estoque_disponivel}
+                        value={item.qtd || ""} 
+                        onChange={(e) => updateCartQtd(item.id, e.target.value)}
+                        className="w-16 px-2 py-1 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
+                      />
+                      <span className="text-xs text-slate-500">x R$ {item.preco.toFixed(2)}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Disp: {item.estoque_disponivel}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-slate-900">R$ {(item.preco * item.qtd).toFixed(2)}</p>
@@ -408,17 +434,17 @@ export default function PDVPage() {
                 {metodoPagamento === 'pix' && <Check className="h-3 w-3 text-primary" />}
               </button>
               <button
-                onClick={() => setMetodoPagamento('cartao')}
+                onClick={() => setMetodoPagamento('cartao_credito')}
                 className={twMerge(clsx(
                   "flex flex-col items-center p-2 rounded border transition-colors",
-                  metodoPagamento === 'cartao'
+                  metodoPagamento === 'cartao_credito'
                     ? "border-primary bg-indigo-50 text-primary"
                     : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
                 ))}
               >
                 <CreditCard className="h-5 w-5 mb-1" />
                 <span className="text-xs font-medium">Cartão</span>
-                {metodoPagamento === 'cartao' && <Check className="h-3 w-3 text-primary" />}
+                {metodoPagamento === 'cartao_credito' && <Check className="h-3 w-3 text-primary" />}
               </button>
               <button
                 onClick={() => setMetodoPagamento('dinheiro')}

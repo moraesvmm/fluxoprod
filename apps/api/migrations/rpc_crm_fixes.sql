@@ -86,26 +86,13 @@ CREATE OR REPLACE FUNCTION public.tenant_listar_clientes(
     p_order_dir TEXT DEFAULT 'DESC',
     p_tags TEXT[] DEFAULT NULL
 )
-RETURNS TABLE (
-    id UUID,
-    nome VARCHAR(255),
-    email VARCHAR(255),
-    telefone VARCHAR(50),
-    documento VARCHAR(50),
-    endereco TEXT,
-    funil_fase VARCHAR(50),
-    status VARCHAR(50),
-    tags TEXT[],
-    criado_em TIMESTAMPTZ,
-    atualizado_em TIMESTAMPTZ,
-    deleted_at TIMESTAMPTZ,
-    next_cursor UUID
-)
+RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
     v_schema_name TEXT;
+    v_result JSONB;
 BEGIN
     v_schema_name := (
         SELECT e.schema_name
@@ -116,27 +103,35 @@ BEGIN
     );
     
     IF v_schema_name IS NULL OR v_schema_name = 'public' THEN
-        RETURN;
+        RETURN '[]'::JSONB;
     END IF;
     
-    RETURN QUERY EXECUTE format('
-        SELECT 
-            id,
-            nome,
-            email,
-            telefone,
-            documento,
-            endereco,
-            funil_fase,
-            status,
-            tags,
-            criado_em,
-            atualizado_em,
-            deleted_at,
-            next_cursor
-        FROM %I.tenant_listar_clientes($1, $2, $3, $4, $5, $6, $7, $8)
+    EXECUTE format('
+        SELECT jsonb_agg(
+            jsonb_build_object(
+                ''id'', c.id,
+                ''nome'', c.nome,
+                ''email'', c.email,
+                ''telefone'', c.telefone,
+                ''documento'', c.documento,
+                ''endereco'', c.endereco,
+                ''funil_fase'', c.funil_fase,
+                ''status'', c.status,
+                ''tags'', c.tags,
+                ''criado_em'', c.criado_em,
+                ''atualizado_em'', c.atualizado_em,
+                ''deleted_at'', c.deleted_at,
+                ''next_cursor'', c.next_cursor
+            )
+        )
+        FROM %I.tenant_listar_clientes($1, $2, $3, $4, $5, $6, $7, $8) c
     ', v_schema_name)
+    INTO v_result
     USING p_cursor, p_limit, p_status, p_funil_fase, p_busca, p_order_by, p_order_dir, p_tags;
+
+    RETURN COALESCE(v_result, '[]'::JSONB);
+EXCEPTION WHEN OTHERS THEN
+    RETURN jsonb_build_object('error', SQLERRM);
 END;
 $$;
 

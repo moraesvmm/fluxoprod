@@ -212,49 +212,157 @@ export default function RelatoriosPage() {
     }
 
     const headers = REPORT_HEADERS[reportType];
+    const relatorioNome = reportType.charAt(0).toUpperCase() + reportType.slice(1);
+    
     if (format === "csv") {
+      const escapeCsv = (value: any) => {
+        const str = String(value).replace(/"/g, '""');
+        return `"${str}"`;
+      };
+      
       const csvRows = [
-        headers.join(","),
-        ...rows.map((row) => headers.map((header) => `"${renderCellValue(row, header)}"`).join(",")),
+        headers.map(escapeCsv).join(","),
+        ...rows.map((row) => headers.map((header) => escapeCsv(renderCellValue(row, header))).join(",")),
       ];
-      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      
+      // Adicionar BOM (\uFEFF) para Excel ler UTF-8 corretamente (acentos, cedilha)
+      const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `relatorio_${reportType}_${new Date().toISOString().split("T")[0]}.csv`;
+      anchor.download = `Fluxo_Relatorio_${relatorioNome}_${new Date().toISOString().split("T")[0]}.csv`;
       anchor.click();
       URL.revokeObjectURL(url);
       success("CSV exportado com sucesso!");
       return;
     }
 
+    const kpisHtml = kpis.length > 0 ? `
+      <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+        ${kpis.map(kpi => `
+          <div style="flex: 1; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">${kpi.label}</div>
+            <div style="font-size: 20px; font-weight: 600; color: #0f172a;">${kpi.value}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
     const tableHtml = `
-      <html><head><title>Relatório ${reportType}</title>
-      <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        h1 { font-size: 18px; margin-bottom: 16px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
-        th { background-color: #f8f9fa; font-weight: 600; }
-      </style></head><body>
-      <h1>Relatório de ${reportType}</h1>
-      <table><thead><tr>${headers.map((header) => `<th>${header}</th>`).join("")}</tr></thead>
-      <tbody>${rows
-        .map(
-          (row) =>
-            `<tr>${headers
-              .map((header) => `<td>${renderCellValue(row, header)}</td>`)
-              .join("")}</tr>`
-        )
-        .join("")}</tbody></table>
-      </body></html>`;
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Relatório - ${relatorioNome}</title>
+        <style>
+          body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            padding: 40px; 
+            color: #0f172a;
+            max-width: 1000px;
+            margin: 0 auto;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+          }
+          .header h1 { 
+            font-size: 28px; 
+            margin: 0; 
+            font-weight: 700;
+            color: #1e1b4b;
+          }
+          .header .brand {
+            font-size: 14px;
+            color: #64748b;
+            text-align: right;
+          }
+          table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+          }
+          th, td { 
+            padding: 12px 16px; 
+            text-align: left; 
+            font-size: 13px; 
+          }
+          th { 
+            background-color: #f8fafc; 
+            font-weight: 600; 
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+          }
+          td {
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+          }
+          tr:last-child td {
+            border-bottom: 2px solid #e2e8f0;
+          }
+          tr:nth-child(even) td {
+            background-color: #fcfcfd;
+          }
+          .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+          }
+          @media print {
+            body { padding: 0; }
+            @page { margin: 1.5cm; }
+            .header { border-bottom-color: #cbd5e1; }
+            th { border-bottom-color: #cbd5e1; }
+            tr:last-child td { border-bottom-color: #cbd5e1; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1>Relatório de ${relatorioNome}</h1>
+            <div style="margin-top: 4px; color: #64748b; font-size: 14px;">Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</div>
+          </div>
+          <div class="brand">
+            <strong style="color: #4f46e5; font-size: 18px;">Fluxo</strong><br/>
+            Gestão Empresarial
+          </div>
+        </div>
+
+        ${kpisHtml}
+
+        <table>
+          <thead>
+            <tr>${headers.map((header) => `<th>${header}</th>`).join("")}</tr>
+          </thead>
+          <tbody>
+            ${rows.map((row) => `<tr>${headers.map((header) => `<td>${renderCellValue(row, header)}</td>`).join("")}</tr>`).join("")}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          Documento gerado automaticamente pelo sistema Fluxo ERP.
+        </div>
+      </body>
+      </html>`;
 
     const printWindow = window.open("", "_blank");
     if (printWindow) {
       printWindow.document.write(tableHtml);
       printWindow.document.close();
-      printWindow.print();
-      success("PDF gerado com sucesso!");
+      setTimeout(() => {
+        printWindow.print();
+        success("PDF gerado com sucesso!");
+      }, 250);
+    } else {
+      toastError("Pop-up bloqueado. Permita pop-ups para gerar o PDF.");
     }
   };
 

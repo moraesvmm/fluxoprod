@@ -446,6 +446,9 @@ BEGIN
         CREATE TABLE %I.vendas (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             cliente_id UUID REFERENCES %I.clientes(id) ON DELETE SET NULL,
+            cliente_nome VARCHAR(255),
+            vendedor_id UUID REFERENCES %I.funcionarios(id) ON DELETE SET NULL,
+            vendedor_nome VARCHAR(255),
             valor_total NUMERIC(10, 2) NOT NULL CHECK (valor_total >= 0),
             metodo_pagamento VARCHAR(50) CHECK (metodo_pagamento IN (''dinheiro'', ''cartao_credito'', ''cartao_debito'', ''pix'', ''boleto'', ''transferencia'')),
             status VARCHAR(50) DEFAULT ''concluido'' CHECK (status IN (''pendente'', ''concluido'', ''cancelado'', ''reembolsado'')),
@@ -2587,23 +2590,26 @@ BEGIN
           RETURN COALESCE(
             (SELECT jsonb_agg(
               jsonb_build_object(
-                ''id'', a.id,
-                ''produto_id'', a.produto_id,
-                ''produto_nome'', p.nome,
-                ''tipo_alerta'', a.tipo_alerta,
-                ''estoque_atual'', a.estoque_atual,
-                ''estoque_minimo'', a.estoque_minimo,
-                ''mensagem'', a.mensagem,
-                ''status'', a.status,
-                ''criado_em'', a.criado_em,
-                ''resolvido_em'', a.resolvido_em
+                ''id'', sub.id,
+                ''produto_id'', sub.produto_id,
+                ''produto_nome'', sub.nome,
+                ''tipo_alerta'', sub.tipo_alerta,
+                ''estoque_atual'', sub.estoque_atual,
+                ''estoque_minimo'', sub.estoque_minimo,
+                ''mensagem'', sub.mensagem,
+                ''status'', sub.status,
+                ''criado_em'', sub.criado_em,
+                ''resolvido_em'', sub.resolvido_em
               )
             )
-            FROM alertas_estoque a
-            JOIN produtos p ON a.produto_id = p.id
-            WHERE (p_status IS NULL OR a.status = p_status)
-            ORDER BY a.criado_em DESC
-            LIMIT p_limit OFFSET p_offset),
+            FROM (
+              SELECT a.*, p.nome
+              FROM alertas_estoque a
+              JOIN produtos p ON a.produto_id = p.id
+              WHERE (p_status IS NULL OR a.status = p_status)
+              ORDER BY a.criado_em DESC
+              LIMIT p_limit OFFSET p_offset
+            ) sub),
             ''[]''::JSONB
           );
         EXCEPTION WHEN OTHERS THEN

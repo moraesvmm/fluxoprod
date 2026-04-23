@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluxo ERP — Vistoria Funcional: Utilidade dos Módulos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #0b0d14;
+      --navy-mid:  #10121c;
+      --navy-card: #161825;
+      --navy-bdr:  #252840;
+      --slate:     #8b8faa;
+      --silver:    #b0b4cc;
+      --white:     #e8eaf4;
+      --accent:    #7c3aed;
+      --accent-lt: #a78bfa;
+      --accent-glow: rgba(124,58,237,.15);
+      --violet:    #6d28d9;
+      --purple-mid:#5b21b6;
+      --green:     #10b981;
+      --green-lt:  #34d399;
+      --amber:     #f59e0b;
+      --amber-lt:  #fbbf24;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── SLIDE ── */
+    .slide {
+      width: 1280px;
+      min-height: 720px;
+      margin: 0 auto 4px;
+      padding: 60px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+      border-bottom: 1px solid var(--navy-bdr);
+    }
+    @page {
+      size: 1280px 720px;
+      margin: 0;
+    }
+    @media print {
+      html, body { width: 1280px; }
+      .slide { margin: 0; border-bottom: none; width: 1280px; min-height: 720px; max-height: 720px; overflow: hidden; }
+    }
+
+    .slide::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+
+    .slide-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--accent-lt); margin-bottom: 20px;
+    }
+
+    h1 { font-size: 52px; font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; }
+    h2 { font-size: 38px; font-weight: 700; line-height: 1.2; letter-spacing: -0.8px; }
+    h3 { font-size: 18px; font-weight: 600; line-height: 1.3; }
+    .subtitle { font-size: 17px; font-weight: 400; color: var(--slate); margin-top: 16px; max-width: 660px; }
+
+    .text-accent { color: var(--accent-lt); }
+    .text-green  { color: var(--green-lt); }
+    .text-amber  { color: var(--amber); }
+    .text-slate  { color: var(--slate); }
+
+    .divider { height: 1px; background: var(--navy-bdr); margin: 28px 0; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-bdr);
+      border-radius: 12px;
+      padding: 24px 28px;
+    }
+
+    /* ── PILLS ── */
+    .pill {
+      display: inline-block;
+      background: rgba(124,58,237,.12);
+      border: 1px solid rgba(124,58,237,.3);
+      color: var(--accent-lt);
+      font-size: 11px; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px;
+    }
+
+    /* ── LOGO ── */
+    .logo-mark { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 44px; }
+    .logo-box {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--violet));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800; color: #fff;
+      box-shadow: 0 0 24px rgba(124,58,237,.4);
+    }
+    .logo-text { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+
+    /* ── COVER / CLOSE ── */
+    .slide-cover { background: radial-gradient(ellipse at 15% 50%, #130b2e 0%, var(--navy) 65%); }
+    .slide-close { background: radial-gradient(ellipse at 80% 50%, #0d0820 0%, var(--navy) 65%); align-items: flex-start; }
+    .grid-bg {
+      position: absolute; top: 0; right: 0;
+      width: 55%; height: 100%;
+      background-image: linear-gradient(var(--navy-bdr) 1px, transparent 1px), linear-gradient(90deg, var(--navy-bdr) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to left, rgba(0,0,0,0.2), transparent 80%);
+      opacity: 0.35;
+    }
+    .glow-orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.12; pointer-events: none;
+    }
+
+    /* ── FOOTER ── */
+    .slide-footer { position: absolute; bottom: 28px; right: 48px; display: flex; align-items: center; gap: 16px; }
+    .slide-footer .brand { font-size: 11px; font-weight: 600; color: var(--navy-bdr); letter-spacing: 1px; text-transform: uppercase; }
+    .slide-footer .page  { font-size: 11px; color: var(--navy-bdr); }
+  </style>
+</head>
+<body>
+
+<!-- SLIDE 1: COVER -->
+<section class="slide slide-cover">
+  <div class="grid-bg"></div>
+  <div class="glow-orb" style="width:500px;height:500px;background:var(--accent);top:-100px;right:80px;"></div>
+  <div class="logo-mark">
+    <div class="logo-box">F</div>
+    <span class="logo-text">Fluxo</span>
+  </div>
+  <div class="slide-label">Auditoria Técnica — Abril 2026</div>
+  <h1>Vistoria Funcional<br><span class="text-accent">Utilidade dos Módulos.</span></h1>
+  <p class="subtitle">
+    Análise detalhada de todos os módulos do sistema Fluxo ERP: funcionalidade, aplicabilidade real e diagnóstico de necessidade técnica.
+  </p>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">01 / 13</span></div>
+</section>
+
+<!-- SLIDE 2: 1. Dashboard -->
+<section class="slide">
+  <div class="slide-label">Módulo 01</div>
+  <h2>📊 Dashboard</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Painel central que consolida os KPIs (Faturamento, vendas, clientes, OS pendentes, estoque, saldo) e exibe gráficos de visão geral.</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Permite que gestores e donos de negócio tenham uma "visão de águia" imediata sobre a saúde financeira e operacional da empresa ao logar no sistema.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">✅</span>
+        <span style="font-size:15px;font-weight:700;color:var(--green-lt);">Há utilidade de fato? SIM, indispensável.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Sem o Dashboard, o usuário perderia muito tempo navegando entre módulos para descobrir como está o negócio. Ele é o coração estratégico do ERP.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">02 / 13</span></div>
+</section>
+
+<!-- SLIDE 3: 2. CRM -->
+<section class="slide">
+  <div class="slide-label">Módulo 02</div>
+  <h2>👥 CRM (Gestão de Clientes)</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Gerencia a carteira de clientes, funil de vendas (Kanban), histórico de interações, tags e campanhas em massa (Email/WhatsApp/SMS).</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Ajuda a equipe comercial a não perder contatos (leads), acompanhar negociações e manter um relacionamento ativo com a base.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">✅</span>
+        <span style="font-size:15px;font-weight:700;color:var(--green-lt);">Há utilidade de fato? SIM, essencial.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Em mercados competitivos, gerenciar o relacionamento e o funil de vendas é o que garante previsibilidade de receita. Qualquer negócio B2B ou B2C de alto valor necessita de um CRM.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">03 / 13</span></div>
+</section>
+
+<!-- SLIDE 4: 3. Vendas / PDV -->
+<section class="slide">
+  <div class="slide-label">Módulo 03</div>
+  <h2>🛒 Vendas / PDV</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Registra todas as vendas, controla o Ponto de Venda (PDV) e o histórico de transações, vinculando-as a clientes, produtos e métodos de pagamento.</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Automatiza o ato de venda, gerando recibos e alimentando diretamente o Financeiro e o Estoque.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">✅</span>
+        <span style="font-size:15px;font-weight:700;color:var(--green-lt);">Há utilidade de fato? SIM, vital.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">É o módulo que registra a entrada primária de receita no sistema. Sem ele, o sistema não teria como justificar faturamento ou baixar produtos do estoque.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">04 / 13</span></div>
+</section>
+
+<!-- SLIDE 5: 4. Catálogo / Estoque -->
+<section class="slide">
+  <div class="slide-label">Módulo 04</div>
+  <h2>📦 Catálogo / Estoque</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">O Catálogo centraliza a listagem e precificação de produtos/serviços. O Estoque controla quantidades, movimentações, valoração e dispara alertas de estoque baixo.</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Previne que a empresa venda produtos que não tem (ruptura) ou fique com capital parado em excesso de estoque.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">✅</span>
+        <span style="font-size:15px;font-weight:700;color:var(--green-lt);">Há utilidade de fato? SIM, vital para varejo e atacado.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Para empresas prestadoras de serviço, o Estoque pode ser menos utilizado, mas para qualquer empresa que movimenta bens físicos, é o módulo que previne prejuízos invisíveis.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">05 / 13</span></div>
+</section>
+
+<!-- SLIDE 6: 5. OS -->
+<section class="slide">
+  <div class="slide-label">Módulo 05</div>
+  <h2>🔧 Ordens de Serviço (OS)</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Controla manutenções, reparos e serviços prestados a clientes. Gerencia veículos/equipamentos, descrições de problemas, orçamentos e responsáveis.</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Organiza o fluxo de trabalho de oficinas, assistências técnicas e prestadores de serviços, garantindo que nenhum serviço seja esquecido ou faturado incorretamente.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">⚠️</span>
+        <span style="font-size:15px;font-weight:700;color:var(--amber-lt);">Há utilidade de fato? SIM, mas é nichado.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Absolutamente indispensável para prestadores de serviços técnicos. Para varejo puro não tem utilidade, por isso faz todo o sentido ser um módulo ativável.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">06 / 13</span></div>
+</section>
+
+<!-- SLIDE 7: 6. Obras -->
+<section class="slide">
+  <div class="slide-label">Módulo 06</div>
+  <h2>🏗️ Obras (Projetos)</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Faz o gerenciamento macro de obras/projetos, controlando etapas (timeline), custos, alocação de recursos, orçamento e armazenamento de documentos arquitetônicos/técnicos.</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Centraliza toda a execução de um projeto longo, evitando estouros de orçamento e atrasos de cronograma.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">⚠️</span>
+        <span style="font-size:15px;font-weight:700;color:var(--amber-lt);">Há utilidade de fato? SIM, altamente nichado.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Vital para construtoras, escritórios de arquitetura e empreiteiras. Sua presença prova a versatilidade do Fluxo ERP para o segmento da construção civil.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">07 / 13</span></div>
+</section>
+
+<!-- SLIDE 8: 7. Financeiro -->
+<section class="slide">
+  <div class="slide-label">Módulo 07</div>
+  <h2>💰 Financeiro</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Controla o contas a pagar e a receber, conciliação (sincronização de banco), fluxo de caixa, vencimentos e inadimplência.</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">É o módulo responsável por garantir que a empresa pague suas contas em dia (evitando juros) e cobre os clientes (evitando calotes).</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">✅</span>
+        <span style="font-size:15px;font-weight:700;color:var(--green-lt);">Há utilidade de fato? SIM, indispensável.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Toda e qualquer empresa, de qualquer tamanho ou nicho, precisa de controle financeiro. É um dos pilares de qualquer ERP.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">08 / 13</span></div>
+</section>
+
+<!-- SLIDE 9: 8. RH -->
+<section class="slide">
+  <div class="slide-label">Módulo 08</div>
+  <h2>👔 RH (Recursos Humanos)</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Gerencia o cadastro de funcionários, cargos, salários base e permite gerar folhas estimadas de pagamento.</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Ajuda o gestor a entender o custo fixo de sua folha de pagamento e ter um registro centralizado de sua equipe.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">💡</span>
+        <span style="font-size:15px;font-weight:700;color:var(--accent-lt);">Há utilidade de fato? SIM, moderada.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Embora não seja um DP contábil profundo, entrega a visão gerencial que o dono do negócio precisa. Útil para empresas com mais de 3 funcionários.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">09 / 13</span></div>
+</section>
+
+<!-- SLIDE 10: 9. Comissões -->
+<section class="slide">
+  <div class="slide-label">Módulo 09</div>
+  <h2>💸 Comissões</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Calcula de forma automatizada quanto cada funcionário ou vendedor deve receber com base nas vendas/serviços realizados, seguindo regras pré-configuradas.</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Substitui planilhas complexas de fechamento de mês, evitando cálculos errados de comissão que geram insatisfação na equipe ou prejuízo para a empresa.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">✅</span>
+        <span style="font-size:15px;font-weight:700;color:var(--green-lt);">Há utilidade de fato? SIM, altíssima utilidade.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Para negócios baseados em performance (como agências, concessionárias, corretoras, clínicas e varejo comissionado), é um alívio operacional gigantesco.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">10 / 13</span></div>
+</section>
+
+<!-- SLIDE 11: 10. Relatórios -->
+<section class="slide">
+  <div class="slide-label">Módulo 10</div>
+  <h2>📈 Relatórios</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Cruza dados de múltiplos módulos para gerar visões analíticas exportáveis (CSV, PDF).</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Permite extrair inteligência do negócio para tomadas de decisão complexas, fechamentos contábeis ou envio de dados para auditoria.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">✅</span>
+        <span style="font-size:15px;font-weight:700;color:var(--green-lt);">Há utilidade de fato? SIM, indispensável.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Apenas ver dados na tela não basta; contadores e gestores avançados precisam manipular, exportar e arquivar essas informações.</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">11 / 13</span></div>
+</section>
+
+<!-- SLIDE 12: 11. Configurações -->
+<section class="slide">
+  <div class="slide-label">Módulo 11</div>
+  <h2>⚙️ Configurações</h2>
+  <div style="display:flex;flex-direction:column;gap:18px;margin-top:32px;">
+    <div class="card" style="border-left: 2px solid var(--accent);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">O que faz</h3>
+      <p style="font-size:14px;color:var(--silver);">Permite ajustar os dados da empresa (Tenant), gerenciar perfis de acesso (RBAC) e ativar/desativar módulos.</p>
+    </div>
+    <div class="card" style="border-left: 2px solid var(--violet);">
+      <h3 style="font-size:16px;margin-bottom:8px;color:var(--white);">Como pode ser útil</h3>
+      <p style="font-size:14px;color:var(--silver);">Dá autonomia para a própria empresa gerenciar quem pode ver o que, e como o sistema se comporta.</p>
+    </div>
+    <div style="padding:18px 24px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;">✅</span>
+        <span style="font-size:15px;font-weight:700;color:var(--green-lt);">Há utilidade de fato? SIM, estrutural.</span>
+      </div>
+      <p style="font-size:14px;color:var(--silver);">Necessário para a arquitetura multi-tenant do sistema, garantindo a governança, a segurança dos dados e o modelo de negócios (SaaS modular).</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">12 / 13</span></div>
+</section>
+
+<!-- SLIDE 13: CONCLUSÃO -->
+<section class="slide slide-close">
+  <div class="grid-bg"></div>
+  <div class="glow-orb" style="width:600px;height:600px;background:var(--accent);bottom:-200px;right:-100px;"></div>
+  
+  <div class="logo-mark" style="margin-bottom: 32px;">
+    <div class="logo-box">F</div>
+    <span class="logo-text">Fluxo</span>
+  </div>
+
+  <div class="slide-label">Conclusão da Vistoria</div>
+  <h2 style="font-size:40px;max-width:740px;line-height:1.25;">
+    "Arquitetura coesa e validada.<br>
+    <span class="text-accent">Não existem módulos<br>redundantes ou inúteis."</span>
+  </h2>
+
+  <div class="divider" style="max-width:540px;"></div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;max-width:640px;">
+    <div>
+      <span style="color:var(--white);font-weight:600;font-size:16px;">🌐 Núcleo (Universal):</span><br>
+      <span style="font-size:15px;color:var(--silver);">Dashboard, Financeiro, Vendas, Clientes, Configurações, Relatórios. Todo cliente usará.</span>
+    </div>
+    <div>
+      <span style="color:var(--accent-lt);font-weight:600;font-size:16px;">🛰️ Satélites (Específicos de Nicho):</span><br>
+      <span style="font-size:15px;color:var(--silver);">Obras (Construção), OS (Serviços), Estoque (Bens Físicos), Comissões (Vendas complexas).</span>
+    </div>
+    <div style="padding:12px 16px;background:rgba(255,255,255,.05);border-radius:8px;margin-top:8px;">
+      <span style="font-size:14px;color:var(--silver);">A utilidade do sistema se provará máxima ao garantir que o provisionamento de empresas ative apenas os "satélites" que o cliente final realmente comprou e necessita, evitando poluição visual.</span>
+    </div>
+  </div>
+
+  <div class="slide-footer"><span class="brand">FLUXO ERP</span><span class="page">13 / 13</span></div>
+</section>
+
+</body>
+</html>

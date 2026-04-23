@@ -14,29 +14,23 @@ export default function BoasVindasBanner({ nome, userId, onDismiss }: BoasVindas
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
-    // Verificar se localStorage está disponível (SSR check)
-    if (typeof window === "undefined") {
-      return;
-    }
+    if (typeof window === "undefined") return;
 
     const storageKey = `boas_vindas_${userId}`;
     const lastViewed = localStorage.getItem(storageKey);
 
-    // Exibir apenas se chave não existe OU data salva < 7 dias atrás
     if (lastViewed) {
       const lastViewedDate = new Date(lastViewed);
       const now = new Date();
-      const diffDays = Math.floor((now.getTime() - lastViewedDate.getTime()) / (1000 * 60 * 60 * 24));
+      // Exibir novamente após 12 horas
+      const diffHours = Math.abs(now.getTime() - lastViewedDate.getTime()) / 36e5;
 
-      if (diffDays >= 7) {
-        // Passou 7 dias, exibir novamente
+      if (diffHours >= 12) {
         setIsVisible(true);
       } else {
-        // Ainda não passou 7 dias, não exibir
         setIsVisible(false);
       }
     } else {
-      // Nunca viu, exibir
       setIsVisible(true);
     }
   }, [userId]);
@@ -58,16 +52,21 @@ export default function BoasVindasBanner({ nome, userId, onDismiss }: BoasVindas
     return null;
   }
 
+  const horaAtual = new Date().getHours();
+  let saudacao = "Boa noite";
+  if (horaAtual >= 5 && horaAtual < 12) saudacao = "Bom dia";
+  else if (horaAtual >= 12 && horaAtual < 18) saudacao = "Boa tarde";
+
   return (
-    <div className="mb-8 transition-all duration-500 ease-out opacity-0 translate-y-[-10px] animate-in fade-in slide-in-from-top-4">
+    <div className="mb-8 animate-page-enter">
       <div className="bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl px-4 sm:px-6 py-4 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <h2 className="text-white text-xl font-semibold mb-1">
-              Bem-vindo de volta, {nome}!
+              {saudacao}, {nome}! 👋
             </h2>
             <p className="text-white/90 text-sm">
-              Aqui está um resumo do seu dia.
+              Aqui está um resumo das movimentações da sua empresa hoje.
             </p>
           </div>
           <button

@@ -15,6 +15,7 @@ export function useUpdateEmpresa() {
     mutationFn: ({ id, empresa }: { id: string, empresa: EmpresaUpdate }) => updateEmpresa(id, empresa),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['empresa'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-data'] });
     },
   });
 }

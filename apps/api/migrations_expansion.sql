@@ -143,6 +143,9 @@ BEGIN
         CREATE TABLE %I.vendas (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             cliente_id UUID REFERENCES %I.clientes(id) ON DELETE SET NULL,
+            cliente_nome VARCHAR(255),
+            vendedor_id UUID REFERENCES %I.funcionarios(id) ON DELETE SET NULL,
+            vendedor_nome VARCHAR(255),
             valor_total NUMERIC(10, 2) NOT NULL CHECK (valor_total >= 0),
             metodo_pagamento VARCHAR(50) CHECK (metodo_pagamento IN (''dinheiro'', ''cartao_credito'', ''cartao_debito'', ''pix'', ''boleto'', ''transferencia'')),
             status VARCHAR(50) DEFAULT ''concluido'' CHECK (status IN (''pendente'', ''concluido'', ''cancelado'', ''reembolsado'')),

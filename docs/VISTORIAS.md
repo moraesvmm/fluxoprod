@@ -4,6 +4,51 @@
 
 > Atualizacao da Vistoria 17 em 22/04/2026: nova vistoria completa registrada neste documento; ver secao imediatamente abaixo de status/metadados.
 
+## VISTORIA 19: Melhorias de UI/UX (Exportações, Alertas, Dashboard e Configurações) — 22/04/2026
+
+### Escopo Analisado
+- Modulo de Relatórios: formatação de exportação CSV e PDF.
+- Modulo de Configurações: erro ao salvar (HTTP 406 Not Acceptable).
+- Módulo de Estoque (Painel de Alertas): atualização da interface não ocorria ao clicar no botão.
+- Dashboard e Layout: Banner de Boas-vindas oculto e Sidebar sem reatividade de cache.
+
+### Problemas Identificados
+- Exportações CSV sem o BOM (`\uFEFF`), corrompendo acentuações no Excel do Windows.
+- Exportações PDF geravam uma tabela crua sem estilização e sem KPI visíveis.
+- Erro no salvamento de Configurações da Empresa ocorria devido à ausência de política de UPDATE na tabela `empresas` para os usuários Tenants, bloqueando a edição através do RLS.
+- O Dashboard possuía um componente `BoasVindasBanner`, mas ele utilizava classes de animação indisponíveis (fazendo-o renderizar com opacidade zero) e com um timer de ocultamento muito longo (7 dias).
+- A Sidebar mantinha o cache agressivo de 5 minutos, não refletindo alterações feitas na Razão Social no menu Configurações.
+
+### Ações e Correções
+- Corrigida a função `handleExport` do Módulo de Relatórios adicionando encoding BOM no CSV e formatando o PDF de maneira premium (usando fonte Inter, estilização corporativa, data/hora, marca d'água da Fluxo e resumo de métricas).
+- Criada a policy `tenant_update_own_empresa` e persistida no `supabase_rpc.sql` para permitir que tenants atualizem os dados de suas próprias empresas, sanando o Erro 406 ao salvar configurações.
+- Adicionado o disparador de `invalidateQueries` para o botão "Verificar Alertas" em `use-alertas-estoque.ts` e também para `sidebar-data` ao atualizar a empresa.
+- Corrigido o `BoasVindasBanner` para aplicar a saudação inteligente ("Bom dia/Boa tarde/Boa noite"), utilizar classes nativas de animação (`animate-page-enter`) e reapresentar-se a cada 12 horas.
+
+> NOTA DE REGRA GLOBAL: Foram feitas mais de 3 alterações no código-fonte. O sistema indica a necessidade de uma próxima Vistoria Geral Técnica de Integridade para garantir que estas correções não afetem módulos integrados, recomendada para a próxima sessão.
+
+## VISTORIA 18: Resolução de Bugs de Mapeamento no CRM e OS — 22/04/2026
+
+### Escopo Analisado
+- Bug crítico no CRM onde a data de cadastro do cliente retornava "Invalid Date".
+- Bug crítico no CRM onde a listagem não exibia os nomes e contatos.
+- Erro no log do React: `Each child in a list should have a unique "key" prop` nas listagens do CRM e na tag `<select>` da página de Ordens de Serviço.
+- Erro no módulo de Vendas/PDV: falha ao carregar lista de estoque para Nova Venda, retornando HTTP 404 na rota `/rest/v1/rpc/tenant_listar_estoque`.
+
+### Problemas Identificados
+- A RPC `public.tenant_listar_clientes` no schema público estava retornando um tipo incompatível (`RETURNS TABLE` em código mas se comportando como `SETOF JSONB` via Supabase API) encapsulando um `jsonb_agg`. Isso resultou no PostgREST servindo um *array duplo* (ex: `[[{"id": 1, "nome": "..."}]]`).
+- Devido ao duplo empacotamento, a variável `item` usada dentro do `map` de `clientes.map(item => ...)` no front-end era na verdade um array em vez de um objeto, fazendo com que `item.id`, `item.nome` e `item.criado_em` fossem avaliados como `undefined`.
+- A RPC `public.tenant_listar_estoque` possuía uma falha grave de isolamento: não identificava o schema do tenant (`v_schema_name`), forçando o Supabase a ler da tabela `public.estoque` (que não existe). O PostgREST não conseguia montar o schema OpenAPI da função adequadamente ou ela falhava no start, resultando em erro 404 Not Found no Front-end, impossibilitando a abertura do PDV.
+
+### Ações e Correções
+- Corrigida a assinatura da função `public.tenant_listar_clientes` para retornar explicitamente `JSONB`.
+- Substituída a expressão de retorno por um simples `EXECUTE format` com `INTO` retornando a agregação de JSON direta.
+- O arquivo de migração local `apps/api/migrations/rpc_crm_fixes.sql` foi atualizado.
+- Com isso, `item` volta a ser interpretado como Objeto (`{}`), restaurando todos os valores (Nome, Contato, Datas, Keys) na tabela do CRM e no seletor de clientes do módulo OS.
+- A função `public.tenant_listar_estoque` foi inteiramente reescrita como um wrapper Multi-tenant autêntico (adicionando a lógica de `user_profiles` + `auth.uid()` para encontrar o `schema_name`), encapsulando a chamada real `FROM %I.tenant_listar_estoque` em `JSONB`.
+- Foi criado o arquivo de migração `apps/api/migrations/rpc_estoque_pdv_fixes.sql` com o backup do código-fonte para manter a rastreabilidade do projeto.
+- O cache do PostgREST foi invalidado localmente via comando `NOTIFY pgrst, 'reload schema'` no Postgres, resolvendo o 404 e trazendo os produtos corretamente para o sistema PDV.
+
 ## VISTORIA 17: Vistoria Completa de Arquitetura, Banco, RPCs e Frontend - 22/04/2026
 
 ### Metodologia Executada

@@ -13,8 +13,10 @@ export function useAlertasEstoque(status?: string) {
 }
 
 export function useVerificarAlertasEstoque() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: verificarAlertasEstoque,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ALERTAS_KEY }),
   });
 }
 

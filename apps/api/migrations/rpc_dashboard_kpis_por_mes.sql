@@ -10,33 +10,33 @@ AS $$
 DECLARE
   v_result JSONB;
 BEGIN
-  -- Buscar faturamento mensal dos últimos N meses
-  SELECT COALESCE(
-    jsonb_agg(
-      jsonb_build_object(
-        'mes', to_char(mes, 'YYYY-MM'),
-        'faturamento', COALESCE(SUM(v.valor_total), 0),
-        'total_vendas', COALESCE(COUNT(v.id), 0),
-        'ticket_medio', CASE 
-          WHEN COUNT(v.id) > 0 THEN COALESCE(SUM(v.valor_total), 0) / COUNT(v.id)
-          ELSE 0
-        END
-      )
-      ORDER BY mes
-    ),
-    '[]'::jsonb
-  )
+  SELECT COALESCE(jsonb_agg(
+    jsonb_build_object(
+      'mes', to_char(sub.mes, 'YYYY-MM'),
+      'faturamento', sub.faturamento,
+      'total_vendas', sub.total_vendas,
+      'ticket_medio', sub.ticket_medio
+    ) ORDER BY sub.mes
+  ), '[]'::jsonb)
   INTO v_result
   FROM (
-    SELECT generate_series(
-      date_trunc('month', CURRENT_DATE - INTERVAL '1 month' * (p_meses - 1)),
-      date_trunc('month', CURRENT_DATE),
-      INTERVAL '1 month'
-    ) as mes
-  ) meses
-  LEFT JOIN vendas v ON 
-    date_trunc('month', v.criado_em) = meses.mes
-    AND v.deleted_at IS NULL;
+    SELECT 
+      meses.mes,
+      COALESCE(SUM(v.valor_total), 0) as faturamento,
+      COUNT(v.id) as total_vendas,
+      CASE WHEN COUNT(v.id) > 0 THEN COALESCE(SUM(v.valor_total), 0) / COUNT(v.id) ELSE 0 END as ticket_medio
+    FROM (
+      SELECT generate_series(
+        date_trunc('month', CURRENT_DATE - INTERVAL '1 month' * (p_meses - 1)),
+        date_trunc('month', CURRENT_DATE),
+        INTERVAL '1 month'
+      ) as mes
+    ) meses
+    LEFT JOIN vendas v ON 
+      date_trunc('month', v.criado_em) = meses.mes
+      AND v.deleted_at IS NULL
+    GROUP BY meses.mes
+  ) sub;
   
   -- Se o resultado for NULL (não deveria acontecer com COALESCE), retorna array vazio
   IF v_result IS NULL THEN
@@ -66,6 +66,9 @@ BEGIN
   IF v_tenant_schema IS NULL THEN
     RETURN '[]'::jsonb;
   END IF;
+  
+  -- Configurar o search_path para o schema do tenant para que as tabelas sejam resolvidas corretamente
+  EXECUTE format('SET LOCAL search_path TO %I, public', v_tenant_schema);
   
   -- Executar RPC no schema do tenant
   EXECUTE format('SELECT %I.tenant_dashboard_kpis_por_mes($1)', v_tenant_schema)
