@@ -1,28 +1,38 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
+import { useState, useMemo, useEffect, Suspense, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ShieldCheck, CreditCard, ArrowRight, Loader2, Building2, UserCircle2, Server, X } from "lucide-react";
+import { Check, ShieldCheck, CreditCard, ArrowRight, Loader2, Building2, UserCircle2, Server, X, Percent } from "lucide-react";
 import Image from "next/image";
 import AppIcon from "../../icon.png";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PaymentGatewayService, PaymentTransactionPayload } from "@/services/PaymentGatewayService";
+import { createClient } from "@/utils/supabase/client";
 
-const PLANOS = [
-  { id: "starter", name: "Starter", price: 249, description: "Entrada e Visibilidade", features: ["Dashboard", "CRM", "Catálogo", "Estoque"] },
-  { id: "business", name: "Business", price: 499, description: "Operação Central", features: ["Tudo do Starter", "Vendas / PDV", "Financeiro", "RH"] },
-  { id: "pro", name: "Pro", price: 849, description: "Vertical Completo", features: ["Tudo do Business", "Ordens de Serviço", "Obras", "Comissões", "Relatórios"] },
+interface PlanoData { id: string; key: string; nome: string; preco: number; preco_promocional: number | null; descricao: string; modulos_incluidos: string[]; ordem_exibicao: number; }
+interface ModuloData { id: string; key: string; nome: string; preco: number; preco_promocional: number | null; descricao: string; icone: string; features: string[]; ordem_exibicao: number; }
+
+/* Fallbacks caso o banco esteja indisponível */
+const PLANOS_FALLBACK: PlanoData[] = [
+  { id: "starter", key: "starter", nome: "Starter", preco: 249, preco_promocional: null, descricao: "Entrada e Visibilidade", modulos_incluidos: ["dashboard","crm","catalogo","estoque"], ordem_exibicao: 1 },
+  { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh"], ordem_exibicao: 2 },
+  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios"], ordem_exibicao: 3 },
+];
+const MODULOS_FALLBACK: ModuloData[] = [
+  { id: "os", key: "os", nome: "Ordem de Serviço", preco: 79.90, preco_promocional: null, icone: "🔧", descricao: "Acompanhamento completo para serviços pontuais.", features: ["OS numerada com status em tempo real","Atribuição a colaboradores e técnicos","Registro completo do histórico do serviço"], ordem_exibicao: 1 },
+  { id: "obras", key: "obras", nome: "Gestão de Obras", preco: 79.90, preco_promocional: null, icone: "🏗️", descricao: "Controle especializado para projetos de longa duração.", features: ["Cronograma por etapas e timeline visual","Financeiro integrado (Previsto vs Real)","Gestão de recursos, materiais e documentos"], ordem_exibicao: 2 },
+  { id: "comissoes", key: "comissoes", nome: "Comissões", preco: 79.90, preco_promocional: null, icone: "💰", descricao: "Gestão transparente das premiações de venda.", features: ["Cálculo automático integrado ao PDV","Histórico auditável de bonificações","Relatórios parametrizados por vendedor"], ordem_exibicao: 3 },
+  { id: "relatorios", key: "relatorios", nome: "Relatórios", preco: 79.90, preco_promocional: null, icone: "📄", descricao: "Visão analítica avançada sobre a operação do tenant.", features: ["Consolidação de dados cruciais da operação","Visão estratégica macro para diretores","Agiliza o controle para a contabilidade"], ordem_exibicao: 4 },
+  { id: "rh", key: "rh", nome: "RH & Pessoal", preco: 79.90, preco_promocional: null, icone: "👥", descricao: "Módulo administrativo da equipe.", features: ["Gestão global de colaboradores ativos/desligados","Cadastro e atribuição de cargos funcionais","Abre caminho para cálculo robusto de comissões"], ordem_exibicao: 5 },
 ];
 
-const MODULOS_AVULSOS = [
-  { id: "os", name: "Ordem de Serviço", icon: "🔧", desc: "Acompanhamento completo para serviços pontuais. Cada Ordem de Serviço recebe numeração única, registro do colaborador responsável e controle do histórico de atividades.", features: ["OS numerada com status em tempo real", "Atribuição a colaboradores e técnicos", "Registro completo do histórico do serviço"] },
-  { id: "obras", name: "Gestão de Obras", icon: "🏗️", desc: "Controle especializado para projetos de longa duração. O painel integra informações físicas e orçamentárias num fluxo completo.", features: ["Cronograma por etapas e timeline visual", "Financeiro integrado (Previsto vs Real)", "Gestão de recursos, materiais e documentos"] },
-  { id: "comissoes", name: "Comissões", icon: "💰", desc: "Gestão transparente das premiações de venda. O cálculo automático é facilmente auditável antes do fechamento de folha de pagamento.", features: ["Cálculo automático integrado ao PDV", "Histórico auditável de bonificações", "Relatórios parametrizados por vendedor"] },
-  { id: "relatorios", name: "Relatórios", icon: "📄", desc: "Visão analítica extraída de forma avançada sobre a operação do tenant. Reúne e consolida todos os dados estratégicos das vendas e finanças em inteligência acionável.", features: ["Consolidação de dados cruciais da operação", "Visão estratégica macro para diretores", "Agiliza o controle para a contabilidade"] },
-  { id: "rh", name: "RH & Pessoal", icon: "👥", desc: "Módulo administrativo da equipe de retaguarda e atendimento. Organiza cargos e libera comissionamentos ou associações em Ordens de Serviço.", features: ["Gestão global de colaboradores ativos/desligados", "Cadastro e atribuição de cargos funcionais", "Abre caminho para cálculo robusto de comissões"] },
-];
+const getEffectivePrice = (item: { preco: number; preco_promocional: number | null }) => item.preco_promocional ?? item.preco;
 
-const PRECO_MODULO_AVULSO = 79.9;
+const MODULE_LABELS: Record<string, string> = {
+  dashboard: "Dashboard", crm: "CRM", catalogo: "Catálogo", estoque: "Estoque",
+  vendas: "Vendas / PDV", financeiro: "Financeiro", rh: "RH & Pessoal",
+  os: "Ordens de Serviço", obras: "Obras", comissoes: "Comissões", relatorios: "Relatórios",
+};
 
 export default function CheckoutPage() {
   return (
@@ -40,9 +50,31 @@ function CheckoutContent() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [pricingLoaded, setPricingLoaded] = useState(false);
   
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Dados dinâmicos de preços
+  const [planos, setPlanos] = useState<PlanoData[]>(PLANOS_FALLBACK);
+  const [modulosAvulsos, setModulosAvulsos] = useState<ModuloData[]>(MODULOS_FALLBACK);
+
+  // Fetch dinâmico de preços do banco
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        const supabase = createClient();
+        const [planosRes, modulosRes] = await Promise.all([
+          supabase.rpc("listar_planos_checkout"),
+          supabase.rpc("listar_modulos_avulsos_checkout"),
+        ]);
+        if (planosRes.data && (planosRes.data as PlanoData[]).length > 0) setPlanos(planosRes.data as PlanoData[]);
+        if (modulosRes.data && (modulosRes.data as ModuloData[]).length > 0) setModulosAvulsos(modulosRes.data as ModuloData[]);
+      } catch { /* fallback silencioso para dados estáticos */ }
+      setPricingLoaded(true);
+    };
+    fetchPricing();
+  }, []);
 
   useEffect(() => {
     if (searchParams.get("success") === "true") {
@@ -65,8 +97,15 @@ function CheckoutContent() {
   }, [activeModal]);
 
   // Seleções do Resumo/Checkout
-  const [selectedPlan, setSelectedPlan] = useState(PLANOS[1]);
+  const [selectedPlan, setSelectedPlan] = useState<PlanoData>(planos[1] || PLANOS_FALLBACK[1]);
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
+
+  // Atualizar selectedPlan quando planos carregam do banco
+  useEffect(() => {
+    if (pricingLoaded && planos.length > 1) {
+      setSelectedPlan(prev => planos.find(p => p.key === prev.key) || planos[1]);
+    }
+  }, [pricingLoaded, planos]);
   
   // Dados do Cliente
   const [customerName, setCustomerName] = useState("");
@@ -80,8 +119,13 @@ function CheckoutContent() {
   const [companySegment, setCompanySegment] = useState("Varejo");
 
   const totalValue = useMemo(() => {
-    return selectedPlan.price + (selectedModules.length * PRECO_MODULO_AVULSO);
-  }, [selectedPlan, selectedModules]);
+    const planPrice = getEffectivePrice(selectedPlan);
+    const modulesPrice = selectedModules.reduce((sum, modKey) => {
+      const mod = modulosAvulsos.find(m => m.key === modKey);
+      return sum + (mod ? getEffectivePrice(mod) : 0);
+    }, 0);
+    return planPrice + modulesPrice;
+  }, [selectedPlan, selectedModules, modulosAvulsos]);
 
   const emailValido = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const documentoNormalizado = companyDocument.replace(/\D/g, "");
@@ -115,7 +159,7 @@ function CheckoutContent() {
     setLoading(true);
     try {
       const payload: PaymentTransactionPayload = {
-        customerName, customerEmail, planName: selectedPlan.name, amount: totalValue,
+        customerName, customerEmail, planName: selectedPlan.nome, amount: totalValue,
         modules: selectedModules, companyName, companyDocument, companySize, companySegment,
         metadata: { password }
       };
@@ -209,31 +253,38 @@ function CheckoutContent() {
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {PLANOS.map(p => (
+                  {planos.map(p => (
                     <div 
-                      key={p.id}
+                      key={p.key}
                       onClick={() => setSelectedPlan(p)}
                       className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 border ${
-                        selectedPlan.id === p.id 
+                        selectedPlan.key === p.key 
                         ? "bg-indigo-500/10 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500" 
                         : "bg-[#121216] border-white/5 hover:border-white/20"
                       }`}
                     >
-                       {selectedPlan.id === p.id && (
+                       {selectedPlan.key === p.key && (
                          <div className="absolute top-4 right-4 bg-indigo-500 rounded-full p-1"><Check className="w-4 h-4 text-white"/></div>
                        )}
-                       <h3 className="text-xl font-bold mb-1">{p.name}</h3>
-                       <p className="text-gray-400 text-sm mb-6">{p.description}</p>
+                       {p.preco_promocional && (
+                         <div className="absolute top-4 left-4 flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full"><Percent className="w-3 h-3" /> PROMO</div>
+                       )}
+                       <h3 className="text-xl font-bold mb-1">{p.nome}</h3>
+                       <p className="text-gray-400 text-sm mb-6">{p.descricao}</p>
                        <div className="flex items-baseline gap-1 mb-8">
                          <span className="text-sm text-gray-500">R$</span>
-                         <span className="text-4xl font-black tracking-tight">{p.price}</span>
+                         {p.preco_promocional ? (
+                           <><span className="text-lg text-gray-500 line-through mr-1">{p.preco}</span><span className="text-4xl font-black tracking-tight text-emerald-400">{p.preco_promocional}</span></>
+                         ) : (
+                           <span className="text-4xl font-black tracking-tight">{p.preco}</span>
+                         )}
                          <span className="text-sm text-gray-500">/mês</span>
                        </div>
                        <div className="space-y-3">
-                         {p.features.map((f, i) => (
+                         {p.modulos_incluidos.map((f, i) => (
                            <div key={i} className="flex items-start gap-2">
                              <Check className="w-5 h-5 text-indigo-400 shrink-0"/>
-                             <span className="text-sm text-gray-300">{f}</span>
+                             <span className="text-sm text-gray-300">{MODULE_LABELS[f] || f}</span>
                            </div>
                          ))}
                        </div>
@@ -246,20 +297,25 @@ function CheckoutContent() {
                    <Server className="w-5 h-5 text-indigo-400"/> Adicione Extensões Avulsas
                  </h3>
                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    {MODULOS_AVULSOS.map(m => (
+                    {modulosAvulsos.map(m => (
                       <div 
-                        key={m.id}
-                        onClick={() => setActiveModal(m.id)}
-                        className={`cursor-pointer rounded-xl p-4 border transition-all ${
-                          selectedModules.includes(m.id) 
+                        key={m.key}
+                        onClick={() => setActiveModal(m.key)}
+                        className={`cursor-pointer rounded-xl p-4 border transition-all relative ${
+                          selectedModules.includes(m.key) 
                           ? "bg-purple-500/10 border-purple-500 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.15)] ring-1 ring-purple-500/50"
                           : "bg-[#121216] border-white/5 hover:bg-white/10 text-gray-400"
                         }`}
                       >
-                         <div className="text-2xl mb-2">{m.icon}</div>
-                         <div className="text-sm font-semibold mb-1 text-white">{m.name}</div>
+                         {m.preco_promocional && <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />}
+                         <div className="text-2xl mb-2">{m.icone}</div>
+                         <div className="text-sm font-semibold mb-1 text-white">{m.nome}</div>
                          <div className="text-xs font-mono">
-                            {selectedModules.includes(m.id) ? "Incluso" : `+R$ ${PRECO_MODULO_AVULSO.toFixed(2)}/mês`}
+                            {selectedModules.includes(m.key) ? "Incluso" : (
+                              m.preco_promocional
+                                ? <><span className="line-through text-gray-600 mr-1">R$ {m.preco.toFixed(2)}</span><span className="text-emerald-400">R$ {m.preco_promocional.toFixed(2)}</span>/mês</>
+                                : `+R$ ${m.preco.toFixed(2)}/mês`
+                            )}
                          </div>
                       </div>
                     ))}
@@ -391,7 +447,7 @@ function CheckoutContent() {
               <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
                  <div className="flex flex-col">
                    <div className="text-sm font-semibold text-gray-400 mb-1 flex items-center gap-2">
-                     <span className="bg-indigo-500/20 text-indigo-400 py-1 px-3 rounded-full text-xs">Plano {selectedPlan.name}</span>
+                     <span className="bg-indigo-500/20 text-indigo-400 py-1 px-3 rounded-full text-xs">Plano {selectedPlan.nome}</span>
                      {selectedModules.length > 0 && <span className="bg-purple-500/20 text-purple-400 py-1 px-3 rounded-full text-xs">+{selectedModules.length} Extras</span>}
                    </div>
                    <div className="flex items-baseline gap-2">
@@ -442,17 +498,17 @@ function CheckoutContent() {
                className="relative w-full max-w-lg bg-[#121216] border border-white/10 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col mt-auto sm:mt-0 max-h-[90vh]"
              >
                {(() => {
-                  const mod = MODULOS_AVULSOS.find(m => m.id === activeModal);
+                  const mod = modulosAvulsos.find(m => m.key === activeModal);
                   if (!mod) return null;
-                  const isSelected = selectedModules.includes(mod.id);
+                  const isSelected = selectedModules.includes(mod.key);
                   
                   return (
                     <>
                        {/* Header do Modal */}
                        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/5 shrink-0">
                           <div className="flex items-center gap-3">
-                            <div className="text-2xl" aria-hidden="true">{mod.icon}</div>
-                            <h2 id="modal-title" className="text-xl font-bold text-white">{mod.name}</h2>
+                            <div className="text-2xl" aria-hidden="true">{mod.icone}</div>
+                            <h2 id="modal-title" className="text-xl font-bold text-white">{mod.nome}</h2>
                           </div>
                           <button 
                             onClick={() => setActiveModal(null)} 
@@ -466,7 +522,7 @@ function CheckoutContent() {
                        {/* Corpo do Modal (com Scroll se necessário) */}
                        <div className="p-6 overflow-y-auto custom-scrollbar">
                           <p className="text-gray-300 mb-6 leading-relaxed text-sm md:text-base">
-                            {mod.desc}
+                            {mod.descricao}
                           </p>
                           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
                             Funcionalidades incluídas:
@@ -485,9 +541,11 @@ function CheckoutContent() {
                        <div className="p-6 border-t border-white/5 bg-[#0a0a0c] flex flex-col sm:flex-row items-center gap-4 justify-between shrink-0">
                           <div className="flex items-baseline gap-1 w-full sm:w-auto justify-center sm:justify-start">
                             <span className="text-sm text-gray-500">R$</span>
-                            <span className="text-2xl font-bold text-white mb-2 sm:mb-0">
-                               {PRECO_MODULO_AVULSO.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
-                            </span>
+                            {mod.preco_promocional ? (
+                              <><span className="text-lg text-gray-500 line-through mr-1">{mod.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span><span className="text-2xl font-bold text-emerald-400 mb-2 sm:mb-0">{mod.preco_promocional.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span></>
+                            ) : (
+                              <span className="text-2xl font-bold text-white mb-2 sm:mb-0">{mod.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            )}
                             <span className="text-xs text-gray-500">/mês</span>
                           </div>
                           
@@ -500,7 +558,7 @@ function CheckoutContent() {
                             </button>
                             <button 
                               onClick={() => {
-                                toggleModule(mod.id);
+                                toggleModule(mod.key);
                                 setActiveModal(null);
                               }}
                               autoFocus

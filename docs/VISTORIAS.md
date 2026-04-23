@@ -4,6 +4,33 @@
 
 > Atualizacao da Vistoria 17 em 22/04/2026: nova vistoria completa registrada neste documento; ver secao imediatamente abaixo de status/metadados.
 
+## VISTORIA 20: Painel Administrativo de Preços (Master) — 23/04/2026
+
+### Escopo
+- Criação de tabelas `planos`, `modulos_avulsos` e `historico_precos` no banco de dados
+- RPCs de leitura pública (checkout) e escrita restrita (master)
+- Painel master (`/mestre`) reestruturado com sistema de abas (Provisionar + Preços)
+- Checkout dinâmico consumindo preços do banco em vez de constantes hardcoded
+
+### O que foi feito
+- **Banco de dados**: 3 tabelas criadas com seed correspondente aos preços atuais, triggers `updated_at`, índices por `key`/`ativo`, 5 RPCs (`listar_planos_checkout`, `listar_modulos_avulsos_checkout`, `master_atualizar_plano`, `master_atualizar_modulo_avulso`, `master_listar_historico_precos`)
+- **Painel Master**: Novo componente `PricingPanel.tsx` com edição inline, preço promocional, badges visuais e histórico de audit trail. Página reestruturada com abas animadas.
+- **Checkout**: Constantes `PLANOS`, `MODULOS_AVULSOS` e `PRECO_MODULO_AVULSO` removidas. Agora consome RPCs com fallback silencioso. Suporte a preço promocional (preço riscado + novo em verde) e selo PROMO nos cards.
+- **Preço individual por módulo**: Cada módulo avulso agora pode ter seu próprio preço (não mais R$ 79,90 fixo para todos).
+
+### Arquivos Modificados
+- `apps/api/migrations/pricing_tables.sql` [NOVO]
+- `apps/web/src/app/mestre/PricingPanel.tsx` [NOVO]
+- `apps/web/src/app/mestre/page.tsx` [MODIFICADO]
+- `apps/web/src/app/(auth)/checkout/page.tsx` [MODIFICADO]
+
+### Validação
+- `tsc --noEmit`: zero erros
+- Checkout renderiza preços do banco corretamente (validado visualmente)
+- `/mestre` protegido por middleware de autenticação
+
+> NOTA: Mais de 3 alterações realizadas. Vistoria técnica de integridade recomendada.
+
 ## VISTORIA 19: Melhorias de UI/UX (Exportações, Alertas, Dashboard e Configurações) — 22/04/2026
 
 ### Escopo Analisado
