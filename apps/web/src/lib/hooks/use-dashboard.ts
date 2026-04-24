@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { useUserProfile } from "./use-user-profile";
 
@@ -106,3 +106,38 @@ export function useDashboardData() {
     modulosAtivos: modulosAtivos || [],
   };
 }
+
+export function useFechamentoPendente() {
+  const { userId } = useUserProfile();
+  const qc = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ["dashboard", "fechamento-pendente"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('tenant_obter_fechamento_pendente');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
+    staleTime: 60 * 60_000, // 1h
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (mes: string) => {
+      const { data, error } = await supabase.rpc('tenant_marcar_fechamento_visto', { p_mes: mes });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["dashboard", "fechamento-pendente"] });
+    }
+  });
+
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    marcarVisto: mutation.mutateAsync,
+    isMarking: mutation.isPending
+  };
+}
+

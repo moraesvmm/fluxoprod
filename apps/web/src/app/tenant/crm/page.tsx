@@ -50,7 +50,7 @@ export default function CRMPage() {
   const [campanhaData, setCampanhaData] = useState({ titulo: '', mensagem: '', tipo: 'email' });
   const [campanhaEnviando, setCampanhaEnviando] = useState(false);
   const [viewMode, setViewMode] = useState<'lista' | 'pipeline'>('lista');
-  const [formData, setFormData] = useState({ nome: '', telefone: '', email: '', endereco: '' });
+  const [formData, setFormData] = useState({ nome: '', telefone: '', email: '', endereco: '', cpf_cnpj: '' });
   const { toasts, removeToast, success, error: toastError, info } = useToast();
 
   const criarCliente = async (e: React.FormEvent) => {
@@ -92,7 +92,7 @@ export default function CRMPage() {
         }
       }
       
-      setFormData({ nome: '', telefone: '', email: '', endereco: '' });
+      setFormData({ nome: '', telefone: '', email: '', endereco: '', cpf_cnpj: '' });
       setShowForm(false);
       success("Cliente criado com sucesso!");
     } catch {
@@ -119,6 +119,7 @@ export default function CRMPage() {
       telefone: cliente.telefone || '',
       email: cliente.email || '',
       endereco: cliente.endereco || '',
+      cpf_cnpj: cliente.cpf_cnpj || '',
     });
     setShowEditModal(true);
   };
@@ -130,7 +131,7 @@ export default function CRMPage() {
     try {
       await updateMutation.mutateAsync({ id: editId, cliente: formData });
 
-      setFormData({ nome: '', telefone: '', email: '', endereco: '' });
+      setFormData({ nome: '', telefone: '', email: '', endereco: '', cpf_cnpj: '' });
       setShowEditModal(false);
       setEditId(null);
       success("Cliente atualizado com sucesso!");
@@ -346,6 +347,10 @@ export default function CRMPage() {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
                 <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Endereço completo" />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
+                <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="000.000.000-00" />
+              </div>
             </div>
             <div className="flex gap-2">
               <button type="submit" disabled={createMutation.isPending} className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
@@ -380,6 +385,10 @@ export default function CRMPage() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
                 <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Endereço completo" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
+                <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="000.000.000-00" />
               </div>
             </div>
             

@@ -34,6 +34,7 @@ export interface Cliente {
   nome: string;
   telefone?: string;
   email?: string;
+  cpf_cnpj?: string;
   documento?: string;
   endereco?: string;
   funil_fase?: string;
@@ -48,6 +49,7 @@ export interface ClienteCreate {
   nome: string;
   telefone?: string;
   email?: string;
+  cpf_cnpj?: string;
   endereco?: string;
   funil_fase?: string;
   status?: string;
@@ -57,6 +59,7 @@ export interface ClienteUpdate {
   nome?: string;
   telefone?: string;
   email?: string;
+  cpf_cnpj?: string;
   funil_fase?: string;
   status?: string;
 }
@@ -542,7 +545,8 @@ export async function createCliente(cliente: ClienteCreate): Promise<Cliente> {
       p_email: cliente.email,
       p_telefone: cliente.telefone,
       p_funil_fase: 'lead',
-      p_status: 'ativo'
+      p_status: 'ativo',
+      p_cpf_cnpj: cliente.cpf_cnpj || null
     });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
@@ -563,7 +567,8 @@ export async function updateCliente(id: string, cliente: ClienteUpdate): Promise
       p_email: cliente.email,
       p_telefone: cliente.telefone || null,
       p_funil_fase: cliente.funil_fase || 'lead',
-      p_status: cliente.status || 'ativo'
+      p_status: cliente.status || 'ativo',
+      p_cpf_cnpj: cliente.cpf_cnpj || null
     });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);

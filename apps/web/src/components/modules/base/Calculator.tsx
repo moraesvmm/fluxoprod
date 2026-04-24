@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calculator, X } from "lucide-react";
 
 interface FloatingCalculatorProps {
@@ -13,6 +13,44 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
   const [previousValue, setPreviousValue] = useState<number | null>(null);
   const [operation, setOperation] = useState<string | null>(null);
   const [newNumber, setNewNumber] = useState(true);
+  const [position, setPosition] = useState({ x: -24, y: -24 }); // bottom-6 right-6 equivalent relative to screen bottom-right
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const saved = localStorage.getItem('calculatorPosition');
+    if (saved) {
+      try {
+        setPosition(JSON.parse(saved));
+      } catch (e) {}
+    }
+  }, []);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setIsDragging(true);
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (isDragging) {
+      const newPos = {
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y
+      };
+      setPosition(newPos);
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDragging(false);
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    localStorage.setItem('calculatorPosition', JSON.stringify(position));
+  };
+
 
   const handleNumber = (num: string) => {
     if (newNumber) {
@@ -88,21 +126,49 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
 
   if (!isOpen) {
     return (
-      <button
-        onClick={onToggle}
-        className="fixed bottom-6 right-6 bg-primary text-white rounded-full p-4 shadow-lg hover:bg-primary/90 transition-all hover:scale-110 z-50"
-        title="Calculadora"
+      <div 
+        className="fixed z-50"
+        style={{ 
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          right: position.x === -24 ? 24 : 'auto', 
+          bottom: position.y === -24 ? 24 : 'auto',
+          left: position.x !== -24 ? 0 : 'auto',
+          top: position.y !== -24 ? 0 : 'auto',
+        }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
       >
-        <Calculator className="h-6 w-6" />
-      </button>
+        <button
+          onClick={onToggle}
+          className="bg-primary text-white rounded-full p-4 shadow-lg hover:bg-primary/90 transition-all hover:scale-110 cursor-move"
+          title="Calculadora"
+        >
+          <Calculator className="h-6 w-6 pointer-events-none" />
+        </button>
+      </div>
     );
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div 
+      className="fixed z-50"
+      style={{ 
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        right: position.x === -24 ? 24 : 'auto', 
+        bottom: position.y === -24 ? 24 : 'auto',
+        left: position.x !== -24 ? 0 : 'auto',
+        top: position.y !== -24 ? 0 : 'auto',
+      }}
+    >
       <div className="bg-white rounded-xl shadow-2xl border border-border w-80 overflow-hidden">
         {/* Header */}
-        <div className="bg-primary text-white px-4 py-3 flex items-center justify-between">
+        <div 
+          className="bg-primary text-white px-4 py-3 flex items-center justify-between cursor-move"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
           <div className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
             <span className="font-semibold">Calculadora</span>

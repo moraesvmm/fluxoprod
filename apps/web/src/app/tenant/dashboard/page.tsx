@@ -33,6 +33,7 @@ import {
 import { useDashboardData } from "@/lib/hooks/use-dashboard";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
 import BoasVindasBanner from "@/components/modules/base/BoasVindasBanner";
+import { FechamentoMesModal } from "@/components/modules/base/FechamentoMesModal";
 import { useQueryClient } from "@tanstack/react-query";
 
 // Lazy load Recharts — only loaded when chart data exists
@@ -99,6 +100,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      <FechamentoMesModal />
       {/* Banner de Boas-Vindas */}
       {!userProfile.loading && userProfile.nome && userProfile.userId && (
         <BoasVindasBanner

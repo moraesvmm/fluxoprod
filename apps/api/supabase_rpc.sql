@@ -237,6 +237,7 @@ BEGIN
             nome VARCHAR(255) NOT NULL,
             email VARCHAR(255),
             telefone VARCHAR(50),
+            cpf_cnpj VARCHAR(20),
             funil_fase VARCHAR(50) DEFAULT ''lead'' CHECK (funil_fase IN (''lead'', ''prospect'', ''oportunidade'', ''cliente'', ''recuperacao'')),
             status VARCHAR(50) DEFAULT ''ativo'' CHECK (status IN (''ativo'', ''inativo'', ''bloqueado'')),
             criado_em TIMESTAMPTZ DEFAULT NOW(),
@@ -450,6 +451,7 @@ BEGIN
             vendedor_id UUID REFERENCES %I.funcionarios(id) ON DELETE SET NULL,
             vendedor_nome VARCHAR(255),
             valor_total NUMERIC(10, 2) NOT NULL CHECK (valor_total >= 0),
+            desconto_aplicado NUMERIC(10, 2) DEFAULT 0,
             metodo_pagamento VARCHAR(50) CHECK (metodo_pagamento IN (''dinheiro'', ''cartao_credito'', ''cartao_debito'', ''pix'', ''boleto'', ''transferencia'')),
             status VARCHAR(50) DEFAULT ''concluido'' CHECK (status IN (''pendente'', ''concluido'', ''cancelado'', ''reembolsado'')),
             criado_em TIMESTAMPTZ DEFAULT NOW(),
@@ -3910,6 +3912,22 @@ BEGIN
         END;
         $func$;
     ', novo_schema, novo_schema);
+
+    -- Criar tabela fechamentos_mensais
+    EXECUTE format('
+        CREATE TABLE IF NOT EXISTS %I.fechamentos_mensais (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            mes VARCHAR(7) NOT NULL,
+            faturamento NUMERIC(12, 2) DEFAULT 0,
+            total_vendas INT DEFAULT 0,
+            ticket_medio NUMERIC(10, 2) DEFAULT 0,
+            visto BOOLEAN DEFAULT FALSE,
+            visto_em TIMESTAMPTZ,
+            criado_em TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(mes)
+        );
+    ', novo_schema);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_fechamentos_mes ON %I.fechamentos_mensais(mes);', novo_schema, novo_schema);
 
     -- Criar RPC tenant_dashboard_kpis dentro do schema tenant
     EXECUTE format('

@@ -4,26 +4,32 @@
 
 > Atualizacao da Vistoria 17 em 22/04/2026: nova vistoria completa registrada neste documento; ver secao imediatamente abaixo de status/metadados.
 
-## VISTORIA 21: Ajustes de Branding, SEO e UI do Checkout — 23/04/2026
+> **⚠ VISTORIA PENDENTE (Sprint 24 — 23/04/2026):** Foram realizadas +6 alterações em código-fonte (PDV desconto, CRM cpf_cnpj, Dashboard fechamento mensal, Calculadora draggable, hooks, api.ts, provisionamento). Uma vistoria completa deve ser realizada o mais rápido possível.
+
+## VISTORIA 21 (PENDENTE): Melhorias Comerciais Sprint 24 — 23/04/2026
 
 ### Escopo
-- Correção de sobreposição do selo PROMO no checkout
-- Restauração do Favicon oficial
-- Atualização de Metadados de SEO e Título da Página
-
-### O que foi feito
-- **Checkout**: O selo `PROMO` foi movido do canto superior esquerdo para o direito. Adicionada lógica de `right-12` quando o plano está selecionado para não colidir com o ícone de check (`right-4`).
-- **Favicon**: Removidos arquivos órfãos de ícone na pasta `app` e gerado novo `icon.png` a partir do `public/logo-fluxo.png`.
-- **SEO/Metadata**: Título alterado para "Fluxo ERP | Gestão Empresarial Inteligente", adicionadas keywords e tags OpenGraph para melhor ranqueamento e compartilhamento social.
+- Fechamento mensal automático com card informativo no dashboard
+- Desconto em vendas no PDV (input + persistência)
+- Campo CPF/CNPJ no CRM (criação e edição de clientes)
+- Calculadora draggable com posição persistida no localStorage
+- Atualização do provisionamento (`supabase_rpc.sql`) para novos tenants
 
 ### Arquivos Modificados
-- `apps/web/src/app/(auth)/checkout/page.tsx` [MODIFICADO]
-- `apps/web/src/app/icon.png` [NOVO/SUBSTITUÍDO]
-- `apps/web/src/app/layout.tsx` [MODIFICADO]
+- `apps/web/src/app/tenant/vendas/pdv/page.tsx` [MODIFICADO] — subtotal/desconto/total
+- `apps/web/src/app/tenant/crm/page.tsx` [MODIFICADO] — campo CPF/CNPJ
+- `apps/web/src/app/tenant/dashboard/page.tsx` [MODIFICADO] — FechamentoMesModal
+- `apps/web/src/lib/api.ts` [MODIFICADO] — interfaces + RPCs com cpf_cnpj
+- `apps/web/src/lib/hooks/use-dashboard.ts` [MODIFICADO] — useFechamentoPendente hook
+- `apps/web/src/components/modules/base/FechamentoMesModal.tsx` [NOVO]
+- `apps/web/src/components/modules/base/Calculator.tsx` [MODIFICADO] — draggable
+- `apps/api/supabase_rpc.sql` [MODIFICADO] — cpf_cnpj, desconto_aplicado, fechamentos_mensais
+- `apps/api/migrations/melhorias_comerciais_sprint24.sql` [NOVO] — migração SQL
 
 ### Status
-> [!IMPORTANT]
-> **Pendente:** Realizar vistoria técnica de integridade após as 3 alterações acima para garantir que o layout de checkout permanece responsivo em mobile.
+- **Build:** `tsc --noEmit` passou sem erros
+- **Banco:** Migração executada em todos os schemas ativos
+- **Vistoria:** PENDENTE — aguardando validação funcional completa
 
 ## VISTORIA 20: Painel Administrativo de Preços (Master) — 23/04/2026
 

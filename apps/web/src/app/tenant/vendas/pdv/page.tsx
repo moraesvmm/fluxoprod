@@ -43,6 +43,7 @@ export default function PDVPage() {
   const [vendedorId, setVendedorId] = useState('');
   const [userEmpresaId, setUserEmpresaId] = useState('');
   const [busca, setBusca] = useState('');
+  const [desconto, setDesconto] = useState<number>(0);
   const supabase = createClient();
   const { toasts, removeToast, success, error: toastError, warning } = useToast();
 
@@ -186,7 +187,8 @@ export default function PDVPage() {
         p_vendedor_id: vendedorId || null,
         p_vendedor_nome: vendedorSelecionado?.nome || null,
         p_metodo_pagamento: metodoPagamento,
-        p_valor_total: total
+        p_valor_total: total,
+        p_desconto: desconto
       });
 
       if (error) throw error;
@@ -202,6 +204,7 @@ export default function PDVPage() {
       setCart([]);
       setCliente('Cliente Avulso');
       setVendedorId('');
+      setDesconto(0);
 
       // Recarregar produtos com estoque atualizado via RPC
       const { data: produtosAtualizados } = await supabase
@@ -216,7 +219,8 @@ export default function PDVPage() {
     }
   };
 
-  const total = cart.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+  const subtotal = cart.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+  const total = Math.max(0, subtotal - desconto);
 
   return (
     <div className="h-[calc(100vh-8rem)] flex gap-6">
@@ -410,6 +414,24 @@ export default function PDVPage() {
             {funcionarios.length === 0 && (
               <p className="text-xs text-amber-500 mt-1">Cadastre colaboradores no RH para vincular vendedor.</p>
             )}
+          </div>
+
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-slate-500 text-sm">Subtotal</span>
+            <span className="text-slate-700 font-medium text-sm">R$ {subtotal.toFixed(2)}</span>
+          </div>
+          
+          <div className="flex justify-between items-center mb-4 pb-4 border-b border-border/50">
+            <span className="text-slate-500 text-sm">Desconto (R$)</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={desconto || ''}
+              onChange={(e) => setDesconto(Math.max(0, parseFloat(e.target.value) || 0))}
+              className="w-24 px-2 py-1 border border-border rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="0.00"
+            />
           </div>
 
           <div className="flex justify-between items-end mb-4">
