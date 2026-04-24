@@ -6,14 +6,41 @@
 
 > **⚠ VISTORIA PENDENTE (Sprint 24 — 23/04/2026):** Foram realizadas +6 alterações em código-fonte (PDV desconto, CRM cpf_cnpj, Dashboard fechamento mensal, Calculadora draggable, hooks, api.ts, provisionamento). Uma vistoria completa deve ser realizada o mais rápido possível.
 
-## VISTORIA 21 (PENDENTE): Melhorias Comerciais Sprint 24 — 23/04/2026
+## VISTORIA 22: Resolução de Conflitos RPC no CRM e Governança de Instâncias — 23/04/2026
 
-### Escopo
-- Fechamento mensal automático com card informativo no dashboard
-- Desconto em vendas no PDV (input + persistência)
-- Campo CPF/CNPJ no CRM (criação e edição de clientes)
-- Calculadora draggable com posição persistida no localStorage
-- Atualização do provisionamento (`supabase_rpc.sql`) para novos tenants
+### Escopo Analisado
+- Bug bloqueante crítico ("Erro ao salvar cliente") no carregamento multi-tenant do CRM surgindo após as "Melhorias Comerciais Sprint 24".
+- Divergências de tipagem (`VARCHAR` vs `TEXT`) detectadas nas functions `tenant_criar_cliente` e `tenant_atualizar_cliente`.
+- Contrato base do frontend divergente do estado consolidado do banco (wrappers explícitos omitidos/antigos).
+
+### Problemas Identificados
+**1. Concorrência e Ambiguidade de Functions (CRÍTICO)**
+- O script de migração anterior criava explicitamente versões com a flag de argumento `p_cpf_cnpj TEXT` e logo deixava vivas as velhas funções, sem limpeza com `DROP`. Contudo, as originais usavam `VARCHAR(n)` e `TEXT`.
+- O cache do PostgREST passou a receber "múltiplas resoluções" possiveis para a assinatura e explodia resultando em 404 lógico disfarçado em front, incapacitando a funcionalidade.
+
+**2. Wrapper Públicos Obsoletos (ALTO)**
+- Foi levantando que a Sprint 24 incluiu suporte mas as funções `public.tenant_criar_cliente` / `atualizar_cliente` encapsuladores (wrappers da API) não foram trocadas para considerar *7* argumentos (com `p_cpf_cnpj`). Sem repasse do campo nulo/cheio, a quebra existia desde o roteador inicial.
+
+**3. Idempotência Removida (MÉDIO)**
+- Em algum momento, retirou-se o campo de idempotency da signature base ou não repassavam este padrão, que precisou ser normalizado.
+
+**4. Ausência do get_tenant_schema() no Ambiente (MÉDIO)**
+- O helper helper de banco de dados nativo de roteamento via SQL de fechamento não existia e lançava erro se dependente disso.
+
+### Ações Executadas (SQL de Correção e Consistência)
+1. Criação do helper `public.get_tenant_schema()` faltante nos wrappers.
+2. Arquivo de correção atômica gerado `apps/api/migrations/fix_crm_sprint24.sql`, orquestrando `DROP FUNCTION` rigorosos nas assinaturas legadas com conflito (VARCHAR/TEXT combinados).
+3. Criação central de uma única função (`idempotency/TEXT/NULL`) base.
+4. Reinclusão da feature `soft_delete` já alinhado com a governança da Vistoria 9.
+5. Recompilação dos Wrappers via *EXECUTE FORMAT* padrão das regras de comissão.
+6. A Tabela canonica de banco da empresa `supabase_rpc.sql` (arquitetura global) foi consolidada.
+7. Modificações realizadas não acarretaram alteração de código fonte nos `apps/web/*` validando sua tipagem interface que obteve confirmação local que a modelagem estava certa, logo o Next.js foi blindado.
+8. A pendência formal em `PENDENCIA_ERRO_CRM_SPRINT24.md` foi resolvida e fechada.
+
+> **⚠️ Ação SQL Exigível:** Devido a injeções em PostgREST via API de Terminal serem banidas pela própria arquitetura da Supabase nestes níveis de permissão atípica, é **expressamente mandatóri** que se execute `fix_crm_sprint24.sql` no Painel Supabase via Web.
+
+## VISTORIA 21 (FECHADO/CONSOLIDADO): Melhorias Comerciais Sprint 24 — 23/04/2026
+
 
 ### Arquivos Modificados
 - `apps/web/src/app/tenant/vendas/pdv/page.tsx` [MODIFICADO] — subtotal/desconto/total

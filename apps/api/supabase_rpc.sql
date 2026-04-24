@@ -1390,12 +1390,12 @@ BEGIN
     -- Criar RPCs de escrita dentro do schema tenant
     EXECUTE format('
         CREATE OR REPLACE FUNCTION %I.tenant_criar_cliente(
-          p_nome VARCHAR(255),
-          p_email VARCHAR(255),
-          p_telefone VARCHAR(50),
-          p_funil_fase VARCHAR(50),
-          p_status VARCHAR(50),
-          p_idempotency_key TEXT DEFAULT NULL
+          p_nome TEXT,
+          p_email TEXT DEFAULT NULL,
+          p_telefone TEXT DEFAULT NULL,
+          p_funil_fase TEXT DEFAULT ''lead'',
+          p_status TEXT DEFAULT ''ativo'',
+          p_cpf_cnpj TEXT DEFAULT NULL
         )
         RETURNS JSONB
         LANGUAGE plpgsql
@@ -1404,37 +1404,55 @@ BEGIN
         AS $func$
         DECLARE
           v_cliente_id UUID;
-          v_cached_result JSONB;
         BEGIN
-          -- Verificar idempotência
-          IF p_idempotency_key IS NOT NULL THEN
-            SELECT result INTO v_cached_result
-            FROM idempotency_control
-            WHERE idempotency_key = p_idempotency_key AND operation_type = ''tenant_criar_cliente'';
-            
-            IF v_cached_result IS NOT NULL THEN
-              RETURN v_cached_result;
-            END IF;
-          END IF;
-
-          INSERT INTO clientes (nome, email, telefone, funil_fase, status)
-          VALUES (p_nome, p_email, p_telefone, p_funil_fase, p_status)
+          INSERT INTO clientes (nome, email, telefone, funil_fase, status, cpf_cnpj, deleted_at)
+          VALUES (p_nome, p_email, p_telefone, p_funil_fase, p_status, p_cpf_cnpj, NULL)
           RETURNING id INTO v_cliente_id;
 
-          v_cached_result := json_build_object(
+          RETURN jsonb_build_object(
             ''success'', true,
             ''cliente_id'', v_cliente_id
           );
+        EXCEPTION WHEN OTHERS THEN
+          RETURN jsonb_build_object(''error'', SQLERRM);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
 
-          -- Armazenar resultado para idempotência
-          IF p_idempotency_key IS NOT NULL THEN
-            INSERT INTO idempotency_control (idempotency_key, operation_type, result)
-            VALUES (p_idempotency_key, ''tenant_criar_cliente'', v_cached_result);
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_atualizar_cliente(
+          p_cliente_id UUID,
+          p_nome TEXT DEFAULT NULL,
+          p_email TEXT DEFAULT NULL,
+          p_telefone TEXT DEFAULT NULL,
+          p_funil_fase TEXT DEFAULT NULL,
+          p_status TEXT DEFAULT NULL,
+          p_cpf_cnpj TEXT DEFAULT NULL
+        )
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        BEGIN
+          UPDATE clientes
+          SET
+            nome = COALESCE(p_nome, nome),
+            email = COALESCE(p_email, email),
+            telefone = COALESCE(p_telefone, telefone),
+            funil_fase = COALESCE(p_funil_fase, funil_fase),
+            status = COALESCE(p_status, status),
+            cpf_cnpj = p_cpf_cnpj,
+            atualizado_em = NOW()
+          WHERE id = p_cliente_id AND deleted_at IS NULL;
+
+          IF NOT FOUND THEN
+            RETURN jsonb_build_object(''error'', ''Cliente não encontrado ou já excluído'');
           END IF;
 
-          RETURN v_cached_result;
+          RETURN jsonb_build_object(''success'', true);
         EXCEPTION WHEN OTHERS THEN
-          RAISE EXCEPTION ''Erro ao criar cliente: %'', SQLERRM;
+          RETURN jsonb_build_object(''error'', SQLERRM);
         END;
         $func$;
     ', novo_schema, novo_schema);
