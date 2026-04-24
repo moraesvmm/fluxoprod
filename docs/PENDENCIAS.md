@@ -7,14 +7,97 @@
 
 ## 🔴 PENDÊNCIAS CRÍTICAS
 
-### 1. Status de Produção: PRODUCTION-READY (COM RESSALVAS)
-**Status Atual:** O sistema está operacional e com build saneado, porém o módulo de comissões está degradado.
-**Motivo:** As RPCs necessárias para a gestão de regras de comissão ainda não foram publicadas no banco de dados live.
+### 1. Divergência de Fases do Funil de Vendas (CRM vs Banco)
+**Status:** CRÍTICO
+**Módulo:** CRM / Vendas
+**Descrição:** Existe divergência entre os valores do campo `funil_fase` definidos no banco de dados e os utilizados no frontend.
+
+**Banco de Dados** (`tenant.clientes` - CHECK constraint):
+- `lead`
+- `prospect`
+- `oportunidade`
+- `cliente`
+- `recuperacao`
+
+**Frontend** (`use-pipeline.ts` - Kanban):
+- `lead`
+- `qualificado`
+- `proposta`
+- `negociacao`
+- `fechado`
+- `perdido`
+
+**Impacto:** Inconsistência de dados, possíveis erros ao mover clientes entre fases, filtros não funcionando corretamente.
 
 **Ação Necessária:**
-- Publicar o script SQL: [rpc_comissoes_regras.sql](file:///c:/Users/VMORAES1/Documents/fluxoprod/apps/api/migrations/rpc_comissoes_regras.sql)
-- **Método de Execução:** Utilizar o Editor SQL do Supabase ou a URI de conexão direta via `psql`.
+- Alinhar valores entre banco e frontend
+- Decidir qual padrão será adotado (recomendado: padrão do frontend mais completo)
+- Atualizar CHECK constraint no banco
+- Atualizar RPCs `tenant_criar_cliente` e `tenant_atualizar_cliente`
+- Testar fluxo completo do Kanban após correção
+
+**Arquivos Envolvidos:**
+- `apps/api/supabase_rpc.sql` (provisionar_empresa - CREATE TABLE clientes)
+- `apps/web/src/lib/hooks/use-pipeline.ts`
+- `apps/web/src/components/crm/kanban-pipeline.tsx`
+
+---
+
+### 2. Módulo de Comissões - RPCs Não Publicadas
+**Status:** CRÍTICO
+**Módulo:** Comissões
+**Descrição:** O módulo de comissões está degradado pois as RPCs necessárias para gestão de regras ainda não foram publicadas no banco live.
+
+**RPCs Ausentes:**
+- `tenant_listar_regras_comissao`
+- `tenant_criar_regra_comissao`
+- `tenant_excluir_regra_comissao`
+
+**Impacto:** Gestão de regras de comissão não funciona, cálculo de comissões em vendas pode falhar.
+
+**Ação Necessária:**
+- Publicar o script SQL: `apps/api/migrations/rpc_comissoes_regras.sql`
+- **Método de Execução:** Utilizar o Editor SQL do Supabase ou URI de conexão via `psql`
 - **URI de Conexão:** `postgresql://postgres:Vmm041126!Database@db.wkxtlvxotvutycbupfuh.supabase.co:5432/postgres`
+- Validar funcionamento após publicação
+
+---
+
+### 3. Geração de Recibo PDF no PDV
+**Status:** ALTA PRIORIDADE
+**Módulo:** Vendas / PDV
+**Descrição:** A funcionalidade de geração de recibo PDF é visual apenas, sem implementação real.
+
+**Impacto:** Usuários não podem emitir recibos oficiais de vendas.
+
+**Ação Necessária:**
+- Implementar geração de PDF via `jsPDF` ou biblioteca similar
+- Adicionar dados da venda: cliente, itens, valores, forma de pagamento
+- Adicionar logo da empresa (se configurado)
+- Implementar botão de download/impressão
+- Testar layout e impressão
+
+**Arquivos Envolvidos:**
+- `apps/web/src/app/tenant/vendas/page.tsx`
+
+---
+
+### 4. KPI "Método Favorito" Hardcoded
+**Status:** MÉDIA PRIORIDADE
+**Módulo:** Vendas / Dashboard
+**Descrição:** O KPI "Método Favorito" no dashboard de vendas está hardcoded como "-", sem cálculo real.
+
+**Impacto:** Dados de métricas de vendas incompletos, impossibilidade de identificar método de pagamento mais utilizado.
+
+**Ação Necessária:**
+- Implementar cálculo baseado em dados reais de `tenant.vendas`
+- Contar ocorrências de cada `metodo_pagamento`
+- Retornar o método mais frequente no período
+- Atualizar hook `useDashboard` ou criar RPC específica
+
+**Arquivos Envolvidos:**
+- `apps/web/src/app/tenant/vendas/page.tsx`
+- `apps/web/src/lib/hooks/use-dashboard.ts`
 
 ---
 
