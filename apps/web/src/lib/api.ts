@@ -83,26 +83,36 @@ export interface ClienteListResult {
 export interface InteracaoCliente {
   id: string;
   cliente_id: string;
-  tipo: 'ligacao' | 'email' | 'reuniao' | 'nota' | 'whatsapp' | 'visita';
+  tipo: 'ligacao' | 'email' | 'reuniao' | 'nota' | 'whatsapp' | 'visita' | 'venda';
   titulo: string;
   descricao?: string;
   data_interacao: string;
   duracao_minutos?: number;
   usuario_id?: string;
-  metadata?: Record<string, any>;
+  metadata?: {
+    produto_descricao?: string;
+    valor?: number;
+    ciclo_recompra_dias?: number;
+    [key: string]: any;
+  };
   criado_em: string;
   atualizado_em?: string;
 }
 
 export interface InteracaoClienteCreate {
   cliente_id: string;
-  tipo: 'ligacao' | 'email' | 'reuniao' | 'nota' | 'whatsapp' | 'visita';
+  tipo: 'ligacao' | 'email' | 'reuniao' | 'nota' | 'whatsapp' | 'visita' | 'venda';
   titulo: string;
   descricao?: string;
   data_interacao?: string;
   duracao_minutos?: number;
   usuario_id?: string;
-  metadata?: Record<string, any>;
+  metadata?: {
+    produto_descricao?: string;
+    valor?: number;
+    ciclo_recompra_dias?: number;
+    [key: string]: any;
+  };
 }
 
 export interface InteracaoClienteListParams {

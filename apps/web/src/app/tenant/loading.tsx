@@ -1,34 +1,34 @@
 export default function TenantLoading() {
   return (
-    <div className="flex h-[80vh] w-full flex-col items-center justify-center p-8 animate-fade-in">
-      <div className="relative mb-6 flex items-center justify-center">
-        {/* Pulsing rings */}
-        <div className="absolute inset-0 rounded-full border-4 border-violet-500/20 shadow-[0_0_20px_rgba(139,92,246,0.3)] animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
-        <div className="absolute inset-[-10px] rounded-full border border-violet-400/30 shadow-[0_0_30px_rgba(139,92,246,0.2)] animate-[spin_4s_linear_infinite]"></div>
+    <div className="flex h-screen w-full flex-col items-center justify-center p-8 bg-background/50 backdrop-blur-sm animate-fade-in">
+      <div className="relative mb-12 flex items-center justify-center">
+        {/* Organic Glow Effect */}
+        <div className="absolute h-32 w-32 rounded-full bg-primary/20 blur-3xl animate-[glow_3s_ease-in-out_infinite]"></div>
         
-        {/* Logo Container */}
-        <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0a0a0c] to-[#12121a] border border-violet-500/30 shadow-xl backdrop-blur-sm">
+        {/* Minimalist Floating Logo */}
+        <div className="relative z-10 animate-[float_4s_ease-in-out_infinite]">
           <img 
             src="/logo-fluxo.png" 
             alt="Fluxo"
-            className="h-10 w-10 object-contain drop-shadow-[0_0_8px_rgba(167,139,250,0.6)] animate-pulse"
+            className="h-16 w-16 object-contain drop-shadow-[0_0_15px_rgba(var(--primary),0.4)]"
           />
         </div>
       </div>
       
-      <div className="flex flex-col items-center text-center">
-        <h3 className="text-xl font-semibold bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent mb-2">
-          Preparando módulo...
+      <div className="flex flex-col items-center text-center max-w-xs">
+        <h3 className="text-lg font-medium text-foreground tracking-tight mb-1">
+          Iniciando módulo
         </h3>
-        <p className="text-sm font-medium text-slate-500 max-w-sm mb-6">
-          Sincronizando dados e construindo a melhor experiência.
+        <p className="text-xs text-muted-foreground/80 mb-8 leading-relaxed">
+          Sincronizando seu ecossistema de dados para uma performance superior.
         </p>
 
-        {/* Loading Bar Premium */}
-        <div className="h-1.5 w-48 overflow-hidden rounded-full bg-slate-200/50 dark:bg-slate-800/50">
-          <div className="h-full w-full rounded-full bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-500 animate-[loading-bar_1.5s_ease-in-out_infinite]" style={{ backgroundSize: '200% 100%' }}></div>
+        {/* Ultra-minimalist Loading Line */}
+        <div className="relative h-[1px] w-40 overflow-hidden bg-muted/30">
+          <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-transparent via-primary to-transparent animate-[shimmer_2s_infinite]" style={{ backgroundSize: '200% 100%' }}></div>
         </div>
       </div>
     </div>
   );
 }
+

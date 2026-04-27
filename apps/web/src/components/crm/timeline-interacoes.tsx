@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, Mail, Users, FileText, MessageCircle, MapPin, Plus, Trash2, Clock, ChevronDown } from "lucide-react";
+import { Phone, Mail, Users, FileText, MessageCircle, MapPin, Plus, Trash2, Clock, ChevronDown, ShoppingBag } from "lucide-react";
 import { useInteracoes } from "@/lib/hooks/use-interacoes";
 import type { InteracaoClienteCreate } from "@/lib/api";
 
@@ -16,6 +16,7 @@ const TIPO_ICONS = {
   nota: FileText,
   whatsapp: MessageCircle,
   visita: MapPin,
+  venda: ShoppingBag,
 };
 
 const TIPO_LABELS = {
@@ -25,6 +26,7 @@ const TIPO_LABELS = {
   nota: "Nota",
   whatsapp: "WhatsApp",
   visita: "Visita",
+  venda: "Venda",
 };
 
 const TIPO_CORES = {
@@ -34,6 +36,7 @@ const TIPO_CORES = {
   nota: "bg-yellow-100 text-yellow-600 border-yellow-200",
   whatsapp: "bg-emerald-100 text-emerald-600 border-emerald-200",
   visita: "bg-orange-100 text-orange-600 border-orange-200",
+  venda: "bg-teal-100 text-teal-600 border-teal-200",
 };
 
 export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProps) {
@@ -48,12 +51,36 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
     duracao_minutos: undefined,
   });
 
+  const [vendaData, setVendaData] = useState<{
+    produto_descricao: string;
+    valor?: number;
+    ciclo_recompra_dias?: number;
+  }>({ produto_descricao: '' });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.titulo.trim()) return;
+    if (!formData.titulo.trim() && formData.tipo !== 'venda') return;
+    if (formData.tipo === 'venda' && !vendaData.produto_descricao.trim()) return;
 
     try {
-      await criar(formData);
+      const finalTitulo = formData.tipo === 'venda' && !formData.titulo.trim() 
+        ? `Venda: ${vendaData.produto_descricao}` 
+        : formData.titulo;
+
+      const finalMetadata = formData.tipo === 'venda' 
+        ? { 
+            produto_descricao: vendaData.produto_descricao,
+            valor: vendaData.valor,
+            ciclo_recompra_dias: vendaData.ciclo_recompra_dias
+          } 
+        : {};
+
+      await criar({
+        ...formData,
+        titulo: finalTitulo,
+        metadata: finalMetadata
+      });
+
       setFormData({
         cliente_id: clienteId,
         tipo: "nota",
@@ -62,6 +89,7 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
         data_interacao: new Date().toISOString().slice(0, 16),
         duracao_minutos: undefined,
       });
+      setVendaData({ produto_descricao: '' });
       setShowForm(false);
     } catch (error) {
       console.error("Erro ao criar interação:", error);
@@ -119,6 +147,7 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
                   <option value="nota">Nota</option>
                   <option value="whatsapp">WhatsApp</option>
                   <option value="visita">Visita</option>
+                  <option value="venda">Venda</option>
                 </select>
               </div>
               <div>
@@ -131,14 +160,14 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Título *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{formData.tipo === 'venda' ? 'Título (opcional)' : 'Título *'}</label>
                 <input
                   type="text"
                   value={formData.titulo}
                   onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-                  placeholder="Título da interação"
-                  required
+                  placeholder={formData.tipo === 'venda' ? 'Auto-preenchido se vazio' : 'Título da interação'}
+                  required={formData.tipo !== 'venda'}
                 />
               </div>
               <div>
@@ -153,6 +182,43 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
                 />
               </div>
             </div>
+
+            {formData.tipo === 'venda' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Produto / Serviço *</label>
+                  <input
+                    type="text"
+                    value={vendaData.produto_descricao}
+                    onChange={(e) => setVendaData({ ...vendaData, produto_descricao: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Ex: Suplemento Proteína"
+                    required={formData.tipo === 'venda'}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor (R$)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={vendaData.valor || ""}
+                    onChange={(e) => setVendaData({ ...vendaData, valor: e.target.value ? parseFloat(e.target.value) : undefined })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="0,00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Ciclo Recompra (dias)</label>
+                  <input
+                    type="number"
+                    value={vendaData.ciclo_recompra_dias || ""}
+                    onChange={(e) => setVendaData({ ...vendaData, ciclo_recompra_dias: e.target.value ? parseInt(e.target.value) : undefined })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Ex: 30"
+                  />
+                </div>
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
               <textarea
@@ -222,6 +288,25 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
                         )}
                       </div>
                       <h4 className="font-medium text-slate-900 mb-1">{interacao.titulo}</h4>
+                      {interacao.tipo === 'venda' && interacao.metadata && (
+                        <div className="mt-2 flex flex-wrap gap-2 mb-2">
+                          {interacao.metadata.produto_descricao && (
+                            <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-emerald-200">
+                              🛍️ {interacao.metadata.produto_descricao}
+                            </span>
+                          )}
+                          {interacao.metadata.valor && (
+                            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-blue-200">
+                              R$ {Number(interacao.metadata.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </span>
+                          )}
+                          {interacao.metadata.ciclo_recompra_dias && (
+                            <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-amber-200">
+                              🔄 {interacao.metadata.ciclo_recompra_dias} dias
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {interacao.descricao && (
                         <p className="text-sm text-slate-600 line-clamp-2">{interacao.descricao}</p>
                       )}

@@ -1,6 +1,6 @@
 # DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
 ## ESTADO ATUAL: PRODUCTION-READY (COM RESSALVAS)
-## ÚLTIMA ATUALIZAÇÃO: 22/04/2026 (Saneamento de Build e Checkout)
+## ÚLTIMA ATUALIZAÇÃO: 27/04/2026 (Nurturing Híbrido e Venda Nativa CRM)
 ## VERSÃO: 2.2
 
 ---
@@ -168,6 +168,7 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
 
 #### Dashboard
 - **tenant_dashboard_kpis()** - Retorna KPIs agregados (faturamento, vendas, clientes, produtos, OS, estoque baixo, saldo)
+- **tenant_obter_sugestoes_nurturing()** - **Modelo Híbrido**: Detecta inatividade via tabela `vendas` OU via interações de tipo `venda` (CRM-only).
 
 ### RPCs do Schema Tenant (Dinâmicas)
 
@@ -188,6 +189,7 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
 - **tenant_criar_financeiro(p_tipo, p_descricao, p_valor, p_data_vencimento, p_status, p_categoria, p_idempotency_key)**
 - **tenant_criar_os(p_cliente_id, p_colaborador_id, p_veiculo_equipamento, p_descricao_problema, p_status, p_valor_orcamento, p_idempotency_key)**
 - **tenant_criar_obra(p_cliente_id, p_nome, p_descricao, p_endereco, p_data_inicio, p_data_fim_prevista, p_status, p_orcamento_total, p_idempotency_key)**
+- **tenant_criar_interacao(p_cliente_id, p_tipo, p_titulo, p_descricao, p_data_interacao, p_duracao_minutos, p_usuario_id, p_metadata)** - Suporta tipo 'venda' para CRM-only
 - **tenant_processar_venda(p_cliente_id, p_cliente_nome, p_cliente_telefone, p_cliente_email, p_itens, p_vendedor_id, p_forma_pagamento, p_idempotency_key)** - RPC transacional completa
 
 #### Exclusão
@@ -1083,6 +1085,23 @@ Documento detalhado em MELHORIAS_FUTURAS.md:
 - **TypeScript Safety**: Adicionadas verificações null/undefined
   - Componente: `PrevisaoDemandaPanel` com `Array.isArray()` e validações
   - Prevenção de erros de runtime em `.map()` e propriedades opcionais
+
+## 📧 VALIDAÇÃO E VERIFICAÇÃO DE E-MAIL (27/04/2026)
+
+### Estratégia de Higienização de Base
+Para garantir que os novos usuários utilizem e-mails reais e operáveis (Gmail, Outlook, domínios corporativos), o sistema agora impõe:
+
+1. **Bloqueio de Domínios Fictícios (Client & Server side)**:
+   - Implementado no Checkout (`apps/web/src/app/(auth)/checkout/page.tsx`) e na API de Sessão (`apps/web/src/app/api/checkout/session/route.ts`).
+   - Bloqueio explícito de domínios como `mailinator.com`, `tempmail.com`, `fake.com`, `teste.com`, `ficticio.com`, etc.
+   - Validação de Regex RFC 5322 para garantir integridade sintática.
+
+2. **Fluxo de Confirmação de E-mail (Supabase Auth)**:
+   - O sistema está configurado para exigir confirmação de e-mail antes do acesso total.
+   - O provisionamento do tenant pelo webhook só é considerado "concluido" após a ativação da conta pelo usuário via link enviado ao e-mail real.
+
+3. **Rastreabilidade**:
+   - Todo e-mail utilizado em tentativas de checkout é registrado em `public.checkout_vendas` para auditoria de comportamento e prevenção de spam.
 
 ---
 

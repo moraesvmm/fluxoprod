@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, LayoutGrid, Building2, ChevronRight, Loader2, Tag } from "lucide-react";
+import { Check, LayoutGrid, Building2, ChevronRight, Loader2, Tag, ArrowLeft } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 
 const PricingPanel = dynamic(() => import("./PricingPanel"), {
@@ -29,6 +30,16 @@ export default function MestrePage() {
   return (
     <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center p-4 font-sans selection:bg-purple-500/30">
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />
+      
+      <div className="absolute top-6 left-6 z-20">
+        <Link 
+          href="/admin" 
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium text-gray-300 hover:text-white transition-all backdrop-blur-sm group"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          Painel Central
+        </Link>
+      </div>
 
       <div className="w-full max-w-lg bg-[#121216] border border-white/5 rounded-2xl shadow-2xl relative overflow-hidden backdrop-blur-xl">
         {/* Tab Bar */}

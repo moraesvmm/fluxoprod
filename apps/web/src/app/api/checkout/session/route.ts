@@ -90,6 +90,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Payload de checkout inválido." }, { status: 400 });
     }
 
+    // Validação de e-mail real (bloqueio de domínios fictícios)
+    const disposableDomains = [
+      "test.com", "example.com", "mailinator.com", "tempmail.com", 
+      "dispostable.com", "guerrillamail.com", "10minutemail.com",
+      "trashmail.com", "fake.com", "ficticio.com", "teste.com"
+    ];
+    const emailDomain = payload.customerEmail.split("@")[1]?.toLowerCase();
+    if (disposableDomains.includes(emailDomain)) {
+      return NextResponse.json(
+        { error: "Por favor, utilize um e-mail real (Gmail, Outlook, etc.). E-mails temporários ou fictícios não são permitidos." },
+        { status: 400 }
+      );
+    }
+
     const checkoutReference = generateCheckoutReference();
     const admin = createAdminClient();
 
@@ -135,7 +149,9 @@ export async function POST(request: Request) {
         value: payload.amount,
         nextDueDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
         cycle: "MONTHLY",
-        description: `Assinatura Fluxo ERP - Plano ${payload.planName}`,
+        description: payload.planName.includes("Personalizado") 
+          ? "Assinatura Fluxo ERP - Módulos A La Carte" 
+          : `Assinatura Fluxo ERP - Plano ${payload.planName}`,
         externalReference: checkoutReference,
         metadata: {
           checkoutReference,

@@ -14,11 +14,12 @@ interface ModuloData { id: string; key: string; nome: string; preco: number; pre
 
 /* Fallbacks caso o banco esteja indisponível */
 const PLANOS_FALLBACK: PlanoData[] = [
-  { id: "starter", key: "starter", nome: "Starter", preco: 249, preco_promocional: null, descricao: "Entrada e Visibilidade", modulos_incluidos: ["dashboard","crm","catalogo","estoque"], ordem_exibicao: 1 },
-  { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh", "Inteligência de Vendas"], ordem_exibicao: 2 },
-  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios", "Inteligência de Vendas"], ordem_exibicao: 3 },
+  { id: "starter", key: "starter", nome: "Starter", preco: 249, preco_promocional: null, descricao: "Entrada e Visibilidade", modulos_incluidos: ["dashboard","crm","catalogo","estoque", "email_real"], ordem_exibicao: 1 },
+  { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh", "Inteligência de Vendas", "email_real"], ordem_exibicao: 2 },
+  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios", "Inteligência de Vendas", "email_real"], ordem_exibicao: 3 },
 ];
 const MODULOS_FALLBACK: ModuloData[] = [
+  { id: "crm", key: "crm", nome: "CRM & Nurturing", preco: 129.90, preco_promocional: null, icone: "🎯", descricao: "Gestão avançada de relacionamento e automação de engajamento.", features: ["Gestão de Funil de Vendas", "Inteligência Proativa de Nurturing", "Importação de Clientes em Lote"], ordem_exibicao: 0 },
   { id: "os", key: "os", nome: "Ordem de Serviço", preco: 79.90, preco_promocional: null, icone: "🔧", descricao: "Acompanhamento completo para serviços pontuais.", features: ["OS numerada com status em tempo real","Atribuição a colaboradores e técnicos","Registro completo do histórico do serviço"], ordem_exibicao: 1 },
   { id: "obras", key: "obras", nome: "Gestão de Obras", preco: 79.90, preco_promocional: null, icone: "🏗️", descricao: "Controle especializado para projetos de longa duração.", features: ["Cronograma por etapas e timeline visual","Financeiro integrado (Previsto vs Real)","Gestão de recursos, materiais e documentos"], ordem_exibicao: 2 },
   { id: "comissoes", key: "comissoes", nome: "Comissões", preco: 79.90, preco_promocional: null, icone: "💰", descricao: "Gestão transparente das premiações de venda.", features: ["Cálculo automático integrado ao PDV","Histórico auditável de bonificações","Relatórios parametrizados por vendedor"], ordem_exibicao: 3 },
@@ -33,6 +34,7 @@ const MODULE_LABELS: Record<string, string> = {
   vendas: "Vendas / PDV", financeiro: "Financeiro", rh: "RH & Pessoal",
   os: "Ordens de Serviço", obras: "Obras", comissoes: "Comissões", relatorios: "Relatórios",
   "Inteligência de Vendas": "Inteligência de Vendas (CRM)",
+  "email_real": "Autenticação via E-mail Real",
 };
 
 export default function CheckoutPage() {
@@ -98,13 +100,13 @@ function CheckoutContent() {
   }, [activeModal]);
 
   // Seleções do Resumo/Checkout
-  const [selectedPlan, setSelectedPlan] = useState<PlanoData>(planos[1] || PLANOS_FALLBACK[1]);
+  const [selectedPlan, setSelectedPlan] = useState<PlanoData | null>(planos[1] || PLANOS_FALLBACK[1]);
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
 
   // Atualizar selectedPlan quando planos carregam do banco
   useEffect(() => {
     if (pricingLoaded && planos.length > 1) {
-      setSelectedPlan(prev => planos.find(p => p.key === prev.key) || planos[1]);
+      setSelectedPlan(prev => prev === null ? null : (planos.find(p => p.key === prev.key) || planos[1]));
     }
   }, [pricingLoaded, planos]);
   
@@ -120,7 +122,7 @@ function CheckoutContent() {
   const [companySegment, setCompanySegment] = useState("Varejo");
 
   const totalValue = useMemo(() => {
-    const planPrice = getEffectivePrice(selectedPlan);
+    const planPrice = selectedPlan ? getEffectivePrice(selectedPlan) : 0;
     const modulesPrice = selectedModules.reduce((sum, modKey) => {
       const mod = modulosAvulsos.find(m => m.key === modKey);
       return sum + (mod ? getEffectivePrice(mod) : 0);
@@ -128,7 +130,18 @@ function CheckoutContent() {
     return planPrice + modulesPrice;
   }, [selectedPlan, selectedModules, modulosAvulsos]);
 
-  const emailValido = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const emailValido = (email: string) => {
+    const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!pattern.test(email)) return false;
+
+    const disposableDomains = [
+      "test.com", "example.com", "mailinator.com", "tempmail.com", 
+      "dispostable.com", "guerrillamail.com", "10minutemail.com",
+      "trashmail.com", "fake.com", "ficticio.com", "teste.com"
+    ];
+    const domain = email.split("@")[1].toLowerCase();
+    return !disposableDomains.includes(domain);
+  };
   const documentoNormalizado = companyDocument.replace(/\D/g, "");
   const passwordValida = password.trim().length >= 8;
 
@@ -160,7 +173,7 @@ function CheckoutContent() {
     setLoading(true);
     try {
       const payload: PaymentTransactionPayload = {
-        customerName, customerEmail, planName: selectedPlan.nome, amount: totalValue,
+        customerName, customerEmail, planName: selectedPlan ? selectedPlan.nome : "Personalizado (A La Carte)", amount: totalValue,
         modules: selectedModules, companyName, companyDocument, companySize, companySegment,
         metadata: { password }
       };
@@ -253,22 +266,53 @@ function CheckoutContent() {
                  <p className="text-gray-400 text-lg">Mude de plano ou adicione módulos sob demanda a qualquer momento.</p>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  {/* Card Personalizado (A La Carte) */}
+                  <div 
+                    onClick={() => setSelectedPlan(null)}
+                    className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 border ${
+                      selectedPlan === null 
+                      ? "bg-emerald-500/10 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500" 
+                      : "bg-[#121216] border-white/5 hover:border-white/20"
+                    }`}
+                  >
+                     {selectedPlan === null && (
+                       <div className="absolute top-4 right-4 bg-emerald-500 rounded-full p-1"><Check className="w-4 h-4 text-white"/></div>
+                     )}
+                     <h3 className="text-xl font-bold mb-1">A La Carte</h3>
+                     <p className="text-gray-400 text-sm mb-6">Monte seu próprio ecossistema</p>
+                     <div className="flex items-baseline gap-1 mb-8">
+                       <span className="text-sm text-gray-500">R$</span>
+                       <span className="text-4xl font-black tracking-tight">0,00</span>
+                       <span className="text-sm text-gray-500">/base</span>
+                     </div>
+                     <div className="space-y-3">
+                        <div className="flex items-start gap-2">
+                          <Check className="w-5 h-5 text-emerald-400 shrink-0"/>
+                          <span className="text-sm text-gray-300">Escolha livre de módulos</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Check className="w-5 h-5 text-emerald-400 shrink-0"/>
+                          <span className="text-sm text-gray-300">Sem taxa fixa mensal</span>
+                        </div>
+                     </div>
+                  </div>
+
                   {planos.map(p => (
                     <div 
                       key={p.key}
                       onClick={() => setSelectedPlan(p)}
                       className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 border ${
-                        selectedPlan.key === p.key 
+                        selectedPlan?.key === p.key 
                         ? "bg-indigo-500/10 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500" 
                         : "bg-[#121216] border-white/5 hover:border-white/20"
                       }`}
                     >
-                       {selectedPlan.key === p.key && (
+                       {selectedPlan?.key === p.key && (
                          <div className="absolute top-4 right-4 bg-indigo-500 rounded-full p-1"><Check className="w-4 h-4 text-white"/></div>
                        )}
                        {p.preco_promocional && (
-                         <div className={`absolute top-4 ${selectedPlan.key === p.key ? 'right-12' : 'right-4'} flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full transition-all duration-300`}>
+                         <div className={`absolute top-4 ${selectedPlan?.key === p.key ? 'right-12' : 'right-4'} flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full transition-all duration-300`}>
                            <Percent className="w-3 h-3" /> PROMO
                          </div>
                        )}
@@ -297,7 +341,7 @@ function CheckoutContent() {
 
                <div className="pt-8 border-t border-white/5">
                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                   <Server className="w-5 h-5 text-indigo-400"/> Adicione Extensões Avulsas
+                   <Server className="w-5 h-5 text-indigo-400"/> Módulos A La Carte
                  </h3>
                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     {modulosAvulsos.map(m => (
@@ -325,8 +369,12 @@ function CheckoutContent() {
                  </div>
                </div>
 
-               <div className="flex justify-end">
-                  <button onClick={() => setStep(2)} className="bg-white text-black hover:bg-gray-200 font-medium py-4 px-8 rounded-xl flex items-center gap-2 group transition-all">
+               <div className="flex justify-end mt-8">
+                  <button 
+                    onClick={() => setStep(2)} 
+                    disabled={selectedPlan === null && selectedModules.length === 0}
+                    className="bg-white text-black disabled:opacity-50 hover:bg-gray-200 font-medium py-4 px-8 rounded-xl flex items-center gap-2 group transition-all"
+                  >
                      Continuar para Cadastro <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform"/>
                   </button>
                </div>
@@ -406,7 +454,7 @@ function CheckoutContent() {
                   <div className="bg-[#0a0a0c] border border-white/5 rounded-xl p-6 mb-8 relative z-10">
                      <div className="flex justify-between items-center mb-4">
                        <span className="text-gray-400">Plano</span>
-                       <span className="font-medium text-indigo-400">{selectedPlan.nome}</span>
+                       <span className="font-medium text-indigo-400">{selectedPlan ? selectedPlan.nome : "Personalizado (A La Carte)"}</span>
                      </div>
                      <div className="flex justify-between items-center mb-4">
                        <span className="text-gray-400">Ciclo</span>
@@ -454,7 +502,9 @@ function CheckoutContent() {
               <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
                  <div className="flex flex-col">
                    <div className="text-sm font-semibold text-gray-400 mb-1 flex items-center gap-2">
-                     <span className="bg-indigo-500/20 text-indigo-400 py-1 px-3 rounded-full text-xs">Plano {selectedPlan.nome}</span>
+                     <span className="bg-indigo-500/20 text-indigo-400 py-1 px-3 rounded-full text-xs">
+                       {selectedPlan ? `Plano ${selectedPlan.nome}` : "A La Carte"}
+                     </span>
                      {selectedModules.length > 0 && <span className="bg-purple-500/20 text-purple-400 py-1 px-3 rounded-full text-xs">+{selectedModules.length} Extras</span>}
                    </div>
                    <div className="flex items-baseline gap-2">
@@ -464,7 +514,11 @@ function CheckoutContent() {
                  </div>
                  
                  {step === 1 && (
-                   <button onClick={() => setStep(2)} className="w-full sm:w-auto bg-white text-black hover:bg-gray-200 font-bold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                   <button 
+                     onClick={() => setStep(2)} 
+                     disabled={selectedPlan === null && selectedModules.length === 0}
+                     className="w-full sm:w-auto bg-white disabled:opacity-50 text-black hover:bg-gray-200 font-bold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                   >
                      Ir para Cadastro <ArrowRight className="w-4 h-4"/>
                    </button>
                  )}

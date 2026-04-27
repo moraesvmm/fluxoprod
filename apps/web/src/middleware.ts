@@ -67,7 +67,8 @@ export async function middleware(request: NextRequest) {
       .maybeSingle()
 
     if (profileCheck) {
-      return NextResponse.redirect(new URL('/tenant/dashboard', request.url))
+      const dest = profileCheck.role === 'master' ? '/admin' : '/tenant/dashboard'
+      return NextResponse.redirect(new URL(dest, request.url))
     }
     // Se não tem perfil, deixa ele no /login para que o erro seja tratado ou ele possa deslogar
     return supabaseResponse
