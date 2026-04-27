@@ -15,8 +15,8 @@ interface ModuloData { id: string; key: string; nome: string; preco: number; pre
 /* Fallbacks caso o banco esteja indisponível */
 const PLANOS_FALLBACK: PlanoData[] = [
   { id: "starter", key: "starter", nome: "Starter", preco: 249, preco_promocional: null, descricao: "Entrada e Visibilidade", modulos_incluidos: ["dashboard","crm","catalogo","estoque"], ordem_exibicao: 1 },
-  { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh"], ordem_exibicao: 2 },
-  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios"], ordem_exibicao: 3 },
+  { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh", "Inteligência de Vendas"], ordem_exibicao: 2 },
+  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios", "Inteligência de Vendas"], ordem_exibicao: 3 },
 ];
 const MODULOS_FALLBACK: ModuloData[] = [
   { id: "os", key: "os", nome: "Ordem de Serviço", preco: 79.90, preco_promocional: null, icone: "🔧", descricao: "Acompanhamento completo para serviços pontuais.", features: ["OS numerada com status em tempo real","Atribuição a colaboradores e técnicos","Registro completo do histórico do serviço"], ordem_exibicao: 1 },
@@ -32,6 +32,7 @@ const MODULE_LABELS: Record<string, string> = {
   dashboard: "Dashboard", crm: "CRM", catalogo: "Catálogo", estoque: "Estoque",
   vendas: "Vendas / PDV", financeiro: "Financeiro", rh: "RH & Pessoal",
   os: "Ordens de Serviço", obras: "Obras", comissoes: "Comissões", relatorios: "Relatórios",
+  "Inteligência de Vendas": "Inteligência de Vendas (CRM)",
 };
 
 export default function CheckoutPage() {
@@ -185,19 +186,19 @@ function CheckoutContent() {
       <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center p-4">
          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-[#121216] border border-white/5 rounded-2xl shadow-2xl p-10 max-w-lg w-full text-center">
             <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Check className="w-10 h-10 text-green-400" />
+               <Check className="w-10 h-10 text-green-400" />
             </div>
             <h2 className="text-3xl font-bold text-white mb-4">Pagamento Aprovado!</h2>
             <p className="text-gray-400 mb-8 leading-relaxed">
-              Recebemos seu pedido com sucesso. A infraestrutura segura da sua operação já está sendo <strong>provisionada automaticamente</strong>.
+               Recebemos seu pedido com sucesso. A infraestrutura segura da sua operação já está sendo <strong>provisionada automaticamente</strong>.
             </p>
             <div className="bg-[#1e1e24] rounded-lg p-4 text-left border border-white/5 mb-8">
                <p className="text-sm text-gray-400 mb-1">Acesso à Plataforma:</p>
                <p className="font-medium text-indigo-400 truncate">{customerEmail}</p>
             </div>
             <button 
-              onClick={() => router.push("/login")}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-4 rounded-xl transition-colors"
+               onClick={() => router.push("/login")}
+               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-4 rounded-xl transition-colors"
             >
                Ir para o Login
             </button>
@@ -248,8 +249,8 @@ function CheckoutContent() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
                
                <div className="text-center max-w-2xl mx-auto">
-                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Escolha o plano ideal para sua operação</h2>
-                 <p className="text-gray-400 text-lg">Mude de plano ou adicione módulos sob demanda. Sem carência.</p>
+                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Escolha a sua assinatura ideal</h2>
+                 <p className="text-gray-400 text-lg">Mude de plano ou adicione módulos sob demanda a qualquer momento.</p>
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -399,20 +400,24 @@ function CheckoutContent() {
                   <div className="absolute top-0 right-0 p-8 opacity-5">
                     <CreditCard className="w-48 h-48"/>
                   </div>
-                  <h2 className="text-2xl font-bold mb-2">Detalhes do Pagamento</h2>
-                  <p className="text-gray-400 mb-8 max-w-sm">Seu pagamento será processado com segurança via <strong>Asaas Gateway</strong>.</p>
+                  <h2 className="text-2xl font-bold mb-2">Finalizar Assinatura</h2>
+                  <p className="text-gray-400 mb-8 max-w-sm">Sua assinatura mensal será processada com segurança via <strong>Asaas Gateway</strong>.</p>
 
                   <div className="bg-[#0a0a0c] border border-white/5 rounded-xl p-6 mb-8 relative z-10">
                      <div className="flex justify-between items-center mb-4">
-                       <span className="text-gray-400">Titular</span>
-                       <span className="font-medium text-white">{customerName}</span>
+                       <span className="text-gray-400">Plano</span>
+                       <span className="font-medium text-indigo-400">{selectedPlan.nome}</span>
+                     </div>
+                     <div className="flex justify-between items-center mb-4">
+                       <span className="text-gray-400">Ciclo</span>
+                       <span className="font-medium text-white">Mensal (Recorrente)</span>
                      </div>
                      <div className="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
-                       <span className="text-gray-400">E-mail</span>
+                       <span className="text-gray-400">E-mail de Acesso</span>
                        <span className="font-medium text-white">{customerEmail}</span>
                      </div>
                      <div className="flex justify-between items-end">
-                       <span className="text-gray-400 font-medium">TOTAL A PAGAR</span>
+                       <span className="text-gray-400 font-medium uppercase tracking-tighter text-xs">Valor da Mensalidade</span>
                        <div className="text-right">
                          <span className="text-xs text-indigo-400 font-bold tracking-widest mr-2 uppercase">BRL</span>
                          <span className="text-4xl font-black">R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>

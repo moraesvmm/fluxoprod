@@ -375,6 +375,9 @@ export interface Empresa {
   schema_name?: string;
   criado_em: string;
   status?: string;
+  subscription_id?: string;
+  subscription_status?: 'ACTIVE' | 'OVERDUE' | 'INACTIVE';
+  data_vencimento?: string;
 }
 
 export interface EmpresaUpdate {
@@ -383,6 +386,9 @@ export interface EmpresaUpdate {
   porte?: string;
   segmento?: string;
   status?: string;
+  subscription_id?: string;
+  subscription_status?: 'ACTIVE' | 'OVERDUE' | 'INACTIVE';
+  data_vencimento?: string;
 }
 
 export interface Funcionario {
@@ -544,6 +550,7 @@ export async function createCliente(cliente: ClienteCreate): Promise<Cliente> {
       p_nome: cliente.nome,
       p_email: cliente.email,
       p_telefone: cliente.telefone,
+      p_endereco: cliente.endereco || null,
       p_funil_fase: 'lead',
       p_status: 'ativo',
       p_cpf_cnpj: cliente.cpf_cnpj || null
@@ -551,6 +558,28 @@ export async function createCliente(cliente: ClienteCreate): Promise<Cliente> {
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
   return { id: data?.cliente_id, ...cliente, criado_em: new Date().toISOString() } as Cliente;
+}
+
+export async function importarClientesLote(clientes: any[]): Promise<{ count: number }> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_importar_clientes_lote', {
+      p_clientes: clientes
+    });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+  return { count: data?.count || 0 };
+}
+
+export async function obterSugestoesNurturing() {
+  const { data, error } = await getSupabase().rpc('tenant_obter_sugestoes_nurturing');
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function finalizarAlertaNurturing(id: string | null) {
+  const { data, error } = await getSupabase().rpc('tenant_finalizar_alerta_nurturing', { p_alerta_id: id });
+  if (error) throw new Error(error.message);
+  return data;
 }
 
 export async function deleteCliente(id: string): Promise<void> {

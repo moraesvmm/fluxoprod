@@ -100,12 +100,31 @@ export async function POST(request: Request) {
     }
 
     const successEvents = ["PAYMENT_CONFIRMED", "PAYMENT_RECEIVED"];
+    const overdueEvents = ["PAYMENT_OVERDUE"];
+    const deletedEvents = ["PAYMENT_DELETED"];
+
+    const payment = body.payment || {};
+    const metadata = payment.metadata || {};
+    const subscriptionId = payment.subscription || null;
+    
+    // 1. Caso de Atraso ou Deleção de Cobrança
+    if (overdueEvents.includes(body.event) || deletedEvents.includes(body.event)) {
+      if (subscriptionId) {
+        await admin
+          .from("empresas")
+          .update({ 
+            subscription_status: body.event === "PAYMENT_OVERDUE" ? "OVERDUE" : "INACTIVE",
+            atualizado_em: new Date().toISOString() 
+          })
+          .eq("subscription_id", subscriptionId);
+      }
+      return NextResponse.json({ message: "Status de pagamento atualizado" }, { status: 200 });
+    }
+
     if (!successEvents.includes(body.event)) {
       return NextResponse.json({ message: "Evento ignorado" }, { status: 200 });
     }
 
-    const payment = body.payment || {};
-    const metadata = payment.metadata || {};
     const checkoutReference = String(
       payment.externalReference || metadata.checkoutReference || payment.id || ""
     );
@@ -115,6 +134,30 @@ export async function POST(request: Request) {
         { error: "Checkout sem referencia de rastreio" },
         { status: 400 }
       );
+    }
+
+    // Tenta localizar a empresa pelo subscription_id primeiro (para renovações)
+    if (subscriptionId) {
+      const { data: existingEmpresa } = await admin
+        .from("empresas")
+        .select("id, data_vencimento")
+        .eq("subscription_id", subscriptionId)
+        .maybeSingle();
+
+      if (existingEmpresa) {
+        // Renovação de assinatura existente
+        const novaDataVencimento = new Date();
+        novaDataVencimento.setDate(novaDataVencimento.getDate() + 30);
+
+        await admin.from("empresas").update({
+          subscription_status: "ACTIVE",
+          data_vencimento: novaDataVencimento.toISOString(),
+          status: "ativo",
+          atualizado_em: new Date().toISOString()
+        }).eq("id", existingEmpresa.id);
+
+        return NextResponse.json({ success: true, message: "Assinatura renovada" });
+      }
     }
 
     const { data: checkoutRow, error: checkoutError } = await admin
@@ -248,6 +291,21 @@ export async function POST(request: Request) {
       throw new Error(provisionResult.message || "Provisionamento retornou falha.");
     }
 
+    // Atualiza dados de assinatura na empresa recém-criada
+    const dataVencimentoInicial = new Date();
+    dataVencimentoInicial.setDate(dataVencimentoInicial.getDate() + 30);
+
+    const { error: empresaUpdateError } = await admin.from("empresas").update({
+      subscription_id: subscriptionId,
+      subscription_status: "ACTIVE",
+      data_vencimento: dataVencimentoInicial.toISOString(),
+      status: "ativo"
+    }).eq("id", empresaId);
+
+    if (empresaUpdateError) {
+      console.error("Erro ao atualizar dados de assinatura na empresa:", empresaUpdateError);
+    }
+
     const { error: profileError } = await admin.from("user_profiles").upsert(
       {
         user_id: authUserId,
@@ -278,7 +336,7 @@ export async function POST(request: Request) {
       external_transaction_id: checkoutReference,
       status: "sucesso",
       payload: body,
-      detalhes: `Tenant provisionado via backend. schema=${schemaName}`,
+      detalhes: `Tenant provisionado via backend. schema=${schemaName}. subscription=${subscriptionId}`,
     });
 
     if (auditError) {

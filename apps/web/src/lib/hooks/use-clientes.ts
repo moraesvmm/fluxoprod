@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchClientes, createCliente, deleteCliente, updateCliente, type ClienteCreate, type ClienteUpdate, type ClienteListParams, type ClienteListResult } from "@/lib/api";
+import { fetchClientes, createCliente, deleteCliente, updateCliente, importarClientesLote, type ClienteCreate, type ClienteUpdate, type ClienteListParams, type ClienteListResult } from "@/lib/api";
 import { useUserProfile } from "./use-user-profile";
 
 const CLIENTES_KEY = ["clientes"] as const;
@@ -42,6 +42,14 @@ export function useUpdateCliente() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, cliente }: { id: string; cliente: ClienteUpdate }) => updateCliente(id, cliente),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CLIENTES_KEY }),
+  });
+}
+
+export function useImportClientes() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (clientes: any[]) => importarClientesLote(clientes),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLIENTES_KEY }),
   });
 }

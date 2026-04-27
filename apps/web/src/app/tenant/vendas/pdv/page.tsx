@@ -44,6 +44,7 @@ export default function PDVPage() {
   const [userEmpresaId, setUserEmpresaId] = useState('');
   const [busca, setBusca] = useState('');
   const [desconto, setDesconto] = useState<number>(0);
+  const [lembrarDias, setLembrarDias] = useState<number | null>(null);
   const supabase = createClient();
   const { toasts, removeToast, success, error: toastError, warning } = useToast();
 
@@ -188,7 +189,8 @@ export default function PDVPage() {
         p_vendedor_nome: vendedorSelecionado?.nome || null,
         p_metodo_pagamento: metodoPagamento,
         p_valor_total: total,
-        p_desconto: desconto
+        p_desconto: desconto,
+        p_lembrar_dias: lembrarDias
       });
 
       if (error) throw error;
@@ -205,6 +207,7 @@ export default function PDVPage() {
       setCliente('Cliente Avulso');
       setVendedorId('');
       setDesconto(0);
+      setLembrarDias(null);
 
       // Recarregar produtos com estoque atualizado via RPC
       const { data: produtosAtualizados } = await supabase
@@ -431,6 +434,18 @@ export default function PDVPage() {
               onChange={(e) => setDesconto(Math.max(0, parseFloat(e.target.value) || 0))}
               className="w-24 px-2 py-1 border border-border rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="0.00"
+            />
+          </div>
+
+          <div className="flex justify-between items-center mb-4 pb-4 border-b border-border/50">
+            <span className="text-slate-500 text-sm">Lembrar em (dias)</span>
+            <input
+              type="number"
+              min="0"
+              value={lembrarDias || ''}
+              onChange={(e) => setLembrarDias(parseInt(e.target.value) || null)}
+              className="w-24 px-2 py-1 border border-border rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Ex: 30"
             />
           </div>
 

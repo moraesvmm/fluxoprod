@@ -123,7 +123,7 @@ export async function POST(request: Request) {
 
     const customerId = await findOrCreateAsaasCustomer(apiKey, payload);
     const mode = process.env.NEXT_PUBLIC_GATEWAY_MODE === "production" ? "api" : "sandbox";
-    const paymentResponse = await fetch(`https://${mode}.asaas.com/v3/payments`, {
+    const paymentResponse = await fetch(`https://${mode}.asaas.com/v3/subscriptions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -133,7 +133,8 @@ export async function POST(request: Request) {
         customer: customerId,
         billingType: "PIX",
         value: payload.amount,
-        dueDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+        nextDueDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+        cycle: "MONTHLY",
         description: `Assinatura Fluxo ERP - Plano ${payload.planName}`,
         externalReference: checkoutReference,
         metadata: {
@@ -146,10 +147,6 @@ export async function POST(request: Request) {
           companySegment: payload.companySegment,
           planName: payload.planName,
           modules: JSON.stringify(payload.modules),
-        },
-        callback: {
-          successUrl: `${new URL(request.url).origin}/checkout?success=true`,
-          autoRedirect: true,
         },
       }),
     });
@@ -169,7 +166,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       transactionId: paymentData.id,
-      redirectUrl: paymentData.invoiceUrl,
+      redirectUrl: paymentData.invoiceUrl || `https://${mode}.asaas.com/v3/subscriptions/${paymentData.id}/payments`,
       checkoutReference,
     });
   } catch (error: any) {

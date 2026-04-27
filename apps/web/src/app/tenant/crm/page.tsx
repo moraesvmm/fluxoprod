@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Users, UserX, AlertCircle, Plus, Search, MessageCircle, Edit, Trash2, LayoutGrid } from "lucide-react";
+import { Users, UserX, AlertCircle, Plus, Search, MessageCircle, Edit, Trash2, LayoutGrid, FileSpreadsheet } from "lucide-react";
 import { useClientes, useCreateCliente, useDeleteCliente, useUpdateCliente } from "@/lib/hooks/use-clientes";
 import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -23,7 +23,9 @@ import KanbanPipeline from "@/components/crm/kanban-pipeline";
 import DashboardKPIs from "@/components/crm/dashboard-kpis";
 import GerenciarTags from "@/components/crm/gerenciar-tags";
 import TimelineInteracoes from "@/components/crm/timeline-interacoes";
-import FiltroTags from "@/components/crm/filtro-tags";
+import FiltroTags from '@/components/crm/filtro-tags';
+import { NurturingPanel } from '@/components/crm/NurturingPanel';
+import ImportadorClientesExcel from "@/components/crm/ImportadorClientesExcel";
 
 export default function CRMPage() {
   const [buscaCliente, setBuscaCliente] = useState('');
@@ -43,6 +45,7 @@ export default function CRMPage() {
   const deleteMutation = useDeleteCliente();
   const updateMutation = useUpdateCliente();
   const [showForm, setShowForm] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -57,7 +60,6 @@ export default function CRMPage() {
     e.preventDefault();
     if (!formData.nome.trim()) return;
     
-    // Validação de formato de e-mail antes de enviar
     if (formData.email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
@@ -69,7 +71,6 @@ export default function CRMPage() {
     try {
       await createMutation.mutateAsync(formData);
       
-      // Enviar e-mail de boas-vindas se o cliente tiver e-mail
       if (formData.email) {
         try {
           const emailHtml = `
@@ -88,7 +89,6 @@ export default function CRMPage() {
           });
         } catch (emailError) {
           console.error('Erro ao enviar e-mail de boas-vindas:', emailError);
-          // Não bloquear o fluxo se o e-mail falhar
         }
       }
       
@@ -124,8 +124,8 @@ export default function CRMPage() {
     setShowEditModal(true);
   };
 
-  const editarCliente = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const editarCliente = async (e?: React.FormEvent | React.MouseEvent) => {
+    e?.preventDefault();
     if (!editId || !formData.nome.trim()) return;
 
     try {
@@ -278,240 +278,270 @@ export default function CRMPage() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Clientes & CRM</h2>
-          <p className="text-muted-foreground">Gestão de relacionamento e campanhas.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowCampanhaModal(true)}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-4 py-2"
-          >
-            <MessageCircle className="mr-2 h-4 w-4" />
-            Campanha em Massa
-          </button>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Cliente
-          </button>
-        </div>
-      </div>
-
-      {/* Toggle Lista/Pipeline */}
-      <div className="flex items-center gap-2 border-b border-border">
-        <button
-          onClick={() => setViewMode('lista')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            viewMode === 'lista'
-              ? 'text-violet-600 border-b-2 border-violet-600'
-              : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          Lista
-        </button>
-        <button
-          onClick={() => setViewMode('pipeline')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            viewMode === 'pipeline'
-              ? 'text-violet-600 border-b-2 border-violet-600'
-              : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          <LayoutGrid className="w-4 h-4 inline mr-1" />
-          Pipeline
-        </button>
-      </div>
-
-      {showForm && (
-        <div className="bg-white rounded-xl border border-border shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Novo Cliente</h3>
-          <form onSubmit={criarCliente} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
-                <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Nome completo" required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-                <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="(00) 00000-0000" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="email@exemplo.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
-                <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Endereço completo" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
-                <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="000.000.000-00" />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button type="submit" disabled={createMutation.isPending} className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                {createMutation.isPending ? "Salvando..." : "Salvar Cliente"}
-              </button>
-              <button type="button" onClick={() => setShowForm(false)} className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
-                Cancelar
-              </button>
-            </div>
-          </form>
-        </div>
+      {/* Modal de Importação */}
+      {showImportModal && (
+        <ImportadorClientesExcel 
+          onSuccess={() => {
+            recarregarClientes();
+            setShowImportModal(false);
+          }} 
+          onClose={() => setShowImportModal(false)} 
+        />
       )}
 
-      {/* Modal de Edição */}
-      {showEditModal && (
-        <div className="bg-white rounded-xl border border-border shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Editar Cliente</h3>
-          <form onSubmit={editarCliente} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
-                <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Nome completo" required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-                <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="(00) 00000-0000" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="email@exemplo.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
-                <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Endereço completo" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
-                <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="000.000.000-00" />
-              </div>
-            </div>
-            
-            {editId && (
-              <>
-                <div className="border-t border-border pt-4">
-                  <GerenciarTags 
-                    clienteId={editId} 
-                    tagsAtuais={clientes.find(c => c.id === editId)?.tags || []}
-                    onChange={() => {}}
-                    onRefresh={recarregarClientes}
-                  />
-                </div>
-                
-                <div className="border-t border-border pt-4">
-                  <TimelineInteracoes clienteId={editId} />
-                </div>
-              </>
-            )}
-            
-            <div className="flex gap-2">
-              <button type="submit" disabled={updateMutation.isPending} className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                {updateMutation.isPending ? "Salvando..." : "Atualizar Cliente"}
-              </button>
-              <button type="button" onClick={() => setShowEditModal(false)} className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
-                Cancelar
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      <div className="flex flex-col gap-8">
+        {/* Painel de Inteligência e Reengajamento */}
+        <NurturingPanel />
 
-      <DashboardKPIs />
-
-      {viewMode === 'pipeline' ? (
-        <KanbanPipeline />
-      ) : (
-        <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50 gap-4">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <input
-                type="search"
-                placeholder="Buscar por nome, telefone ou email..."
-                value={buscaCliente}
-                onChange={e => setBuscaCliente(e.target.value)}
-                className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-            <FiltroTags onFiltroChange={(tags, operador) => console.log('Filtro:', tags, operador)} />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Clientes & CRM</h2>
+            <p className="text-muted-foreground">Gestão de relacionamento e campanhas.</p>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Contato</TableHead>
-                <TableHead>Data de Cadastro</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowCampanhaModal(true)}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-4 py-2"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Campanha em Massa
+            </button>
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 h-10 px-4 py-2"
+            >
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Importar Excel
+            </button>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Cliente
+            </button>
+          </div>
+        </div>
+
+        <DashboardKPIs />
+
+        {/* Toggle Lista/Pipeline */}
+        <div className="flex items-center gap-2 border-b border-border">
+          <button
+            onClick={() => setViewMode('lista')}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              viewMode === 'lista'
+                ? 'text-violet-600 border-b-2 border-violet-600'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            Lista
+          </button>
+          <button
+            onClick={() => setViewMode('pipeline')}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              viewMode === 'pipeline'
+                ? 'text-violet-600 border-b-2 border-violet-600'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <LayoutGrid className="w-4 h-4 inline mr-1" />
+            Pipeline
+          </button>
+        </div>
+
+        {showForm && (
+          <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4">Novo Cliente</h3>
+            <form onSubmit={criarCliente} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
+                  <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Nome completo" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
+                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="(00) 00000-0000" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                  <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="email@exemplo.com" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+                  <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Endereço completo" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
+                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="000.000.000-00" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button type="submit" disabled={createMutation.isPending} className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+                  {createMutation.isPending ? "Salvando..." : "Salvar Cliente"}
+                </button>
+                <button type="button" onClick={() => setShowForm(false)} className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Modal de Edição */}
+        {showEditModal && (
+          <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4">Editar Cliente</h3>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
+                  <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Nome completo" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
+                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="(00) 00000-0000" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                  <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="email@exemplo.com" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+                  <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Endereço completo" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
+                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="000.000.000-00" />
+                </div>
+              </div>
+              
+              {editId && (
+                <>
+                  <div className="border-t border-border pt-4">
+                    <GerenciarTags 
+                      clienteId={editId} 
+                      tagsAtuais={clientes.find(c => c.id === editId)?.tags || []}
+                      onChange={() => {}}
+                      onRefresh={recarregarClientes}
+                    />
+                  </div>
+                  
+                  <div className="border-t border-border pt-4">
+                    <TimelineInteracoes clienteId={editId} />
+                  </div>
+                </>
+              )}
+              
+              <div className="flex gap-2">
+                <button 
+                  type="button"
+                  onClick={editarCliente}
+                  disabled={updateMutation.isPending} 
+                  className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {updateMutation.isPending ? "Salvando..." : "Atualizar Cliente"}
+                </button>
+                <button type="button" onClick={() => setShowEditModal(false)} className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {viewMode === 'pipeline' ? (
+          <KanbanPipeline />
+        ) : (
+          <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50 gap-4">
+              <div className="relative w-full max-w-sm">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="search"
+                  placeholder="Buscar por nome, telefone ou email..."
+                  value={buscaCliente}
+                  onChange={e => setBuscaCliente(e.target.value)}
+                  className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <FiltroTags onFiltroChange={(tags, operador) => console.log('Filtro:', tags, operador)} />
+            </div>
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="p-0">
-                    <TableSkeleton rows={5} columns={5} />
-                  </TableCell>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>CPF/CNPJ</TableHead>
+                  <TableHead>Contato</TableHead>
+                  <TableHead>Data de Cadastro</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
-              ) : error ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-6">
-                    <div className="text-red-500">{error}</div>
-                  </TableCell>
-                </TableRow>
-              ) : clientes.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-6">
-                    <div className="text-slate-500">Nenhum cliente encontrado</div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                clientes.map((item: any) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium text-slate-900">{item.nome}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-sm">{item.telefone || '-'}</span>
-                        <span className="text-xs text-muted-foreground">{item.email || '-'}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-slate-500">{formatarData(item.criado_em)}</TableCell>
-                    <TableCell>
-                      <StatusBadge status="success" label="ativo" className="capitalize" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          className={`p-1 ${item.telefone ? 'text-emerald-600 hover:text-emerald-700' : 'text-slate-300 opacity-50 cursor-not-allowed'}`}
-                          title={item.telefone ? 'WhatsApp' : 'Telefone não cadastrado'}
-                          disabled={!item.telefone}
-                          onClick={() => {
-                            if (!item.telefone) return;
-                            const num = item.telefone.replace(/\D/g, '');
-                            window.open(`https://wa.me/55${num}`, '_blank');
-                          }}
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                        </button>
-                        <button onClick={() => abrirEdicao(item)} className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button onClick={() => setDeleteId(item.id)} className="text-slate-400 hover:text-red-600 p-1" title="Excluir">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-0">
+                      <TableSkeleton rows={5} columns={6} />
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                ) : error ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-6">
+                      <div className="text-red-500">{error}</div>
+                    </TableCell>
+                  </TableRow>
+                ) : clientes.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-6">
+                      <div className="text-slate-500">Nenhum cliente encontrado</div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  clientes.map((item: any) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium text-slate-900">{item.nome}</TableCell>
+                      <TableCell className="font-mono text-xs text-slate-600">{item.cpf_cnpj || '-'}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-sm">{item.telefone || '-'}</span>
+                            <span className="text-xs text-muted-foreground">{item.email || '-'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-500">{formatarData(item.criado_em)}</TableCell>
+                        <TableCell>
+                          <StatusBadge status="success" label="ativo" className="capitalize" />
+                        </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            className={`p-1 ${item.telefone ? 'text-emerald-600 hover:text-emerald-700' : 'text-slate-300 opacity-50 cursor-not-allowed'}`}
+                            title={item.telefone ? 'WhatsApp' : 'Telefone não cadastrado'}
+                            disabled={!item.telefone}
+                            onClick={() => {
+                              if (!item.telefone) return;
+                              const num = item.telefone.replace(/\D/g, '');
+                              window.open(`https://wa.me/55${num}`, '_blank');
+                            }}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                          </button>
+                          <button onClick={() => abrirEdicao(item)} className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button onClick={() => setDeleteId(item.id)} className="text-slate-400 hover:text-red-600 p-1" title="Excluir">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

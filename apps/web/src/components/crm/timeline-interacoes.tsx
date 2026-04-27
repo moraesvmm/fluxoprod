@@ -92,6 +92,7 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Histórico de Interações</h3>
         <button
+          type="button"
           onClick={() => setShowForm(!showForm)}
           className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
         >
@@ -227,6 +228,7 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
                       <p className="text-xs text-slate-400 mt-2">{formatarData(interacao.data_interacao)}</p>
                     </div>
                     <button
+                      type="button"
                       onClick={() => excluir(interacao.id)}
                       disabled={isDeleting}
                       className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
@@ -242,6 +244,7 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
           {hasMore && (
             <div className="text-center pt-4">
               <button
+                type="button"
                 onClick={carregarMais}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-violet-600 hover:text-violet-700 hover:bg-violet-50 rounded-lg transition-colors"
               >

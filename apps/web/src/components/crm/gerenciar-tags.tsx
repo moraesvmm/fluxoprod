@@ -119,6 +119,7 @@ export default function GerenciarTags({ clienteId, tagsAtuais, onChange, onRefre
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           </div>
           <button
+            type="button"
             onClick={() => inputValue.trim() && adicionarNovaTag(inputValue.trim())}
             disabled={isAdding}
             className="px-3 py-2 bg-violet-600 text-white rounded-md text-sm font-medium hover:bg-violet-700 transition-colors disabled:opacity-50"
@@ -135,6 +136,7 @@ export default function GerenciarTags({ clienteId, tagsAtuais, onChange, onRefre
             {sugestoes.map((tag) => (
               <button
                 key={tag}
+                type="button"
                 onClick={() => adicionarNovaTag(tag)}
                 className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 transition-colors flex items-center gap-2"
               >
@@ -158,6 +160,7 @@ export default function GerenciarTags({ clienteId, tagsAtuais, onChange, onRefre
           >
             {tag}
             <button
+              type="button"
               onClick={() => handleRemoverTag(tag)}
               disabled={isRemoving}
               className="hover:bg-white/20 rounded-full p-0.5 transition-colors disabled:opacity-50"
