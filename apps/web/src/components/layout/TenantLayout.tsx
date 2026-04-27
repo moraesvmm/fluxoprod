@@ -1,14 +1,29 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { SubscriptionBanner } from "./SubscriptionBanner";
 import { GlobalSearch } from "@/components/modules/base/GlobalSearch";
 import { PageTransition } from "./PageTransition";
+import { useEmpresa } from "@/lib/hooks/use-empresas";
 
 export function TenantLayout({ children }: { children: ReactNode }) {
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const { data: empresa } = useEmpresa();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (empresa?.subscription_status === 'TRIAL' && empresa.trial_ends_at) {
+      const endsAt = new Date(empresa.trial_ends_at);
+      const now = new Date();
+      if (now > endsAt && !pathname.includes('/tenant/assinatura')) {
+        router.push('/tenant/assinatura');
+      }
+    }
+  }, [empresa, router, pathname]);
 
   return (
     <div className="flex h-screen bg-background">

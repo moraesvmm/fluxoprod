@@ -10,6 +10,8 @@ export interface PaymentTransactionPayload {
   companySegment: string;
   metadata?: {
     password?: string;
+    empresaId?: string;
+    isUpgrade?: boolean;
   };
 }
 
@@ -42,6 +44,8 @@ export class PaymentGatewayService {
           companyDocument: payload.companyDocument,
           companySize: payload.companySize,
           companySegment: payload.companySegment,
+          empresaId: payload.metadata?.empresaId,
+          isUpgrade: payload.metadata?.isUpgrade,
         }),
       });
 

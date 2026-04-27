@@ -36,6 +36,7 @@ const stats = [
 ];
 
 const benefits = [
+  "7 dias de teste grátis (sem cartão)",
   "Setup em menos de 5 minutos",
   "Sem instalação de software",
   "Suporte técnico dedicado",
@@ -168,7 +169,7 @@ export default function LandingPageV2() {
             {/* CTAs */}
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/login" className="group inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-base rounded-2xl shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 transition-all duration-300 hover:scale-[1.03]">
-                Começar Agora <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                Começar Teste Grátis <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Link>
               <a href="#funcionalidades" className={`inline-flex items-center gap-2 px-8 py-4 font-semibold text-base rounded-2xl border transition-all duration-300 ${d ? "bg-white/[0.03] text-slate-300 border-white/10 hover:border-violet-500/40 hover:bg-white/[0.06]" : "bg-white text-slate-700 border-slate-200 hover:border-violet-300 hover:text-violet-700 shadow-sm"}`}>
                 Explorar Recursos
@@ -180,7 +181,7 @@ export default function LandingPageV2() {
               {[
                 { icon: ShieldCheck, text: "Dados Protegidos" },
                 { icon: Globe, text: "100% Cloud" },
-                { icon: Clock, text: "Setup em 5 min" },
+                { icon: Sparkles, text: "7 Dias Grátis" },
               ].map(({ icon: Icon, text }) => (
                 <span key={text} className="flex items-center gap-1.5">
                   <Icon className="w-4 h-4 text-violet-500" /> {text}
@@ -309,7 +310,7 @@ export default function LandingPageV2() {
             </h2>
             <p className="text-lg sm:text-xl text-violet-100 max-w-2xl mx-auto mb-10 leading-relaxed">Comece agora mesmo e descubra por que o Fluxo é a escolha de empresas que buscam eficiência real.</p>
             <Link href="/login" className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-violet-700 font-bold text-lg rounded-2xl shadow-2xl shadow-black/20 transition-all duration-300 hover:scale-105">
-              Acessar a Plataforma <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1.5" />
+              Começar Teste Grátis <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1.5" />
             </Link>
           </AnimatedSection>
         </div>

@@ -1,10 +1,47 @@
 # MÓDULO CHECKOUT & ASSINATURAS
 
-> **⚠ VISTORIA PENDENTE (Integração Resend — 27/04/2026):** Implementado disparo automático de e-mail de boas-vindas via Resend API no Checkout e no Painel Master. Adicionada API route de proxy e utilitário de e-mail. Pendente teste de entrega no e-mail `vitorbm309@gmail.com`.
+| DATA | VISTORIA | STATUS | RESUMO |
+| :--- | :--- | :--- | :--- |
+| 2026-04-27 | Provisionamento Automático & E-mail Trial | **PENDENTE** | Automação de DDL e link de ativação real. |
+| 2026-04-27 | Teste Grátis de 7 Dias (Free Trial) | **PENDENTE** | Fluxo de registro trial e upgrade Asaas. |
+| 2026-04-26 | Dashboard KPI & CRM Nurturing | CONCLUÍDO | Ajuste de RPCs globais e schemas dinâmicos. |
 
-> **⚠ VISTORIA PENDENTE (Validação de E-mail Real — 27/04/2026):** Implementada validação de domínios fictícios (blacklisting) no frontend e backend. O fluxo de criação de usuário no Webhook foi alterado para `email_confirm: false`, forçando a verificação real via link do Supabase antes do login. Página de login atualizada com mensagens de erro amigáveis para e-mails não confirmados.
+---
 
-> **⚠ VISTORIA PENDENTE (SaaS Subscriptions — 26/04/2026):** Foi implementado o modelo de assinaturas mensais recorrentes via Asaas. Alterações críticas realizadas no banco de dados (public.empresas), checkout session, webhook de pagamento e UI do checkout. Uma vistoria completa de integridade deve ser realizada com prioridade máxima.
+## VISTORIA 29 (PENDENTE): Provisionamento Automático & E-mail Trial — 27/04/2026
+
+### Escopo
+- **Provisionamento DDL:** Atualização da RPC `public.provisionar_empresa` para criar tabelas e funções internas (`tenant_dashboard_kpis`, `tenant_obter_sugestoes_nurturing`) automaticamente.
+- **E-mail Transactional:** Configuração da `RESEND_API_KEY` e correção do template HTML em `email.ts`.
+- **Ativação Real:** Uso de `admin.auth.admin.generateLink` para envio de link de ativação real no e-mail.
+- **Hotfix Dashboard:** Injeção manual de DDL no tenant `tenant_fluxoerp_01615a` para resolver travamento de UI.
+
+### Arquivos Modificados
+- `apps/web/src/lib/email.ts` [MODIFICADO]
+- `apps/web/src/app/api/auth/register-trial/route.ts` [MODIFICADO]
+- `public.provisionar_empresa` [DB]
+
+### Status
+- **Banco:** RPC atualizada e tenant corrigido.
+- **E-mail:** Link de ativação funcional.
+- **Vistoria:** PENDENTE.
+
+## VISTORIA 28 (PENDENTE): Implementação de Teste Grátis de 7 Dias (Free Trial) — 27/04/2026
+
+### Escopo
+- Mudança do paradigma de provisionamento: de "pós-pagamento" para "imediato" via trial.
+- Adição de inteligência de controle temporal (`trial_ends_at`) no banco e middleware.
+- Criação de interface de conversão (upgrade) dentro do tenant.
+
+### Arquivos Modificados
+- `public.empresas` [DB] — Colunas `trial_ends_at` e `plan_name`.
+- `apps/web/src/app/api/auth/register-trial/route.ts` [NOVO].
+- `apps/web/src/app/tenant/assinatura/page.tsx` [NOVO].
+
+### Status
+- **Vistoria:** PENDENTE.
+
+---
 
 ## VISTORIA 26 (VALIDADA): Flexibilização Modular A La Carte e CRM Avulso — 27/04/2026
 
@@ -163,7 +200,7 @@ Habilitar a autossuficiência do módulo CRM para clientes "A La Carte", permiti
 - [x] **`FechamentoMesModal.tsx`** — Modal de fechamento mensal com `canvas-confetti` (dependência verificada no `package.json`). Consome `useFechamentoPendente`.
 - [x] **`KPICard.tsx`** — Componente bem documentado com JSDoc, suporte a tendência opcional, customização via className.
 - [x] **`ActionCard.tsx`** — Componente bem documentado, links via Next.js `Link`, animações hover.
-- [x] **Skeletons** — `KPISkeleton.tsx`, `CardSkeleton.tsx`, `ChartSkeleton` (inline) existem e são usados.
+- [x] **`Skeletons`** — `KPISkeleton.tsx`, `CardSkeleton.tsx`, `ChartSkeleton` (inline) existem e são usados.
 
 ### Middleware Verificado
 - [x] **Rota `/tenant/dashboard`** — Corretamente isenta de feature flag check (linha 137: `moduleKey !== 'dashboard'`). Dashboard é sempre acessível para tenants autenticados.

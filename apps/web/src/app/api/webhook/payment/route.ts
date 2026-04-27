@@ -161,6 +161,36 @@ export async function POST(request: Request) {
       }
     }
 
+    // 1.5 CASO DE UPGRADE (Trial -> Pago)
+    // Se vier empresaId no metadata, apenas ativamos a empresa existente
+    const upgradeEmpresaId = metadata.empresaId || null;
+    if (upgradeEmpresaId) {
+      const novaDataVencimento = new Date();
+      novaDataVencimento.setDate(novaDataVencimento.getDate() + 30);
+
+      const { error: upgradeError } = await admin.from("empresas").update({
+        subscription_id: subscriptionId,
+        subscription_status: "ACTIVE",
+        data_vencimento: novaDataVencimento.toISOString(),
+        status: "ativo",
+        atualizado_em: new Date().toISOString()
+      }).eq("id", upgradeEmpresaId);
+
+      if (upgradeError) {
+         console.error("Erro ao processar upgrade no webhook:", upgradeError);
+         return NextResponse.json({ error: "Erro ao ativar empresa de upgrade" }, { status: 500 });
+      }
+
+      await admin.from("webhook_audit_log").insert({
+        external_transaction_id: checkoutReference,
+        status: "sucesso",
+        payload: body,
+        detalhes: `Upgrade de Trial realizado com sucesso. empresa_id=${upgradeEmpresaId}`,
+      });
+
+      return NextResponse.json({ success: true, message: "Upgrade realizado com sucesso" });
+    }
+
     const { data: checkoutRow, error: checkoutError } = await admin
       .from("checkout_vendas")
       .select("id, external_transaction_id, config_payload, email, cliente_nome, status")

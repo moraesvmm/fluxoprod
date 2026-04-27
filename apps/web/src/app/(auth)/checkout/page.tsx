@@ -172,24 +172,35 @@ function CheckoutContent() {
 
     setLoading(true);
     try {
-      const payload: PaymentTransactionPayload = {
-        customerName, customerEmail, planName: selectedPlan ? selectedPlan.nome : "Personalizado (A La Carte)", amount: totalValue,
-        modules: selectedModules, companyName, companyDocument, companySize, companySegment,
-        metadata: { password }
+      const payload = {
+        customerName, 
+        customerEmail, 
+        planName: selectedPlan ? selectedPlan.nome : "Personalizado (A La Carte)", 
+        modules: selectedModules, 
+        companyName, 
+        companyDocument, 
+        companySize, 
+        companySegment,
+        password
       };
 
-      const response = await PaymentGatewayService.createTransaction(payload);
+      const response = await fetch("/api/auth/register-trial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      
+      const data = await response.json();
 
-      if (response.success && response.redirectUrl) {
-        // No cenário real, redirecionamos para o checkout do gateway (Asaas Invoice)
-        window.location.href = response.redirectUrl;
+      if (response.ok && data.success) {
+        setSuccess(true);
       } else {
-        alert("Erro no checkout: " + (response.error || "Falha ao gerar link de pagamento"));
+        alert("Erro no cadastro: " + (data.error || "Falha ao criar conta de teste"));
         setLoading(false);
       }
     } catch (err) {
       console.error(err);
-      alert("Houve um problema ao processar seu pagamento. Por favor, tente novamente.");
+      alert("Houve um problema ao processar seu cadastro. Por favor, tente novamente.");
       setLoading(false);
     }
   };
@@ -198,23 +209,33 @@ function CheckoutContent() {
     return (
       <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center p-4">
          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-[#121216] border border-white/5 rounded-2xl shadow-2xl p-10 max-w-lg w-full text-center">
-            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-               <Check className="w-10 h-10 text-green-400" />
+            <div className="w-20 h-20 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+               <motion.div
+                 animate={{ y: [0, -5, 0] }}
+                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+               >
+                 <Server className="w-10 h-10 text-indigo-400" />
+               </motion.div>
             </div>
-            <h2 className="text-3xl font-bold text-white mb-4">Pagamento Aprovado!</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">Verifique seu E-mail</h2>
             <p className="text-gray-400 mb-8 leading-relaxed">
-               Recebemos seu pedido com sucesso. A infraestrutura segura da sua operação já está sendo <strong>provisionada automaticamente</strong>.
+               Sua conta foi pré-configurada! Enviamos um <strong>link de ativação</strong> para o endereço abaixo. Por favor, confirme seu e-mail para liberar o acesso aos 7 dias de teste.
             </p>
             <div className="bg-[#1e1e24] rounded-lg p-4 text-left border border-white/5 mb-8">
-               <p className="text-sm text-gray-400 mb-1">Acesso à Plataforma:</p>
+               <p className="text-sm text-gray-400 mb-1">E-mail de Cadastro:</p>
                <p className="font-medium text-indigo-400 truncate">{customerEmail}</p>
             </div>
-            <button 
-               onClick={() => router.push("/login")}
-               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-4 rounded-xl transition-colors"
-            >
-               Ir para o Login
-            </button>
+            <div className="space-y-4">
+              <button 
+                 onClick={() => router.push("/login")}
+                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-4 rounded-xl transition-colors"
+              >
+                 Já confirmei, ir para o Login
+              </button>
+              <p className="text-xs text-gray-500">
+                Não recebeu? Verifique sua caixa de spam ou <button className="text-indigo-400 hover:underline">clique aqui para reenviar</button>.
+              </p>
+            </div>
          </motion.div>
       </div>
     );
@@ -248,7 +269,7 @@ function CheckoutContent() {
              <div className="hidden sm:flex items-center justify-end gap-6 text-sm font-medium text-gray-400 flex-1">
                 <span className={step >= 1 ? "text-indigo-400" : ""}>1. Plano</span>
                 <span className={step >= 2 ? "text-indigo-400" : ""}>2. Cadastro</span>
-                <span className={step >= 3 ? "text-indigo-400" : ""}>3. Pagamento</span>
+                <span className={step >= 3 ? "text-indigo-400" : ""}>3. Teste Grátis</span>
                 <span className="flex items-center justify-center text-emerald-500 hover:text-emerald-400 transition-colors" title="Ambiente Seguro">
                   <ShieldCheck className="w-[18px] h-[18px]"/>
                 </span>
@@ -436,7 +457,7 @@ function CheckoutContent() {
                        disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11}
                       className="bg-white text-black disabled:opacity-50 hover:bg-gray-200 font-medium py-3 px-8 rounded-xl flex items-center gap-2 group transition-all"
                    >
-                     Ir para Pagamento <ArrowRight className="w-4 h-4" />
+                     Começar Teste Grátis <ArrowRight className="w-4 h-4" />
                    </button>
                 </div>
              </motion.div>
@@ -448,8 +469,8 @@ function CheckoutContent() {
                   <div className="absolute top-0 right-0 p-8 opacity-5">
                     <CreditCard className="w-48 h-48"/>
                   </div>
-                  <h2 className="text-2xl font-bold mb-2">Finalizar Assinatura</h2>
-                  <p className="text-gray-400 mb-8 max-w-sm">Sua assinatura mensal será processada com segurança via <strong>Asaas Gateway</strong>.</p>
+                  <h2 className="text-2xl font-bold mb-2">Iniciar Teste Grátis de 7 Dias</h2>
+                  <p className="text-gray-400 mb-8 max-w-sm">Comece a usar o Fluxo ERP imediatamente, sem compromisso. Cancele quando quiser.</p>
 
                   <div className="bg-[#0a0a0c] border border-white/5 rounded-xl p-6 mb-8 relative z-10">
                      <div className="flex justify-between items-center mb-4">
@@ -478,7 +499,7 @@ function CheckoutContent() {
                     disabled={loading}
                     className="relative z-10 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-xl shadow-indigo-500/20 font-bold py-5 rounded-xl flex items-center justify-center gap-3 transition-all disabled:opacity-70 disabled:cursor-not-allowed text-lg"
                   >
-                    {loading ? <><Loader2 className="w-5 h-5 animate-spin"/> Mágica Acontecendo...</> : "Confirmar e Assinar"}
+                    {loading ? <><Loader2 className="w-5 h-5 animate-spin"/> Mágica Acontecendo...</> : "Criar Conta e Iniciar Teste"}
                   </button>
                </div>
                
@@ -528,7 +549,7 @@ function CheckoutContent() {
                       disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11}
                      className="w-full sm:w-auto bg-emerald-500 text-white disabled:opacity-50 disabled:bg-gray-600 font-bold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-colors"
                    >
-                     Revisar e Pagar
+                     Começar Teste Grátis
                    </button>
                  )}
               </div>

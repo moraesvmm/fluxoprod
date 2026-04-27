@@ -17,6 +17,8 @@ interface CheckoutSessionPayload {
   companyDocument: string;
   companySize: string;
   companySegment: string;
+  empresaId?: string;
+  isUpgrade?: boolean;
 }
 
 async function findOrCreateAsaasCustomer(
@@ -81,7 +83,7 @@ export async function POST(request: Request) {
     if (
       !payload.customerName?.trim() ||
       !payload.customerEmail?.trim() ||
-      !payload.password?.trim() ||
+      (!payload.isUpgrade && !payload.password?.trim()) ||
       !payload.companyName?.trim() ||
       !payload.companyDocument?.trim() ||
       !Number.isFinite(payload.amount) ||
@@ -124,6 +126,8 @@ export async function POST(request: Request) {
           company_document: payload.companyDocument,
           company_size: payload.companySize,
           company_segment: payload.companySegment,
+          empresa_id: payload.empresaId,
+          is_upgrade: payload.isUpgrade,
         },
       },
       {
@@ -163,6 +167,8 @@ export async function POST(request: Request) {
           companySegment: payload.companySegment,
           planName: payload.planName,
           modules: JSON.stringify(payload.modules),
+          empresaId: payload.empresaId,
+          isUpgrade: payload.isUpgrade ? "true" : "false",
         },
       }),
     });

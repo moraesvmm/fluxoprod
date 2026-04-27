@@ -386,8 +386,10 @@ export interface Empresa {
   criado_em: string;
   status?: string;
   subscription_id?: string;
-  subscription_status?: 'ACTIVE' | 'OVERDUE' | 'INACTIVE';
+  subscription_status?: 'ACTIVE' | 'OVERDUE' | 'INACTIVE' | 'TRIAL';
   data_vencimento?: string;
+  trial_ends_at?: string;
+  plan_name?: string;
 }
 
 export interface EmpresaUpdate {
@@ -397,8 +399,10 @@ export interface EmpresaUpdate {
   segmento?: string;
   status?: string;
   subscription_id?: string;
-  subscription_status?: 'ACTIVE' | 'OVERDUE' | 'INACTIVE';
+  subscription_status?: 'ACTIVE' | 'OVERDUE' | 'INACTIVE' | 'TRIAL';
   data_vencimento?: string;
+  trial_ends_at?: string;
+  plan_name?: string;
 }
 
 export interface Funcionario {
