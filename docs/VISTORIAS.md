@@ -1,5 +1,7 @@
 # MÓDULO CHECKOUT & ASSINATURAS
 
+> **⚠ VISTORIA PENDENTE (Integração Resend — 27/04/2026):** Implementado disparo automático de e-mail de boas-vindas via Resend API no Checkout e no Painel Master. Adicionada API route de proxy e utilitário de e-mail. Pendente teste de entrega no e-mail `vitorbm309@gmail.com`.
+
 > **⚠ VISTORIA PENDENTE (Validação de E-mail Real — 27/04/2026):** Implementada validação de domínios fictícios (blacklisting) no frontend e backend. O fluxo de criação de usuário no Webhook foi alterado para `email_confirm: false`, forçando a verificação real via link do Supabase antes do login. Página de login atualizada com mensagens de erro amigáveis para e-mails não confirmados.
 
 > **⚠ VISTORIA PENDENTE (SaaS Subscriptions — 26/04/2026):** Foi implementado o modelo de assinaturas mensais recorrentes via Asaas. Alterações críticas realizadas no banco de dados (public.empresas), checkout session, webhook de pagamento e UI do checkout. Uma vistoria completa de integridade deve ser realizada com prioridade máxima.

@@ -103,6 +103,7 @@ function ProvisioningWizard() {
 
   const [formData, setFormData] = useState({
     cnpj: "", razao_social: "", porte: "MPE", segmento: "", modules: [] as string[],
+    email: "",
   });
 
   const availableModules = [
@@ -140,6 +141,16 @@ function ProvisioningWizard() {
       if (error) throw new Error(error.message);
       const result = data as { status: string; message: string };
       setProgressStatus(result.message || "Ambiente gerado com sucesso!");
+
+      // Enviar e-mail de boas-vindas via API route
+      if (formData.email) {
+        fetch("/api/mestre/welcome", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: formData.email, name: formData.razao_social })
+        }).catch(e => console.error("Falha ao enviar e-mail mestre:", e));
+      }
+
       setTimeout(() => setStep(4), 2000);
     } catch (err: any) {
       setProgressStatus("Provisionamento falhou.");
@@ -162,6 +173,10 @@ function ProvisioningWizard() {
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">Razão Social</label>
                 <input value={formData.razao_social} onChange={e => setFormData({ ...formData, razao_social: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all" placeholder="Tech Solutions Ltda" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">E-mail do Administrador</label>
+                <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="admin@empresa.com" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

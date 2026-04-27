@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { decryptCheckoutSecret } from "@/lib/server/checkout-state";
 import { PaymentGatewayService } from "@/services/PaymentGatewayService";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { sendWelcomeEmail } from "@/lib/email";
 
 type CheckoutConfig = {
   customer_name?: string;
@@ -341,6 +342,13 @@ export async function POST(request: Request) {
 
     if (auditError) {
       throw new Error(auditError.message);
+    }
+
+    // Enviar e-mail de boas-vindas
+    if (customerEmail) {
+      await sendWelcomeEmail(customerEmail, customerName).catch(err => 
+        console.error("Erro ao disparar e-mail de boas-vindas:", err)
+      );
     }
 
     return NextResponse.json({

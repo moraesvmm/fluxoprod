@@ -1108,6 +1108,21 @@ Para garantir que os novos usuários utilizem e-mails reais e operáveis (Gmail,
 
 ---
 
+## 📧 INTEGRAÇÃO RESEND (BOAS-VINDAS)
+
+### Fluxo de Mensageria
+O sistema utiliza o **Resend** para disparar e-mails transacionais de boas-vindas:
+
+1.  **Checkout**: Após a confirmação de pagamento e provisionamento do tenant, o webhook dispara um e-mail para o novo cliente.
+2.  **Painel Master**: Ao provisionar uma empresa manualmente via `/mestre`, o administrador master pode informar o e-mail do cliente para envio automático das boas-vindas.
+
+### Implementação Técnica
+*   **Utility**: `apps/web/src/lib/email.ts` (Utiliza `fetch` nativo para compatibilidade).
+*   **Endpoint**: `/api/mestre/welcome` (Proxy para componentes client).
+*   **Template**: HTML responsivo com branding Fluxoprod.
+
+---
+
 ## 🎯 RESUMO EXECUTIVO
 
 ### Estado Atual
