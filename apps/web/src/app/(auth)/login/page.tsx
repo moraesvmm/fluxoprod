@@ -26,7 +26,11 @@ export default function LoginPage() {
     });
 
     if (signInError || !signInData?.user) {
-      setError(signInError?.message || "Erro na autenticação.");
+      let msg = signInError?.message || "Erro na autenticação.";
+      if (msg.includes("Email not confirmed")) {
+        msg = "Seu e-mail ainda não foi verificado. Por favor, verifique sua caixa de entrada (e spam) para o link de confirmação.";
+      }
+      setError(msg);
       setLoading(false);
       return;
     }

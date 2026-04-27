@@ -1097,11 +1097,14 @@ Para garantir que os novos usuários utilizem e-mails reais e operáveis (Gmail,
    - Validação de Regex RFC 5322 para garantir integridade sintática.
 
 2. **Fluxo de Confirmação de E-mail (Supabase Auth)**:
-   - O sistema está configurado para exigir confirmação de e-mail antes do acesso total.
-   - O provisionamento do tenant pelo webhook só é considerado "concluido" após a ativação da conta pelo usuário via link enviado ao e-mail real.
+   - O sistema agora força a confirmação de e-mail ao criar o usuário no webhook de pagamento (`email_confirm: false`).
+   - O Supabase envia automaticamente um link de verificação para o e-mail real fornecido no checkout.
+   - O login na plataforma é bloqueado até que o usuário clique no link de confirmação.
+   - A página de login fornece feedback específico caso o e-mail ainda não tenha sido validado.
 
 3. **Rastreabilidade**:
    - Todo e-mail utilizado em tentativas de checkout é registrado em `public.checkout_vendas` para auditoria de comportamento e prevenção de spam.
+   - O webhook realiza uma verificação prévia de duplicidade e higienização de domínios antes de tentar criar a conta.
 
 ---
 

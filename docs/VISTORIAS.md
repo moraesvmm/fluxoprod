@@ -1,6 +1,6 @@
 # MÓDULO CHECKOUT & ASSINATURAS
 
-> **⚠ VISTORIA PENDENTE (Validação de E-mail Real — 27/04/2026):** Implementada validação de domínios fictícios (blacklisting) no frontend e backend para forçar o uso de e-mails reais (Gmail, Outlook, etc.). Pendente teste de integração com Gateway e confirmação de fluxo Supabase Auth.
+> **⚠ VISTORIA PENDENTE (Validação de E-mail Real — 27/04/2026):** Implementada validação de domínios fictícios (blacklisting) no frontend e backend. O fluxo de criação de usuário no Webhook foi alterado para `email_confirm: false`, forçando a verificação real via link do Supabase antes do login. Página de login atualizada com mensagens de erro amigáveis para e-mails não confirmados.
 
 > **⚠ VISTORIA PENDENTE (SaaS Subscriptions — 26/04/2026):** Foi implementado o modelo de assinaturas mensais recorrentes via Asaas. Alterações críticas realizadas no banco de dados (public.empresas), checkout session, webhook de pagamento e UI do checkout. Uma vistoria completa de integridade deve ser realizada com prioridade máxima.
 

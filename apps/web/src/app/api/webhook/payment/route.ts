@@ -232,7 +232,7 @@ export async function POST(request: Request) {
     const { data: createdUser, error: createUserError } = await admin.auth.admin.createUser({
       email: customerEmail,
       password,
-      email_confirm: true,
+      email_confirm: false, // Força a verificação de e-mail real
     });
 
     let authUserId = createdUser?.user?.id ?? null;
