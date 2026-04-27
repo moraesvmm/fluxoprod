@@ -14,12 +14,15 @@ export async function sendWelcomeEmail(to: string, name: string) {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Fluxoprod <onboarding@resend.dev>", // Nota: Em prod, usar domínio verificado
+        from: "Fluxoprod <onboarding@seufluxoerp.com.br>",
         to: [to],
         subject: "Bem-vindo ao Fluxoprod! 🚀",
         html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
-            <h1 style="color: #4f46e5;">Olá, ${name}!</h1>
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; border: 1px solid #eee; border-radius: 12px;">
+            <div style="text-align: center; margin-bottom: 25px;">
+              <img src="https://seufluxoerp.com.br/logo-fluxo.png" alt="Fluxoprod Logo" style="width: 180px; height: auto;" />
+            </div>
+            <h1 style="color: #4f46e5; text-align: center;">Olá, ${name}!</h1>
             <p style="font-size: 16px; line-height: 1.6;">
               É um prazer ter você conosco no <strong>Fluxoprod</strong>. Sua conta foi criada com sucesso e seu ambiente já está sendo preparado.
             </p>
