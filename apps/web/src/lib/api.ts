@@ -602,12 +602,12 @@ export async function updateCliente(id: string, cliente: ClienteUpdate): Promise
   const { data, error } = await getSupabase()
     .rpc('tenant_atualizar_cliente', {
       p_cliente_id: id,
-      p_nome: cliente.nome,
-      p_email: cliente.email,
-      p_telefone: cliente.telefone || null,
-      p_funil_fase: cliente.funil_fase || 'lead',
-      p_status: cliente.status || 'ativo',
-      p_cpf_cnpj: cliente.cpf_cnpj || null
+      p_nome: cliente.nome ?? null,
+      p_email: cliente.email ?? null,
+      p_telefone: cliente.telefone ?? null,
+      p_funil_fase: cliente.funil_fase ?? null,
+      p_status: cliente.status ?? null,
+      p_cpf_cnpj: cliente.cpf_cnpj ?? null
     });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);

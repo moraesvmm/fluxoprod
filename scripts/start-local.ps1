@@ -2,7 +2,7 @@
 # Usa Node portátil local sem dependências globais
 
 $ErrorActionPreference = "Stop"
-$repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$repoRoot = (Get-Item $PSScriptRoot).Parent.FullName
 
 Write-Host "=== Iniciando FLUXO (ambiente corporativo restrito) ==="
 

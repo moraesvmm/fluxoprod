@@ -140,7 +140,7 @@ BEGIN
           telefone = COALESCE(p_telefone, telefone),
           funil_fase = COALESCE(p_funil_fase, funil_fase),
           status = COALESCE(p_status, status),
-          cpf_cnpj = p_cpf_cnpj,
+          cpf_cnpj = COALESCE(p_cpf_cnpj, cpf_cnpj),
           atualizado_em = NOW()
         WHERE id = p_cliente_id AND deleted_at IS NULL;
 

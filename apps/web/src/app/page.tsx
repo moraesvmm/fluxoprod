@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { AnimatedSection, FloatingParticles, GradientText, SectionBadge } from "./landing-components";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 const VideoDemo = dynamic(() => import("@/components/VideoDemo"), {
   ssr: false,
@@ -53,7 +54,7 @@ const navLinks = [
 export default function LandingPageV2() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
@@ -65,19 +66,11 @@ export default function LandingPageV2() {
     return () => window.removeEventListener("scroll", h);
   }, []);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("darkMode");
-    if (saved !== null) setDarkMode(saved === "true");
-  }, []);
-
   const toggleDark = () => {
-    setDarkMode((p) => {
-      localStorage.setItem("darkMode", String(!p));
-      return !p;
-    });
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  const d = darkMode; // shorthand
+  const d = resolvedTheme === "dark"; // shorthand
 
   return (
     <div className={`relative min-h-screen overflow-x-hidden transition-colors duration-500 ${d ? "bg-[#060611] text-slate-100" : "bg-[#fafafe] text-slate-900"}`}>

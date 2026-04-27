@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { CheckCircle, TrendingUp, ShoppingBag, Banknote } from "lucide-react";
 import { useFechamentoPendente } from "@/lib/hooks/use-dashboard";
-import confetti from "canvas-confetti";
+// import confetti from "canvas-confetti";
 
 export function FechamentoMesModal() {
   const { data, isLoading, marcarVisto, isMarking } = useFechamentoPendente();
@@ -11,6 +11,8 @@ export function FechamentoMesModal() {
     if (!isLoading && data?.pendente) {
       setIsOpen(true);
       // Disparar confetes se houve faturamento
+      // Comentado temporariamente devido a erro de módulo no ambiente local
+      /*
       if (data.faturamento > 0) {
         setTimeout(() => {
           confetti({
@@ -21,6 +23,7 @@ export function FechamentoMesModal() {
           });
         }, 300);
       }
+      */
     }
   }, [data, isLoading]);
 

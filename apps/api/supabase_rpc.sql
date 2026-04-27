@@ -3947,19 +3947,97 @@ BEGIN
     ', novo_schema);
     EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%I_fechamentos_mes ON %I.fechamentos_mensais(mes);', novo_schema, novo_schema);
 
+    -- Criar RPC tenant_obter_fechamento_pendente dentro do schema tenant
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_obter_fechamento_pendente()
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        DECLARE
+          v_mes_anterior VARCHAR(7);
+          v_registro RECORD;
+          v_faturamento NUMERIC;
+          v_total_vendas INT;
+          v_ticket_medio NUMERIC;
+        BEGIN
+          v_mes_anterior := to_char(CURRENT_DATE - INTERVAL ''1 month'', ''YYYY-MM'');
+
+          SELECT * INTO v_registro FROM fechamentos_mensais WHERE mes = v_mes_anterior;
+
+          IF NOT FOUND THEN
+            SELECT
+              COALESCE(SUM(valor_total), 0),
+              COUNT(*)::INT,
+              CASE WHEN COUNT(*) > 0 THEN COALESCE(SUM(valor_total), 0) / COUNT(*) ELSE 0 END
+            INTO v_faturamento, v_total_vendas, v_ticket_medio
+            FROM vendas
+            WHERE criado_em >= date_trunc(''month'', CURRENT_DATE - INTERVAL ''1 month'')
+              AND criado_em < date_trunc(''month'', CURRENT_DATE)
+              AND status = ''concluido'';
+
+            IF v_total_vendas > 0 OR EXTRACT(DAY FROM CURRENT_DATE) <= 5 THEN
+              INSERT INTO fechamentos_mensais (mes, faturamento, total_vendas, ticket_medio)
+              VALUES (v_mes_anterior, v_faturamento, v_total_vendas, v_ticket_medio)
+              ON CONFLICT (mes) DO NOTHING
+              RETURNING * INTO v_registro;
+            ELSE
+              RETURN jsonb_build_object(''success'', true, ''pendente'', false);
+            END IF;
+          END IF;
+
+          IF v_registro.visto THEN
+            RETURN jsonb_build_object(''success'', true, ''pendente'', false);
+          END IF;
+
+          RETURN jsonb_build_object(
+            ''success'', true,
+            ''pendente'', true,
+            ''mes'', v_registro.mes,
+            ''faturamento'', v_registro.faturamento,
+            ''total_vendas'', v_registro.total_vendas,
+            ''ticket_medio'', v_registro.ticket_medio
+          );
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
+    -- Criar RPC tenant_marcar_fechamento_visto dentro do schema tenant
+    EXECUTE format('
+        CREATE OR REPLACE FUNCTION %I.tenant_marcar_fechamento_visto(p_mes VARCHAR)
+        RETURNS JSONB
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = %I
+        AS $func$
+        BEGIN
+          UPDATE fechamentos_mensais
+          SET visto = true, visto_em = NOW()
+          WHERE mes = p_mes;
+
+          IF NOT FOUND THEN
+            RETURN jsonb_build_object(''success'', false, ''error'', ''Registro não encontrado'');
+          END IF;
+
+          RETURN jsonb_build_object(''success'', true);
+        END;
+        $func$;
+    ', novo_schema, novo_schema);
+
     -- Criar RPC tenant_dashboard_kpis dentro do schema tenant
+    -- ALINHADA com o wrapper público (inclui qtd_obras_em_andamento)
     EXECUTE format('
         CREATE OR REPLACE FUNCTION %I.tenant_dashboard_kpis()
         RETURNS TABLE (
           total_vendas NUMERIC,
-          total_receita NUMERIC,
-          total_despesa NUMERIC,
-          saldo NUMERIC,
-          qtd_vendas INT,
-          qtd_clientes INT,
-          qtd_produtos INT,
-          qtd_os_abertas INT,
-          estoque_baixo INT
+          qtd_vendas BIGINT,
+          qtd_clientes BIGINT,
+          qtd_produtos BIGINT,
+          qtd_os_abertas BIGINT,
+          qtd_obras_em_andamento BIGINT,
+          estoque_baixo BIGINT,
+          saldo NUMERIC
         )
         LANGUAGE plpgsql
         SECURITY DEFINER
@@ -3967,39 +4045,15 @@ BEGIN
         AS $func$
         BEGIN
           RETURN QUERY
-          WITH vendas_total AS (
-            SELECT
-              COALESCE(SUM(valor_total), 0) as total_vendas,
-              COUNT(*) as qtd_vendas
-            FROM vendas
-            WHERE status = ''concluido''
-            AND criado_em >= NOW() - INTERVAL ''6 months''
-          ),
-          financeiro_total AS (
-            SELECT
-              COALESCE(SUM(CASE WHEN tipo = ''receber'' THEN valor ELSE 0 END), 0) as total_receita,
-              COALESCE(SUM(CASE WHEN tipo = ''pagar'' THEN valor ELSE 0 END), 0) as total_despesa
-            FROM financeiro
-            WHERE criado_em >= NOW() - INTERVAL ''6 months''
-          ),
-          contagem AS (
-            SELECT
-              (SELECT COUNT(*) FROM clientes) as qtd_clientes,
-              (SELECT COUNT(*) FROM produtos) as qtd_produtos,
-              (SELECT COUNT(*) FROM ordens_servico WHERE status = ''aberta'') as qtd_os_abertas,
-              (SELECT COUNT(*) FROM estoque WHERE quantidade <= quantidade_minima) as estoque_baixo
-          )
           SELECT
-            vt.total_vendas,
-            ft.total_receita,
-            ft.total_despesa,
-            (ft.total_receita - ft.total_despesa) as saldo,
-            vt.qtd_vendas,
-            c.qtd_clientes,
-            c.qtd_produtos,
-            c.qtd_os_abertas,
-            c.estoque_baixo
-          FROM vendas_total vt, financeiro_total ft, contagem c;
+            COALESCE((SELECT SUM(valor_total) FROM vendas), 0)::NUMERIC,
+            COALESCE((SELECT COUNT(*) FROM vendas), 0)::BIGINT,
+            COALESCE((SELECT COUNT(*) FROM clientes), 0)::BIGINT,
+            COALESCE((SELECT COUNT(*) FROM produtos), 0)::BIGINT,
+            COALESCE((SELECT COUNT(*) FROM ordens_servico WHERE status = ''aberta''), 0)::BIGINT,
+            COALESCE((SELECT COUNT(*) FROM obras WHERE status = ''em_andamento''), 0)::BIGINT,
+            COALESCE((SELECT COUNT(*) FROM estoque WHERE quantidade <= quantidade_minima), 0)::BIGINT,
+            COALESCE((SELECT SUM(CASE WHEN tipo IN (''receita'', ''receber'') THEN valor ELSE -valor END) FROM financeiro), 0)::NUMERIC;
         END;
         $func$;
     ', novo_schema, novo_schema);
@@ -4355,11 +4409,146 @@ GRANT EXECUTE ON FUNCTION public.upgrade_all_tenants(INTEGER) TO service_role;
 -- no schema public no momento da criação das policies.
 
 -- ==========================================
--- 7. RPC DE DASHBOARD (KPIs AGREGADOS)
+-- 7. RPC DE DASHBOARD — WRAPPERS PÚBLICOS
 -- ==========================================
--- NOTA: A função tenant_dashboard_kpis deve ser criada dinamicamente
--- dentro de cada schema tenant pela função provisionar_empresa,
--- pois as tabelas não existem no schema public no momento da criação.
+-- As funções tenant-level são criadas dinamicamente dentro de cada schema
+-- pela provisionar_empresa. Os wrappers abaixo roteiam para o schema correto.
+
+-- 7.1 KPIs agregados do dashboard
+DROP FUNCTION IF EXISTS public.tenant_dashboard_kpis();
+CREATE OR REPLACE FUNCTION public.tenant_dashboard_kpis()
+RETURNS TABLE(
+  total_vendas NUMERIC,
+  qtd_vendas BIGINT,
+  qtd_clientes BIGINT,
+  qtd_produtos BIGINT,
+  qtd_os_abertas BIGINT,
+  qtd_obras_em_andamento BIGINT,
+  estoque_baixo BIGINT,
+  saldo NUMERIC
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_schema TEXT;
+BEGIN
+  SELECT schema_name INTO v_schema
+  FROM public.user_profiles up
+  JOIN public.empresas e ON e.id = up.empresa_id
+  WHERE up.user_id = auth.uid();
+
+  IF v_schema IS NULL OR v_schema = 'public' THEN
+    RETURN;
+  END IF;
+
+  RETURN QUERY EXECUTE format('
+    SELECT
+      COALESCE((SELECT SUM(valor_total) FROM %I.vendas), 0)::NUMERIC,
+      COALESCE((SELECT COUNT(*) FROM %I.vendas), 0)::BIGINT,
+      COALESCE((SELECT COUNT(*) FROM %I.clientes), 0)::BIGINT,
+      COALESCE((SELECT COUNT(*) FROM %I.produtos), 0)::BIGINT,
+      COALESCE((SELECT COUNT(*) FROM %I.ordens_servico WHERE status = ''aberta''), 0)::BIGINT,
+      COALESCE((SELECT COUNT(*) FROM %I.obras WHERE status = ''em_andamento''), 0)::BIGINT,
+      COALESCE((SELECT COUNT(*) FROM %I.estoque WHERE quantidade <= quantidade_minima), 0)::BIGINT,
+      COALESCE((SELECT SUM(CASE WHEN tipo IN (''receita'', ''receber'') THEN valor ELSE -valor END) FROM %I.financeiro), 0)::NUMERIC
+  ', v_schema, v_schema, v_schema, v_schema, v_schema, v_schema, v_schema, v_schema);
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.tenant_dashboard_kpis TO authenticated, anon;
+
+-- 7.2 Série temporal de faturamento por mês
+CREATE OR REPLACE FUNCTION public.tenant_dashboard_kpis_por_mes(p_meses INTEGER DEFAULT 6)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_tenant_schema TEXT;
+  v_result JSONB;
+BEGIN
+  SELECT e.schema_name INTO v_tenant_schema
+  FROM public.user_profiles up
+  JOIN public.empresas e ON e.id = up.empresa_id
+  WHERE up.user_id = auth.uid();
+
+  IF v_tenant_schema IS NULL THEN
+    RETURN '[]'::jsonb;
+  END IF;
+
+  EXECUTE format('SET LOCAL search_path TO %I, public', v_tenant_schema);
+
+  EXECUTE format('SELECT %I.tenant_dashboard_kpis_por_mes($1)', v_tenant_schema)
+  INTO v_result
+  USING p_meses;
+
+  IF v_result IS NULL OR NOT jsonb_typeof(v_result) = 'array' THEN
+    v_result := '[]'::jsonb;
+  END IF;
+
+  RETURN v_result;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.tenant_dashboard_kpis_por_mes TO authenticated;
+
+-- 7.3 Fechamento mensal pendente
+CREATE OR REPLACE FUNCTION public.tenant_obter_fechamento_pendente()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_tenant_schema TEXT;
+  v_result JSONB;
+BEGIN
+  SELECT e.schema_name INTO v_tenant_schema
+  FROM public.user_profiles up
+  JOIN public.empresas e ON e.id = up.empresa_id
+  WHERE up.user_id = auth.uid();
+
+  IF v_tenant_schema IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Tenant não identificado');
+  END IF;
+
+  EXECUTE format('SET LOCAL search_path TO %I, public', v_tenant_schema);
+
+  EXECUTE format('SELECT %I.tenant_obter_fechamento_pendente()', v_tenant_schema)
+  INTO v_result;
+
+  RETURN COALESCE(v_result, jsonb_build_object('success', true, 'pendente', false));
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.tenant_obter_fechamento_pendente TO authenticated;
+
+-- 7.4 Marcar fechamento mensal como visto
+CREATE OR REPLACE FUNCTION public.tenant_marcar_fechamento_visto(p_mes VARCHAR)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_tenant_schema TEXT;
+  v_result JSONB;
+BEGIN
+  SELECT e.schema_name INTO v_tenant_schema
+  FROM public.user_profiles up
+  JOIN public.empresas e ON e.id = up.empresa_id
+  WHERE up.user_id = auth.uid();
+
+  IF v_tenant_schema IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Tenant não identificado');
+  END IF;
+
+  EXECUTE format('SET LOCAL search_path TO %I, public', v_tenant_schema);
+
+  EXECUTE format('SELECT %I.tenant_marcar_fechamento_visto($1)', v_tenant_schema)
+  INTO v_result
+  USING p_mes;
+
+  RETURN COALESCE(v_result, jsonb_build_object('success', false, 'error', 'Falha ao marcar'));
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.tenant_marcar_fechamento_visto TO authenticated;
 
 REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) FROM anon;

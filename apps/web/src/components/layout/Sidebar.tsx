@@ -38,9 +38,12 @@ const navigation = [
   { key: "configuracoes", name: "Configuracoes", href: "/tenant/configuracoes", icon: Settings },
 ];
 
+import { useTheme } from "@/components/providers/ThemeProvider";
+
 export function Sidebar() {
   const pathname = usePathname();
   const { data, isLoading } = useSidebarData();
+  const { resolvedTheme } = useTheme();
 
   const activeKeys = data?.activeKeys ?? null;
   const empresaNome = data?.empresaNome ?? "";
@@ -65,8 +68,7 @@ export function Sidebar() {
 
   return (
     <div
-      className="flex h-full w-64 flex-col overflow-y-auto border-r border-sidebar-border/60 text-sidebar-foreground shadow-lg transition-all duration-300"
-      style={{ background: "linear-gradient(180deg, #0f0a1e 0%, #1a1145 40%, #0d1b2a 100%)" }}
+      className="flex h-full w-64 flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg transition-all duration-300"
     >
       <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border/40 px-6">
         <Link href="/tenant/dashboard" className="group flex items-center gap-3">
@@ -82,8 +84,8 @@ export function Sidebar() {
           </div>
           <div className="mt-1 flex flex-col">
             <span
-              className="text-3xl font-normal leading-none tracking-normal text-white"
-              style={{ fontFamily: "var(--font-brand)", textShadow: "0 2px 8px rgba(192, 132, 252, 0.35)" }}
+              className="text-3xl font-normal leading-none tracking-normal text-sidebar-foreground"
+              style={{ fontFamily: "var(--font-brand)" }}
             >
               Fluxo
             </span>
@@ -147,7 +149,7 @@ export function Sidebar() {
             {empresaIniciais || "-"}
           </div>
           <div className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[13px] font-semibold text-white/90">
+            <span className="truncate text-[13px] font-semibold text-sidebar-foreground">
               {empresaNome || "Carregando..."}
             </span>
           </div>

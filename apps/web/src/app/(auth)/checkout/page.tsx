@@ -14,9 +14,9 @@ interface ModuloData { id: string; key: string; nome: string; preco: number; pre
 
 /* Fallbacks caso o banco esteja indisponível */
 const PLANOS_FALLBACK: PlanoData[] = [
-  { id: "starter", key: "starter", nome: "Starter", preco: 249, preco_promocional: null, descricao: "Entrada e Visibilidade", modulos_incluidos: ["dashboard","crm","catalogo","estoque", "email_real"], ordem_exibicao: 1 },
-  { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh", "Inteligência de Vendas", "email_real"], ordem_exibicao: 2 },
-  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios", "Inteligência de Vendas", "email_real"], ordem_exibicao: 3 },
+  { id: "starter", key: "starter", nome: "Starter", preco: 249, preco_promocional: null, descricao: "Entrada e Visibilidade", modulos_incluidos: ["dashboard","crm","catalogo","estoque", "email_real", "Modo Escuro Global"], ordem_exibicao: 1 },
+  { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh", "Inteligência de Vendas", "email_real", "Interface Premium Dark Mode"], ordem_exibicao: 2 },
+  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios", "Inteligência de Vendas", "email_real", "Interface Premium Dark Mode"], ordem_exibicao: 3 },
 ];
 const MODULOS_FALLBACK: ModuloData[] = [
   { id: "crm", key: "crm", nome: "CRM & Nurturing", preco: 129.90, preco_promocional: null, icone: "🎯", descricao: "Gestão avançada de relacionamento e automação de engajamento.", features: ["Gestão de Funil de Vendas", "Inteligência Proativa de Nurturing", "Importação de Clientes em Lote"], ordem_exibicao: 0 },

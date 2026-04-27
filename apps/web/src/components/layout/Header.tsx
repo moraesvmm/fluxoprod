@@ -4,6 +4,7 @@ import { Bell, Search, LogOut } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
   onSearchClick?: () => void;
@@ -26,7 +27,7 @@ export function Header({ onSearchClick }: HeaderProps) {
   });
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border/60 bg-white/90 backdrop-blur-lg px-4 sm:gap-x-6 sm:px-6 lg:px-8 shadow-sm">
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border/60 bg-background/90 backdrop-blur-lg px-4 sm:gap-x-6 sm:px-6 lg:px-8 shadow-sm transition-colors duration-300">
       <div className="flex items-center gap-2 lg:hidden">
         <Image 
           src="/logo-fluxo.png" 
@@ -37,7 +38,7 @@ export function Header({ onSearchClick }: HeaderProps) {
           className="object-contain drop-shadow-sm" 
         />
         <span 
-          className="text-2xl font-normal text-slate-800"
+          className="text-2xl font-normal text-slate-800 dark:text-slate-100"
           style={{ fontFamily: "var(--font-monsieur), cursive" }}
         >
           Fluxo
@@ -59,6 +60,10 @@ export function Header({ onSearchClick }: HeaderProps) {
             {currentDate}
           </div>
           
+          <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-border/60" aria-hidden="true" />
+          
+          <ThemeToggle />
+
           {/* Separator */}
           <div
             className="hidden lg:block lg:h-6 lg:w-px lg:bg-border/60"
@@ -71,7 +76,7 @@ export function Header({ onSearchClick }: HeaderProps) {
           >
             <span className="sr-only">Notificações</span>
             <Bell className="h-5 w-5" aria-hidden="true" />
-            <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-destructive border-2 border-white shadow-sm"></span>
+            <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-destructive border-2 border-white dark:border-slate-900 shadow-sm"></span>
           </button>
 
           <div
@@ -82,7 +87,7 @@ export function Header({ onSearchClick }: HeaderProps) {
           {/* Profile Dropdown (Simulation) */}
           <div className="flex items-center gap-x-4">
             <img
-              className="h-9 w-9 rounded-full bg-muted object-cover border-2 border-border/40 shadow-md ring-2 ring-white"
+              className="h-9 w-9 rounded-full bg-muted object-cover border-2 border-border/40 shadow-md ring-2 ring-white dark:ring-slate-800"
               src="https://api.dicebear.com/7.x/notionists/svg?seed=Admin&backgroundColor=f8fafc"
               alt="Avatar"
             />

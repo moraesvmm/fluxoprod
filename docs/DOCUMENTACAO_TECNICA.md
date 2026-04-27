@@ -159,6 +159,10 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
     - Colunas: id, operation_type, resource, resource_id, user_id, details, status, criado_em
     - Índices: idx_audit_log_operation, idx_audit_log_resource, idx_audit_log_user, idx_audit_log_timestamp, idx_audit_log_status
 
+16. **fechamentos_mensais** - Resumos de fechamento mensal do dashboard
+    - Colunas: id, mes (VARCHAR(7), UNIQUE), faturamento, total_vendas, ticket_medio, visto, visto_em, criado_em
+    - Índices: idx_fechamentos_mes (mes)
+
 ### RPCs do Schema Public
 
 #### Provisionamento
@@ -167,7 +171,10 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
 - **upgrade_all_tenants(p_target_version)** - Aplica migrations em todos os schemas tenant
 
 #### Dashboard
-- **tenant_dashboard_kpis()** - Retorna KPIs agregados (faturamento, vendas, clientes, produtos, OS, estoque baixo, saldo)
+- **tenant_dashboard_kpis()** - Retorna KPIs agregados (faturamento, vendas, clientes, produtos, OS, obras em andamento, estoque baixo, saldo)
+- **tenant_dashboard_kpis_por_mes(p_meses)** - Retorna série temporal JSONB de faturamento dos últimos N meses (faturamento, total_vendas, ticket_medio por mês)
+- **tenant_obter_fechamento_pendente()** - Detecta fechamento mensal pendente e retorna resumo do mês anterior (faturamento, vendas, ticket médio)
+- **tenant_marcar_fechamento_visto(p_mes)** - Marca o fechamento de um mês como visualizado pelo usuário
 - **tenant_obter_sugestoes_nurturing()** - **Modelo Híbrido**: Detecta inatividade via tabela `vendas` OU via interações de tipo `venda` (CRM-only).
 
 ### RPCs do Schema Tenant (Dinâmicas)
