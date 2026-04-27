@@ -83,7 +83,11 @@ BEGIN
 
     -- ── 2a. CREATE versão definitiva de tenant_criar_cliente ──
     -- Parâmetros: TEXT (compatível com PostgREST JSON)
-    -- Inclui: p_cpf_cnpj, soft delete (deleted_at), idempotência
+    -- Inclui: p_cpf_cnpj, p_endereco, soft delete (deleted_at), idempotência
+
+    -- Garantir que a coluna endereco existe
+    EXECUTE format('ALTER TABLE %I.clientes ADD COLUMN IF NOT EXISTS endereco TEXT', tenant_schema.schema_name);
+
     EXECUTE format('
       CREATE OR REPLACE FUNCTION %I.tenant_criar_cliente(
         p_nome TEXT,
@@ -91,7 +95,8 @@ BEGIN
         p_telefone TEXT DEFAULT NULL,
         p_funil_fase TEXT DEFAULT ''lead'',
         p_status TEXT DEFAULT ''ativo'',
-        p_cpf_cnpj TEXT DEFAULT NULL
+        p_cpf_cnpj TEXT DEFAULT NULL,
+        p_endereco TEXT DEFAULT NULL
       )
       RETURNS JSONB
       LANGUAGE plpgsql
@@ -101,8 +106,8 @@ BEGIN
       DECLARE
         v_cliente_id UUID;
       BEGIN
-        INSERT INTO clientes (nome, email, telefone, funil_fase, status, cpf_cnpj, deleted_at)
-        VALUES (p_nome, p_email, p_telefone, p_funil_fase, p_status, p_cpf_cnpj, NULL)
+        INSERT INTO clientes (nome, email, telefone, funil_fase, status, cpf_cnpj, endereco, deleted_at)
+        VALUES (p_nome, p_email, p_telefone, p_funil_fase, p_status, p_cpf_cnpj, p_endereco, NULL)
         RETURNING id INTO v_cliente_id;
 
         RETURN jsonb_build_object(
@@ -113,7 +118,7 @@ BEGIN
         RETURN jsonb_build_object(''error'', SQLERRM);
       END;
       $func$;
-    ', tenant_schema.schema_name, tenant_schema.schema_name);
+    ', tenant_schema.schema_name, tenant_schema.schema_name, tenant_schema.schema_name);
     RAISE NOTICE '  ✓ tenant_criar_cliente recriada em %', tenant_schema.schema_name;
 
     -- ── 2b. CREATE versão definitiva de tenant_atualizar_cliente ──
@@ -125,7 +130,8 @@ BEGIN
         p_telefone TEXT DEFAULT NULL,
         p_funil_fase TEXT DEFAULT NULL,
         p_status TEXT DEFAULT NULL,
-        p_cpf_cnpj TEXT DEFAULT NULL
+        p_cpf_cnpj TEXT DEFAULT NULL,
+        p_endereco TEXT DEFAULT NULL
       )
       RETURNS JSONB
       LANGUAGE plpgsql
@@ -141,6 +147,7 @@ BEGIN
           funil_fase = COALESCE(p_funil_fase, funil_fase),
           status = COALESCE(p_status, status),
           cpf_cnpj = COALESCE(p_cpf_cnpj, cpf_cnpj),
+          endereco = COALESCE(p_endereco, endereco),
           atualizado_em = NOW()
         WHERE id = p_cliente_id AND deleted_at IS NULL;
 
@@ -153,7 +160,7 @@ BEGIN
         RETURN jsonb_build_object(''error'', SQLERRM);
       END;
       $func$;
-    ', tenant_schema.schema_name, tenant_schema.schema_name);
+    ', tenant_schema.schema_name, tenant_schema.schema_name, tenant_schema.schema_name);
     RAISE NOTICE '  ✓ tenant_atualizar_cliente recriada em %', tenant_schema.schema_name;
 
   END LOOP;
@@ -182,7 +189,8 @@ CREATE OR REPLACE FUNCTION public.tenant_criar_cliente(
   p_telefone TEXT DEFAULT NULL,
   p_funil_fase TEXT DEFAULT 'lead',
   p_status TEXT DEFAULT 'ativo',
-  p_cpf_cnpj TEXT DEFAULT NULL
+  p_cpf_cnpj TEXT DEFAULT NULL,
+  p_endereco TEXT DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -203,11 +211,11 @@ BEGIN
   END IF;
 
   EXECUTE format(
-    'SELECT %I.tenant_criar_cliente($1, $2, $3, $4, $5, $6)',
+    'SELECT %I.tenant_criar_cliente($1, $2, $3, $4, $5, $6, $7)',
     v_tenant_schema
   )
   INTO v_result
-  USING p_nome, p_email, p_telefone, p_funil_fase, p_status, p_cpf_cnpj;
+  USING p_nome, p_email, p_telefone, p_funil_fase, p_status, p_cpf_cnpj, p_endereco;
 
   RETURN v_result;
 END;
@@ -221,7 +229,8 @@ CREATE OR REPLACE FUNCTION public.tenant_atualizar_cliente(
   p_telefone TEXT DEFAULT NULL,
   p_funil_fase TEXT DEFAULT NULL,
   p_status TEXT DEFAULT NULL,
-  p_cpf_cnpj TEXT DEFAULT NULL
+  p_cpf_cnpj TEXT DEFAULT NULL,
+  p_endereco TEXT DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -242,11 +251,11 @@ BEGIN
   END IF;
 
   EXECUTE format(
-    'SELECT %I.tenant_atualizar_cliente($1, $2, $3, $4, $5, $6, $7)',
+    'SELECT %I.tenant_atualizar_cliente($1, $2, $3, $4, $5, $6, $7, $8)',
     v_tenant_schema
   )
   INTO v_result
-  USING p_cliente_id, p_nome, p_email, p_telefone, p_funil_fase, p_status, p_cpf_cnpj;
+  USING p_cliente_id, p_nome, p_email, p_telefone, p_funil_fase, p_status, p_cpf_cnpj, p_endereco;
 
   RETURN v_result;
 END;

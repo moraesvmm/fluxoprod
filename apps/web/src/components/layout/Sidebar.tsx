@@ -79,6 +79,7 @@ export function Sidebar() {
               width={44}
               height={44}
               priority
+              style={{ width: "auto" }}
               className="relative z-10 object-contain drop-shadow-[0_0_10px_rgba(192,132,252,0.4)]"
             />
           </div>

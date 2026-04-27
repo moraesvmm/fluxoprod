@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adicionarTag, removerTag, listarTagsCatalog, fetchClientes, type Cliente, type TagCatalog } from "@/lib/api";
+import { adicionarTag as apiAdicionarTag, removerTag as apiRemoverTag, listarTagsCatalog, fetchClientes, type Cliente, type TagCatalog } from "@/lib/api";
 
 const TAGS_KEY = ["tags"] as const;
 
@@ -32,7 +32,7 @@ export function useSegmentacao(clienteId?: string) {
 
   const adicionarTagMutation = useMutation({
     mutationFn: async ({ clienteId, tag }: { clienteId: string; tag: string }) => {
-      await adicionarTag(clienteId, tag);
+      await apiAdicionarTag(clienteId, tag);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [TAGS_KEY[0]] });
@@ -41,18 +41,18 @@ export function useSegmentacao(clienteId?: string) {
 
   const removerTagMutation = useMutation({
     mutationFn: async ({ clienteId, tag }: { clienteId: string; tag: string }) => {
-      await removerTag(clienteId, tag);
+      await apiRemoverTag(clienteId, tag);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [TAGS_KEY[0]] });
     },
   });
 
-  const adicionarTag = async (clienteId: string, tag: string) => {
+  const handleAdicionarTag = async (clienteId: string, tag: string) => {
     await adicionarTagMutation.mutateAsync({ clienteId, tag });
   };
 
-  const removerTag = async (clienteId: string, tag: string) => {
+  const handleRemoverTag = async (clienteId: string, tag: string) => {
     await removerTagMutation.mutateAsync({ clienteId, tag });
   };
 
@@ -80,8 +80,8 @@ export function useSegmentacao(clienteId?: string) {
   return {
     tags: catalogQuery.data || [],
     loading: catalogQuery.isLoading,
-    adicionarTag,
-    removerTag,
+    adicionarTag: handleAdicionarTag,
+    removerTag: handleRemoverTag,
     filtrarPorTags,
     tagsAtivas,
     setTagsAtivas,

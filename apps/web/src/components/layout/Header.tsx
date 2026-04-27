@@ -35,7 +35,8 @@ export function Header({ onSearchClick }: HeaderProps) {
           width={32}
           height={32}
           priority
-          className="object-contain drop-shadow-sm" 
+          className="object-contain drop-shadow-sm"
+          style={{ width: "auto", height: "auto" }}
         />
         <span 
           className="text-2xl font-normal text-slate-800 dark:text-slate-100"

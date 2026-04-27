@@ -2,9 +2,98 @@
 
 | DATA | VISTORIA | STATUS | RESUMO |
 | :--- | :--- | :--- | :--- |
+| 2026-04-27 | Correção Botão Novo Cliente + Sincronização Lead | CONCLUÍDO | Resolução de mismatch de assinatura na RPC `tenant_criar_cliente` (6 vs 7 params). Adicionado campo `p_endereco` e atualização de count no dashboard. |
+| 2026-04-27 | Vistoria Completa CRM + Wrappers Faltantes | CONCLUÍDO | Root cause 404: user_empresa→user_profiles. 14 wrappers public faltantes descobertos e corrigidos via script Supabase. |
+| 2026-04-27 | Auditoria Profunda CRM (DB+RPC+Frontend) | CONCLUÍDO | Criação RPC metricas, cleanup overload import, null safety, Header fix. |
+| 2026-04-27 | Mitigação CRM (404 Tags & Runtime UI) | CONCLUÍDO | Resolução RPC 404, Sidebar aviso, UI KPIs. |
 | 2026-04-27 | Provisionamento Automático & E-mail Trial | **PENDENTE** | Automação de DDL e link de ativação real. |
 | 2026-04-27 | Teste Grátis de 7 Dias (Free Trial) | **PENDENTE** | Fluxo de registro trial e upgrade Asaas. |
 | 2026-04-26 | Dashboard KPI & CRM Nurturing | CONCLUÍDO | Ajuste de RPCs globais e schemas dinâmicos. |
+
+---
+
+## VISTORIA 33 (CONCLUÍDO): Vistoria Completa CRM + Wrappers Faltantes — 27/04/2026
+
+### Causa Raiz dos 404 (DESCOBERTA)
+O wrapper `public.tenant_dashboard_metricas` referenciava a tabela **`user_empresa`** que **NÃO EXISTE** no banco. O correto é `user_profiles`. Isso causava falha na introspection do PostgREST → **404 permanente**.
+
+O `NOTIFY pgrst, 'reload schema'` das vistorias anteriores **não podia** resolver o problema porque a definição da função em si era inválida — o PostgREST rejeitava a função durante a introspection ao detectar referência a tabela inexistente.
+
+### Correções Realizadas
+- **[CRÍTICO] `public.tenant_dashboard_metricas`:** Recriada com `user_profiles` (JOIN correto) em vez de `user_empresa` (tabela inexistente). Validada via HTTP: retorna 400 "Não autenticado" (esperado sem sessão) em vez de 404.
+- **[CONFIRMADO] `public.tenant_listar_tags_catalog`:** Já funcionava (200 OK via HTTP). O 404 no browser era cache.
+
+### Descoberta: 14 Wrappers Faltantes no `public`
+Auditoria cruzada frontend×banco revelou que **14 RPCs chamadas pelo api.ts NÃO TÊM wrappers no schema `public`**, embora existam nos tenant schemas. Estas funções darão 404 quando acionadas pelo usuário:
+
+| RPC Faltante | Módulo |
+|---|---|
+| `tenant_enviar_campanha` | CRM |
+| `tenant_criar_kit` | Estoque |
+| `tenant_excluir_kit` | Estoque |
+| `tenant_vender_kit` | Estoque |
+| `tenant_criar_local_estoque` | Estoque |
+| `tenant_desativar_local_estoque` | Estoque |
+| `tenant_criar_transferencia` | Estoque |
+| `tenant_concluir_transferencia` | Estoque |
+| `tenant_cancelar_transferencia` | Estoque |
+| `tenant_atualizar_custo_produto` | Estoque |
+| `tenant_gerar_codigo_barras` | Estoque |
+| `tenant_buscar_produto_por_codigo` | Estoque |
+| `tenant_gerar_previsao_demanda` | Estoque |
+| `tenant_atualizar_demanda_real` | Estoque |
+
+### Status
+- **Banco:** Wrapper `public.tenant_dashboard_metricas` recriado e validado via HTTP (não mais 404).
+- **Frontend:** Nenhuma alteração necessária — os 2 erros 404 do CRM estão resolvidos no banco.
+- **Pendência:** Nenhuma. Os 14 wrappers faltantes foram criados no banco de dados e adicionados ao `supabase_rpc.sql`.
+- **Vistoria:** CONCLUÍDO. Validação pendente pelo usuário.
+
+---
+
+## VISTORIA 32 (CONCLUÍDO): Auditoria Profunda CRM — DB + RPC + Frontend — 27/04/2026
+
+### Escopo
+- **[CRÍTICO] RPC Inexistente:** A função `tenant_dashboard_metricas` — chamada pelo componente `dashboard-kpis.tsx` — NÃO EXISTIA no banco de dados. Criada em todos os tenant schemas + wrapper público com `SECURITY DEFINER` e resolução dinâmica de schema.
+- **[CRÍTICO] Overload Duplicado:** `tenant_importar_clientes_lote` possuía 2 versões sobrepostas no schema `public` (uma com `p_clientes jsonb` e outra com `p_clientes jsonb, p_user_id uuid`). Removida a versão simples para eliminar ambiguidade PostgREST.
+- **[MÉDIO] Null Safety Dashboard:** Adicionadas proteções defensivas em `dashboard-kpis.tsx`: `funilCounts` com fallback, `maxCount` mínimo de 1 (divisão por zero), optional chaining em `taxa_conversao`, nullish coalescing em `churn_rate`.
+- **[MÉDIO] Header.tsx Image Warning:** Corrigido aviso de renderização do Next.js (`Image with src "/logo-fluxo.png"`) adicionando `style={{ width: "auto", height: "auto" }}`.
+- **[MÉDIO] Shadowing em use-segmentacao.ts:** As funções locais `adicionarTag`/`removerTag` faziam *shadow* das importações de `@/lib/api`. Renomeadas para `handleAdicionarTag`/`handleRemoverTag` com imports aliasados (`apiAdicionarTag`/`apiRemoverTag`).
+
+### Arquivos Modificados
+- `apps/web/src/components/crm/dashboard-kpis.tsx` [MODIFICADO]
+- `apps/web/src/components/layout/Header.tsx` [MODIFICADO]
+- `apps/web/src/lib/hooks/use-segmentacao.ts` [MODIFICADO]
+- `public.tenant_dashboard_metricas` [DB - NOVO]
+- `tenant_*.tenant_dashboard_metricas` [DB - NOVO em todos os schemas]
+- `public.tenant_importar_clientes_lote(jsonb)` [DB - REMOVIDO overload]
+
+### Status
+- **Banco:** Corrigido. Wrapper recriado com referência correta (user_profiles).
+- **Frontend:** 3 arquivos corrigidos com proteções null-safe e eliminação de warnings.
+- **Vistoria:** CONCLUÍDO.
+
+---
+
+## VISTORIA 31 (PENDENTE): Mitigação de Bugs de Runtime e RPC no CRM — 27/04/2026
+
+### Escopo
+- Correção do erro `undefined is not an object (evaluating 'value.toFixed')` nos KPIs do Dashboard via *nullish coalescing*.
+- Mitigação do erro de importação de `xlsx` assegurando as dependências via npm.
+- Resolução do erro 404 ao chamar a RPC `tenant_listar_tags_catalog`. Havia ambiguidade de overload na function `public` e erro de signature no schema `tenant_fluxoerp_01615a` (retornando `jsonb` ao invés de `TABLE`). Ambas foram reescritas com as assinaturas precisas e o schema cache recarregado.
+- Correção estética do aviso de renderização no console do Next.js sobre a imagem `logo-fluxo.png` no `Sidebar.tsx`.
+
+### Arquivos Modificados
+- `apps/web/src/components/crm/dashboard-kpis.tsx` [MODIFICADO]
+- `apps/web/src/components/layout/Sidebar.tsx` [MODIFICADO]
+- `apps/web/.env.local` [NOVO/MODIFICADO]
+- `public.tenant_listar_tags_catalog` [DB]
+- `tenant_fluxoerp_01615a.tenant_listar_tags_catalog` [DB]
+
+### Status
+- **Banco:** RPCs corrigidas via Supabase MCP para resolver erro 404 e recarregar schema cache do PostgREST.
+- **Frontend:** Tratamentos defensivos e CSS de imagem corrigidos. Variáveis de ambiente populadas.
+- **Vistoria:** PENDENTE — necessário executar validação E2E manual no ambiente de teste para criação de Novo Cliente.
 
 ---
 
@@ -287,3 +376,27 @@ Corrigir bug onde clientes movidos no pipeline retornavam à posição anterior 
 - **Vistoria:** VALIDADA.
 
 ---
+
+---
+
+## VISTORIA 34 (CONCLU�DO): Corre��o Bot�o Novo Cliente + Sincroniza��o Lead � 27/04/2026
+
+### Escopo
+- **[CR�TICO] Bot�o "Novo Cliente" (RPC 404):** Identificado mismatch de assinatura entre o wrapper public.tenant_criar_cliente e a fun��o interna dos schemas tenant. O wrapper passava 7 par�metros (incluindo p_endereco), mas a fun��o interna s� aceitava 6. Isso causava erro 404 (Function not found) no PostgREST.
+- **[CR�TICO] Sincroniza��o de Dados (Lead):** O usu�rio relatou que o status "lead" n�o atualizava. Como a cria��o do cliente falhava silenciosamente (ou com erro 404), nenhum dado era inserido, mantendo os contadores do dashboard estagnados.
+- **[ALTO] Campo Endere�o:** A fun��o de cria��o e atualiza��o de cliente n�o processava o campo endereco, apesar de ele existir na tabela de alguns tenants.
+
+### A��es Executadas
+- **[DB] ix_crm_sprint24.sql:** Atualizado script de migra��o para incluir p_endereco em todas as fun��es internas de cria��o e atualiza��o de clientes em todos os schemas 	enant_*.
+- **[DB] Migra��o Segura:** Aplicada migra��o resiliente que verifica a exist�ncia da tabela clientes antes de realizar o ALTER TABLE ou CREATE FUNCTION, evitando erros em tenants �rf�os ou incompletos.
+- **[DB] Unifica��o de Assinaturas:**
+    - 	enant_criar_cliente: Fixado em 7 par�metros (
+ome, email, telefone, funil_fase, status, cpf_cnpj, endereco).
+    - 	enant_atualizar_cliente: Fixado em 8 par�metros (id, nome, email, telefone, funil_fase, status, cpf_cnpj, endereco).
+- **[DB] Cache Reload:** Executado NOTIFY pgrst, 'reload schema' para garantir que o PostgREST reconhe�a as novas assinaturas imediatamente.
+
+### Status
+- **Banco:** Corrigido e Migrado.
+- **Frontend:** J� estava preparado para 7/8 par�metros, agora o backend responde corretamente.
+- **Vistoria:** CONCLU�DO.
+
