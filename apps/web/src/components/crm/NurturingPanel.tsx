@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Sparkles, MessageCircle, Check, ArrowRight, Clock, ShoppingBag, X } from 'lucide-react';
-import { api, obterSugestoesNurturing, finalizarAlertaNurturing } from '@/lib/api';
+import { obterSugestoesNurturing, finalizarAlertaNurturing } from '@/lib/api';
 import { useToast, Toast } from '@/components/ui/toast';
 
 interface Sugestao {

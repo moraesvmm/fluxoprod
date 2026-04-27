@@ -281,6 +281,7 @@ export default function CRMPage() {
       {/* Modal de Importação */}
       {showImportModal && (
         <ImportadorClientesExcel 
+          isOpen={showImportModal}
           onSuccess={() => {
             recarregarClientes();
             setShowImportModal(false);
