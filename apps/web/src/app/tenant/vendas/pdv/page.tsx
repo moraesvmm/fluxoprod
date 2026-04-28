@@ -45,6 +45,7 @@ export default function PDVPage() {
   const [busca, setBusca] = useState('');
   const [desconto, setDesconto] = useState<number>(0);
   const [lembrarDias, setLembrarDias] = useState<number | null>(null);
+  const [emitirNfe, setEmitirNfe] = useState(false);
   const supabase = createClient();
   const { toasts, removeToast, success, error: toastError, warning } = useToast();
 
@@ -190,7 +191,8 @@ export default function PDVPage() {
         p_metodo_pagamento: metodoPagamento,
         p_valor_total: total,
         p_desconto: desconto,
-        p_lembrar_dias: lembrarDias
+        p_lembrar_dias: lembrarDias,
+        p_emitir_nfe: emitirNfe
       });
 
       if (error) throw error;
@@ -208,6 +210,7 @@ export default function PDVPage() {
       setVendedorId('');
       setDesconto(0);
       setLembrarDias(null);
+      setEmitirNfe(false);
 
       // Recarregar produtos com estoque atualizado via RPC
       const { data: produtosAtualizados } = await supabase
@@ -497,6 +500,27 @@ export default function PDVPage() {
                 {metodoPagamento === 'dinheiro' && <Check className="h-3 w-3 text-primary" />}
               </button>
             </div>
+          </div>
+
+          <div className="mb-4 flex items-center justify-between bg-indigo-50/50 p-2 rounded-md border border-indigo-100">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-slate-700">Emitir NFe automaticamente</span>
+            </div>
+            <button
+              onClick={() => setEmitirNfe(!emitirNfe)}
+              className={twMerge(clsx(
+                "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
+                emitirNfe ? "bg-primary" : "bg-slate-200"
+              ))}
+            >
+              <span
+                className={twMerge(clsx(
+                  "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                  emitirNfe ? "translate-x-4" : "translate-x-1"
+                ))}
+              />
+            </button>
           </div>
 
           <button

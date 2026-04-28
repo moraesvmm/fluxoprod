@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, Save, Loader2, CreditCard, Calendar, CheckCircle2, AlertCircle } from "lucide-react";
+import { Settings, Save, Loader2, CreditCard, Calendar, CheckCircle2, AlertCircle, FileText } from "lucide-react";
 import { useEmpresa, useUpdateEmpresa } from "@/lib/hooks/use-empresas";
 import { useToast, Toast } from "@/components/ui/toast";
 import { TutorialSettingsSection } from "@/components/onboarding/TutorialSettingsSection";
+import { FiscalGuide } from "@/components/modules/fiscal/FiscalGuide";
 
 export default function ConfiguracoesPage() {
   const { data: empresa, isLoading } = useEmpresa();
@@ -16,6 +17,11 @@ export default function ConfiguracoesPage() {
     cnpj: "",
     porte: "",
     segmento: "",
+    inscricao_estadual: "",
+    regime_tributario: "",
+    focusnfe_token_producao: "",
+    focusnfe_token_homologacao: "",
+    nfe_ambiente: "homologacao" as 'producao' | 'homologacao',
   });
 
   // Sync state when data is loaded
@@ -26,6 +32,11 @@ export default function ConfiguracoesPage() {
         cnpj: empresa.cnpj || "",
         porte: empresa.porte || "",
         segmento: empresa.segmento || "",
+        inscricao_estadual: empresa.inscricao_estadual || "",
+        regime_tributario: empresa.regime_tributario || "",
+        focusnfe_token_producao: empresa.focusnfe_token_producao || "",
+        focusnfe_token_homologacao: empresa.focusnfe_token_homologacao || "",
+        nfe_ambiente: empresa.nfe_ambiente || "homologacao",
       });
     }
   }, [empresa]);
@@ -40,7 +51,13 @@ export default function ConfiguracoesPage() {
           razao_social: formData.razao_social,
           cnpj: formData.cnpj, // CNPJ could be editable or non-editable depending on requirements, let's keep editable for now since it's just config
           porte: formData.porte,
+          porte: formData.porte,
           segmento: formData.segmento,
+          inscricao_estadual: formData.inscricao_estadual,
+          regime_tributario: formData.regime_tributario,
+          focusnfe_token_producao: formData.focusnfe_token_producao,
+          focusnfe_token_homologacao: formData.focusnfe_token_homologacao,
+          nfe_ambiente: formData.nfe_ambiente,
         }
       });
       success("Configurações salvas com sucesso!");
@@ -140,6 +157,118 @@ export default function ConfiguracoesPage() {
           </div>
 
           <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
+              <FileText className="h-5 w-5 text-primary" /> Configurações Fiscais (NFe)
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">Configure os parâmetros necessários para a emissão automática de notas fiscais eletrônicas.</p>
+
+            {/* Guia de Onboarding Fiscal */}
+            <div className="mb-8 p-4 rounded-lg bg-blue-50 border border-blue-100 flex gap-4">
+              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                <AlertCircle className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-blue-900 mb-1">Iniciando com Notas Fiscais no Fluxo?</h4>
+                <p className="text-xs text-blue-800 leading-relaxed mb-3">
+                  Para que o Fluxo ERP emita notas automaticamente em seu nome, você precisará de dois itens essenciais que toda empresa organizada possui:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px]">
+                  <div className="bg-white/50 p-2 rounded border border-blue-200">
+                    <span className="font-bold text-blue-900 block mb-1">1. Certificado Digital A1 (.pfx)</span>
+                    É a sua assinatura digital. Caso não possua, você pode adquirir em certificadoras como Serasa, Certisign ou Soluti.
+                  </div>
+                  <div className="bg-white/50 p-2 rounded border border-blue-200">
+                    <span className="font-bold text-blue-900 block mb-1">2. Credenciamento na SEFAZ</span>
+                    Solicite ao seu contador que realize o "Credenciamento para Emissão em Software Próprio" no portal da SEFAZ do seu estado.
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Inscrição Estadual</label>
+                <input 
+                  type="text" 
+                  value={formData.inscricao_estadual}
+                  onChange={(e) => setFormData({ ...formData, inscricao_estadual: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                  placeholder="Isento se não possuir"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Regime Tributário</label>
+                <select 
+                  value={formData.regime_tributario}
+                  onChange={(e) => setFormData({ ...formData, regime_tributario: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                >
+                    <option value="">Selecione...</option>
+                    <option value="Simples Nacional">Simples Nacional</option>
+                    <option value="Simples Nacional - Excesso de limite">Simples Nacional - Excesso de limite</option>
+                    <option value="Regime Normal">Regime Normal (Lucro Presumido/Real)</option>
+                </select>
+              </div>
+              
+              <div className="sm:col-span-2 border-t border-slate-100 pt-4 mt-2">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Integração FocusNFe</h4>
+                  <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
+                    <button 
+                      onClick={() => setFormData({ ...formData, nfe_ambiente: 'homologacao' })}
+                      className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${formData.nfe_ambiente === 'homologacao' ? 'bg-white shadow-sm text-primary' : 'text-slate-500'}`}
+                    >
+                      Homologação
+                    </button>
+                    <button 
+                      onClick={() => setFormData({ ...formData, nfe_ambiente: 'producao' })}
+                      className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${formData.nfe_ambiente === 'producao' ? 'bg-white shadow-sm text-primary' : 'text-slate-500'}`}
+                    >
+                      Produção
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">Token de Homologação (Testes)</label>
+                    <input 
+                      type="password" 
+                      value={formData.focusnfe_token_homologacao}
+                      onChange={(e) => setFormData({ ...formData, focusnfe_token_homologacao: e.target.value })}
+                      className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                      placeholder="Token do ambiente de testes"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">Token de Produção (Real)</label>
+                    <input 
+                      type="password" 
+                      value={formData.focusnfe_token_producao}
+                      onChange={(e) => setFormData({ ...formData, focusnfe_token_producao: e.target.value })}
+                      className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                      placeholder="Token do ambiente real"
+                    />
+                  </div>
+                </div>
+                <p className="mt-4 text-xs text-slate-400">
+                  * Os tokens são criptografados e usados apenas para comunicação com a SEFAZ via FocusNFe.
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-end">
+              <button 
+                onClick={handleSave}
+                disabled={updateMutation.isPending}
+                className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+              >
+                 {updateMutation.isPending ? "Salvando..." : "Salvar Configurações Fiscais"}
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
               <CreditCard className="h-5 w-5" /> Plano e Assinatura
             </h3>
@@ -205,6 +334,7 @@ export default function ConfiguracoesPage() {
           </div>
         </div>
       )}
+      <FiscalGuide />
     </div>
   );
 }

@@ -5,10 +5,10 @@ import { fetchVendas, createVenda, deleteVenda, type VendaCreate } from "@/lib/a
 
 const VENDAS_KEY = ["vendas"] as const;
 
-export function useVendas() {
+export function useVendas(searchTerm?: string) {
   return useQuery({
-    queryKey: VENDAS_KEY,
-    queryFn: fetchVendas,
+    queryKey: [...VENDAS_KEY, searchTerm],
+    queryFn: () => fetchVendas(searchTerm),
   });
 }
 

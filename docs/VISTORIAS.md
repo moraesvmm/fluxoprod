@@ -452,3 +452,25 @@ Tornar a página de Configurações um recurso nativo da plataforma, garantindo ace
 - **Arquitetura:** Módulo convertido em Core Feature.
 - **Vistoria:** PENDENTE (Alterações de código realizadas).
 $entry
+
+---
+
+## VISTORIA 38 (PENDENTE): Melhorias no Módulo de Vendas & Prontidão SEFAZ - 28/04/2026
+
+### Objetivo
+Resolver gaps de funcionalidade no módulo de Vendas, implementar busca real no servidor, geração de recibos e preparar a estrutura de banco de dados para futura integração com SEFAZ.
+
+### Ações Executadas
+- **vendas_sefaz_readiness.sql [NOVO]**: Migração para adicionar colunas de NFe (
+fe_status, 
+fe_chave, 
+fe_xml, etc.) e atualizar RPCs (	enant_processar_venda, 	enant_listar_vendas).
+- **lib/api.ts [MODIFICADO]**: Atualização da interface Venda e função etchVendas com suporte a searchTerm.
+- **hooks/use-vendas.ts [MODIFICADO]**: Hook atualizado para suportar buscas reativas.
+- **vendas/page.tsx [MODIFICADO]**: Implementação de busca funcional, exibição de status NFe e gerador de recibo (Window Print).
+- **vendas/pdv/page.tsx [MODIFICADO]**: Adição de toggle para solicitação de emissão de NFe no checkout.
+- **SEFAZ_INTEGRATION_GUIDE.md [NOVO]**: Documentação técnica para o próximo estágio de integração fiscal.
+
+### Status
+- **Arquitetura:** Infraestrutura pronta para NFe e Busca Otimizada.
+- **Vistoria:** PENDENTE (Realizar teste de fumaça no PDV e Histórico).

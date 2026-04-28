@@ -11,6 +11,9 @@ export interface Venda {
   vendedor_nome?: string;
   criado_em: string;
   atualizado_em?: string;
+  nfe_status?: 'nao_emitida' | 'pendente' | 'emitida' | 'erro' | 'cancelada';
+  nfe_chave?: string;
+  desconto_aplicado?: number;
 }
 
 export interface VendaCreate {
@@ -391,6 +394,11 @@ export interface Empresa {
   data_vencimento?: string;
   trial_ends_at?: string;
   plan_name?: string;
+  inscricao_estadual?: string;
+  regime_tributario?: string;
+  focusnfe_token_producao?: string;
+  focusnfe_token_homologacao?: string;
+  nfe_ambiente?: 'producao' | 'homologacao';
 }
 
 export interface EmpresaUpdate {
@@ -404,6 +412,11 @@ export interface EmpresaUpdate {
   data_vencimento?: string;
   trial_ends_at?: string;
   plan_name?: string;
+  inscricao_estadual?: string;
+  regime_tributario?: string;
+  focusnfe_token_producao?: string;
+  focusnfe_token_homologacao?: string;
+  nfe_ambiente?: 'producao' | 'homologacao';
 }
 
 export interface Funcionario {
@@ -510,9 +523,12 @@ function isMissingRpcError(message: string) {
 }
 
 // VENDAS - Usar RPC tenant_listar_vendas para leitura
-export async function fetchVendas(): Promise<Venda[]> {
+export async function fetchVendas(searchTerm?: string): Promise<Venda[]> {
   const { data, error } = await getSupabase()
-    .rpc('tenant_listar_vendas', { p_limit: 100 });
+    .rpc('tenant_listar_vendas', { 
+      p_limit: 100,
+      p_busca: searchTerm || null
+    });
   if (error) throw new Error(error.message);
   return data || [];
 }

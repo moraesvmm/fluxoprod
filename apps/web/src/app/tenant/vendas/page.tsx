@@ -17,13 +17,42 @@ import Link from "next/link";
 import { useVendas, useDeleteVenda } from "@/lib/hooks/use-vendas";
 import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { FiscalGuide } from "@/components/modules/fiscal/FiscalGuide";
 
 export default function VendasPage() {
-  const { data: vendas = [], isLoading: loading, error: queryError } = useVendas();
+  const [searchTerm, setSearchTerm] = useState("");
+  const { data: vendas = [], isLoading: loading, error: queryError } = useVendas(searchTerm);
   const deleteMutation = useDeleteVenda();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
   const { toasts, removeToast, success, error: toastError } = useToast();
+
+  const imprimirRecibo = (venda: any) => {
+    const conteudo = `
+      FLUXO ERP - RECIBO DE VENDA
+      ---------------------------
+      ID: ${venda.id}
+      Data: ${formatarData(venda.criado_em)}
+      Cliente: ${venda.cliente}
+      Valor: ${formatarValor(venda.valor)}
+      Método: ${venda.metodo}
+      ---------------------------
+      Obrigado pela preferência!
+    `;
+    const win = window.open('', 'PRINT', 'height=600,width=400');
+    if (win) {
+      win.document.write(`
+        <html>
+          <head><title>Recibo - ${venda.id.substring(0,8)}</title></head>
+          <body style="font-family: monospace; padding: 20px;">
+            <pre style="white-space: pre-wrap;">${conteudo}</pre>
+            <script>window.print(); setTimeout(() => window.close(), 500);</script>
+          </body>
+        </html>
+      `);
+      win.document.close();
+    }
+  };
 
   const confirmDelete = async () => {
     if (!deleteId) return;
@@ -97,7 +126,9 @@ export default function VendasPage() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
-              placeholder="Buscar recibo, cliente ou data..."
+              placeholder="Buscar recibo ou cliente..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
@@ -114,6 +145,7 @@ export default function VendasPage() {
               <TableHead>Método</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>NFe</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -150,6 +182,16 @@ export default function VendasPage() {
                   <TableCell>
                     <StatusBadge status={item.status as any} />
                   </TableCell>
+                  <TableCell>
+                    <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                      item.nfe_status === 'emitida' ? 'bg-green-100 text-green-700' :
+                      item.nfe_status === 'erro' ? 'bg-red-100 text-red-700' :
+                      item.nfe_status === 'pendente' ? 'bg-amber-100 text-amber-700 animate-pulse' :
+                      'bg-slate-100 text-slate-500'
+                    }`}>
+                      {item.nfe_status?.replace('_', ' ') || 'Não Emitida'}
+                    </span>
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <button className="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Editar transação">
@@ -162,7 +204,11 @@ export default function VendasPage() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                      <button className="text-slate-400 hover:text-primary transition-colors p-1" title="Gerar Recibo PDF">
+                      <button 
+                        className="text-slate-400 hover:text-primary transition-colors p-1" 
+                        title="Gerar Recibo PDF"
+                        onClick={() => imprimirRecibo(item)}
+                      >
                         <FileText className="h-4 w-4" />
                       </button>
                     </div>
@@ -176,6 +222,7 @@ export default function VendasPage() {
 
       {/* Calculadora Flutuante */}
       <FloatingCalculator isOpen={showCalculator} onToggle={() => setShowCalculator(!showCalculator)} />
+      <FiscalGuide />
     </div>
   );
 }
