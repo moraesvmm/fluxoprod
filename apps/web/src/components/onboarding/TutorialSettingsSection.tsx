@@ -5,16 +5,12 @@ import { Play, CheckCircle2, HelpCircle } from 'lucide-react';
 import { useOnboarding } from './OnboardingProvider';
 import { TUTORIAL_DATA } from '@/lib/onboarding/tutorials';
 import { Button } from '@/components/ui/button';
-import { useEmpresa } from '@/lib/hooks/use-empresas';
+import { useActiveModules } from '@/lib/hooks/use-dashboard';
 
 export function TutorialSettingsSection() {
   const { startTutorial, isStepCompleted } = useOnboarding();
-  const { data: empresa } = useEmpresa();
+  const { data: activeModules = [] } = useActiveModules();
 
-  // Filtra tutoriais baseados nos módulos ativos da empresa
-  // Se empresa.modulos for undefined, assume apenas dashboard (core)
-  const activeModules = empresa?.modulos?.map(m => m.key) || ['dashboard'];
-  
   const tutorialsToShow = Object.values(TUTORIAL_DATA).filter(tutorial => 
     tutorial.key === 'dashboard' || activeModules.includes(tutorial.key)
   );

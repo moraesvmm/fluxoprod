@@ -7,9 +7,31 @@ import { useUserProfile } from "./use-user-profile";
 const supabase = createClient();
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
+export function useActiveModules() {
+  const { userId } = useUserProfile();
+
+  return useQuery({
+    queryKey: ["modulos-ativos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('v_empresa_modulos')
+        .select('modulo_key')
+        .eq('ativo', true);
+      if (error) throw error;
+      return data?.map(m => m.modulo_key) || [];
+    },
+    staleTime: 10 * 60_000,
+    retry: 2,
+    enabled: !!userId,
+  });
+}
+
 export function useDashboardData() {
   // Obter userId do auth para usar como guard
   const { userId } = useUserProfile();
+
+  // Buscar módulos ativos para validar feature flags
+  const { data: modulosAtivos } = useActiveModules();
 
   // Usar RPC tenant_dashboard_kpis para obter todos os KPIs calculados no banco
   const { data: kpis, isLoading, error } = useQuery({
@@ -37,21 +59,6 @@ export function useDashboardData() {
     enabled: !!userId, // Só executar se usuário estiver autenticado
   });
 
-  // Buscar módulos ativos para validar feature flags
-  const { data: modulosAtivos } = useQuery({
-    queryKey: ["modulos-ativos"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('v_empresa_modulos')
-        .select('modulo_key')
-        .eq('ativo', true);
-      if (error) throw error;
-      return data?.map(m => m.modulo_key) || [];
-    },
-    staleTime: 10 * 60_000,
-    retry: 2,
-    enabled: !!userId, // Só executar se usuário estiver autenticado
-  });
 
   // Série temporal real: faturamento dos últimos 6 meses por mês
   const { data: kpisPorMes, isLoading: isLoadingChart } = useQuery({
