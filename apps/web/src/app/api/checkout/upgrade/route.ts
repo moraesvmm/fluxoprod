@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "ID da empresa obrigatório" }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Obter dados da empresa
     const { data: empresa, error: empresaError } = await supabase

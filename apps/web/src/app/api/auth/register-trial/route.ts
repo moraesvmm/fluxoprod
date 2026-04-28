@@ -207,7 +207,7 @@ export async function POST(request: Request) {
       password: payload.password, // Importante para link de signup via admin
     });
 
-    const activationLink = linkData?.properties?.action_link || null;
+    const activationLink = linkData?.properties?.action_link || undefined;
 
     if (linkError) {
       console.error("Erro ao gerar link de ativação:", linkError);
