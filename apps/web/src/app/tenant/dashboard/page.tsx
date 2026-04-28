@@ -128,7 +128,10 @@ export default function DashboardPage() {
       {dashboard.isLoading ? (
         <KPISkeleton />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+        <div 
+          data-tour="kpi-cards"
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6"
+        >
           <KPICard title="Faturamento (Hoje)" value={formatarMoeda(dashboard.faturamentoHoje)} icon={Banknote} />
           <KPICard title="Vendas (Hoje)" value={String(dashboard.vendasHoje)} icon={ShoppingBag} />
           <KPICard title="Ticket Médio" value={formatarMoeda(dashboard.ticketMedio)} icon={BarChart} />

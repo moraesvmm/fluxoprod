@@ -48,6 +48,7 @@ export function Header({ onSearchClick }: HeaderProps) {
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
         <button
           onClick={onSearchClick}
+          data-tour="global-search"
           className="relative flex flex-1 items-center gap-2 px-4 py-2 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors text-left"
         >
           <Search className="h-4 w-4 text-muted-foreground/60" />

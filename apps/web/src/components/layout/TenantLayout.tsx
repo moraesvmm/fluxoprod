@@ -8,6 +8,9 @@ import { SubscriptionBanner } from "./SubscriptionBanner";
 import { GlobalSearch } from "@/components/modules/base/GlobalSearch";
 import { PageTransition } from "./PageTransition";
 import { useEmpresa } from "@/lib/hooks/use-empresas";
+import { OnboardingProvider } from "@/components/onboarding/OnboardingProvider";
+import { TutorialCard } from "@/components/onboarding/TutorialCard";
+import { TutorialOverlay } from "@/components/onboarding/TutorialOverlay";
 
 export function TenantLayout({ children }: { children: ReactNode }) {
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
@@ -26,20 +29,24 @@ export function TenantLayout({ children }: { children: ReactNode }) {
   }, [empresa, router, pathname]);
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
-        <SubscriptionBanner />
-        <Header onSearchClick={() => setShowGlobalSearch(true)} />
-        <main className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <PageTransition>
-              {children}
-            </PageTransition>
-          </div>
-        </main>
+    <OnboardingProvider>
+      <div className="flex h-screen bg-background">
+        <Sidebar />
+        <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+          <SubscriptionBanner />
+          <Header onSearchClick={() => setShowGlobalSearch(true)} />
+          <main className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </div>
+          </main>
+        </div>
+        <GlobalSearch isOpen={showGlobalSearch} onClose={() => setShowGlobalSearch(false)} />
+        <TutorialOverlay />
+        <TutorialCard />
       </div>
-      <GlobalSearch isOpen={showGlobalSearch} onClose={() => setShowGlobalSearch(false)} />
-    </div>
+    </OnboardingProvider>
   );
 }

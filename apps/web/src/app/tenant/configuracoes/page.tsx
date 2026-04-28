@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Settings, Save, Loader2, CreditCard, Calendar, CheckCircle2, AlertCircle } from "lucide-react";
 import { useEmpresa, useUpdateEmpresa } from "@/lib/hooks/use-empresas";
 import { useToast, Toast } from "@/components/ui/toast";
+import { TutorialSettingsSection } from "@/components/onboarding/TutorialSettingsSection";
 
 export default function ConfiguracoesPage() {
   const { data: empresa, isLoading } = useEmpresa();
@@ -198,6 +199,9 @@ export default function ConfiguracoesPage() {
                  </p>
               </div>
             </div>
+          </div>
+          <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
+            <TutorialSettingsSection />
           </div>
         </div>
       )}
