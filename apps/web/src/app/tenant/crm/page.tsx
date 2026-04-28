@@ -26,6 +26,7 @@ import TimelineInteracoes from "@/components/crm/timeline-interacoes";
 import FiltroTags from '@/components/crm/filtro-tags';
 import { NurturingPanel } from '@/components/crm/NurturingPanel';
 import ImportadorClientesExcel from "@/components/crm/ImportadorClientesExcel";
+import { Modal } from "@/components/ui/modal";
 
 export default function CRMPage() {
   const [buscaCliente, setBuscaCliente] = useState('');
@@ -351,105 +352,107 @@ export default function CRMPage() {
           </button>
         </div>
 
-        {showForm && (
-          <div className="bg-white rounded-xl border border-border shadow-sm p-6">
-            <h3 className="text-lg font-semibold mb-4">Novo Cliente</h3>
-            <form onSubmit={criarCliente} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
-                  <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Nome completo" required />
-                </div>
+        <Modal 
+          isOpen={showForm} 
+          onClose={() => setShowForm(false)} 
+          title="Novo Cliente"
+        >
+          <form onSubmit={criarCliente} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
+                <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="Nome completo" required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="(00) 00000-0000" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                  <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="email@exemplo.com" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
-                  <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Endereço completo" />
+                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="(00) 00000-0000" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
-                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="000.000.000-00" />
+                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="000.000.000-00" />
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button type="submit" disabled={createMutation.isPending} className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
-                  {createMutation.isPending ? "Salvando..." : "Salvar Cliente"}
-                </button>
-                <button type="button" onClick={() => setShowForm(false)} className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
-                  Cancelar
-                </button>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="email@exemplo.com" />
               </div>
-            </form>
-          </div>
-        )}
-
-        {/* Modal de Edição */}
-        {showEditModal && (
-          <div className="bg-white rounded-xl border border-border shadow-sm p-6">
-            <h3 className="text-lg font-semibold mb-4">Editar Cliente</h3>
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
-                  <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Nome completo" required />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="(00) 00000-0000" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                  <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="email@exemplo.com" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
-                  <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Endereço completo" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
-                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="000.000.000-00" />
-                </div>
-              </div>
-              
-              {editId && (
-                <>
-                  <div className="border-t border-border pt-4">
-                    <GerenciarTags 
-                      clienteId={editId} 
-                      tagsAtuais={clientes.find(c => c.id === editId)?.tags || []}
-                      onChange={() => {}}
-                      onRefresh={recarregarClientes}
-                    />
-                  </div>
-                  
-                  <div className="border-t border-border pt-4">
-                    <TimelineInteracoes clienteId={editId} />
-                  </div>
-                </>
-              )}
-              
-              <div className="flex gap-2">
-                <button 
-                  type="button"
-                  onClick={editarCliente}
-                  disabled={updateMutation.isPending} 
-                  className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  {updateMutation.isPending ? "Salvando..." : "Atualizar Cliente"}
-                </button>
-                <button type="button" onClick={() => setShowEditModal(false)} className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
-                  Cancelar
-                </button>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+                <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="Endereço completo" />
               </div>
             </div>
+            <div className="flex gap-2 pt-4 border-t border-border mt-6">
+              <button type="submit" disabled={createMutation.isPending} className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+                {createMutation.isPending ? "Salvando..." : "Salvar Cliente"}
+              </button>
+              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </Modal>
+
+        {/* Modal de Edição */}
+        <Modal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          title="Editar Cliente"
+        >
+          <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
+                <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="Nome completo" required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
+                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="(00) 00000-0000" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
+                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="000.000.000-00" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="email@exemplo.com" />
+              </div>
+            </div>
+            
+            {editId && (
+              <>
+                <div className="border-t border-border pt-4">
+                  <GerenciarTags 
+                    clienteId={editId} 
+                    tagsAtuais={clientes.find(c => c.id === editId)?.tags || []}
+                    onChange={() => {}}
+                    onRefresh={recarregarClientes}
+                  />
+                </div>
+                
+                <div className="border-t border-border pt-4">
+                  <TimelineInteracoes clienteId={editId} />
+                </div>
+              </>
+            )}
           </div>
-        )}
+          
+          <div className="flex gap-2 pt-4 border-t border-border mt-6">
+            <button 
+              type="button"
+              onClick={editarCliente}
+              disabled={updateMutation.isPending} 
+              className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {updateMutation.isPending ? "Salvando..." : "Atualizar Cliente"}
+            </button>
+            <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+              Cancelar
+            </button>
+          </div>
+        </Modal>
 
         {viewMode === 'pipeline' ? (
           <KanbanPipeline />

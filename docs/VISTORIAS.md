@@ -417,3 +417,20 @@ Repaginação total do Dark Mode para melhorar contraste, eficiência visual e u
 ### Status:
 - **UI/UX:** PENDENTE DE VISTORIA (Alterações de código-fonte realizadas).
 - **Vistoria:** PENDENTE.
+
+---
+
+## VISTORIA 36 (CONCLUÍDO): Correção Painel Nurturing & UX "Novo Cliente" — 27/04/2026
+
+### Escopo
+- **[CRÍTICO] Erro row_to_json(jsonb):** Identificada falha na RPC `public.tenant_obter_sugestoes_nurturing` devido a retornos inconsistentes nos tenants.
+- **[UX] Posicionamento do Formulário:** O formulário de "Novo Cliente" agora é um Modal centralizado.
+- **[ALTO] Hydration Error (React 418):** Estabilização da página após correção da RPC.
+
+### Ações Executadas
+- **[DB] public.tenant_obter_sugestoes_nurturing:** Refatorada para ser polimórfica (suporta record e jsonb).
+- **[FE] CRM Page:** Refatoração para uso do componente `Modal`.
+
+### Status
+- **Funcionalidade:** Painel restaurado e UX corrigido.
+- **Vistoria:** CONCLUÍDO.

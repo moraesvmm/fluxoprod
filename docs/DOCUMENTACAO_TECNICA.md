@@ -1,7 +1,15 @@
 # DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
 ## ESTADO ATUAL: PRODUCTION-READY (COM RESSALVAS)
-## ÚLTIMA ATUALIZAÇÃO: 27/04/2026 (Nurturing Híbrido e Venda Nativa CRM)
-## VERSÃO: 2.2
+## ÚLTIMA ATUALIZAÇÃO: 28/04/2026 (UI Overhaul, CRM Modal & Nurturing Polimórfico)
+## VERSÃO: 2.3
+
+---
+
+> [!CAUTION]
+> **🛑 BLINDAGEM DO MÓDULO CRM (REGRA DE OURO)**
+> O módulo de CRM (`apps/web/src/app/tenant/crm/page.tsx` e componentes em `@/components/crm/*`) é o núcleo de inteligência e reengajamento do Fluxo ERP. 
+> **PROIBIDO ALTERAR** a estrutura de RPCs (`tenant_obter_sugestoes_nurturing`, `tenant_criar_cliente`), hooks ou o sistema de Modais sem validação em ambiente multi-tenant diversificado. 
+> **RESTRIÇÃO CRÍTICA**: Qualquer modificação em RPCs de CRM deve manter compatibilidade polimórfica (suporte a retornos `JSONB` e `RECORD`) para evitar quebra de produção em tenants legados.
 
 ---
 
