@@ -44,7 +44,7 @@ export function TutorialSettingsSection() {
                   <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
                     {tutorial.moduleName}
                     {completed && (
-                      <CheckCircle2 className="w-4 h-4 text-green-500" title="Concluído" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
                     )}
                   </h4>
                   <p className="text-xs text-muted-foreground">
