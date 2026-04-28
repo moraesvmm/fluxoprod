@@ -13,6 +13,25 @@
 
 ---
 
+## 🛡️ POLÍTICA DE EVOLUÇÃO E BLINDAGEM GLOBAL
+
+Para garantir a integridade do sistema em caso de rollbacks e evitar quebra de produção por agentes ou manutenções:
+
+1. **Mudanças Aditivas (Não Destrutivas)**: 
+   - Ao adicionar funcionalidades, priorize a **adição** de novas colunas ou tabelas. 
+   - **PROIBIDO** renomear ou excluir colunas existentes sem um plano de migração de dados de duas etapas (dual-run).
+   - O código antigo deve sempre ser capaz de ignorar novas colunas adicionadas ao banco.
+
+2. **Versionamento de RPCs (Modo Seguro)**:
+   - Se uma alteração em uma RPC existente puder quebrar o contrato atual (ex: mudar parâmetros ou tipo de retorno), **NÃO ALTERE** a função original.
+   - Crie uma nova versão da função (ex: `tenant_listar_vendas_v2`).
+   - Mantenha a `v1` funcional até que todos os clientes/componentes tenham migrado para a nova versão.
+
+3. **Independência de Rollback**:
+   - O sistema deve ser projetado para que o rollback de um commit do Frontend (Git) não resulte em falha catastrófica devido ao estado "mais novo" do Banco de Dados.
+
+---
+
 ## 📋 ESTRUTURA DO SISTEMA
 
 ### Arquitetura Geral (OPÇÃO A - IMPLEMENTADA)
