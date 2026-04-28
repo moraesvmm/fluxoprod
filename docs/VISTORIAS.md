@@ -1,32 +1,41 @@
+# VISTORIAS DO SISTEMA
+
+## VISTORIA 39 - Gestão de Vendas (Cancelamento e Devolução)
+- **Data:** 28/04/2026
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - Implementação de RPCs `tenant_cancelar_venda` e `tenant_devolver_item`.
+  - Estorno automático de estoque em cancelamentos e devoluções parciais.
+  - Feedback visual de status 'cancelado' no histórico de vendas.
+  - Atualização dos cards de checkout com novas funcionalidades.
+
+---
+
 # MÓDULO CHECKOUT & ASSINATURAS
 
 | DATA | VISTORIA | STATUS | RESUMO |
 | :--- | :--- | :--- | :--- |
-| 2026-04-27 | Correção Botão Novo Cliente + Sincronização Lead | CONCLUÍDO | Resolução de mismatch de assinatura na RPC `tenant_criar_cliente` (6 vs 7 params). Adicionado campo `p_endereco` e atualização de count no dashboard. |
-| 2026-04-27 | Vistoria Completa CRM + Wrappers Faltantes | CONCLUÍDO | Root cause 404: user_empresa→user_profiles. 14 wrappers public faltantes descobertos e corrigidos via script Supabase. |
-| 2026-04-27 | Auditoria Profunda CRM (DB+RPC+Frontend) | CONCLUÍDO | Criação RPC metricas, cleanup overload import, null safety, Header fix. |
-| 2026-04-27 | Mitigação CRM (404 Tags & Runtime UI) | CONCLUÍDO | Resolução RPC 404, Sidebar aviso, UI KPIs. |
-| 2026-04-27 | Provisionamento Automático & E-mail Trial | **PENDENTE** | Automação de DDL e link de ativação real. |
-| 2026-04-27 | Teste Grátis de 7 Dias (Free Trial) | **PENDENTE** | Fluxo de registro trial e upgrade Asaas. |
-| 2026-04-26 | Dashboard KPI & CRM Nurturing | CONCLUÍDO | Ajuste de RPCs globais e schemas dinâmicos. |
+| 2026-04-27 | Provisionamento AutomÃ¡tico & E-mail Trial | **PENDENTE** | AutomaÃ§Ã£o de DDL e link de ativaÃ§Ã£o real. |
+| 2026-04-27 | Teste GrÃ¡tis de 7 Dias (Free Trial) | **PENDENTE** | Fluxo de registro trial e upgrade Asaas. |
+| 2026-04-26 | Dashboard KPI & CRM Nurturing | CONCLUÃ�DO | Ajuste de RPCs globais e schemas dinÃ¢micos. |
 
 ---
 
-## VISTORIA 33 (CONCLUÍDO): Vistoria Completa CRM + Wrappers Faltantes — 27/04/2026
+## VISTORIA 33 (CONCLUÃ�DO): Vistoria Completa CRM + Wrappers Faltantes â€” 27/04/2026
 
 ### Causa Raiz dos 404 (DESCOBERTA)
-O wrapper `public.tenant_dashboard_metricas` referenciava a tabela **`user_empresa`** que **NÃO EXISTE** no banco. O correto é `user_profiles`. Isso causava falha na introspection do PostgREST → **404 permanente**.
+O wrapper `public.tenant_dashboard_metricas` referenciava a tabela **`user_empresa`** que **NÃƒO EXISTE** no banco. O correto Ã© `user_profiles`. Isso causava falha na introspection do PostgREST â†’ **404 permanente**.
 
-O `NOTIFY pgrst, 'reload schema'` das vistorias anteriores **não podia** resolver o problema porque a definição da função em si era inválida — o PostgREST rejeitava a função durante a introspection ao detectar referência a tabela inexistente.
+O `NOTIFY pgrst, 'reload schema'` das vistorias anteriores **nÃ£o podia** resolver o problema porque a definiÃ§Ã£o da funÃ§Ã£o em si era invÃ¡lida â€” o PostgREST rejeitava a funÃ§Ã£o durante a introspection ao detectar referÃªncia a tabela inexistente.
 
-### Correções Realizadas
-- **[CRÍTICO] `public.tenant_dashboard_metricas`:** Recriada com `user_profiles` (JOIN correto) em vez de `user_empresa` (tabela inexistente). Validada via HTTP: retorna 400 "Não autenticado" (esperado sem sessão) em vez de 404.
-- **[CONFIRMADO] `public.tenant_listar_tags_catalog`:** Já funcionava (200 OK via HTTP). O 404 no browser era cache.
+### CorreÃ§Ãµes Realizadas
+- **[CRÃ�TICO] `public.tenant_dashboard_metricas`:** Recriada com `user_profiles` (JOIN correto) em vez de `user_empresa` (tabela inexistente). Validada via HTTP: retorna 400 "NÃ£o autenticado" (esperado sem sessÃ£o) em vez de 404.
+- **[CONFIRMADO] `public.tenant_listar_tags_catalog`:** JÃ¡ funcionava (200 OK via HTTP). O 404 no browser era cache.
 
 ### Descoberta: 14 Wrappers Faltantes no `public`
-Auditoria cruzada frontend×banco revelou que **14 RPCs chamadas pelo api.ts NÃO TÊM wrappers no schema `public`**, embora existam nos tenant schemas. Estas funções darão 404 quando acionadas pelo usuário:
+Auditoria cruzada frontendÃ—banco revelou que **14 RPCs chamadas pelo api.ts NÃƒO TÃŠM wrappers no schema `public`**, embora existam nos tenant schemas. Estas funÃ§Ãµes darÃ£o 404 quando acionadas pelo usuÃ¡rio:
 
-| RPC Faltante | Módulo |
+| RPC Faltante | MÃ³dulo |
 |---|---|
 | `tenant_enviar_campanha` | CRM |
 | `tenant_criar_kit` | Estoque |
@@ -44,21 +53,21 @@ Auditoria cruzada frontend×banco revelou que **14 RPCs chamadas pelo api.ts NÃ
 | `tenant_atualizar_demanda_real` | Estoque |
 
 ### Status
-- **Banco:** Wrapper `public.tenant_dashboard_metricas` recriado e validado via HTTP (não mais 404).
-- **Frontend:** Nenhuma alteração necessária — os 2 erros 404 do CRM estão resolvidos no banco.
-- **Pendência:** Nenhuma. Os 14 wrappers faltantes foram criados no banco de dados e adicionados ao `supabase_rpc.sql`.
-- **Vistoria:** CONCLUÍDO. Validação pendente pelo usuário.
+- **Banco:** Wrapper `public.tenant_dashboard_metricas` recriado e validado via HTTP (nÃ£o mais 404).
+- **Frontend:** Nenhuma alteraÃ§Ã£o necessÃ¡ria â€” os 2 erros 404 do CRM estÃ£o resolvidos no banco.
+- **PendÃªncia:** Nenhuma. Os 14 wrappers faltantes foram criados no banco de dados e adicionados ao `supabase_rpc.sql`.
+- **Vistoria:** CONCLUÃ�DO. ValidaÃ§Ã£o pendente pelo usuÃ¡rio.
 
 ---
 
-## VISTORIA 32 (CONCLUÍDO): Auditoria Profunda CRM — DB + RPC + Frontend — 27/04/2026
+## VISTORIA 32 (CONCLUÃ�DO): Auditoria Profunda CRM â€” DB + RPC + Frontend â€” 27/04/2026
 
 ### Escopo
-- **[CRÍTICO] RPC Inexistente:** A função `tenant_dashboard_metricas` — chamada pelo componente `dashboard-kpis.tsx` — NÃO EXISTIA no banco de dados. Criada em todos os tenant schemas + wrapper público com `SECURITY DEFINER` e resolução dinâmica de schema.
-- **[CRÍTICO] Overload Duplicado:** `tenant_importar_clientes_lote` possuía 2 versões sobrepostas no schema `public` (uma com `p_clientes jsonb` e outra com `p_clientes jsonb, p_user_id uuid`). Removida a versão simples para eliminar ambiguidade PostgREST.
-- **[MÉDIO] Null Safety Dashboard:** Adicionadas proteções defensivas em `dashboard-kpis.tsx`: `funilCounts` com fallback, `maxCount` mínimo de 1 (divisão por zero), optional chaining em `taxa_conversao`, nullish coalescing em `churn_rate`.
-- **[MÉDIO] Header.tsx Image Warning:** Corrigido aviso de renderização do Next.js (`Image with src "/logo-fluxo.png"`) adicionando `style={{ width: "auto", height: "auto" }}`.
-- **[MÉDIO] Shadowing em use-segmentacao.ts:** As funções locais `adicionarTag`/`removerTag` faziam *shadow* das importações de `@/lib/api`. Renomeadas para `handleAdicionarTag`/`handleRemoverTag` com imports aliasados (`apiAdicionarTag`/`apiRemoverTag`).
+- **[CRÃ�TICO] RPC Inexistente:** A funÃ§Ã£o `tenant_dashboard_metricas` â€” chamada pelo componente `dashboard-kpis.tsx` â€” NÃƒO EXISTIA no banco de dados. Criada em todos os tenant schemas + wrapper pÃºblico com `SECURITY DEFINER` e resoluÃ§Ã£o dinÃ¢mica de schema.
+- **[CRÃ�TICO] Overload Duplicado:** `tenant_importar_clientes_lote` possuÃ­a 2 versÃµes sobrepostas no schema `public` (uma com `p_clientes jsonb` e outra com `p_clientes jsonb, p_user_id uuid`). Removida a versÃ£o simples para eliminar ambiguidade PostgREST.
+- **[MÃ‰DIO] Null Safety Dashboard:** Adicionadas proteÃ§Ãµes defensivas em `dashboard-kpis.tsx`: `funilCounts` com fallback, `maxCount` mÃ­nimo de 1 (divisÃ£o por zero), optional chaining em `taxa_conversao`, nullish coalescing em `churn_rate`.
+- **[MÃ‰DIO] Header.tsx Image Warning:** Corrigido aviso de renderizaÃ§Ã£o do Next.js (`Image with src "/logo-fluxo.png"`) adicionando `style={{ width: "auto", height: "auto" }}`.
+- **[MÃ‰DIO] Shadowing em use-segmentacao.ts:** As funÃ§Ãµes locais `adicionarTag`/`removerTag` faziam *shadow* das importaÃ§Ãµes de `@/lib/api`. Renomeadas para `handleAdicionarTag`/`handleRemoverTag` com imports aliasados (`apiAdicionarTag`/`apiRemoverTag`).
 
 ### Arquivos Modificados
 - `apps/web/src/components/crm/dashboard-kpis.tsx` [MODIFICADO]
@@ -69,19 +78,19 @@ Auditoria cruzada frontend×banco revelou que **14 RPCs chamadas pelo api.ts NÃ
 - `public.tenant_importar_clientes_lote(jsonb)` [DB - REMOVIDO overload]
 
 ### Status
-- **Banco:** Corrigido. Wrapper recriado com referência correta (user_profiles).
-- **Frontend:** 3 arquivos corrigidos com proteções null-safe e eliminação de warnings.
-- **Vistoria:** CONCLUÍDO.
+- **Banco:** Corrigido. Wrapper recriado com referÃªncia correta (user_profiles).
+- **Frontend:** 3 arquivos corrigidos com proteÃ§Ãµes null-safe e eliminaÃ§Ã£o de warnings.
+- **Vistoria:** CONCLUÃ�DO.
 
 ---
 
-## VISTORIA 31 (PENDENTE): Mitigação de Bugs de Runtime e RPC no CRM — 27/04/2026
+## VISTORIA 31 (PENDENTE): MitigaÃ§Ã£o de Bugs de Runtime e RPC no CRM â€” 27/04/2026
 
 ### Escopo
-- Correção do erro `undefined is not an object (evaluating 'value.toFixed')` nos KPIs do Dashboard via *nullish coalescing*.
-- Mitigação do erro de importação de `xlsx` assegurando as dependências via npm.
-- Resolução do erro 404 ao chamar a RPC `tenant_listar_tags_catalog`. Havia ambiguidade de overload na function `public` e erro de signature no schema `tenant_fluxoerp_01615a` (retornando `jsonb` ao invés de `TABLE`). Ambas foram reescritas com as assinaturas precisas e o schema cache recarregado.
-- Correção estética do aviso de renderização no console do Next.js sobre a imagem `logo-fluxo.png` no `Sidebar.tsx`.
+- CorreÃ§Ã£o do erro `undefined is not an object (evaluating 'value.toFixed')` nos KPIs do Dashboard via *nullish coalescing*.
+- MitigaÃ§Ã£o do erro de importaÃ§Ã£o de `xlsx` assegurando as dependÃªncias via npm.
+- ResoluÃ§Ã£o do erro 404 ao chamar a RPC `tenant_listar_tags_catalog`. Havia ambiguidade de overload na function `public` e erro de signature no schema `tenant_fluxoerp_01615a` (retornando `jsonb` ao invÃ©s de `TABLE`). Ambas foram reescritas com as assinaturas precisas e o schema cache recarregado.
+- CorreÃ§Ã£o estÃ©tica do aviso de renderizaÃ§Ã£o no console do Next.js sobre a imagem `logo-fluxo.png` no `Sidebar.tsx`.
 
 ### Arquivos Modificados
 - `apps/web/src/components/crm/dashboard-kpis.tsx` [MODIFICADO]
@@ -92,18 +101,18 @@ Auditoria cruzada frontend×banco revelou que **14 RPCs chamadas pelo api.ts NÃ
 
 ### Status
 - **Banco:** RPCs corrigidas via Supabase MCP para resolver erro 404 e recarregar schema cache do PostgREST.
-- **Frontend:** Tratamentos defensivos e CSS de imagem corrigidos. Variáveis de ambiente populadas.
-- **Vistoria:** PENDENTE — necessário executar validação E2E manual no ambiente de teste para criação de Novo Cliente.
+- **Frontend:** Tratamentos defensivos e CSS de imagem corrigidos. VariÃ¡veis de ambiente populadas.
+- **Vistoria:** PENDENTE â€” necessÃ¡rio executar validaÃ§Ã£o E2E manual no ambiente de teste para criaÃ§Ã£o de Novo Cliente.
 
 ---
 
-## VISTORIA 29 (PENDENTE): Provisionamento Automático & E-mail Trial — 27/04/2026
+## VISTORIA 29 (PENDENTE): Provisionamento AutomÃ¡tico & E-mail Trial â€” 27/04/2026
 
 ### Escopo
-- **Provisionamento DDL:** Atualização da RPC `public.provisionar_empresa` para criar tabelas e funções internas (`tenant_dashboard_kpis`, `tenant_obter_sugestoes_nurturing`) automaticamente.
-- **E-mail Transactional:** Configuração da `RESEND_API_KEY` e correção do template HTML em `email.ts`.
-- **Ativação Real:** Uso de `admin.auth.admin.generateLink` para envio de link de ativação real no e-mail.
-- **Hotfix Dashboard:** Injeção manual de DDL no tenant `tenant_fluxoerp_01615a` para resolver travamento de UI.
+- **Provisionamento DDL:** AtualizaÃ§Ã£o da RPC `public.provisionar_empresa` para criar tabelas e funÃ§Ãµes internas (`tenant_dashboard_kpis`, `tenant_obter_sugestoes_nurturing`) automaticamente.
+- **E-mail Transactional:** ConfiguraÃ§Ã£o da `RESEND_API_KEY` e correÃ§Ã£o do template HTML em `email.ts`.
+- **AtivaÃ§Ã£o Real:** Uso de `admin.auth.admin.generateLink` para envio de link de ativaÃ§Ã£o real no e-mail.
+- **Hotfix Dashboard:** InjeÃ§Ã£o manual de DDL no tenant `tenant_fluxoerp_01615a` para resolver travamento de UI.
 
 ### Arquivos Modificados
 - `apps/web/src/lib/email.ts` [MODIFICADO]
@@ -112,18 +121,18 @@ Auditoria cruzada frontend×banco revelou que **14 RPCs chamadas pelo api.ts NÃ
 
 ### Status
 - **Banco:** RPC atualizada e tenant corrigido.
-- **E-mail:** Link de ativação funcional.
+- **E-mail:** Link de ativaÃ§Ã£o funcional.
 - **Vistoria:** PENDENTE.
 
-## VISTORIA 28 (PENDENTE): Implementação de Teste Grátis de 7 Dias (Free Trial) — 27/04/2026
+## VISTORIA 28 (PENDENTE): ImplementaÃ§Ã£o de Teste GrÃ¡tis de 7 Dias (Free Trial) â€” 27/04/2026
 
 ### Escopo
-- Mudança do paradigma de provisionamento: de "pós-pagamento" para "imediato" via trial.
-- Adição de inteligência de controle temporal (`trial_ends_at`) no banco e middleware.
-- Criação de interface de conversão (upgrade) dentro do tenant.
+- MudanÃ§a do paradigma de provisionamento: de "pÃ³s-pagamento" para "imediato" via trial.
+- AdiÃ§Ã£o de inteligÃªncia de controle temporal (`trial_ends_at`) no banco e middleware.
+- CriaÃ§Ã£o de interface de conversÃ£o (upgrade) dentro do tenant.
 
 ### Arquivos Modificados
-- `public.empresas` [DB] — Colunas `trial_ends_at` e `plan_name`.
+- `public.empresas` [DB] â€” Colunas `trial_ends_at` e `plan_name`.
 - `apps/web/src/app/api/auth/register-trial/route.ts` [NOVO].
 - `apps/web/src/app/tenant/assinatura/page.tsx` [NOVO].
 
@@ -132,71 +141,71 @@ Auditoria cruzada frontend×banco revelou que **14 RPCs chamadas pelo api.ts NÃ
 
 ---
 
-## VISTORIA 26 (VALIDADA): Flexibilização Modular A La Carte e CRM Avulso — 27/04/2026
+## VISTORIA 26 (VALIDADA): FlexibilizaÃ§Ã£o Modular A La Carte e CRM Avulso â€” 27/04/2026
 
 ### Escopo
-- Alteração do modelo de vendas do Fluxoprod para suportar checkout "A La Carte" (sem plano base obrigatório).
-- Inclusão do módulo "CRM & Nurturing" como extensão avulsa (R$ 129,90) na tabela `public.modulos_avulsos`.
-- Adaptação do payload de sessão de checkout para processar assinaturas no Asaas sem um "plano principal" nomeado.
-- Refatoração da UI de checkout (Step 1) para permitir a desmarcação de planos e exibição do catálogo de Módulos A La Carte.
+- AlteraÃ§Ã£o do modelo de vendas do Fluxoprod para suportar checkout "A La Carte" (sem plano base obrigatÃ³rio).
+- InclusÃ£o do mÃ³dulo "CRM & Nurturing" como extensÃ£o avulsa (R$ 129,90) na tabela `public.modulos_avulsos`.
+- AdaptaÃ§Ã£o do payload de sessÃ£o de checkout para processar assinaturas no Asaas sem um "plano principal" nomeado.
+- RefatoraÃ§Ã£o da UI de checkout (Step 1) para permitir a desmarcaÃ§Ã£o de planos e exibiÃ§Ã£o do catÃ¡logo de MÃ³dulos A La Carte.
 
 ### Arquivos Modificados
-- `public.modulos_avulsos` [DB] — Inserção da key `crm` com o valor de R$ 129,90.
-- `apps/web/src/app/(auth)/checkout/page.tsx` [MODIFICADO] — Lógica de `selectedPlan` opcional, cálculos de carrinho flexíveis, card "A La Carte" e inclusão no `MODULOS_FALLBACK`.
-- `apps/web/src/app/api/checkout/session/route.ts` [MODIFICADO] — Tratamento amigável da descrição da assinatura no Asaas ("Módulos A La Carte" quando plano não está presente).
+- `public.modulos_avulsos` [DB] â€” InserÃ§Ã£o da key `crm` com o valor de R$ 129,90.
+- `apps/web/src/app/(auth)/checkout/page.tsx` [MODIFICADO] â€” LÃ³gica de `selectedPlan` opcional, cÃ¡lculos de carrinho flexÃ­veis, card "A La Carte" e inclusÃ£o no `MODULOS_FALLBACK`.
+- `apps/web/src/app/api/checkout/session/route.ts` [MODIFICADO] â€” Tratamento amigÃ¡vel da descriÃ§Ã£o da assinatura no Asaas ("MÃ³dulos A La Carte" quando plano nÃ£o estÃ¡ presente).
 
 ### Status
-- **Banco:** Estruturas e RPCs (`listar_modulos_avulsos_checkout` e `listar_planos_checkout`) validadas sem exposição indevida. Payload armazenando corretamente a senha criptografada.
-- **Frontend/Backend:** Cálculo matemático, lógicas de trava de botões e payloads de ciclo "MONTHLY" plenamente aderentes ao contrato da arquitetura e Gateway Asaas.
-- **Vistoria:** VALIDADA. Todo o ciclo transacional e de segurança analisado com êxito.
+- **Banco:** Estruturas e RPCs (`listar_modulos_avulsos_checkout` e `listar_planos_checkout`) validadas sem exposiÃ§Ã£o indevida. Payload armazenando corretamente a senha criptografada.
+- **Frontend/Backend:** CÃ¡lculo matemÃ¡tico, lÃ³gicas de trava de botÃµes e payloads de ciclo "MONTHLY" plenamente aderentes ao contrato da arquitetura e Gateway Asaas.
+- **Vistoria:** VALIDADA. Todo o ciclo transacional e de seguranÃ§a analisado com Ãªxito.
 
-## VISTORIA 22 (PENDENTE): Implementação de Assinaturas Mensais — 26/04/2026
+## VISTORIA 22 (PENDENTE): ImplementaÃ§Ã£o de Assinaturas Mensais â€” 26/04/2026
 
 ### Escopo
-- Migração de pagamentos pontuais para assinaturas recorrentes (`cycle: MONTHLY`)
-- Evolução estrutural da tabela `public.empresas` (subscription_id, status, vencimento)
-- Orquestração de webhook para lidar com renovações e inadimplência
-- Interface de checkout atualizada com labels de recorrência
+- MigraÃ§Ã£o de pagamentos pontuais para assinaturas recorrentes (`cycle: MONTHLY`)
+- EvoluÃ§Ã£o estrutural da tabela `public.empresas` (subscription_id, status, vencimento)
+- OrquestraÃ§Ã£o de webhook para lidar com renovaÃ§Ãµes e inadimplÃªncia
+- Interface de checkout atualizada com labels de recorrÃªncia
 
 ### Arquivos Modificados
-- `public.empresas` [DB] — novos campos de assinatura
-- `apps/web/src/app/api/checkout/session/route.ts` [MODIFICADO] — criação de subscription via Asaas
-- `apps/web/src/app/api/webhook/payment/route.ts] [MODIFICADO] — lógica de renovação e status
-- `apps/web/src/app/(auth)/checkout/page.tsx` [MODIFICADO] — UI de checkout SaaS
+- `public.empresas` [DB] â€” novos campos de assinatura
+- `apps/web/src/app/api/checkout/session/route.ts` [MODIFICADO] â€” criaÃ§Ã£o de subscription via Asaas
+- `apps/web/src/app/api/webhook/payment/route.ts] [MODIFICADO] â€” lÃ³gica de renovaÃ§Ã£o e status
+- `apps/web/src/app/(auth)/checkout/page.tsx` [MODIFICADO] â€” UI de checkout SaaS
 
 ### Status
-- **Banco:** Migração aplicada via Supabase MCP
-- **Vistoria:** PENDENTE — aguardando teste de integração com Sandbox Asaas
+- **Banco:** MigraÃ§Ã£o aplicada via Supabase MCP
+- **Vistoria:** PENDENTE â€” aguardando teste de integraÃ§Ã£o com Sandbox Asaas
 
-# MÓDULO CRM
+# MÃ“DULO CRM
 
-## VISTORIA 27 (PENDENTE): Venda Nativa no CRM e Nurturing Híbrido — 27/04/2026
+## VISTORIA 27 (PENDENTE): Venda Nativa no CRM e Nurturing HÃ­brido â€” 27/04/2026
 
 ### Objetivo:
-Habilitar a autossuficiência do módulo CRM para clientes "A La Carte", permitindo o registro de vendas manuais e alertas de reengajamento sem depender do módulo de Vendas.
+Habilitar a autossuficiÃªncia do mÃ³dulo CRM para clientes "A La Carte", permitindo o registro de vendas manuais e alertas de reengajamento sem depender do mÃ³dulo de Vendas.
 
 ### Itens Auditados:
-- **`public.tenant_obter_sugestoes_nurturing` [DB]** — Evoluída para modelo híbrido (UNION ALL entre Vendas e Interações).
-- **`interacoes_clientes_tipo_check` [DB]** — Constraint atualizada em todos os schemas para incluir o tipo `'venda'`.
-- **`apps/web/src/lib/api.ts` [MODIFICADO]** — Interfaces atualizadas com o novo tipo e metadata estruturado.
-- **`apps/web/src/components/crm/timeline-interacoes.tsx` [MODIFICADO]** — UI com campos de Produto, Valor e Ciclo de Recompra.
-- **`apps/api/migrations/rpc_nurturing_interacoes_venda.sql` [NOVO]** — Script de migração unificado.
+- **`public.tenant_obter_sugestoes_nurturing` [DB]** â€” EvoluÃ­da para modelo hÃ­brido (UNION ALL entre Vendas e InteraÃ§Ãµes).
+- **`interacoes_clientes_tipo_check` [DB]** â€” Constraint atualizada em todos os schemas para incluir o tipo `'venda'`.
+- **`apps/web/src/lib/api.ts` [MODIFICADO]** â€” Interfaces atualizadas com o novo tipo e metadata estruturado.
+- **`apps/web/src/components/crm/timeline-interacoes.tsx` [MODIFICADO]** â€” UI com campos de Produto, Valor e Ciclo de Recompra.
+- **`apps/api/migrations/rpc_nurturing_interacoes_venda.sql` [NOVO]** â€” Script de migraÃ§Ã£o unificado.
 
 ### Status:
-- [x] Migrações de banco aplicadas em todos os schemas via `execute_dynamic_ddl`.
+- [x] MigraÃ§Ãµes de banco aplicadas em todos os schemas via `execute_dynamic_ddl`.
 - [x] Tipos TypeScript sincronizados em `api.ts`.
-- [x] Interface do usuário (`timeline-interacoes.tsx`) funcional com campos condicionais e ícone `ShoppingBag`.
-- [ ] Validação final em produção (Vercel).
+- [x] Interface do usuÃ¡rio (`timeline-interacoes.tsx`) funcional com campos condicionais e Ã­cone `ShoppingBag`.
+- [ ] ValidaÃ§Ã£o final em produÃ§Ã£o (Vercel).
 
 ---
 
-## VISTORIA 25 (VALIDADA): Auditoria Arquitetural e Estrutural do CRM — 27/04/2026
+## VISTORIA 25 (VALIDADA): Auditoria Arquitetural e Estrutural do CRM â€” 27/04/2026
 
 ### Escopo
-- Revisão completa do alinhamento arquitetural do módulo CRM (Opção A).
-- Validação de tipagem e isolamento nas chamadas via Next.js (`apps/web/src/lib/api.ts`).
-- Verificação de implementação de Soft Delete (`deleted_at`) e Idempotência (`idempotency_control`).
-- Análise de componentes e uso de hooks fragmentados (`use-clientes`, `use-segmentacao`, `use-interacoes`).
+- RevisÃ£o completa do alinhamento arquitetural do mÃ³dulo CRM (OpÃ§Ã£o A).
+- ValidaÃ§Ã£o de tipagem e isolamento nas chamadas via Next.js (`apps/web/src/lib/api.ts`).
+- VerificaÃ§Ã£o de implementaÃ§Ã£o de Soft Delete (`deleted_at`) e IdempotÃªncia (`idempotency_control`).
+- AnÃ¡lise de componentes e uso de hooks fragmentados (`use-clientes`, `use-segmentacao`, `use-interacoes`).
 
 ### Arquivos Analisados
 - `apps/api/supabase_rpc.sql` [VERIFICADO]
@@ -207,270 +216,270 @@ Habilitar a autossuficiência do módulo CRM para clientes "A La Carte", permiti
 ### Status
 - **Banco:** Estruturas base e complementares (`interacoes_clientes`, `tags_catalog`, `idempotency_control`) perfeitamente validadas.
 - **Frontend:** Absoluta conformidade. Nenhuma query `.from()` vazada no frontend para CRM. Uso eficiente de custom hooks isolados.
-- **Vistoria:** VALIDADA. Módulo robusto e pronto para produção sem ressalvas técnicas pendentes além dos testes de usabilidade finais de importação e nurturing.
+- **Vistoria:** VALIDADA. MÃ³dulo robusto e pronto para produÃ§Ã£o sem ressalvas tÃ©cnicas pendentes alÃ©m dos testes de usabilidade finais de importaÃ§Ã£o e nurturing.
 
 > [!NOTE]
-> As vistorias 24 e 23 (abaixo) foram verificadas estaticamente nesta auditoria 25 e possuem código consistente, dependendo apenas de validação E2E final para limpeza dos alertas originais.
+> As vistorias 24 e 23 (abaixo) foram verificadas estaticamente nesta auditoria 25 e possuem cÃ³digo consistente, dependendo apenas de validaÃ§Ã£o E2E final para limpeza dos alertas originais.
 
-## VISTORIA 24 (VALIDADA): Inteligência de Nurturing e Reengajamento — 27/04/2026
+## VISTORIA 24 (VALIDADA): InteligÃªncia de Nurturing e Reengajamento â€” 27/04/2026
 
 ### Escopo
-- Criação da tabela `crm_nurturing_alertas` com suporte a multi-tenant.
-- Implementação do "Cérebro" de sugestões via RPC (`tenant_obter_sugestoes_nurturing`).
-- Integração total com o PDV: campo "Ciclo de Recompra" que gera alertas automáticos.
-- Painel de Inteligência Proativa no CRM com ações rápidas via WhatsApp.
-- Lógica de arquivamento/finalização de alertas (`tenant_finalizar_alerta_nurturing`).
+- CriaÃ§Ã£o da tabela `crm_nurturing_alertas` com suporte a multi-tenant.
+- ImplementaÃ§Ã£o do "CÃ©rebro" de sugestÃµes via RPC (`tenant_obter_sugestoes_nurturing`).
+- IntegraÃ§Ã£o total com o PDV: campo "Ciclo de Recompra" que gera alertas automÃ¡ticos.
+- Painel de InteligÃªncia Proativa no CRM com aÃ§Ãµes rÃ¡pidas via WhatsApp.
+- LÃ³gica de arquivamento/finalizaÃ§Ã£o de alertas (`tenant_finalizar_alerta_nurturing`).
 
 ### Arquivos Modificados
-- `public.crm_nurturing_alertas` [DB] — Nova tabela em todos os schemas.
-- `public.tenant_obter_sugestoes_nurturing` [DB] — Lógica de detecção de inatividade e recompra.
-- `apps/web/src/components/crm/NurturingPanel.tsx` [NOVO] — UI premium de insights com botão de descarte (X).
-- `apps/web/src/app/tenant/vendas/pdv/page.tsx` [MODIFICADO] — Integração com o ciclo de venda e estabilização de conexão.
-- `apps/web/src/app/tenant/crm/page.tsx` [RESTAURADO] — Integração do painel e limpeza de layout.
-- `apps/web/src/lib/api.ts` [MODIFICADO] — Novos endpoints de nurturing.
+- `public.crm_nurturing_alertas` [DB] â€” Nova tabela em todos os schemas.
+- `public.tenant_obter_sugestoes_nurturing` [DB] â€” LÃ³gica de detecÃ§Ã£o de inatividade e recompra.
+- `apps/web/src/components/crm/NurturingPanel.tsx` [NOVO] â€” UI premium de insights com botÃ£o de descarte (X).
+- `apps/web/src/app/tenant/vendas/pdv/page.tsx` [MODIFICADO] â€” IntegraÃ§Ã£o com o ciclo de venda e estabilizaÃ§Ã£o de conexÃ£o.
+- `apps/web/src/app/tenant/crm/page.tsx` [RESTAURADO] â€” IntegraÃ§Ã£o do painel e limpeza de layout.
+- `apps/web/src/lib/api.ts` [MODIFICADO] â€” Novos endpoints de nurturing.
 
 ### Status
-- **Banco:** Estrutura e RPCs aplicadas via Supabase MCP. Inteligência nativa independente de vendas ativada.
-- **Frontend:** Implementado com design premium, animações e botão de descarte (X) funcional.
-- **Vistoria:** VALIDADA LOCALMENTE — o sistema agora detecta leads inativos (15 dias) e permite remoção manual dos cards.
+- **Banco:** Estrutura e RPCs aplicadas via Supabase MCP. InteligÃªncia nativa independente de vendas ativada.
+- **Frontend:** Implementado com design premium, animaÃ§Ãµes e botÃ£o de descarte (X) funcional.
+- **Vistoria:** VALIDADA LOCALMENTE â€” o sistema agora detecta leads inativos (15 dias) e permite remoÃ§Ã£o manual dos cards.
 
-## VISTORIA 23 (PENDENTE): Importador massivo de Clientes (CRM) — 27/04/2026
+## VISTORIA 23 (PENDENTE): Importador massivo de Clientes (CRM) â€” 27/04/2026
 
 ### Escopo
-- Criação de RPC de importação em lote (`tenant_importar_clientes_lote`) no Supabase.
-- Integração da biblioteca `xlsx` para processamento client-side de arquivos Excel/CSV.
-- Mapeamento inteligente de cabeçalhos (Nome, Email, Telefone, CPF/CNPJ).
-- Lógica de concatenação de subinformações de endereço (Rua, Número, Bairro, CEP, etc) para o campo único `endereco`.
+- CriaÃ§Ã£o de RPC de importaÃ§Ã£o em lote (`tenant_importar_clientes_lote`) no Supabase.
+- IntegraÃ§Ã£o da biblioteca `xlsx` para processamento client-side de arquivos Excel/CSV.
+- Mapeamento inteligente de cabeÃ§alhos (Nome, Email, Telefone, CPF/CNPJ).
+- LÃ³gica de concatenaÃ§Ã£o de subinformaÃ§Ãµes de endereÃ§o (Rua, NÃºmero, Bairro, CEP, etc) para o campo Ãºnico `endereco`.
 
 ### Arquivos Modificados
-- `public.tenant_importar_clientes_lote` [DB] — Nova RPC massiva
-- `apps/web/src/lib/api.ts` [MODIFICADO] — Adicionado `importarClientesLote`
-- `apps/web/src/lib/hooks/use-clientes.ts` [MODIFICADO] — Adicionado hook `useImportClientes`
-- `apps/web/src/components/crm/ImportadorClientesExcel.tsx` [NOVO] — Componente de UI e parser
-- `apps/web/src/app/tenant/crm/page.tsx` [MODIFICADO] — Integração do botão e modal
+- `public.tenant_importar_clientes_lote` [DB] â€” Nova RPC massiva
+- `apps/web/src/lib/api.ts` [MODIFICADO] â€” Adicionado `importarClientesLote`
+- `apps/web/src/lib/hooks/use-clientes.ts` [MODIFICADO] â€” Adicionado hook `useImportClientes`
+- `apps/web/src/components/crm/ImportadorClientesExcel.tsx` [NOVO] â€” Componente de UI e parser
+- `apps/web/src/app/tenant/crm/page.tsx` [MODIFICADO] â€” IntegraÃ§Ã£o do botÃ£o e modal
 
 ### Status
 - **Banco:** RPC criada e testada via MCP
-- **Vistoria:** PENDENTE — aguardando validação com planilhas reais de clientes
+- **Vistoria:** PENDENTE â€” aguardando validaÃ§Ã£o com planilhas reais de clientes
 
-## VISTORIA 21: Resolução de Conflitos RPC no CRM e Governança de Instâncias — 23/04/2026
+## VISTORIA 21: ResoluÃ§Ã£o de Conflitos RPC no CRM e GovernanÃ§a de InstÃ¢ncias â€” 23/04/2026
 
 ### Escopo Analisado
-- Bug bloqueante crítico ("Erro ao salvar cliente") no carregamento multi-tenant do CRM surgindo após as "Melhorias Comerciais Sprint 24".
-- Divergências de tipagem (`VARCHAR` vs `TEXT`) detectadas nas functions `tenant_criar_cliente` e `tenant_atualizar_cliente`.
-- Contrato base do frontend divergente do estado consolidado do banco (wrappers explícitos omitidos/antigos).
+- Bug bloqueante crÃ­tico ("Erro ao salvar cliente") no carregamento multi-tenant do CRM surgindo apÃ³s as "Melhorias Comerciais Sprint 24".
+- DivergÃªncias de tipagem (`VARCHAR` vs `TEXT`) detectadas nas functions `tenant_criar_cliente` e `tenant_atualizar_cliente`.
+- Contrato base do frontend divergente do estado consolidado do banco (wrappers explÃ­citos omitidos/antigos).
 
-### Ações Executadas
-- Criação do helper `public.get_tenant_schema()` faltante nos wrappers.
-- Execução do script `fix_crm_sprint24.sql` para limpar assinaturas duplicadas.
-- Reinclusão da feature `soft_delete` alinhada com a governança da Vistoria 9.
-- O Dashboard possuía um componente `BoasVindasBanner` corrigido para saudação inteligente.
+### AÃ§Ãµes Executadas
+- CriaÃ§Ã£o do helper `public.get_tenant_schema()` faltante nos wrappers.
+- ExecuÃ§Ã£o do script `fix_crm_sprint24.sql` para limpar assinaturas duplicadas.
+- ReinclusÃ£o da feature `soft_delete` alinhada com a governanÃ§a da Vistoria 9.
+- O Dashboard possuÃ­a um componente `BoasVindasBanner` corrigido para saudaÃ§Ã£o inteligente.
 
-# MÓDULO DASHBOARD
+# MÃ“DULO DASHBOARD
 
-## VISTORIA 28 (VALIDADA): Auditoria Completa do Dashboard — 27/04/2026
+## VISTORIA 28 (VALIDADA): Auditoria Completa do Dashboard â€” 27/04/2026
 
 ### Escopo
-- Verificação cruzada entre banco de dados (RPCs live), código SQL de provisionamento e frontend (hook, page, componentes).
-- Validação de existência e assinatura de todas as RPCs consumidas pelo dashboard.
-- Análise de componentes auxiliares (BoasVindasBanner, FechamentoMesModal, KPICard, ActionCard).
-- Verificação de feature flags, middleware e checkout info cards.
+- VerificaÃ§Ã£o cruzada entre banco de dados (RPCs live), cÃ³digo SQL de provisionamento e frontend (hook, page, componentes).
+- ValidaÃ§Ã£o de existÃªncia e assinatura de todas as RPCs consumidas pelo dashboard.
+- AnÃ¡lise de componentes auxiliares (BoasVindasBanner, FechamentoMesModal, KPICard, ActionCard).
+- VerificaÃ§Ã£o de feature flags, middleware e checkout info cards.
 
 ### RPCs Verificadas no Banco Live (via `service_role`)
-- [x] **`public.tenant_dashboard_kpis()`** — Existe e acessível. Retorna `total_vendas`, `qtd_vendas`, `qtd_clientes`, `qtd_produtos`, `qtd_os_abertas`, `qtd_obras_em_andamento`, `estoque_baixo`, `saldo`. Contrato alinhado com o hook `use-dashboard.ts`.
-- [x] **`public.tenant_dashboard_kpis_por_mes(p_meses)`** — Existe e acessível. Retorna série temporal JSONB. Migration localizada em `apps/api/migrations/rpc_dashboard_kpis_por_mes.sql`.
-- [x] **`public.tenant_obter_fechamento_pendente()`** — Existe e funcional (retorna `{success: false, error: "Tenant não identificado"}` sem auth, comportamento correto).
-- [x] **`public.tenant_marcar_fechamento_visto(p_mes)`** — Existe e funcional (mesma resposta defensiva sem auth).
+- [x] **`public.tenant_dashboard_kpis()`** â€” Existe e acessÃ­vel. Retorna `total_vendas`, `qtd_vendas`, `qtd_clientes`, `qtd_produtos`, `qtd_os_abertas`, `qtd_obras_em_andamento`, `estoque_baixo`, `saldo`. Contrato alinhado com o hook `use-dashboard.ts`.
+- [x] **`public.tenant_dashboard_kpis_por_mes(p_meses)`** â€” Existe e acessÃ­vel. Retorna sÃ©rie temporal JSONB. Migration localizada em `apps/api/migrations/rpc_dashboard_kpis_por_mes.sql`.
+- [x] **`public.tenant_obter_fechamento_pendente()`** â€” Existe e funcional (retorna `{success: false, error: "Tenant nÃ£o identificado"}` sem auth, comportamento correto).
+- [x] **`public.tenant_marcar_fechamento_visto(p_mes)`** â€” Existe e funcional (mesma resposta defensiva sem auth).
 
 ### Frontend Verificado
-- [x] **`use-dashboard.ts`** — Hook principal correto. Consome `tenant_dashboard_kpis`, `tenant_listar_vendas` (limit 5), `v_empresa_modulos` e `tenant_dashboard_kpis_por_mes`. Todas as queries possuem `enabled: !!userId` como guard.
-- [x] **`page.tsx` (Dashboard)** — Estrutura limpa com lazy loading de Recharts (`dynamic`), skeletons de carregamento, gráfico de área, tabela de últimas vendas, KPIs condicionais (OS e Obras via feature flags).
-- [x] **`BoasVindasBanner.tsx`** — Componente funcional com saudação inteligente (hora), localStorage para cooldown de 12h, botão de dismiss.
-- [x] **`FechamentoMesModal.tsx`** — Modal de fechamento mensal com `canvas-confetti` (dependência verificada no `package.json`). Consome `useFechamentoPendente`.
-- [x] **`KPICard.tsx`** — Componente bem documentado com JSDoc, suporte a tendência opcional, customização via className.
-- [x] **`ActionCard.tsx`** — Componente bem documentado, links via Next.js `Link`, animações hover.
-- [x] **`Skeletons`** — `KPISkeleton.tsx`, `CardSkeleton.tsx`, `ChartSkeleton` (inline) existem e são usados.
+- [x] **`use-dashboard.ts`** â€” Hook principal correto. Consome `tenant_dashboard_kpis`, `tenant_listar_vendas` (limit 5), `v_empresa_modulos` e `tenant_dashboard_kpis_por_mes`. Todas as queries possuem `enabled: !!userId` como guard.
+- [x] **`page.tsx` (Dashboard)** â€” Estrutura limpa com lazy loading de Recharts (`dynamic`), skeletons de carregamento, grÃ¡fico de Ã¡rea, tabela de Ãºltimas vendas, KPIs condicionais (OS e Obras via feature flags).
+- [x] **`BoasVindasBanner.tsx`** â€” Componente funcional com saudaÃ§Ã£o inteligente (hora), localStorage para cooldown de 12h, botÃ£o de dismiss.
+- [x] **`FechamentoMesModal.tsx`** â€” Modal de fechamento mensal com `canvas-confetti` (dependÃªncia verificada no `package.json`). Consome `useFechamentoPendente`.
+- [x] **`KPICard.tsx`** â€” Componente bem documentado com JSDoc, suporte a tendÃªncia opcional, customizaÃ§Ã£o via className.
+- [x] **`ActionCard.tsx`** â€” Componente bem documentado, links via Next.js `Link`, animaÃ§Ãµes hover.
+- [x] **`Skeletons`** â€” `KPISkeleton.tsx`, `CardSkeleton.tsx`, `ChartSkeleton` (inline) existem e sÃ£o usados.
 
 ### Middleware Verificado
-- [x] **Rota `/tenant/dashboard`** — Corretamente isenta de feature flag check (linha 137: `moduleKey !== 'dashboard'`). Dashboard é sempre acessível para tenants autenticados.
-- [x] **Schema routing** — `set_tenant_schema` chamado antes de qualquer acesso a dados tenant.
+- [x] **Rota `/tenant/dashboard`** â€” Corretamente isenta de feature flag check (linha 137: `moduleKey !== 'dashboard'`). Dashboard Ã© sempre acessÃ­vel para tenants autenticados.
+- [x] **Schema routing** â€” `set_tenant_schema` chamado antes de qualquer acesso a dados tenant.
 
 ### Checkout Info Cards Verificado
-- [x] **`dashboard`** listado em `PLANOS_FALLBACK` como módulo incluso em todos os planos (Starter, Business, Pro).
-- [x] **`MODULE_LABELS`** contém `dashboard: "Dashboard"`.
+- [x] **`dashboard`** listado em `PLANOS_FALLBACK` como mÃ³dulo incluso em todos os planos (Starter, Business, Pro).
+- [x] **`MODULE_LABELS`** contÃ©m `dashboard: "Dashboard"`.
 
-### ✅ PROBLEMAS IDENTIFICADOS E CORRIGIDOS (27/04/2026)
+### âœ… PROBLEMAS IDENTIFICADOS E CORRIGIDOS (27/04/2026)
 
-#### 🔴 ~~CRÍTICO~~ → CORRIGIDO: Drift na RPC tenant-level de provisionamento
+#### ðŸ”´ ~~CRÃ�TICO~~ â†’ CORRIGIDO: Drift na RPC tenant-level de provisionamento
 - **Arquivo corrigido:** `apps/api/supabase_rpc.sql`
-- **Ação:** Atualizada a função `tenant_dashboard_kpis()` dentro de `provisionar_empresa()` para incluir `qtd_obras_em_andamento` e alinhar assinatura (8 colunas BIGINT/NUMERIC) com o wrapper público live.
+- **AÃ§Ã£o:** Atualizada a funÃ§Ã£o `tenant_dashboard_kpis()` dentro de `provisionar_empresa()` para incluir `qtd_obras_em_andamento` e alinhar assinatura (8 colunas BIGINT/NUMERIC) com o wrapper pÃºblico live.
 
-#### 🟠 ~~ALTO~~ → CORRIGIDO: RPCs de Fechamento sem migration files
+#### ðŸŸ  ~~ALTO~~ â†’ CORRIGIDO: RPCs de Fechamento sem migration files
 - **Arquivo criado:** `apps/api/migrations/rpc_fechamento_mensal.sql`
-- **Ação:** Criado arquivo de migração documentando `tenant_obter_fechamento_pendente` e `tenant_marcar_fechamento_visto` (tenant-level + wrappers públicos). Também adicionadas ao provisionamento em `supabase_rpc.sql`.
+- **AÃ§Ã£o:** Criado arquivo de migraÃ§Ã£o documentando `tenant_obter_fechamento_pendente` e `tenant_marcar_fechamento_visto` (tenant-level + wrappers pÃºblicos). TambÃ©m adicionadas ao provisionamento em `supabase_rpc.sql`.
 
-#### 🟡 ~~MÉDIO~~ → CORRIGIDO: RPCs públicas do Dashboard fora do arquivo canônico
-- **Arquivo corrigido:** `apps/api/supabase_rpc.sql` (seção 7)
-- **Ação:** Consolidados os 4 wrappers públicos do Dashboard na seção 7 do arquivo canônico: `tenant_dashboard_kpis`, `tenant_dashboard_kpis_por_mes`, `tenant_obter_fechamento_pendente`, `tenant_marcar_fechamento_visto`.
+#### ðŸŸ¡ ~~MÃ‰DIO~~ â†’ CORRIGIDO: RPCs pÃºblicas do Dashboard fora do arquivo canÃ´nico
+- **Arquivo corrigido:** `apps/api/supabase_rpc.sql` (seÃ§Ã£o 7)
+- **AÃ§Ã£o:** Consolidados os 4 wrappers pÃºblicos do Dashboard na seÃ§Ã£o 7 do arquivo canÃ´nico: `tenant_dashboard_kpis`, `tenant_dashboard_kpis_por_mes`, `tenant_obter_fechamento_pendente`, `tenant_marcar_fechamento_visto`.
 
-#### 🟡 ~~MÉDIO~~ → CORRIGIDO: Documentação Técnica desatualizada para Dashboard
+#### ðŸŸ¡ ~~MÃ‰DIO~~ â†’ CORRIGIDO: DocumentaÃ§Ã£o TÃ©cnica desatualizada para Dashboard
 - **Arquivo corrigido:** `docs/DOCUMENTACAO_TECNICA.md`
-- **Ação:** Adicionadas as 3 RPCs faltantes à seção Dashboard (`kpis_por_mes`, `fechamento_pendente`, `fechamento_visto`) e documentada a tabela `fechamentos_mensais` na lista de tabelas tenant.
+- **AÃ§Ã£o:** Adicionadas as 3 RPCs faltantes Ã  seÃ§Ã£o Dashboard (`kpis_por_mes`, `fechamento_pendente`, `fechamento_visto`) e documentada a tabela `fechamentos_mensais` na lista de tabelas tenant.
 
 ### Veredito
-- **Frontend:** VALIDADO — Sem falhas detectadas. Código limpo, bem estruturado, com lazy loading e skeletons.
-- **Banco de Dados:** VALIDADO — Todas as divergências corrigidas. Provisionamento, wrappers públicos e migrations alinhados.
-- **Vistoria:** VALIDADA — Todos os 4 problemas identificados foram corrigidos nesta sessão.
+- **Frontend:** VALIDADO â€” Sem falhas detectadas. CÃ³digo limpo, bem estruturado, com lazy loading e skeletons.
+- **Banco de Dados:** VALIDADO â€” Todas as divergÃªncias corrigidas. Provisionamento, wrappers pÃºblicos e migrations alinhados.
+- **Vistoria:** VALIDADA â€” Todos os 4 problemas identificados foram corrigidos nesta sessÃ£o.
 
 ### Itens Sem Problemas
-- [x] Query à `v_empresa_modulos` no hook usa RLS da tabela base (correto para views).
-- [x] Dependência `canvas-confetti` presente em `package.json` (`^1.9.4`) e `@types/canvas-confetti` (`^1.9.0`).
-- [x] Recharts carregado via `dynamic` com `ssr: false` (otimização de bundle).
+- [x] Query Ã  `v_empresa_modulos` no hook usa RLS da tabela base (correto para views).
+- [x] DependÃªncia `canvas-confetti` presente em `package.json` (`^1.9.4`) e `@types/canvas-confetti` (`^1.9.0`).
+- [x] Recharts carregado via `dynamic` com `ssr: false` (otimizaÃ§Ã£o de bundle).
 - [x] Todas as queries React Query possuem `staleTime` configurado (evita refetch excessivo).
-- [x] `formatarMoeda` e `formatarData` são utilitários inline sem dependências externas.
-- [x] Hook `useUserProfile` resolve nome com fallback robusto (profile → metadata → email).
+- [x] `formatarMoeda` e `formatarData` sÃ£o utilitÃ¡rios inline sem dependÃªncias externas.
+- [x] Hook `useUserProfile` resolve nome com fallback robusto (profile â†’ metadata â†’ email).
 
 ### Veredito
-- **Frontend:** VALIDADO — Sem falhas detectadas. Código limpo, bem estruturado, com lazy loading e skeletons.
-- **Banco de Dados:** VALIDADO COM RESSALVAS — RPCs live funcionais, mas drift crítico no provisionamento e governança de migrations incompleta.
-- **Vistoria:** VALIDADA COM RESSALVAS — Sistema operacional em produção, mas 4 ações corretivas pendentes (1 crítica, 1 alta, 2 médias).
+- **Frontend:** VALIDADO â€” Sem falhas detectadas. CÃ³digo limpo, bem estruturado, com lazy loading e skeletons.
+- **Banco de Dados:** VALIDADO COM RESSALVAS â€” RPCs live funcionais, mas drift crÃ­tico no provisionamento e governanÃ§a de migrations incompleta.
+- **Vistoria:** VALIDADA COM RESSALVAS â€” Sistema operacional em produÃ§Ã£o, mas 4 aÃ§Ãµes corretivas pendentes (1 crÃ­tica, 1 alta, 2 mÃ©dias).
 
 ---
 
 
-# MÓDULO DASHBOARD & UI/UX
+# MÃ“DULO DASHBOARD & UI/UX
 
-## VISTORIA 30 (VALIDADA): Dark Mode Global e Refinamento de UI/UX — 27/04/2026
+## VISTORIA 30 (VALIDADA): Dark Mode Global e Refinamento de UI/UX â€” 27/04/2026
 
 ### Objetivo:
-Implementação de um sistema de temas (Light/Dark/System) em toda a plataforma e refinamento estético premium.
+ImplementaÃ§Ã£o de um sistema de temas (Light/Dark/System) em toda a plataforma e refinamento estÃ©tico premium.
 
-### Ações Executadas:
-- **`ThemeProvider.tsx` [NOVO]** — Infraestrutura de temas local via React Context e `localStorage`.
-- **`ThemeToggle.tsx` [NOVO]** — Componente de controle de tema no Header.
-- **`globals.css` [MODIFICADO]** — Definição da paleta "Deep Slate" (OKLCH) para dark mode com foco em UI/UX premium.
-- **`page.tsx` (Landing) [MODIFICADO]** — Sincronização da landing page com o tema global do sistema.
-- **`Sidebar.tsx` [MODIFICADO]** — Tornada responsiva ao tema (Remoção de cores fixas).
-- **`FechamentoMesModal.tsx` [MODIFICADO]** — Desativado temporariamente `canvas-confetti` por restrição de ambiente local (Fix de compilação).
+### AÃ§Ãµes Executadas:
+- **`ThemeProvider.tsx` [NOVO]** â€” Infraestrutura de temas local via React Context e `localStorage`.
+- **`ThemeToggle.tsx` [NOVO]** â€” Componente de controle de tema no Header.
+- **`globals.css` [MODIFICADO]** â€” DefiniÃ§Ã£o da paleta "Deep Slate" (OKLCH) para dark mode com foco em UI/UX premium.
+- **`page.tsx` (Landing) [MODIFICADO]** â€” SincronizaÃ§Ã£o da landing page com o tema global do sistema.
+- **`Sidebar.tsx` [MODIFICADO]** â€” Tornada responsiva ao tema (RemoÃ§Ã£o de cores fixas).
+- **`FechamentoMesModal.tsx` [MODIFICADO]** â€” Desativado temporariamente `canvas-confetti` por restriÃ§Ã£o de ambiente local (Fix de compilaÃ§Ã£o).
 
 ### Status:
 - **UI/UX:** VALIDADA. Contraste e paleta profissional de alta performance.
-- **Funcionalidade:** Persistência de tema validada.
+- **Funcionalidade:** PersistÃªncia de tema validada.
 - **Vistoria:** VALIDADA.
 
 ---
 
-# MÓDULO CRM
+# MÃ“DULO CRM
 
-## VISTORIA 29 (VALIDADA): Correção de Persistência no Pipeline (Efeito Elástico) — 27/04/2026
+## VISTORIA 29 (VALIDADA): CorreÃ§Ã£o de PersistÃªncia no Pipeline (Efeito ElÃ¡stico) â€” 27/04/2026
 
 ### Objetivo:
-Corrigir bug onde clientes movidos no pipeline retornavam à posição anterior ou não salvavam estado.
+Corrigir bug onde clientes movidos no pipeline retornavam Ã  posiÃ§Ã£o anterior ou nÃ£o salvavam estado.
 
-### Ações Executadas:
-- **`apps/web/src/lib/api.ts` [MODIFICADO]** — Alterada lógica de fallback de `||` para `??` (Nullish Coalescing) para evitar que valores default sobrescrevam campos não enviados no drag-and-drop.
-- **`hotfix_pipeline_coalesce.sql` [DB]** — Adicionado `COALESCE` no campo `cpf_cnpj` na RPC `tenant_atualizar_cliente` para evitar nulos.
+### AÃ§Ãµes Executadas:
+- **`apps/web/src/lib/api.ts` [MODIFICADO]** â€” Alterada lÃ³gica de fallback de `||` para `??` (Nullish Coalescing) para evitar que valores default sobrescrevam campos nÃ£o enviados no drag-and-drop.
+- **`hotfix_pipeline_coalesce.sql` [DB]** â€” Adicionado `COALESCE` no campo `cpf_cnpj` na RPC `tenant_atualizar_cliente` para evitar nulos.
 
 ### Status:
-- **Funcionalidade:** Persistência de drag-and-drop validada localmente.
+- **Funcionalidade:** PersistÃªncia de drag-and-drop validada localmente.
 - **Vistoria:** VALIDADA.
 
 ---
 
 ---
 
-## VISTORIA 34 (CONCLU�DO): Corre��o Bot�o Novo Cliente + Sincroniza��o Lead � 27/04/2026
+## VISTORIA 34 (CONCLUÍDO): Correção Botão Novo Cliente + Sincronização Lead — 27/04/2026
 
 ### Escopo
-- **[CR�TICO] Bot�o "Novo Cliente" (RPC 404):** Identificado mismatch de assinatura entre o wrapper public.tenant_criar_cliente e a fun��o interna dos schemas tenant. O wrapper passava 7 par�metros (incluindo p_endereco), mas a fun��o interna s� aceitava 6. Isso causava erro 404 (Function not found) no PostgREST.
-- **[CR�TICO] Sincroniza��o de Dados (Lead):** O usu�rio relatou que o status "lead" n�o atualizava. Como a cria��o do cliente falhava silenciosamente (ou com erro 404), nenhum dado era inserido, mantendo os contadores do dashboard estagnados.
-- **[ALTO] Campo Endere�o:** A fun��o de cria��o e atualiza��o de cliente n�o processava o campo endereco, apesar de ele existir na tabela de alguns tenants.
+- **[CRÍTICO] Botão "Novo Cliente" (RPC 404):** Identificado mismatch de assinatura entre o wrapper public.tenant_criar_cliente e a função interna dos schemas tenant. O wrapper passava 7 parâmetros (incluindo p_endereco), mas a função interna só aceitava 6. Isso causava erro 404 (Function not found) no PostgREST.
+- **[CRÍTICO] Sincronização de Dados (Lead):** O usuário relatou que o status "lead" não atualizava. Como a criação do cliente falhava silenciosamente (ou com erro 404), nenhum dado era inserido, mantendo os contadores do dashboard estagnados.
+- **[ALTO] Campo Endereço:** A função de criação e atualização de cliente não processava o campo endereco, apesar de ele existir na tabela de alguns tenants.
 
-### A��es Executadas
-- **[DB] ix_crm_sprint24.sql:** Atualizado script de migra��o para incluir p_endereco em todas as fun��es internas de cria��o e atualiza��o de clientes em todos os schemas 	enant_*.
-- **[DB] Migra��o Segura:** Aplicada migra��o resiliente que verifica a exist�ncia da tabela clientes antes de realizar o ALTER TABLE ou CREATE FUNCTION, evitando erros em tenants �rf�os ou incompletos.
-- **[DB] Unifica��o de Assinaturas:**
-    - 	enant_criar_cliente: Fixado em 7 par�metros (
+### Ações Executadas
+- **[DB] ix_crm_sprint24.sql:** Atualizado script de migração para incluir p_endereco em todas as funções internas de criação e atualização de clientes em todos os schemas 	enant_*.
+- **[DB] Migração Segura:** Aplicada migração resiliente que verifica a existência da tabela clientes antes de realizar o ALTER TABLE ou CREATE FUNCTION, evitando erros em tenants órfãos ou incompletos.
+- **[DB] Unificação de Assinaturas:**
+    - 	enant_criar_cliente: Fixado em 7 parâmetros (
 ome, email, telefone, funil_fase, status, cpf_cnpj, endereco).
-    - 	enant_atualizar_cliente: Fixado em 8 par�metros (id, nome, email, telefone, funil_fase, status, cpf_cnpj, endereco).
-- **[DB] Cache Reload:** Executado NOTIFY pgrst, 'reload schema' para garantir que o PostgREST reconhe�a as novas assinaturas imediatamente.
+    - 	enant_atualizar_cliente: Fixado em 8 parâmetros (id, nome, email, telefone, funil_fase, status, cpf_cnpj, endereco).
+- **[DB] Cache Reload:** Executado NOTIFY pgrst, 'reload schema' para garantir que o PostgREST reconheça as novas assinaturas imediatamente.
 
 ### Status
 - **Banco:** Corrigido e Migrado.
-- **Frontend:** J� estava preparado para 7/8 par�metros, agora o backend responde corretamente.
-- **Vistoria:** CONCLU�DO.
+- **Frontend:** Já estava preparado para 7/8 parâmetros, agora o backend responde corretamente.
+- **Vistoria:** CONCLUÍDO.
 
 
 ---
 
-## VISTORIA 35 (PENDENTE): Overhaul de UI/UX Dark Mode — 27/04/2026
+## VISTORIA 35 (PENDENTE): Overhaul de UI/UX Dark Mode â€” 27/04/2026
 
 ### Objetivo:
-Repaginação total do Dark Mode para melhorar contraste, eficiência visual e usabilidade premium.
+RepaginaÃ§Ã£o total do Dark Mode para melhorar contraste, eficiÃªncia visual e usabilidade premium.
 
-### Ações Executadas:
-- **globals.css [MODIFICADO]** — Nova paleta OKLCH "Deep Midnight", introdução da fonte "Outfit" e refinamento de tipografia global.
-- **Sidebar.tsx [MODIFICADO]** — Branding atualizado com "Outfit", melhoria no peso das fontes, espaçamento e estados de interação (hover/active).
-- **KPICard.tsx [MODIFICADO]** — Suporte total a dark mode via bg-card, atualização de ícones e redesign de badges de tendência.
-- **Header.tsx [MODIFICADO]** — Ajuste de branding mobile e refinamento de sombras/backdrop blur.
+### AÃ§Ãµes Executadas:
+- **globals.css [MODIFICADO]** â€” Nova paleta OKLCH "Deep Midnight", introduÃ§Ã£o da fonte "Outfit" e refinamento de tipografia global.
+- **Sidebar.tsx [MODIFICADO]** â€” Branding atualizado com "Outfit", melhoria no peso das fontes, espaÃ§amento e estados de interaÃ§Ã£o (hover/active).
+- **KPICard.tsx [MODIFICADO]** â€” Suporte total a dark mode via bg-card, atualizaÃ§Ã£o de Ã­cones e redesign de badges de tendÃªncia.
+- **Header.tsx [MODIFICADO]** â€” Ajuste de branding mobile e refinamento de sombras/backdrop blur.
 
 ### Status:
-- **UI/UX:** PENDENTE DE VISTORIA (Alterações de código-fonte realizadas).
+- **UI/UX:** PENDENTE DE VISTORIA (AlteraÃ§Ãµes de cÃ³digo-fonte realizadas).
 - **Vistoria:** PENDENTE.
 
 ---
 
-## VISTORIA 36 (CONCLUÍDO): Correção Painel Nurturing & UX "Novo Cliente" — 27/04/2026
+## VISTORIA 36 (CONCLUÃ�DO): CorreÃ§Ã£o Painel Nurturing & UX "Novo Cliente" â€” 27/04/2026
 
 ### Escopo
-- **[CRÍTICO] Erro row_to_json(jsonb):** Identificada falha na RPC `public.tenant_obter_sugestoes_nurturing` devido a retornos inconsistentes nos tenants.
-- **[UX] Posicionamento do Formulário:** O formulário de "Novo Cliente" agora é um Modal centralizado.
-- **[ALTO] Hydration Error (React 418):** Estabilização da página após correção da RPC.
+- **[CRÃ�TICO] Erro row_to_json(jsonb):** Identificada falha na RPC `public.tenant_obter_sugestoes_nurturing` devido a retornos inconsistentes nos tenants.
+- **[UX] Posicionamento do FormulÃ¡rio:** O formulÃ¡rio de "Novo Cliente" agora Ã© um Modal centralizado.
+- **[ALTO] Hydration Error (React 418):** EstabilizaÃ§Ã£o da pÃ¡gina apÃ³s correÃ§Ã£o da RPC.
 
-### Ações Executadas
-- **[DB] public.tenant_obter_sugestoes_nurturing:** Refatorada para ser polimórfica (suporta record e jsonb).
-- **[FE] CRM Page:** Refatoração para uso do componente `Modal`.
+### AÃ§Ãµes Executadas
+- **[DB] public.tenant_obter_sugestoes_nurturing:** Refatorada para ser polimÃ³rfica (suporta record e jsonb).
+- **[FE] CRM Page:** RefatoraÃ§Ã£o para uso do componente `Modal`.
 
 ### Status
 - **Funcionalidade:** Painel restaurado e UX corrigido.
-- **Vistoria:** CONCLUÍDO.
+- **Vistoria:** CONCLUÃ�DO.
 
 ---
 
-## VISTORIA 37 (PENDENTE): Promo��o de 'Configura��es' para Recurso Nativo - 28/04/2026
+## VISTORIA 37 (PENDENTE): Promoção de 'Configurações' para Recurso Nativo - 28/04/2026
 
 ### Objetivo
-Tornar a p�gina de Configura��es um recurso nativo da plataforma, garantindo acesso perp�tuo (independente de plano ou status de assinatura) e eliminando o risco de loop de redirecionamento no middleware.
+Tornar a página de Configurações um recurso nativo da plataforma, garantindo acesso perpétuo (independente de plano ou status de assinatura) e eliminando o risco de loop de redirecionamento no middleware.
 
-### A��es Executadas
-- **middleware.ts [MODIFICADO]**: Adicionada exce��o para 'configuracoes' no check de m�dulos ativos.
-- **Sidebar.tsx [MODIFICADO]**: Inje��o for�ada do link de Configura��es na navega��o vis�vel.
-- **mestre/page.tsx [MODIFICADO]**: Remo��o de 'Configura��es' do wizard de provisionamento SaaS.
-- **remove_settings_from_catalog.sql [NOVO]**: Script para limpar a entrada do cat�logo no schema public.
+### Ações Executadas
+- **middleware.ts [MODIFICADO]**: Adicionada exceção para 'configuracoes' no check de módulos ativos.
+- **Sidebar.tsx [MODIFICADO]**: Injeção forçada do link de Configurações na navegação visível.
+- **mestre/page.tsx [MODIFICADO]**: Remoção de 'Configurações' do wizard de provisionamento SaaS.
+- **remove_settings_from_catalog.sql [NOVO]**: Script para limpar a entrada do catálogo no schema public.
 
 ### Status
-- **Arquitetura:** M�dulo convertido em Core Feature.
-- **Vistoria:** PENDENTE (Altera��es de c�digo realizadas).
+- **Arquitetura:** Módulo convertido em Core Feature.
+- **Vistoria:** PENDENTE (Alterações de código realizadas).
 $entry
 
 ---
 
-## VISTORIA 38 (PENDENTE): Melhorias no M�dulo de Vendas & Prontid�o SEFAZ - 28/04/2026
+## VISTORIA 38 (PENDENTE): Melhorias no Módulo de Vendas & Prontidão SEFAZ - 28/04/2026
 
 ### Objetivo
-Resolver gaps de funcionalidade no m�dulo de Vendas, implementar busca real no servidor, gera��o de recibos e preparar a estrutura de banco de dados para futura integra��o com SEFAZ.
+Resolver gaps de funcionalidade no módulo de Vendas, implementar busca real no servidor, geração de recibos e preparar a estrutura de banco de dados para futura integração com SEFAZ.
 
-### A��es Executadas
-- **vendas_sefaz_readiness.sql [NOVO]**: Migra��o para adicionar colunas de NFe (
+### Ações Executadas
+- **vendas_sefaz_readiness.sql [NOVO]**: Migração para adicionar colunas de NFe (
 fe_status, 
 fe_chave, 
 fe_xml, etc.) e atualizar RPCs (	enant_processar_venda, 	enant_listar_vendas).
-- **lib/api.ts [MODIFICADO]**: Atualiza��o da interface Venda e fun��o etchVendas com suporte a searchTerm.
+- **lib/api.ts [MODIFICADO]**: Atualização da interface Venda e função etchVendas com suporte a searchTerm.
 - **hooks/use-vendas.ts [MODIFICADO]**: Hook atualizado para suportar buscas reativas.
-- **vendas/page.tsx [MODIFICADO]**: Implementa��o de busca funcional, exibi��o de status NFe e gerador de recibo (Window Print).
-- **vendas/pdv/page.tsx [MODIFICADO]**: Adi��o de toggle para solicita��o de emiss�o de NFe no checkout.
-- **SEFAZ_INTEGRATION_GUIDE.md [NOVO]**: Documenta��o t�cnica para o pr�ximo est�gio de integra��o fiscal.
+- **vendas/page.tsx [MODIFICADO]**: Implementação de busca funcional, exibição de status NFe e gerador de recibo (Window Print).
+- **vendas/pdv/page.tsx [MODIFICADO]**: Adição de toggle para solicitação de emissão de NFe no checkout.
+- **SEFAZ_INTEGRATION_GUIDE.md [NOVO]**: Documentação técnica para o próximo estágio de integração fiscal.
 
 ### Status
 - **Arquitetura:** Infraestrutura pronta para NFe e Busca Otimizada.
-- **Vistoria:** PENDENTE (Realizar teste de fuma�a no PDV e Hist�rico).
+- **Vistoria:** PENDENTE (Realizar teste de fumaça no PDV e Histórico).

@@ -11,10 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Banknote, ShoppingBag, BarChart, CreditCard, Plus, Search, FileText, Edit, Trash2 } from "lucide-react";
+import { Banknote, ShoppingBag, BarChart, CreditCard, Plus, Search, FileText, Edit, Trash2, RotateCcw, Ban } from "lucide-react";
 import { FloatingCalculator } from "@/components/modules/base/Calculator";
 import Link from "next/link";
-import { useVendas, useDeleteVenda } from "@/lib/hooks/use-vendas";
+import { useVendas, useDeleteVenda, useCancelVenda } from "@/lib/hooks/use-vendas";
 import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { FiscalGuide } from "@/components/modules/fiscal/FiscalGuide";
@@ -26,6 +26,8 @@ export default function VendasPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
   const { toasts, removeToast, success, error: toastError } = useToast();
+  const cancelMutation = useCancelVenda();
+  const [cancelId, setCancelId] = useState<string | null>(null);
 
   const imprimirRecibo = (venda: any) => {
     const conteudo = `
@@ -51,6 +53,18 @@ export default function VendasPage() {
         </html>
       `);
       win.document.close();
+    }
+  };
+
+  const confirmCancel = async () => {
+    if (!cancelId) return;
+    try {
+      await cancelMutation.mutateAsync(cancelId);
+      success("Venda cancelada com sucesso!");
+    } catch {
+      toastError("Erro ao cancelar venda. Tente novamente.");
+    } finally {
+      setCancelId(null);
     }
   };
 
@@ -85,6 +99,17 @@ export default function VendasPage() {
       {toasts.map(toast => (
         <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
       ))}
+
+      <ConfirmModal
+        isOpen={!!cancelId}
+        onConfirm={confirmCancel}
+        onCancel={() => setCancelId(null)}
+        title="Cancelar venda"
+        message="Tem certeza que deseja cancelar esta venda? O estoque será devolvido automaticamente."
+        confirmText="Confirmar Cancelamento"
+        cancelText="Voltar"
+        variant="danger"
+      />
 
       <ConfirmModal
         isOpen={!!deleteId}
@@ -173,12 +198,14 @@ export default function VendasPage() {
               </TableRow>
             ) : (
               vendas.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow key={item.id} className={item.status === 'cancelado' ? 'opacity-50 grayscale' : ''}>
                   <TableCell className="font-medium">{item.id.substring(0, 8)}...</TableCell>
-                  <TableCell>{item.cliente}</TableCell>
+                  <TableCell className={item.status === 'cancelado' ? 'line-through' : ''}>{item.cliente}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{item.metodo}</TableCell>
-                  <TableCell className="font-medium text-slate-900">{formatarValor(item.valor)}</TableCell>
+                  <TableCell className={`font-medium ${item.status === 'cancelado' ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
+                    {formatarValor(item.valor)}
+                  </TableCell>
                   <TableCell>
                     <StatusBadge status={item.status as any} />
                   </TableCell>
@@ -194,8 +221,17 @@ export default function VendasPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button className="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Editar transação">
-                        <Edit className="h-4 w-4" />
+                      {item.status !== 'cancelado' && (
+                        <button 
+                          onClick={() => setCancelId(item.id)}
+                          className="text-slate-400 hover:text-amber-600 transition-colors p-1" 
+                          title="Cancelar venda"
+                        >
+                          <Ban className="h-4 w-4" />
+                        </button>
+                      )}
+                      <button className="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Visualizar Detalhes">
+                        <FileText className="h-4 w-4" />
                       </button>
                       <button
                         className="text-slate-400 hover:text-red-600 transition-colors p-1"

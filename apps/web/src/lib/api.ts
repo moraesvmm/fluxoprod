@@ -6,7 +6,7 @@ export interface Venda {
   cliente: string;
   valor: number;
   metodo: string;
-  status: string;
+  status: 'concluido' | 'pendente' | 'cancelado' | 'parcialmente_devolvida';
   vendedor_id?: string;
   vendedor_nome?: string;
   criado_em: string;
@@ -541,6 +541,24 @@ export async function createVenda(venda: VendaCreate): Promise<Venda> {
 
 export async function updateVenda(id: string, venda: VendaUpdate): Promise<Venda> {
   throw new Error('Atualização de vendas não implementada via RPC');
+}
+
+export async function cancelarVenda(id: string): Promise<any> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_cancelar_venda', { p_venda_id: id });
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function devolverItem(vendaId: string, itemId: string, quantidade: number): Promise<any> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_devolver_item', { 
+      p_venda_id: vendaId,
+      p_venda_item_id: itemId,
+      p_quantidade: quantidade
+    });
+  if (error) throw new Error(error.message);
+  return data;
 }
 
 export async function deleteVenda(id: string): Promise<void> {
