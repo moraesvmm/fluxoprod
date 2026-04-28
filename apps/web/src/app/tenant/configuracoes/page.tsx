@@ -51,7 +51,6 @@ export default function ConfiguracoesPage() {
           razao_social: formData.razao_social,
           cnpj: formData.cnpj, // CNPJ could be editable or non-editable depending on requirements, let's keep editable for now since it's just config
           porte: formData.porte,
-          porte: formData.porte,
           segmento: formData.segmento,
           inscricao_estadual: formData.inscricao_estadual,
           regime_tributario: formData.regime_tributario,
