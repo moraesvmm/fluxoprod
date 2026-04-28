@@ -49,12 +49,12 @@ interface KPICardProps {
  */
 export function KPICard({ title, value, icon: Icon, trend, className }: KPICardProps) {
   return (
-    <div className={twMerge(clsx("relative overflow-hidden rounded-xl bg-white p-6 border border-border/60 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5", className))}>
+    <div className={twMerge(clsx("relative overflow-hidden rounded-xl bg-card p-6 border border-border/60 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1", className))}>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-muted-foreground/80 truncate">
+        <p className="text-sm font-semibold text-muted-foreground transition-colors group-hover:text-foreground">
           {title}
         </p>
-        <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100 p-2.5 text-primary shadow-sm">
+        <div className="rounded-xl bg-primary/10 p-2.5 text-primary shadow-inner ring-1 ring-primary/20">
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -69,15 +69,17 @@ export function KPICard({ title, value, icon: Icon, trend, className }: KPICardP
           <span
             className={twMerge(
               clsx(
-                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold",
-                trend.isPositive ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+                "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-bold text-[11px] uppercase tracking-wider shadow-sm ring-1 ring-inset",
+                trend.isPositive 
+                  ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20" 
+                  : "bg-rose-500/10 text-rose-400 ring-rose-500/20"
               )
             )}
           >
             {trend.isPositive ? "+" : "-"}
             {Math.abs(trend.value)}%
           </span>
-          <span className="ml-2 text-muted-foreground/80">{trend.label}</span>
+          <span className="ml-2 text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wide">{trend.label}</span>
         </div>
       )}
     </div>

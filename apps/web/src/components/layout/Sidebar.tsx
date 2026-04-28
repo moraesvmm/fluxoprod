@@ -70,22 +70,22 @@ export function Sidebar() {
     <div
       className="flex h-full w-64 flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg transition-all duration-300"
     >
-      <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border/40 px-6">
+      <div className="flex h-20 shrink-0 items-center border-b border-sidebar-border/40 px-6">
         <Link href="/tenant/dashboard" className="group flex items-center gap-3">
           <div className="relative flex items-center justify-center transition-all duration-300 group-hover:scale-105">
             <Image
               src="/logo-fluxo.png"
               alt="Fluxo Logo"
-              width={44}
-              height={44}
+              width={40}
+              height={40}
               priority
               style={{ width: "auto" }}
-              className="relative z-10 object-contain drop-shadow-[0_0_10px_rgba(192,132,252,0.4)]"
+              className="relative z-10 object-contain drop-shadow-[0_0_15px_rgba(124,58,237,0.5)]"
             />
           </div>
-          <div className="mt-1 flex flex-col">
+          <div className="flex flex-col">
             <span
-              className="text-3xl font-normal leading-none tracking-normal text-sidebar-foreground"
+              className="text-2xl font-bold tracking-tight text-sidebar-foreground transition-colors duration-300 group-hover:text-primary"
               style={{ fontFamily: "var(--font-brand)" }}
             >
               Fluxo
@@ -94,20 +94,24 @@ export function Sidebar() {
         </Link>
       </div>
 
-      <nav className="flex flex-1 flex-col px-3 py-5">
-        <div className="mb-2 px-3">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500/60">Modulos</span>
+      <nav className="flex flex-1 flex-col px-4 py-6">
+        <div className="mb-4 px-2">
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Módulos</span>
         </div>
-        <ul role="list" className="flex flex-1 flex-col gap-y-0.5">
+        <ul role="list" className="flex flex-1 flex-col gap-y-1">
           {activeKeys !== null && visibleNavigation.length === 0 && !isLoading && (
-            <li className="px-3 py-3 text-sm text-slate-400/80">
-              Nenhum modulo ativo. Solicite ativacao ao administrador do sistema.
+            <li className="px-3 py-3 text-sm text-muted-foreground/60 italic">
+              Nenhum módulo ativo.
             </li>
           )}
           {isLoading && (
-            <li className="flex items-center gap-x-3 px-3 py-3">
-              <div className="h-4 w-4 animate-pulse rounded bg-slate-800"></div>
-              <div className="h-4 w-24 animate-pulse rounded bg-slate-800"></div>
+            <li className="flex flex-col gap-y-3 px-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-x-3">
+                  <div className="h-8 w-8 animate-pulse rounded-lg bg-sidebar-accent/30"></div>
+                  <div className="h-4 w-24 animate-pulse rounded bg-sidebar-accent/30"></div>
+                </div>
+              ))}
             </li>
           )}
           {visibleNavigation.map((item) => {
@@ -118,25 +122,25 @@ export function Sidebar() {
                   href={item.href}
                   className={twMerge(
                     clsx(
-                      "group flex gap-x-3 rounded-lg px-3 py-2 text-[13px] font-medium leading-6 transition-all duration-200",
+                      "group flex items-center gap-x-3 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-all duration-200",
                       isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md shadow-primary/20"
-                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 translate-x-1"
+                        : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:translate-x-1"
                     )
                   )}
                 >
                   <item.icon
                     className={twMerge(
                       clsx(
-                        "h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110",
+                        "h-5 w-5 shrink-0 transition-all duration-200",
                         isActive
-                          ? "text-sidebar-primary-foreground"
-                          : "text-slate-400/80 group-hover:text-sidebar-accent-foreground"
+                          ? "text-primary-foreground scale-110"
+                          : "text-muted-foreground/60 group-hover:text-sidebar-foreground group-hover:scale-110"
                       )
                     )}
                     aria-hidden="true"
                   />
-                  {item.name}
+                  <span>{item.name}</span>
                 </Link>
               </li>
             );

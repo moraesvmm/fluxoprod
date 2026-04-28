@@ -400,3 +400,20 @@ ome, email, telefone, funil_fase, status, cpf_cnpj, endereco).
 - **Frontend:** J� estava preparado para 7/8 par�metros, agora o backend responde corretamente.
 - **Vistoria:** CONCLU�DO.
 
+
+---
+
+## VISTORIA 35 (PENDENTE): Overhaul de UI/UX Dark Mode — 27/04/2026
+
+### Objetivo:
+Repaginação total do Dark Mode para melhorar contraste, eficiência visual e usabilidade premium.
+
+### Ações Executadas:
+- **globals.css [MODIFICADO]** — Nova paleta OKLCH "Deep Midnight", introdução da fonte "Outfit" e refinamento de tipografia global.
+- **Sidebar.tsx [MODIFICADO]** — Branding atualizado com "Outfit", melhoria no peso das fontes, espaçamento e estados de interação (hover/active).
+- **KPICard.tsx [MODIFICADO]** — Suporte total a dark mode via bg-card, atualização de ícones e redesign de badges de tendência.
+- **Header.tsx [MODIFICADO]** — Ajuste de branding mobile e refinamento de sombras/backdrop blur.
+
+### Status:
+- **UI/UX:** PENDENTE DE VISTORIA (Alterações de código-fonte realizadas).
+- **Vistoria:** PENDENTE.

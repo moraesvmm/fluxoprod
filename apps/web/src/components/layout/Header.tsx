@@ -35,12 +35,12 @@ export function Header({ onSearchClick }: HeaderProps) {
           width={32}
           height={32}
           priority
-          className="object-contain drop-shadow-sm"
+          className="object-contain drop-shadow-[0_0_10px_rgba(124,58,237,0.4)]"
           style={{ width: "auto", height: "auto" }}
         />
         <span 
-          className="text-2xl font-normal text-slate-800 dark:text-slate-100"
-          style={{ fontFamily: "var(--font-monsieur), cursive" }}
+          className="text-xl font-bold tracking-tight text-foreground"
+          style={{ fontFamily: "var(--font-brand)" }}
         >
           Fluxo
         </span>
