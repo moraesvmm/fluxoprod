@@ -51,7 +51,7 @@ export function Sidebar() {
 
   const visibleNavigation = useMemo(() => {
     if (activeKeys === null) return [];
-    const base = navigation.filter((n) => activeKeys.includes(n.key));
+    const base = navigation.filter((n) => activeKeys.includes(n.key) || n.key === "configuracoes");
     
     // Injetar link mestre se o usuário for master
     if (data?.role === "master") {

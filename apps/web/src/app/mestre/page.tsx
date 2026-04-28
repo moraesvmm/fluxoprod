@@ -116,7 +116,6 @@ function ProvisioningWizard() {
     { id: "rh", name: "RH & Pessoal", icon: "👥" },
     { id: "relatorios", name: "Relatórios", icon: "📄" },
     { id: "os", name: "Ordem de Serviço", icon: "🔧" },
-    { id: "configuracoes", name: "Configurações", icon: "⚙️" },
   ];
 
   const handleToggleModule = (id: string) => {

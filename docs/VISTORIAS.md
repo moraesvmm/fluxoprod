@@ -434,3 +434,20 @@ RepaginaÃ§Ã£o total do Dark Mode para melhorar contraste, eficiÃªncia visual e u
 ### Status
 - **Funcionalidade:** Painel restaurado e UX corrigido.
 - **Vistoria:** CONCLUÃDO.
+
+---
+
+## VISTORIA 37 (PENDENTE): Promoção de 'Configurações' para Recurso Nativo - 28/04/2026
+
+### Objetivo
+Tornar a página de Configurações um recurso nativo da plataforma, garantindo acesso perpétuo (independente de plano ou status de assinatura) e eliminando o risco de loop de redirecionamento no middleware.
+
+### Ações Executadas
+- **middleware.ts [MODIFICADO]**: Adicionada exceção para 'configuracoes' no check de módulos ativos.
+- **Sidebar.tsx [MODIFICADO]**: Injeção forçada do link de Configurações na navegação visível.
+- **mestre/page.tsx [MODIFICADO]**: Remoção de 'Configurações' do wizard de provisionamento SaaS.
+- **remove_settings_from_catalog.sql [NOVO]**: Script para limpar a entrada do catálogo no schema public.
+
+### Status
+- **Arquitetura:** Módulo convertido em Core Feature.
+- **Vistoria:** PENDENTE (Alterações de código realizadas).

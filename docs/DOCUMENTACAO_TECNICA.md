@@ -85,7 +85,7 @@ Estado real consolidado pela Vistoria 17 (22/04/2026):
 
 2. **modulos_catalogo** - Catálogo de módulos disponíveis
    - Colunas: key, nome, descricao, criado_em
-   - Dados: dashboard, vendas, estoque, crm, financeiro, catalogo, rh, os, obras, comissoes, relatorios, configuracoes
+   - Dados: dashboard, vendas, estoque, crm, financeiro, catalogo, rh, os, obras, comissoes, relatorios (Configurações é nativo)
 
 3. **empresa_modulos** - Módulos ativos por empresa
    - Colunas: id, empresa_id, modulo_key, ativo
@@ -255,10 +255,11 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
   1. Verifica env vars Supabase
   2. Valida autenticação do usuário via Supabase Auth
   3. Obtém perfil do usuário (role, empresa_id)
-  4. Configura schema do tenant via RPC `set_tenant_schema`
-  5. Valida acesso à rota baseado em role
-  6. Valida feature flags da empresa
-  7. Redireciona conforme necessário
+  4. Configurações do tenant via RPC `set_tenant_schema` (Roteamento de Schema)
+  5. White-listing de módulos core (Dashboard, Configurações) para garantir acesso básico
+  6. Valida acesso à rota baseado em role
+  7. Valida feature flags da empresa
+  8. Redireciona conforme necessário
 
 ---
 
