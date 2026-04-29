@@ -405,10 +405,19 @@ export interface Empresa {
   trial_ends_at?: string;
   plan_name?: string;
   inscricao_estadual?: string;
-  regime_tributario?: string;
+  inscricao_municipal?: string;
+  regime_tributario?: string | number;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  uf?: string;
+  cep?: string;
   focusnfe_token_producao?: string;
   focusnfe_token_homologacao?: string;
   nfe_ambiente?: 'producao' | 'homologacao';
+  nfe_certificado_senha?: string;
 }
 
 export interface EmpresaUpdate {
@@ -423,10 +432,19 @@ export interface EmpresaUpdate {
   trial_ends_at?: string;
   plan_name?: string;
   inscricao_estadual?: string;
-  regime_tributario?: string;
+  inscricao_municipal?: string;
+  regime_tributario?: string | number;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  uf?: string;
+  cep?: string;
   focusnfe_token_producao?: string;
   focusnfe_token_homologacao?: string;
   nfe_ambiente?: 'producao' | 'homologacao';
+  nfe_certificado_senha?: string;
 }
 
 export interface Funcionario {

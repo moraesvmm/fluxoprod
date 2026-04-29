@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Banknote, ShoppingBag, BarChart, CreditCard, Plus, Search, FileText, Edit, Trash2, RotateCcw, Ban } from "lucide-react";
+import { Banknote, ShoppingBag, BarChart, CreditCard, Plus, Search, FileText, Edit, Trash2, RotateCcw, Ban, Printer } from "lucide-react";
 import { FloatingCalculator } from "@/components/modules/base/Calculator";
 import Link from "next/link";
 import { useVendas, useDeleteVenda, useCancelVenda } from "@/lib/hooks/use-vendas";

@@ -6,6 +6,7 @@ import { useEmpresa, useUpdateEmpresa } from "@/lib/hooks/use-empresas";
 import { useToast, Toast } from "@/components/ui/toast";
 import { TutorialSettingsSection } from "@/components/onboarding/TutorialSettingsSection";
 import { FiscalGuide } from "@/components/modules/fiscal/FiscalGuide";
+import { createClient } from "@/utils/supabase/client";
 
 export default function ConfiguracoesPage() {
   const { data: empresa, isLoading } = useEmpresa();
@@ -43,7 +44,7 @@ export default function ConfiguracoesPage() {
         segmento: empresa.segmento || "",
         inscricao_estadual: empresa.inscricao_estadual || "",
         inscricao_municipal: (empresa as any).inscricao_municipal || "",
-        regime_tributario: empresa.regime_tributario || "",
+        regime_tributario: empresa.regime_tributario != null ? String(empresa.regime_tributario) : "",
         logradouro: (empresa as any).logradouro || "",
         numero: (empresa as any).numero || "",
         complemento: (empresa as any).complemento || "",

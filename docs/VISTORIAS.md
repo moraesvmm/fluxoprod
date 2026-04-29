@@ -1,5 +1,15 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 41 - Logística NFe (Build + Instrumentaç?o)
+- **Data:** 29/04/2026
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alteraç?es:**
+  - Correç?es de build TypeScript/JSX (Catálogo, Configuraç?es, Vendas).
+  - Ajuste de compatibilidade `xml-crypto` (assinatura XML) para a vers?o instalada.
+  - Instrumentaç?o server-side na rota `/api/fiscal/nfe/emitir` com fallback de log NDJSON local para auditoria runtime.
+
+---
+
 ## VISTORIA 40 - Inteligência Financeira & CMV
 - **Data:** 29/04/2026
 - **Status:** CONCLUÍDO

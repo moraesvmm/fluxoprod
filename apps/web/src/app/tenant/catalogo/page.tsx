@@ -75,7 +75,7 @@ export default function CatalogoPage() {
 
       await createProduto.mutateAsync(payload);
 
-      setFormData({ nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '', estoque_atual: '0', estoque_minimo: '10', categoria: '' });
+      setFormData({ nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '', estoque_atual: '0', estoque_minimo: '10', categoria: '', ncm: '', cfop_padrao: '', origem: '0' });
       setShowModal(false);
       success("Produto cadastrado com sucesso!");
     } catch (err: any) {
@@ -131,7 +131,7 @@ export default function CatalogoPage() {
 
       await updateProduto.mutateAsync({ id: editId, produto: payload });
 
-      setFormData({ nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '', estoque_atual: '0', estoque_minimo: '10', categoria: '' });
+      setFormData({ nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '', estoque_atual: '0', estoque_minimo: '10', categoria: '', ncm: '', cfop_padrao: '', origem: '0' });
       setShowEditModal(false);
       setEditId(null);
       success("Produto atualizado com sucesso!");
@@ -421,9 +421,9 @@ export default function CatalogoPage() {
                 <option value="0">0 - Nacional</option>
                 <option value="1">1 - Estrangeira (Importação Direta)</option>
                 <option value="2">2 - Estrangeira (Adquirida no Mercado Interno)</option>
-                <option value="3">3 - Nacional (Conteúdo Importação > 40%)</option>
+                <option value="3">3 - Nacional (Conteúdo Importação {'>'} 40%)</option>
                 <option value="4">4 - Nacional (Produção Básica)</option>
-                <option value="5">5 - Nacional (Conteúdo Importação <= 40%)</option>
+                <option value="5">5 - Nacional (Conteúdo Importação {'≤'} 40%)</option>
                 <option value="6">6 - Estrangeira (Importação Direta, sem similar nacional)</option>
                 <option value="7">7 - Estrangeira (Mercado Interno, sem similar nacional)</option>
                 <option value="8">8 - Nacional (Mercadoria ou bem com Conteúdo de Importação superior a 70%)</option>
@@ -542,9 +542,9 @@ export default function CatalogoPage() {
                 <option value="0">0 - Nacional</option>
                 <option value="1">1 - Estrangeira (Importação Direta)</option>
                 <option value="2">2 - Estrangeira (Adquirida no Mercado Interno)</option>
-                <option value="3">3 - Nacional (Conteúdo Importação > 40%)</option>
+                <option value="3">3 - Nacional (Conteúdo Importação {'>'} 40%)</option>
                 <option value="4">4 - Nacional (Produção Básica)</option>
-                <option value="5">5 - Nacional (Conteúdo Importação <= 40%)</option>
+                <option value="5">5 - Nacional (Conteúdo Importação {'≤'} 40%)</option>
                 <option value="6">6 - Estrangeira (Importação Direta, sem similar nacional)</option>
                 <option value="7">7 - Estrangeira (Mercado Interno, sem similar nacional)</option>
                 <option value="8">8 - Nacional (Mercadoria ou bem com Conteúdo de Importação superior a 70%)</option>

@@ -16,15 +16,18 @@ export class NfeSigner {
       const sig = new SignedXml();
       
       // Configurar a assinatura (Padrão SEFAZ)
-      sig.addReference("//*[local-name()='infNFe']", 
-        ['http://www.w3.org/2000/09/xmldsig#enveloped-signature', 'http://www.w3.org/2001/10/xml-exc-c14n#'], 
-        'http://www.w3.org/2001/04/xmlenc#sha256'
-      );
-      
-      sig.signingKey = privateKeyPem;
-      sig.keyInfoProvider = {
-        getKeyInfo: () => `<X509Data><X509Certificate>${this.cleanCert(certificatePem)}</X509Certificate></X509Data>`
-      };
+      sig.addReference({
+        xpath: "//*[local-name()='infNFe']",
+        transforms: [
+          'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
+          'http://www.w3.org/2001/10/xml-exc-c14n#',
+        ],
+        digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256',
+        isEmptyUri: false,
+      });
+
+      sig.privateKey = privateKeyPem;
+      sig.publicCert = certificatePem;
       
       sig.computeSignature(xml, { 
         location: { reference: "//*[local-name()='infNFe']", action: "after" } 
