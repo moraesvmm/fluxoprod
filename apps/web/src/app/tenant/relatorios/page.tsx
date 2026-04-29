@@ -144,6 +144,7 @@ export default function RelatoriosPage() {
             { label: "Pendentes", value: formatarMoeda(pendentes), icon: DollarSign },
           ]);
           break;
+        }
         case "dre": {
           const hoje = new Date();
           const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString();
