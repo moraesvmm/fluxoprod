@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, ShoppingCart, Trash2, ArrowLeft, CreditCard, Banknote, QrCode, Check, AlertCircle, User } from "lucide-react";
+import { Search, ShoppingCart, Trash2, ArrowLeft, CreditCard, Banknote, QrCode, Check, AlertCircle, User, FileText } from "lucide-react";
 import Link from "next/link";
 import { twMerge } from "tailwind-merge";
 import { clsx } from "clsx";
