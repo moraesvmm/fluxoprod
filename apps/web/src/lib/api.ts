@@ -414,6 +414,7 @@ export interface Empresa {
   cidade?: string;
   uf?: string;
   cep?: string;
+  codigo_municipio_ibge?: string;
   focusnfe_token_producao?: string;
   focusnfe_token_homologacao?: string;
   nfe_ambiente?: 'producao' | 'homologacao';
@@ -441,6 +442,7 @@ export interface EmpresaUpdate {
   cidade?: string;
   uf?: string;
   cep?: string;
+  codigo_municipio_ibge?: string;
   focusnfe_token_producao?: string;
   focusnfe_token_homologacao?: string;
   nfe_ambiente?: 'producao' | 'homologacao';
@@ -1136,7 +1138,7 @@ export async function updateObra(id: string, obra: ObraUpdate): Promise<Obra> {
 export async function fetchEmpresa(): Promise<Empresa | null> {
   const { data, error } = await getSupabase()
     .from('empresas')
-    .select('*')
+    .select('id, cnpj, razao_social, porte, segmento, schema_name, criado_em, status, subscription_id, subscription_status, data_vencimento, trial_ends_at, plan_name, inscricao_estadual, inscricao_municipal, regime_tributario, logradouro, numero, complemento, bairro, cidade, uf, cep, codigo_municipio_ibge, nfe_ambiente')
     .limit(1)
     .maybeSingle();
   if (error) throw new Error(error.message);

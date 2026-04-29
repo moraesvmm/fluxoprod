@@ -228,8 +228,7 @@ export default function VendasPage() {
                             className="text-green-600 hover:text-green-800 transition-colors p-1" 
                             title="Download XML NFe"
                             onClick={() => {
-                              if (!item.nfe_xml_url) return;
-                              window.open(item.nfe_xml_url, '_blank');
+                              window.open(`/api/fiscal/nfe/${item.id}/xml`, '_blank');
                             }}
                           >
                             <FileText className="h-4 w-4" />

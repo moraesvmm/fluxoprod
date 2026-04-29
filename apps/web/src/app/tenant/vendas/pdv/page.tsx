@@ -191,7 +191,6 @@ export default function PDVPage() {
         p_metodo_pagamento: metodoPagamento,
         p_valor_total: total,
         p_desconto: desconto,
-        p_lembrar_dias: lembrarDias,
         p_emitir_nfe: emitirNfe
       });
 
@@ -235,7 +234,16 @@ export default function PDVPage() {
       const { data: produtosAtualizados } = await supabase
         .rpc('tenant_listar_estoque');
 
-      setProdutos(produtosAtualizados || []);
+      const produtosMapeados = (produtosAtualizados || []).map((item: any) => ({
+        id: item.id,
+        nome: item.produto_nome,
+        preco_venda: item.produto_preco_base,
+        estoque_atual: item.quantidade,
+        estoque_minimo: item.quantidade_minima,
+        sku: item.sku
+      }));
+
+      setProdutos(produtosMapeados);
     } catch (err: any) {
       toastError('Erro ao processar pagamento: ' + (err.message || 'Tente novamente.'));
       throw err; // Propagar erro (não silencioso)

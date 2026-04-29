@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import {
   Table,
@@ -28,6 +28,9 @@ interface Produto {
   estoque_minimo: number;
   categoria?: string;
   criado_em: string;
+  ncm?: string;
+  cfop_padrao?: string;
+  origem?: number;
 }
 
 export default function CatalogoPage() {
@@ -39,20 +42,99 @@ export default function CatalogoPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [fiscalByProduct, setFiscalByProduct] = useState<Record<string, { ncm?: string; cfop_padrao?: string; origem?: number }>>({});
   const [formData, setFormData] = useState({
-    nome: '',
-    descricao: '',
-    sku: '',
-    preco_custo: '',
-    preco_venda: '',
-    estoque_atual: '0',
-    estoque_minimo: '10',
-    categoria: '',
-    ncm: '',
-    cfop_padrao: '',
-    origem: '0'
+    nome: "",
+    descricao: "",
+    sku: "",
+    preco_custo: "",
+    preco_venda: "",
+    estoque_atual: "0",
+    estoque_minimo: "10",
+    categoria: "",
+    ncm: "",
+    cfop_padrao: "",
+    origem: "0",
   });
   const { toasts, removeToast, success, error: toastError } = useToast();
+  const produtosComFiscal: Produto[] = (produtos || []).map((produto) => ({
+    ...produto,
+    ...(fiscalByProduct[produto.id] || {}),
+  }));
+
+  useEffect(() => {
+    const loadFiscalData = async () => {
+      try {
+        const response = await fetch("/api/tenant/catalogo/fiscal", {
+          cache: "no-store",
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.error || "Falha ao carregar dados fiscais.");
+        }
+
+        const nextMap = Object.fromEntries(
+          (payload.data || []).map((item: any) => [
+            item.id,
+            {
+              ncm: item.ncm || "",
+              cfop_padrao: item.cfop_padrao || "",
+              origem: typeof item.origem === "number" ? item.origem : 0,
+            },
+          ])
+        );
+        setFiscalByProduct(nextMap);
+      } catch (err: any) {
+        toastError("Erro ao carregar dados fiscais do catálogo: " + err.message);
+      }
+    };
+
+    loadFiscalData();
+  }, [toastError]);
+
+  const salvarDadosFiscaisProduto = async (produtoId: string) => {
+    const fiscalResponse = await fetch("/api/tenant/catalogo/fiscal", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        produtoId,
+        ncm: formData.ncm,
+        cfop_padrao: formData.cfop_padrao,
+        origem: parseInt(formData.origem, 10) || 0,
+      }),
+    });
+    const fiscalPayload = await fiscalResponse.json();
+    if (!fiscalResponse.ok || !fiscalPayload.success) {
+      throw new Error(fiscalPayload.error || "Falha ao salvar dados fiscais do produto.");
+    }
+
+    setFiscalByProduct((current) => ({
+      ...current,
+      [produtoId]: {
+        ncm: formData.ncm,
+        cfop_padrao: formData.cfop_padrao,
+        origem: parseInt(formData.origem, 10) || 0,
+      },
+    }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      nome: "",
+      descricao: "",
+      sku: "",
+      preco_custo: "",
+      preco_venda: "",
+      estoque_atual: "0",
+      estoque_minimo: "10",
+      categoria: "",
+      ncm: "",
+      cfop_padrao: "",
+      origem: "0",
+    });
+  };
 
   const criarProduto = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,21 +143,19 @@ export default function CatalogoPage() {
     try {
       const payload: any = {
         nome: formData.nome,
-        estoque_atual: parseInt(formData.estoque_atual) || 0,
-        estoque_minimo: parseInt(formData.estoque_minimo) || 10,
+        estoque_atual: parseInt(formData.estoque_atual, 10) || 0,
+        estoque_minimo: parseInt(formData.estoque_minimo, 10) || 10,
       };
       if (formData.descricao) payload.descricao = formData.descricao;
       if (formData.sku) payload.sku = formData.sku;
       if (formData.preco_custo) payload.preco_custo = parseFloat(formData.preco_custo);
       if (formData.preco_venda) payload.preco_venda = parseFloat(formData.preco_venda);
       if (formData.categoria) payload.categoria = formData.categoria;
-      if (formData.ncm) payload.ncm = formData.ncm;
-      if (formData.cfop_padrao) payload.cfop_padrao = formData.cfop_padrao;
-      payload.origem = parseInt(formData.origem) || 0;
 
-      await createProduto.mutateAsync(payload);
+      const created = await createProduto.mutateAsync(payload);
+      await salvarDadosFiscaisProduto(created.id);
 
-      setFormData({ nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '', estoque_atual: '0', estoque_minimo: '10', categoria: '', ncm: '', cfop_padrao: '', origem: '0' });
+      resetForm();
       setShowModal(false);
       success("Produto cadastrado com sucesso!");
     } catch (err: any) {
@@ -87,6 +167,11 @@ export default function CatalogoPage() {
     if (!deleteId) return;
     try {
       await deleteProduto.mutateAsync(deleteId);
+      setFiscalByProduct((current) => {
+        const next = { ...current };
+        delete next[deleteId];
+        return next;
+      });
       success("Produto removido com sucesso!");
     } catch (err: any) {
       toastError("Erro ao remover produto: " + (err.message || "Tente novamente."));
@@ -99,16 +184,16 @@ export default function CatalogoPage() {
     setEditId(produto.id);
     setFormData({
       nome: produto.nome,
-      descricao: produto.descricao || '',
-      sku: produto.sku || '',
-      preco_custo: produto.preco_custo ? String(produto.preco_custo) : '',
-      preco_venda: produto.preco_venda ? String(produto.preco_venda) : '',
+      descricao: produto.descricao || "",
+      sku: produto.sku || "",
+      preco_custo: produto.preco_custo ? String(produto.preco_custo) : "",
+      preco_venda: produto.preco_venda ? String(produto.preco_venda) : "",
       estoque_atual: String(produto.estoque_atual),
       estoque_minimo: String(produto.estoque_minimo),
-      categoria: produto.categoria || '',
-      ncm: (produto as any).ncm || '',
-      cfop_padrao: (produto as any).cfop_padrao || '',
-      origem: String((produto as any).origem || '0')
+      categoria: produto.categoria || "",
+      ncm: produto.ncm || "",
+      cfop_padrao: produto.cfop_padrao || "",
+      origem: String(produto.origem || 0),
     });
     setShowEditModal(true);
   };
@@ -125,13 +210,11 @@ export default function CatalogoPage() {
       if (formData.sku) payload.sku = formData.sku;
       if (formData.preco_custo) payload.preco_custo = parseFloat(formData.preco_custo);
       if (formData.categoria) payload.categoria = formData.categoria;
-      if (formData.ncm) (payload as any).ncm = formData.ncm;
-      if (formData.cfop_padrao) (payload as any).cfop_padrao = formData.cfop_padrao;
-      (payload as any).origem = parseInt(formData.origem) || 0;
 
       await updateProduto.mutateAsync({ id: editId, produto: payload });
+      await salvarDadosFiscaisProduto(editId);
 
-      setFormData({ nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '', estoque_atual: '0', estoque_minimo: '10', categoria: '', ncm: '', cfop_padrao: '', origem: '0' });
+      resetForm();
       setShowEditModal(false);
       setEditId(null);
       success("Produto atualizado com sucesso!");
@@ -147,12 +230,10 @@ export default function CatalogoPage() {
 
   return (
     <div className="space-y-8">
-      {/* Toasts */}
-      {toasts.map(toast => (
+      {toasts.map((toast) => (
         <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
       ))}
 
-      {/* Confirm Modal */}
       <ConfirmModal
         isOpen={!!deleteId}
         onConfirm={confirmarExclusao}
@@ -178,23 +259,21 @@ export default function CatalogoPage() {
         </button>
       </div>
 
-      {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-4">
-        <KPICard title="Total de Produtos" value={produtos?.length || 0} icon={Package} />
-        <KPICard title="Categorias" value={new Set(produtos?.filter(p => p.categoria).map(p => p.categoria) || []).size} icon={Tags} />
+        <KPICard title="Total de Produtos" value={produtosComFiscal.length || 0} icon={Package} />
+        <KPICard title="Categorias" value={new Set(produtosComFiscal.filter((p) => p.categoria).map((p) => p.categoria) || []).size} icon={Tags} />
         <KPICard
           title="Valor do Estoque"
-          value={formatarMoeda(produtos?.reduce((sum, p) => sum + ((p.preco_venda || 0) * p.estoque_atual), 0) || 0)}
+          value={formatarMoeda(produtosComFiscal.reduce((sum, p) => sum + ((p.preco_venda || 0) * p.estoque_atual), 0) || 0)}
           icon={DollarSign}
         />
         <KPICard
           title="Preço Médio"
-          value={formatarMoeda((produtos?.length || 0) > 0 ? (produtos?.reduce((sum, p) => sum + (p.preco_venda || 0), 0) || 0) / (produtos?.length || 1) : 0)}
+          value={formatarMoeda((produtosComFiscal.length || 0) > 0 ? (produtosComFiscal.reduce((sum, p) => sum + (p.preco_venda || 0), 0) || 0) / (produtosComFiscal.length || 1) : 0)}
           icon={DollarSign}
         />
       </div>
 
-      {/* Tabela */}
       <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
           <div className="relative w-full max-w-sm">
@@ -231,7 +310,7 @@ export default function CatalogoPage() {
                   <div className="text-red-500">{error.message}</div>
                 </TableCell>
               </TableRow>
-            ) : !produtos || produtos.length === 0 ? (
+            ) : produtosComFiscal.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
@@ -242,7 +321,7 @@ export default function CatalogoPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              produtos?.map((p) => (
+              produtosComFiscal.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>
                     <div className="flex flex-col">
@@ -261,13 +340,15 @@ export default function CatalogoPage() {
                   <TableCell className="text-sm text-muted-foreground">{formatarMoeda(p.preco_custo)}</TableCell>
                   <TableCell className="font-medium text-slate-900">{formatarMoeda(p.preco_venda)}</TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      p.estoque_atual <= 0
-                        ? "bg-red-100 text-red-700"
-                        : p.estoque_atual <= p.estoque_minimo
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-emerald-100 text-emerald-700"
-                    }`}>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        p.estoque_atual <= 0
+                          ? "bg-red-100 text-red-700"
+                          : p.estoque_atual <= p.estoque_minimo
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-emerald-100 text-emerald-700"
+                      }`}
+                    >
                       {p.estoque_atual} un
                     </span>
                   </TableCell>
@@ -292,7 +373,6 @@ export default function CatalogoPage() {
         </Table>
       </div>
 
-      {/* Modal de Cadastro */}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Adicionar Produto ao Catálogo">
         <form onSubmit={criarProduto} className="space-y-4">
           <div>
@@ -423,10 +503,10 @@ export default function CatalogoPage() {
                 <option value="2">2 - Estrangeira (Adquirida no Mercado Interno)</option>
                 <option value="3">3 - Nacional (Conteúdo Importação {'>'} 40%)</option>
                 <option value="4">4 - Nacional (Produção Básica)</option>
-                <option value="5">5 - Nacional (Conteúdo Importação {'≤'} 40%)</option>
+                <option value="5">5 - Nacional (Conteúdo Importação {'<='} 40%)</option>
                 <option value="6">6 - Estrangeira (Importação Direta, sem similar nacional)</option>
                 <option value="7">7 - Estrangeira (Mercado Interno, sem similar nacional)</option>
-                <option value="8">8 - Nacional (Mercadoria ou bem com Conteúdo de Importação superior a 70%)</option>
+                <option value="8">8 - Nacional (Conteúdo de Importação superior a 70%)</option>
               </select>
             </div>
           </div>
@@ -448,7 +528,6 @@ export default function CatalogoPage() {
         </form>
       </Modal>
 
-      {/* Modal de Edição */}
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Produto">
         <form onSubmit={editarProduto} className="space-y-4">
           <div>
@@ -544,10 +623,10 @@ export default function CatalogoPage() {
                 <option value="2">2 - Estrangeira (Adquirida no Mercado Interno)</option>
                 <option value="3">3 - Nacional (Conteúdo Importação {'>'} 40%)</option>
                 <option value="4">4 - Nacional (Produção Básica)</option>
-                <option value="5">5 - Nacional (Conteúdo Importação {'≤'} 40%)</option>
+                <option value="5">5 - Nacional (Conteúdo Importação {'<='} 40%)</option>
                 <option value="6">6 - Estrangeira (Importação Direta, sem similar nacional)</option>
                 <option value="7">7 - Estrangeira (Mercado Interno, sem similar nacional)</option>
-                <option value="8">8 - Nacional (Mercadoria ou bem com Conteúdo de Importação superior a 70%)</option>
+                <option value="8">8 - Nacional (Conteúdo de Importação superior a 70%)</option>
               </select>
             </div>
           </div>
