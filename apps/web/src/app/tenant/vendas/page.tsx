@@ -221,6 +221,55 @@ export default function VendasPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
+                      {/* Ações de NFe */}
+                      {item.nfe_status === 'emitida' ? (
+                        <>
+                          <button 
+                            className="text-green-600 hover:text-green-800 transition-colors p-1" 
+                            title="Download XML NFe"
+                            onClick={() => {
+                              if (!item.nfe_xml_url) return;
+                              window.open(item.nfe_xml_url, '_blank');
+                            }}
+                          >
+                            <FileText className="h-4 w-4" />
+                          </button>
+                          <Link 
+                            href={`/tenant/vendas/nfe/${item.id}/danfe`}
+                            className="text-blue-600 hover:text-blue-800 transition-colors p-1" 
+                            title="Visualizar DANFE"
+                          >
+                            <Printer className="h-4 w-4" />
+                          </Link>
+                        </>
+                      ) : item.status !== 'cancelado' && (
+                        <button 
+                          onClick={async () => {
+                            try {
+                              const res = await fetch('/api/fiscal/nfe/emitir', {
+                                method: 'POST',
+                                body: JSON.stringify({ vendaId: item.id }),
+                                headers: { 'Content-Type': 'application/json' }
+                              });
+                              const data = await res.json();
+                              if (data.success) {
+                                success("NFe emitida com sucesso!");
+                                // Recarregar dados
+                                window.location.reload();
+                              } else {
+                                toastError("Erro na emissão: " + data.error);
+                              }
+                            } catch (err) {
+                              toastError("Falha ao comunicar com o servidor.");
+                            }
+                          }}
+                          className="text-amber-500 hover:text-amber-700 transition-colors p-1" 
+                          title="Emitir NFe Manual"
+                        >
+                          <Banknote className="h-4 w-4" />
+                        </button>
+                      )}
+
                       {item.status !== 'cancelado' && (
                         <button 
                           onClick={() => setCancelId(item.id)}
@@ -245,7 +294,7 @@ export default function VendasPage() {
                         title="Gerar Recibo PDF"
                         onClick={() => imprimirRecibo(item)}
                       >
-                        <FileText className="h-4 w-4" />
+                        <RotateCcw className="h-4 w-4" />
                       </button>
                     </div>
                   </TableCell>

@@ -495,3 +495,26 @@ fe_xml, etc.) e atualizar RPCs (	enant_processar_venda, 	enant_listar_vendas).
 ### Status
 - **Arquitetura:** Infraestrutura pronta para NFe e Busca Otimizada.
 - **Vistoria:** PENDENTE (Realizar teste de fumaÃ§a no PDV e HistÃ³rico).
+
+---
+
+## VISTORIA 39 (PENDENTE): Implementação Nativa do Motor de NFe (Custo Zero) - 29/04/2026
+
+### Objetivo
+Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.io).
+
+### Ações Executadas
+- **nfe-xml-builder.ts [NOVO]**: Gerador de XML 4.00.
+- **nfe-signer.ts [NOVO]**: Assinador digital XML.
+- **sefaz-client.ts [NOVO]**: Cliente SOAP com mTLS.
+- **nfe-service.ts [NOVO]**: Orquestrador de faturamento.
+- **api/fiscal/nfe/emitir/route.ts [NOVO]**: Rota de API Next.js.
+- **catalogo/page.tsx [MODIFICADO]**: Campos NCM, CFOP, Origem.
+- **configuracoes/page.tsx [MODIFICADO]**: Dados do emitente.
+- **pdv/page.tsx [MODIFICADO]**: Gatilho de faturamento.
+- **api.ts [MODIFICADO]**: Expansão de interfaces.
+- **rpc_fiscal_expansion.sql [NOVO]**: Expansão SQL.
+
+### Status
+- **Arquitetura**: Motor fiscal 100% nativo.
+- **Vistoria**: PENDENTE.

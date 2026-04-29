@@ -1,0 +1,102 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import { Printer, Download, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
+export default function DanfePage() {
+  const { id } = useParams();
+  const [xml, setXml] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const loadNfe = async () => {
+      try {
+        const { data: venda, error: vError } = await supabase
+          .from('vendas')
+          .select('nfe_xml_url')
+          .eq('id', id)
+          .single();
+
+        if (vError || !venda?.nfe_xml_url) throw new Error("NFe não encontrada.");
+
+        const res = await fetch(venda.nfe_xml_url);
+        const text = await res.text();
+        setXml(text);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadNfe();
+  }, [id]);
+
+  if (loading) return <div className="p-8 text-center text-slate-500">Carregando DANFE...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">Erro: {error}</div>;
+
+  // No MVP, vamos apenas exibir que o XML foi carregado e preparar a estrutura
+  // Em uma implementação real, usaríamos um parser para extrair dados do XML e montar o grid
+  return (
+    <div className="min-h-screen bg-slate-100 p-4 sm:p-8 no-print">
+      <div className="max-w-4xl mx-auto mb-6 flex justify-between items-center">
+        <Link href="/tenant/vendas" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
+          <ArrowLeft className="h-4 w-4" /> Voltar
+        </Link>
+        <div className="flex gap-3">
+          <button 
+            onClick={() => window.print()}
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all shadow-md"
+          >
+            <Printer className="h-4 w-4" /> Imprimir DANFE
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white shadow-2xl mx-auto p-8 border border-slate-200 print:shadow-none print:border-none print:p-0" id="danfe-content">
+        {/* Cabeçalho DANFE Simplificado */}
+        <div className="border-2 border-black p-2 mb-4">
+          <div className="flex justify-between items-start">
+            <div className="w-1/2 border-r-2 border-black pr-2">
+              <h1 className="font-bold text-lg uppercase">DANFE</h1>
+              <p className="text-xs">Documento Auxiliar da Nota Fiscal Eletrônica</p>
+              <div className="mt-4 grid grid-cols-2 text-[10px]">
+                <div>0 - ENTRADA<br/>1 - SAÍDA</div>
+                <div className="border-2 border-black text-center font-bold text-lg">1</div>
+              </div>
+            </div>
+            <div className="w-1/2 pl-2 text-[10px]">
+              <p className="font-bold">CHAVE DE ACESSO</p>
+              <p className="text-xs tracking-tighter">CONSULTA DE AUTENTICIDADE NO PORTAL NACIONAL DA NF-E</p>
+              <div className="mt-4 border-2 border-black p-1 text-center font-mono">
+                {/* Aqui viria a chave extraída do XML */}
+                3524 0412 3456 7800 0190 5500 1000 0012 3412 3456 7890
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center py-20 border-2 border-dashed border-slate-300 rounded-lg text-slate-400">
+          <p className="font-medium">Visualizador de DANFE Premium</p>
+          <p className="text-sm mt-2">Os dados serão extraídos automaticamente do XML {id?.toString().substring(0,8)}</p>
+        </div>
+
+        <div className="mt-8 text-[9px] text-slate-400">
+          <p>Fluxo ERP - Sistema de Gestão Inteligente</p>
+        </div>
+      </div>
+
+      <style jsx global>{`
+        @media print {
+          .no-print { display: none !important; }
+          body { background: white !important; }
+          #danfe-content { width: 100% !important; max-width: none !important; }
+        }
+      `}</style>
+    </div>
+  );
+}

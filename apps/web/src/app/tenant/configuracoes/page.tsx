@@ -18,10 +18,19 @@ export default function ConfiguracoesPage() {
     porte: "",
     segmento: "",
     inscricao_estadual: "",
+    inscricao_municipal: "",
     regime_tributario: "",
+    logradouro: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "",
+    uf: "",
+    cep: "",
     focusnfe_token_producao: "",
     focusnfe_token_homologacao: "",
     nfe_ambiente: "homologacao" as 'producao' | 'homologacao',
+    nfe_certificado_senha: "",
   });
 
   // Sync state when data is loaded
@@ -33,10 +42,19 @@ export default function ConfiguracoesPage() {
         porte: empresa.porte || "",
         segmento: empresa.segmento || "",
         inscricao_estadual: empresa.inscricao_estadual || "",
+        inscricao_municipal: (empresa as any).inscricao_municipal || "",
         regime_tributario: empresa.regime_tributario || "",
+        logradouro: (empresa as any).logradouro || "",
+        numero: (empresa as any).numero || "",
+        complemento: (empresa as any).complemento || "",
+        bairro: (empresa as any).bairro || "",
+        cidade: (empresa as any).cidade || "",
+        uf: (empresa as any).uf || "",
+        cep: (empresa as any).cep || "",
         focusnfe_token_producao: empresa.focusnfe_token_producao || "",
         focusnfe_token_homologacao: empresa.focusnfe_token_homologacao || "",
         nfe_ambiente: empresa.nfe_ambiente || "homologacao",
+        nfe_certificado_senha: (empresa as any).nfe_certificado_senha || "",
       });
     }
   }, [empresa]);
@@ -53,10 +71,19 @@ export default function ConfiguracoesPage() {
           porte: formData.porte,
           segmento: formData.segmento,
           inscricao_estadual: formData.inscricao_estadual,
+          inscricao_municipal: formData.inscricao_municipal,
           regime_tributario: formData.regime_tributario,
+          logradouro: formData.logradouro,
+          numero: formData.numero,
+          complemento: formData.complemento,
+          bairro: formData.bairro,
+          cidade: formData.cidade,
+          uf: formData.uf,
+          cep: formData.cep,
           focusnfe_token_producao: formData.focusnfe_token_producao,
           focusnfe_token_homologacao: formData.focusnfe_token_homologacao,
           nfe_ambiente: formData.nfe_ambiente,
+          nfe_certificado_senha: formData.nfe_certificado_senha,
         }
       });
       success("Configurações salvas com sucesso!");
@@ -139,6 +166,76 @@ export default function ConfiguracoesPage() {
                 />
               </div>
             </div>
+
+            <div className="mt-8 border-t border-slate-100 pt-6">
+              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Endereço Fiscal</h4>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                <div className="sm:col-span-1">
+                  <label className="block text-sm font-medium text-slate-700">CEP</label>
+                  <input 
+                    type="text" 
+                    value={formData.cep}
+                    onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700">Logradouro (Rua/Av)</label>
+                  <input 
+                    type="text" 
+                    value={formData.logradouro}
+                    onChange={(e) => setFormData({ ...formData, logradouro: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Número</label>
+                  <input 
+                    type="text" 
+                    value={formData.numero}
+                    onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Complemento</label>
+                  <input 
+                    type="text" 
+                    value={formData.complemento}
+                    onChange={(e) => setFormData({ ...formData, complemento: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Bairro</label>
+                  <input 
+                    type="text" 
+                    value={formData.bairro}
+                    onChange={(e) => setFormData({ ...formData, bairro: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700">Cidade</label>
+                  <input 
+                    type="text" 
+                    value={formData.cidade}
+                    onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
+                    className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">UF</label>
+                  <input 
+                    type="text" 
+                    maxLength={2}
+                    value={formData.uf}
+                    onChange={(e) => setFormData({ ...formData, uf: e.target.value.toUpperCase() })}
+                    className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm uppercase" 
+                  />
+                </div>
+              </div>
+            </div>
             
             <div className="mt-6 flex justify-end">
               <button 
@@ -193,6 +290,15 @@ export default function ConfiguracoesPage() {
                   onChange={(e) => setFormData({ ...formData, inscricao_estadual: e.target.value })}
                   className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
                   placeholder="Isento se não possuir"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Inscrição Municipal</label>
+                <input 
+                  type="text" 
+                  value={formData.inscricao_municipal}
+                  onChange={(e) => setFormData({ ...formData, inscricao_municipal: e.target.value })}
+                  className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
                 />
               </div>
               <div>
@@ -251,8 +357,54 @@ export default function ConfiguracoesPage() {
                   </div>
                 </div>
                 <p className="mt-4 text-xs text-slate-400">
-                  * Os tokens são criptografados e usados apenas para comunicação com a SEFAZ via FocusNFe.
+                  * Os tokens são criptografados e usados apenas para comunicação com a SEFAZ via FocusNFe (Legado).
                 </p>
+
+                <div className="mt-8 border-t border-slate-100 pt-6">
+                  <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" /> Emissão Nativa (Custo Zero)
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700">Certificado Digital (.pfx / .p12)</label>
+                      <div className="mt-1 flex items-center gap-4">
+                        <input 
+                          type="file" 
+                          accept=".pfx,.p12"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file || !empresa?.id) return;
+                            
+                            try {
+                              const { error } = await createClient().storage
+                                .from('fiscal')
+                                .upload(`${empresa.id}/certificado.pfx`, file, { upsert: true });
+                              
+                              if (error) throw error;
+                              success("Certificado enviado com sucesso!");
+                            } catch (err: any) {
+                              toastError("Erro ao enviar certificado: " + err.message);
+                            }
+                          }}
+                          className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                        />
+                      </div>
+                      <p className="mt-1 text-[10px] text-slate-400">O arquivo será armazenado de forma segura no seu ambiente isolado.</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700">Senha do Certificado</label>
+                      <input 
+                        type="password" 
+                        value={formData.nfe_certificado_senha}
+                        onChange={(e) => setFormData({ ...formData, nfe_certificado_senha: e.target.value })}
+                        className="mt-1 block w-full rounded-md border border-slate-300 py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm" 
+                        placeholder="Senha definida na exportação do PFX"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             

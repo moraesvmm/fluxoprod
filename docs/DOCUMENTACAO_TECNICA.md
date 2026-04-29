@@ -1,8 +1,8 @@
 # DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
--- Status: Vistoria 40 Implementada - Inteligência Financeira Ativa --
+-- Status: Vistoria 39 Implementada - Motor Fiscal Nativo (Custo Zero) --
 ## ESTADO ATUAL: PRODUCTION-READY (QUALIFICADO)
-## ÚLTIMA ATUALIZAÇÃO: 29/04/2026 (DRE, Conciliação OFX, Automação CMV)
-## VERSÃO: 2.4
+## ÚLTIMA ATUALIZAÇÃO: 29/04/2026 (NFe Nativa, mTLS, XMLDSIG)
+## VERSÃO: 2.5
 
 ---
 
@@ -77,6 +77,18 @@ Estado real consolidado pela Vistoria 17 (22/04/2026):
 - **Middleware**: Injeta schema via RPC em cada request, valida role e feature flags
 - **RLS**: Policies permissivas (`USING (true)`) pois isolamento é por schema routing
 - **RBAC**: Tabela `role_permissions` com roles `tenant_admin` e `tenant_user` padrão
+
+### Módulo Fiscal (NFe Nativa - OPÇÃO CUSTO ZERO)
+- **Motor**: Node.js Nativo (`node-forge` + `xml-crypto` + `axios`)
+- **Certificado (Multi-tenant)**: Armazenamento isolado em Supabase Storage (`fiscal/{empresa_id}/certificado.pfx`).
+- **Gestão**: Cada empresa realiza o upload de seu próprio certificado e senha via painel de Configurações.
+- **Assinatura**: Padrão XMLDSIG (Sha256) executado server-side via API Route (`/api/fiscal/nfe/emitir`).
+- **Transmissão**: mTLS (Mutual TLS) direto para os Web Services da SEFAZ utilizando o certificado do tenant.
+- **Componentes Core**:
+  - `NfeXmlBuilder`: Geração de XML 4.00.
+  - `NfeSigner`: Assinatura digital do XML.
+  - `SefazClient`: Comunicação SOAP/HTTPS com Agente mTLS dinâmico.
+  - `NfeService`: Orquestrador de alto nível que consome credenciais do tenant.
 
 ---
 

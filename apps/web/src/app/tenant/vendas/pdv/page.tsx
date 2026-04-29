@@ -205,6 +205,25 @@ export default function PDVPage() {
 
       success('Pagamento realizado com sucesso!');
 
+      // Gatilho de NFe
+      if (emitirNfe && resultado.venda_id) {
+        try {
+          const response = await fetch('/api/fiscal/nfe/emitir', {
+            method: 'POST',
+            body: JSON.stringify({ vendaId: resultado.venda_id }),
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const nfeResult = await response.json();
+          if (nfeResult.success) {
+            success('NFe emitida e autorizada com sucesso!');
+          } else {
+            warning('Venda concluída, mas houve erro na NFe: ' + nfeResult.error);
+          }
+        } catch (nfeErr) {
+          warning('Venda concluída, mas não foi possível disparar a NFe.');
+        }
+      }
+
       setCart([]);
       setCliente('Cliente Avulso');
       setVendedorId('');

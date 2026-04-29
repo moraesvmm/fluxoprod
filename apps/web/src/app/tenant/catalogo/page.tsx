@@ -47,7 +47,10 @@ export default function CatalogoPage() {
     preco_venda: '',
     estoque_atual: '0',
     estoque_minimo: '10',
-    categoria: ''
+    categoria: '',
+    ncm: '',
+    cfop_padrao: '',
+    origem: '0'
   });
   const { toasts, removeToast, success, error: toastError } = useToast();
 
@@ -66,6 +69,9 @@ export default function CatalogoPage() {
       if (formData.preco_custo) payload.preco_custo = parseFloat(formData.preco_custo);
       if (formData.preco_venda) payload.preco_venda = parseFloat(formData.preco_venda);
       if (formData.categoria) payload.categoria = formData.categoria;
+      if (formData.ncm) payload.ncm = formData.ncm;
+      if (formData.cfop_padrao) payload.cfop_padrao = formData.cfop_padrao;
+      payload.origem = parseInt(formData.origem) || 0;
 
       await createProduto.mutateAsync(payload);
 
@@ -99,7 +105,10 @@ export default function CatalogoPage() {
       preco_venda: produto.preco_venda ? String(produto.preco_venda) : '',
       estoque_atual: String(produto.estoque_atual),
       estoque_minimo: String(produto.estoque_minimo),
-      categoria: produto.categoria || ''
+      categoria: produto.categoria || '',
+      ncm: (produto as any).ncm || '',
+      cfop_padrao: (produto as any).cfop_padrao || '',
+      origem: String((produto as any).origem || '0')
     });
     setShowEditModal(true);
   };
@@ -116,6 +125,9 @@ export default function CatalogoPage() {
       if (formData.sku) payload.sku = formData.sku;
       if (formData.preco_custo) payload.preco_custo = parseFloat(formData.preco_custo);
       if (formData.categoria) payload.categoria = formData.categoria;
+      if (formData.ncm) (payload as any).ncm = formData.ncm;
+      if (formData.cfop_padrao) (payload as any).cfop_padrao = formData.cfop_padrao;
+      (payload as any).origem = parseInt(formData.origem) || 0;
 
       await updateProduto.mutateAsync({ id: editId, produto: payload });
 
@@ -372,6 +384,52 @@ export default function CatalogoPage() {
               />
             </div>
           </div>
+
+          <div className="border-t border-slate-100 pt-4">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Informações Fiscais (NFe)</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">NCM</label>
+                <input
+                  type="text"
+                  maxLength={8}
+                  value={formData.ncm}
+                  onChange={(e) => setFormData({ ...formData, ncm: e.target.value })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: 85444200"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">CFOP Padrão</label>
+                <input
+                  type="text"
+                  maxLength={4}
+                  value={formData.cfop_padrao}
+                  onChange={(e) => setFormData({ ...formData, cfop_padrao: e.target.value })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: 5102"
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Origem da Mercadoria</label>
+              <select
+                value={formData.origem}
+                onChange={(e) => setFormData({ ...formData, origem: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-white"
+              >
+                <option value="0">0 - Nacional</option>
+                <option value="1">1 - Estrangeira (Importação Direta)</option>
+                <option value="2">2 - Estrangeira (Adquirida no Mercado Interno)</option>
+                <option value="3">3 - Nacional (Conteúdo Importação > 40%)</option>
+                <option value="4">4 - Nacional (Produção Básica)</option>
+                <option value="5">5 - Nacional (Conteúdo Importação <= 40%)</option>
+                <option value="6">6 - Estrangeira (Importação Direta, sem similar nacional)</option>
+                <option value="7">7 - Estrangeira (Mercado Interno, sem similar nacional)</option>
+                <option value="8">8 - Nacional (Mercadoria ou bem com Conteúdo de Importação superior a 70%)</option>
+              </select>
+            </div>
+          </div>
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
@@ -446,6 +504,52 @@ export default function CatalogoPage() {
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="R$ 0,00"
             />
+          </div>
+
+          <div className="border-t border-slate-100 pt-4">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Informações Fiscais (NFe)</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">NCM</label>
+                <input
+                  type="text"
+                  maxLength={8}
+                  value={formData.ncm}
+                  onChange={(e) => setFormData({ ...formData, ncm: e.target.value })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: 85444200"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">CFOP Padrão</label>
+                <input
+                  type="text"
+                  maxLength={4}
+                  value={formData.cfop_padrao}
+                  onChange={(e) => setFormData({ ...formData, cfop_padrao: e.target.value })}
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Ex: 5102"
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Origem da Mercadoria</label>
+              <select
+                value={formData.origem}
+                onChange={(e) => setFormData({ ...formData, origem: e.target.value })}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-white"
+              >
+                <option value="0">0 - Nacional</option>
+                <option value="1">1 - Estrangeira (Importação Direta)</option>
+                <option value="2">2 - Estrangeira (Adquirida no Mercado Interno)</option>
+                <option value="3">3 - Nacional (Conteúdo Importação > 40%)</option>
+                <option value="4">4 - Nacional (Produção Básica)</option>
+                <option value="5">5 - Nacional (Conteúdo Importação <= 40%)</option>
+                <option value="6">6 - Estrangeira (Importação Direta, sem similar nacional)</option>
+                <option value="7">7 - Estrangeira (Mercado Interno, sem similar nacional)</option>
+                <option value="8">8 - Nacional (Mercadoria ou bem com Conteúdo de Importação superior a 70%)</option>
+              </select>
+            </div>
           </div>
           <div className="flex gap-3 pt-4">
             <button

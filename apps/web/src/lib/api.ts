@@ -13,6 +13,10 @@ export interface Venda {
   atualizado_em?: string;
   nfe_status?: 'nao_emitida' | 'pendente' | 'emitida' | 'erro' | 'cancelada';
   nfe_chave?: string;
+  nfe_xml_url?: string;
+  nfe_pdf_url?: string;
+  nfe_protocolo?: string;
+  valor_custo_total?: number;
   desconto_aplicado?: number;
 }
 
@@ -145,6 +149,9 @@ export interface Produto {
   sku?: string;
   preco_custo?: number;
   preco_venda?: number;
+  ncm?: string;
+  cfop_padrao?: string;
+  origem?: number;
   estoque_atual: number;
   estoque_minimo: number;
   categoria?: string;
@@ -376,7 +383,10 @@ export interface ObraEtapa {
   data_inicio?: string;
   data_fim_prevista?: string;
   ordem: number;
-  orcamento?: number;
+  preco_custo?: number;
+  ncm?: string;
+  cfop_padrao?: string;
+  origem?: number;
   criado_em: string;
 }
 
