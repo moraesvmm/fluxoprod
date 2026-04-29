@@ -1,8 +1,8 @@
 # DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
--- Status: Vistoria 39 Implementada - Pronto para Produção --
-## ESTADO ATUAL: PRODUCTION-READY (COM RESSALVAS)
-## ÚLTIMA ATUALIZAÇÃO: 28/04/2026 (UI Overhaul, CRM Modal & Nurturing Polimórfico)
-## VERSÃO: 2.3
+-- Status: Vistoria 40 Implementada - Inteligência Financeira Ativa --
+## ESTADO ATUAL: PRODUCTION-READY (QUALIFICADO)
+## ÚLTIMA ATUALIZAÇÃO: 29/04/2026 (DRE, Conciliação OFX, Automação CMV)
+## VERSÃO: 2.4
 
 ---
 
@@ -141,15 +141,15 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
    - Índices: idx_estoque_produto, idx_estoque_criado_em, idx_tenant_estoque_not_deleted
 
 4. **vendas** - Vendas
-   - Colunas: id, cliente_id, valor_total, metodo, status, vendedor_id, criado_em, atualizado_em, **deleted_at**
+   - Colunas: id, cliente_id, valor_total, metodo, status, vendedor_id, valor_custo_total (CMV), criado_em, atualizado_em, **deleted_at**
    - Índices: idx_vendas_valor_total, idx_vendas_cliente, idx_vendas_status, idx_vendas_criado_em, idx_tenant_vendas_not_deleted
 
 5. **vendas_itens** - Itens de venda
    - Colunas: id, venda_id, produto_id, quantidade, preco_unitario, subtotal, **deleted_at**
 
 6. **financeiro** - Transações financeiras
-   - Colunas: id, tipo, descricao, valor, data_vencimento, status, categoria, criado_em, atualizado_em, **deleted_at**
-   - Índices: idx_financeiro_tipo, idx_financeiro_status, idx_financeiro_criado_em, idx_tenant_financeiro_not_deleted
+   - Colunas: id, tipo, descricao, valor, data_vencimento, status, categoria, conciliado (boolean), banco_transacao_id, banco_nome, data_conciliacao, criado_em, atualizado_em, **deleted_at**
+   - Índices: idx_financeiro_tipo, idx_financeiro_status, idx_financeiro_criado_em, idx_financeiro_conciliado, idx_tenant_financeiro_not_deleted
 
 7. **funcionarios** - Funcionários/RH
    - Colunas: id, nome, cargo, salario, status, criado_em, atualizado_em, **deleted_at**
@@ -204,6 +204,7 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
 - **tenant_obter_fechamento_pendente()** - Detecta fechamento mensal pendente e retorna resumo do mês anterior (faturamento, vendas, ticket médio)
 - **tenant_marcar_fechamento_visto(p_mes)** - Marca o fechamento de um mês como visualizado pelo usuário
 - **tenant_obter_sugestoes_nurturing()** - **Modelo Híbrido**: Detecta inatividade via tabela `vendas` OU via interações de tipo `venda` (CRM-only).
+- **tenant_obter_dre(p_data_inicio, p_data_fim)** - Motor de DRE que consolida Faturamento, CMV e Despesas Operacionais em tempo real.
 
 ### RPCs do Schema Tenant (Dinâmicas)
 
@@ -225,7 +226,7 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
 - **tenant_criar_os(p_cliente_id, p_colaborador_id, p_veiculo_equipamento, p_descricao_problema, p_status, p_valor_orcamento, p_idempotency_key)**
 - **tenant_criar_obra(p_cliente_id, p_nome, p_descricao, p_endereco, p_data_inicio, p_data_fim_prevista, p_status, p_orcamento_total, p_idempotency_key)**
 - **tenant_criar_interacao(p_cliente_id, p_tipo, p_titulo, p_descricao, p_data_interacao, p_duracao_minutos, p_usuario_id, p_metadata)** - Suporta tipo 'venda' para CRM-only
-- **tenant_processar_venda(p_cliente_id, p_cliente_nome, p_cliente_telefone, p_cliente_email, p_itens, p_vendedor_id, p_forma_pagamento, p_idempotency_key)** - RPC transacional completa
+- **tenant_processar_venda(p_cliente_id, p_cliente_nome, p_itens, p_vendedor_id, p_metodo_pagamento, p_valor_total, p_desconto, p_emitir_nfe)** - RPC transacional que automatiza criação de CMV e lançamento financeiro de receita.
 
 #### Exclusão
 - **tenant_excluir_cliente(p_cliente_id)**
@@ -768,9 +769,16 @@ $$;
 - **Integrações:** Vendas, RH
 
 ### Relatórios
-- **Responsabilidade:** Relatórios customizados
-- **Funcionalidades:** Relatórios por módulo, exportação
-- **Integrações:** Todos os módulos
+- **Responsabilidade:** Visão analítica avançada sobre a operação do tenant.
+- **Funcionalidades:** Relatórios Analíticos de Vendas, Performance de Equipe e **DRE Real**.
+- **DRE (Demonstrativo de Resultados):** Consolida Faturamento Bruto, CMV (Custo de Mercadoria), Lucro Bruto, Despesas e Lucro Líquido com cálculo de margens automáticas.
+- **Integrações:** Todos os módulos, com foco em Vendas e Financeiro.
+
+### Conciliação Bancária (Módulo Financeiro)
+- **Responsabilidade:** Auditoria e batimento de saldos reais vs sistema.
+- **Engine de Parse:** `ofx-parser.ts` (interpretador nativo para arquivos OFX).
+- **Auto-matching:** Algoritmo que associa transações bancárias a lançamentos financeiros baseado em valor (margem 0.01) e data.
+- **Rastreabilidade:** Gravação de IDs de transação bancária em cada lançamento conciliado.
 
 ### Configurações
 - **Responsabilidade:** Configurações do tenant
