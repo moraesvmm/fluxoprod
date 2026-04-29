@@ -459,6 +459,9 @@ export interface Financeiro {
   categoria?: string;
   criado_em: string;
   atualizado_em?: string;
+  conciliado?: boolean;
+  banco_transacao_id?: string;
+  banco_nome?: string;
 }
 
 export interface FinanceiroCreate {

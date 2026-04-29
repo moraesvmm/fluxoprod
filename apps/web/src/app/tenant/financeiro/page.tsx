@@ -17,6 +17,7 @@ import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useFinanceiro, useCreateFinanceiro, useDeleteFinanceiro, useUpdateFinanceiro } from "@/lib/hooks/use-financeiro";
 import { type FinanceiroUpdate } from "@/lib/api";
+import { ConciliacaoModal } from "@/components/financeiro/ConciliacaoModal";
 
 interface Transacao {
   id: string;
@@ -40,6 +41,7 @@ export default function FinanceiroPage() {
   const [syncConfirm, setSyncConfirm] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showConciliacao, setShowConciliacao] = useState(false);
   const syncBtnRef = useRef<HTMLButtonElement>(null);
   const [formData, setFormData] = useState({
     descricao: '',
@@ -125,15 +127,7 @@ export default function FinanceiroPage() {
 
   const confirmSyncBanco = async () => {
     setSyncConfirm(false);
-    setSyncing(true);
-    try {
-      // A sincronização é automática via React Query
-      success('Sincronização concluída com sucesso!');
-    } catch (err) {
-      toastError('Erro ao sincronizar com o banco. Tente novamente.');
-    } finally {
-      setSyncing(false);
-    }
+    setShowConciliacao(true);
   };
 
   const formatarValor = (valor: number) => {
@@ -470,6 +464,16 @@ export default function FinanceiroPage() {
 
       {/* Calculadora Flutuante */}
       <FloatingCalculator isOpen={showCalculator} onToggle={() => setShowCalculator(!showCalculator)} />
+
+      {/* Modal de Conciliação */}
+      <ConciliacaoModal 
+        isOpen={showConciliacao}
+        onClose={() => setShowConciliacao(false)}
+        onSuccess={() => {
+          success("Conciliação bancária realizada com sucesso!");
+        }}
+        existingTransactions={transacoes || []}
+      />
     </div>
   );
 }
