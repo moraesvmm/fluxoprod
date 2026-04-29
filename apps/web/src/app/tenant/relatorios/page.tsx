@@ -20,9 +20,11 @@ import {
   fetchFuncionarios,
   fetchProdutos,
   fetchVendas,
+  fetchDRE,
+  type DREData
 } from "@/lib/api";
 
-type ReportType = "vendas" | "financeiro" | "estoque" | "crm" | "rh" | "comissoes";
+type ReportType = "vendas" | "financeiro" | "estoque" | "crm" | "rh" | "comissoes" | "dre";
 type ReportRow = Record<string, any>;
 
 const REPORT_HEADERS: Record<ReportType, string[]> = {
@@ -32,6 +34,7 @@ const REPORT_HEADERS: Record<ReportType, string[]> = {
   crm: ["Cliente", "Email", "Telefone", "Cadastro"],
   rh: ["Colaborador", "Cargo", "Salário", "Cadastro"],
   comissoes: ["Colaborador", "Venda", "Valor Venda", "Comissão", "Status"],
+  dre: ["Indicador", "Valor", "Margem (%)"],
 };
 
 function formatarMoeda(valor: number) {
@@ -141,6 +144,26 @@ export default function RelatoriosPage() {
             { label: "Pendentes", value: formatarMoeda(pendentes), icon: DollarSign },
           ]);
           break;
+        case "dre": {
+          const hoje = new Date();
+          const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString();
+          const fimMes = hoje.toISOString();
+          const dre = await fetchDRE(inicioMes, fimMes);
+          
+          setRows([
+            { indicador: "Faturamento Bruto", valor: dre.faturamento, margem: 100 },
+            { indicador: "(-) Custo de Mercadoria (CMV)", valor: -dre.cmv, margem: dre.margem_bruta - 100 },
+            { indicador: "= LUCRO BRUTO", valor: dre.lucro_bruto, margem: dre.margem_bruta },
+            { indicador: "(-) Despesas Operacionais", valor: -dre.despesas, margem: dre.margem_liquida - dre.margem_bruta },
+            { indicador: "= LUCRO LÍQUIDO", valor: dre.lucro_liquido, margem: dre.margem_liquida },
+          ]);
+
+          setKpis([
+            { label: "Receita Líquida", value: formatarMoeda(dre.faturamento), icon: TrendingUp },
+            { label: "Margem Bruta", value: `${dre.margem_bruta}%`, icon: DollarSign },
+            { label: "Lucro Real", value: formatarMoeda(dre.lucro_liquido), icon: DollarSign },
+          ]);
+          break;
         }
       }
 
@@ -199,6 +222,11 @@ export default function RelatoriosPage() {
         if (header === "Valor Venda") return formatarMoeda(row.valor_venda || 0);
         if (header === "Comissão") return formatarMoeda(row.valor_comissao || 0);
         if (header === "Status") return row.status_pagamento || "—";
+        break;
+      case "dre":
+        if (header === "Indicador") return row.indicador;
+        if (header === "Valor") return formatarMoeda(row.valor);
+        if (header === "Margem (%)") return `${row.margem.toFixed(2)}%`;
         break;
     }
 
@@ -407,7 +435,7 @@ export default function RelatoriosPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(["vendas", "financeiro", "estoque", "crm", "rh", "comissoes"] as ReportType[]).map(
+        {(["vendas", "financeiro", "dre", "estoque", "crm", "rh", "comissoes"] as ReportType[]).map(
           (type) => (
             <button
               key={type}

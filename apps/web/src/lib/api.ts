@@ -1661,3 +1661,28 @@ export async function deleteObraDocumento(documentoId: string): Promise<void> {
     }
   }
 }
+
+export interface DREData {
+  faturamento: number;
+  cmv: number;
+  lucro_bruto: number;
+  despesas: number;
+  lucro_liquido: number;
+  margem_bruta: number;
+  margem_liquida: number;
+  periodo: {
+    inicio: string;
+    fim: string;
+  };
+}
+
+export async function fetchDRE(dataInicio: string, dataFim: string): Promise<DREData> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('tenant_obter_dre', {
+    p_data_inicio: dataInicio,
+    p_data_fim: dataFim
+  });
+
+  if (error) throw error;
+  return data;
+}

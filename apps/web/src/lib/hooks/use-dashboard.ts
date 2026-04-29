@@ -85,6 +85,7 @@ export function useDashboardData() {
   const obrasEmAndamento = kpis?.[0]?.qtd_obras_em_andamento || 0;
   const estoqueBaixo = kpis?.[0]?.estoque_baixo || 0;
   const saldo = kpis?.[0]?.saldo || 0;
+  const patrimonioEstoque = kpis?.[0]?.patrimonio_estoque || 0;
 
   // Dados do gráfico a partir da RPC de série temporal (sem Math.random)
   const chartData = (kpisPorMes || []).map(item => {
@@ -108,6 +109,7 @@ export function useDashboardData() {
     obrasEmAndamento,
     estoqueBaixo,
     saldo,
+    patrimonioEstoque,
     chartData,
     ultimasVendas: ultimasVendas || [],
     modulosAtivos: modulosAtivos || [],

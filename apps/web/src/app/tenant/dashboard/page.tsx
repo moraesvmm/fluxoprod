@@ -29,6 +29,7 @@ import {
   DollarSign,
   Wrench,
   Building2,
+  Package,
 } from "lucide-react";
 import { useDashboardData } from "@/lib/hooks/use-dashboard";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
@@ -135,6 +136,7 @@ export default function DashboardPage() {
           <KPICard title="Faturamento (Hoje)" value={formatarMoeda(dashboard.faturamentoHoje)} icon={Banknote} />
           <KPICard title="Vendas (Hoje)" value={String(dashboard.vendasHoje)} icon={ShoppingBag} />
           <KPICard title="Ticket Médio" value={formatarMoeda(dashboard.ticketMedio)} icon={BarChart} />
+          <KPICard title="Patrimônio em Estoque" value={formatarMoeda(dashboard.patrimonioEstoque)} icon={Package} className="border-indigo-200 bg-indigo-50/10" />
           <KPICard title="Clientes" value={String(dashboard.totalClientes)} icon={BadgeCheck} />
           {dashboard.modulosAtivos?.includes('os') && (
             <KPICard title="OS Abertas" value={String(dashboard.osAbertas)} icon={Wrench} className="border-amber-200 bg-amber-50/10" />
