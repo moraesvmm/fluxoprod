@@ -16,13 +16,14 @@ export class NfeSigner {
       const sig = new SignedXml();
       
       // Configurar a assinatura (Padrão SEFAZ)
+      sig.signatureAlgorithm = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
       sig.addReference({
         xpath: "//*[local-name()='infNFe']",
         transforms: [
           'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
           'http://www.w3.org/2001/10/xml-exc-c14n#',
         ],
-        digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256',
+        digestAlgorithm: 'http://www.w3.org/2000/09/xmldsig#sha1',
         isEmptyUri: false,
       });
 

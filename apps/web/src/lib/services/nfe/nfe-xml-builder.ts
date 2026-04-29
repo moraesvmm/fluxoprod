@@ -48,6 +48,7 @@ export class NfeXmlBuilder {
     const chaveSemDV = this.gerarChaveAcessoSemDV(venda, emitente, cnf, serie, opts?.nNF)
     const cDV = this.calcularDV(chaveSemDV)
     const chave = `${chaveSemDV}${cDV}`
+    xml += `<NFe xmlns="http://www.portalfiscal.inf.br/nfe">`
     xml += `<infNFe Id="NFe${chave}" version="4.00">`
 
     xml += `<ide>`
@@ -142,6 +143,7 @@ export class NfeXmlBuilder {
     xml += `</detPag></pag>`
 
     xml += `</infNFe>`
+    xml += `</NFe>`
     return xml
   }
 
