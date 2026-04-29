@@ -1,5 +1,17 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 40 - InteligÍncia Financeira & CMV
+- **Data:** 29/04/2026
+- **Status:** CONCLUÕDO
+- **AlteraÁıes:**
+  - ImplementaÁ„o de integraÁ„o autom·tica Venda -> Financeiro.
+  - Motor de DRE Real (Demonstrativo de Resultados) com c·lculo de CMV.
+  - Sistema de ConciliaÁ„o Banc·ria real via parser de arquivos OFX.
+  - KPI de PatrimÙnio em Estoque (Capital Imobilizado) no Dashboard.
+  - AtualizaÁ„o dos cards de checkout com as novas features.
+
+---
+
 ## VISTORIA 39 - Gest√£o de Vendas (Cancelamento e Devolu√ß√£o)
 - **Data:** 28/04/2026
 - **Status:** PENDENTE (Realizar vistoria o mais r√°pido poss√≠vel)
