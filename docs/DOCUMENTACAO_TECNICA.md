@@ -168,38 +168,42 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
    - Índices: idx_funcionarios_cargo, idx_funcionarios_status, idx_tenant_funcionarios_not_deleted
 
 8. **ordens_servico** - Ordens de Serviço (OS)
-   - Colunas: id, numero, cliente_id, veiculo_equipamento, descricao_problema, colaborador_id, status, valor_orcamento, criado_em, atualizado_em, **deleted_at**
+   - Colunas: id, numero (BIGSERIAL), cliente_id, veiculo_equipamento, descricao_problema, colaborador_id, status, valor_orcamento, **tempo_total_minutos** (INTEGER), **timer_iniciado_em** (TIMESTAMPTZ), **valor_servico** (NUMERIC), criado_em, atualizado_em, **deleted_at**
    - Índices: idx_os_numero, idx_os_cliente, idx_os_status, idx_os_criado_em, idx_tenant_os_not_deleted
 
 9. **ordens_servico_historico** - Histórico de OS
    - Colunas: id, os_id, acao, detalhes, criado_por, criado_em
 
-10. **obras** - Obras/Projetos
+10. **ordens_servico_itens** - Peças e Serviços da OS
+    - Colunas: id, ordem_servico_id, produto_id, descricao, quantidade, preco_unitario, **valor_custo**, subtotal (generated), criado_em
+    - Índices: idx_os_itens_os, idx_os_itens_produto
+
+11. **obras** - Obras/Projetos
     - Colunas: id, nome, cliente_id, endereco, data_inicio, data_fim_prevista, orcamento_total, descricao, status, criado_em, atualizado_em, **deleted_at**
     - Índices: idx_obras_cliente, idx_obras_status, idx_obras_criado_em, idx_tenant_obras_not_deleted
 
-11. **configuracoes** - Configurações do tenant
+12. **configuracoes** - Configurações do tenant
     - Colunas: id, chave, valor, descricao, criado_em, atualizado_em, **deleted_at**
     - Índices: idx_configuracoes_chave
 
-12. **role_permissions** - Permissões por role (RBAC intra-tenant)
+13. **role_permissions** - Permissões por role (RBAC intra-tenant)
     - Colunas: id, role, resource, action, criado_em
     - Índices: idx_role_permissions_unique (role, resource, action)
     - Dados seed: tenant_admin (all), tenant_user (read-only)
 
-13. **schema_migrations** - Versionamento de schema
+14. **schema_migrations** - Versionamento de schema
     - Colunas: id, version, descricao, aplicado_em
     - Índices: idx_schema_migrations_version
 
-14. **idempotency_control** - Controle de idempotência
+15. **idempotency_control** - Controle de idempotência
     - Colunas: id, idempotency_key, operation_type, cached_result, criado_em
     - Índices: idx_idempotency_key (idempotency_key, operation_type), idx_idempotency_created_at
 
-15. **audit_log** - Log de auditoria de operações de negócio
+16. **audit_log** - Log de auditoria de operações de negócio
     - Colunas: id, operation_type, resource, resource_id, user_id, details, status, criado_em
     - Índices: idx_audit_log_operation, idx_audit_log_resource, idx_audit_log_user, idx_audit_log_timestamp, idx_audit_log_status
 
-16. **fechamentos_mensais** - Resumos de fechamento mensal do dashboard
+17. **fechamentos_mensais** - Resumos de fechamento mensal do dashboard
     - Colunas: id, mes (VARCHAR(7), UNIQUE), faturamento, total_vendas, ticket_medio, visto, visto_em, criado_em
     - Índices: idx_fechamentos_mes (mes)
 

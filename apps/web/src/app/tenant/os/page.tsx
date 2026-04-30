@@ -212,6 +212,14 @@ export default function OSPage() {
               className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
+          <button
+            onClick={() => {
+              if (viewMode === 'kanban') setViewMode('calendar');
+              else if (viewMode === 'calendar') setViewMode('table');
+              else setViewMode('kanban');
+            }}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-border rounded-md hover:bg-slate-50 transition-colors"
+          >
             {viewMode === 'table' ? (
               <>
                 <LayoutGrid className="h-4 w-4" />
