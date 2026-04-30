@@ -12,6 +12,7 @@ import { createRoutes } from './routes';
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const API_KEY = process.env.API_KEY || 'fluxo-wa-secret-change-me';
 
+console.log('[Fluxo WhatsApp Service] Versão 1.1.0 (Fixed QR Loop) iniciada');
 const app = express();
 
 // Middleware

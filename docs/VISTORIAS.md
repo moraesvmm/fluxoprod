@@ -676,3 +676,15 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
   - **Vercel Build (Tailwind)**: Adicionada a dependência opcional `lightningcss-linux-x64-gnu` no `apps/web/package.json` para evitar falha no Turbopack.
   - **Railway Build (WhatsApp Service)**: Movidas `devDependencies` do `whatsapp-service/package.json` para `dependencies` e ajustado script de build para `tsc` direto, garantindo que o compilador TypeScript não seja removido em ambientes de produção (`NODE_ENV=production`).
   - **Vistoria Módulo Configurações**: Confirmado que o componente de status do WhatsApp consome `/api/whatsapp/status` e que este depende da ENV `WHATSAPP_SERVICE_URL`. Sem modificações adicionais necessárias no frontend.
+
+---
+
+## VISTORIA 54: Estabilização Anti-Spam WhatsApp e Fix de Deploy
+- **Data:** 30/04/2026
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - **Prevenção de Loop de QR Code:** Removido o auto-connect no boot quando não há sessão salva. Agora a conexão é iniciada apenas via ação explícita no frontend, evitando bloqueios do WhatsApp ("Não é possível conectar novos dispositivos").
+  - **Gerenciamento de QR Code:** Implementado limite de 3 tentativas de geração de QR e delay entre retentativas para respeitar limites do WhatsApp.
+  - **Browser Fingerprint:** Atualizado fingerprint para `Fluxo ERP (Chrome)` para reduzir chances de detecção de bot.
+  - **Fix de Build (Docker):** Alterado `npm ci` para `npm install` no Dockerfile para suportar ambientes sem `package-lock.json` no subdiretório do monorepo.
+  - ** Railway Config:** Adicionado `railway.json` local ao serviço de WhatsApp para forçar o uso do Dockerfile builder e isolar o contexto de deploy.
