@@ -1,7 +1,7 @@
 {
-  "name": "fluxo-wa-service-v112",
+  "name": "fluxo-whatsapp-service",
   "version": "1.1.2",
-  "description": "WhatsApp Microservice for Fluxo ERP - Anti-Loop",
+  "description": "WhatsApp Microservice for Fluxo ERP",
   "main": "dist/index.js",
   "scripts": {
     "build:trigger": "echo 1777582292",
