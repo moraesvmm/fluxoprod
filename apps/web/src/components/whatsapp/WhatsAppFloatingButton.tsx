@@ -63,10 +63,7 @@ export function WhatsAppFloatingButton() {
         dragElastic={0.1}
         dragMomentum={false}
         onClick={() => setIsDrawerOpen(true)}
-        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full shadow-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-shadow hover:shadow-xl active:shadow-md"
-        style={{
-          background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
-        }}
+        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full shadow-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-shadow hover:shadow-xl active:shadow-md bg-primary text-primary-foreground"
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         title={isConnected ? "Abrir conversas do WhatsApp" : "WhatsApp desconectado"}

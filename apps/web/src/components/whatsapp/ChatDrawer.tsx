@@ -26,9 +26,9 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
   const [loading, setLoading] = useState(false);
 
   // Buscar conversas
-  const fetchConversations = useCallback(async () => {
+  const fetchConversations = useCallback(async (isPolling = false) => {
     try {
-      setLoading(true);
+      if (!isPolling) setLoading(true);
       const res = await fetch("/api/whatsapp/conversations");
       if (res.ok) {
         const data = await res.json();
@@ -43,8 +43,8 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
 
   useEffect(() => {
     if (isOpen && isConnected) {
-      fetchConversations();
-      const interval = setInterval(fetchConversations, 4000);
+      fetchConversations(false);
+      const interval = setInterval(() => fetchConversations(true), 4000);
       return () => clearInterval(interval);
     }
   }, [isOpen, isConnected, fetchConversations]);
@@ -92,8 +92,7 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
     >
       {/* Header */}
       <div
-        className="flex items-center gap-3 px-4 py-3 text-white shadow-md"
-        style={{ background: "linear-gradient(135deg, #128C7E 0%, #075E54 100%)" }}
+        className="flex items-center gap-3 px-4 py-3 bg-primary text-primary-foreground shadow-md flex-shrink-0"
       >
         {selectedPhone ? (
           <>
@@ -199,7 +198,7 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-100 text-left"
                 >
                   {/* Avatar */}
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-sm border border-primary/20">
                     {getInitial(convo.name)}
                   </div>
 
@@ -218,7 +217,7 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
                         {convo.lastMessage}
                       </span>
                       {convo.unreadCount > 0 && (
-                        <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 ml-2">
+                        <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center flex-shrink-0 ml-2">
                           {convo.unreadCount > 99 ? "99+" : convo.unreadCount}
                         </span>
                       )}
