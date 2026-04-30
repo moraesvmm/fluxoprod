@@ -38,7 +38,7 @@ export default function OSPage() {
     veiculo_equipamento: "",
     descricao_problema: "",
     colaborador_id: "",
-    valor: "",
+    valor_orcamento: "",
   });
   const [viewMode, setViewMode] = useState<'table' | 'calendar' | 'kanban'>('kanban');
   const [selectedOS, setSelectedOS] = useState<OrdemServico | null>(null);
@@ -73,7 +73,7 @@ export default function OSPage() {
         veiculo_equipamento: formData.veiculo_equipamento,
         descricao_problema: formData.descricao_problema,
         colaborador_id: formData.colaborador_id || undefined,
-        valor: formData.valor ? parseFloat(formData.valor) : 0,
+        valor_orcamento: formData.valor_orcamento ? parseFloat(formData.valor_orcamento) : 0,
         status: "aberta",
       });
       success("OS criada com sucesso!");
@@ -83,7 +83,7 @@ export default function OSPage() {
         veiculo_equipamento: "",
         descricao_problema: "",
         colaborador_id: "",
-        valor: "",
+        valor_orcamento: "",
       });
     } catch (err: any) {
       toastError("Erro ao criar OS: " + (err.message || "Tente novamente"));
@@ -110,7 +110,7 @@ export default function OSPage() {
       veiculo_equipamento: ordem.veiculo_equipamento || '',
       descricao_problema: ordem.descricao_problema || '',
       colaborador_id: ordem.colaborador_id || '',
-      valor: ordem.valor ? String(ordem.valor) : '',
+      valor_orcamento: ordem.valor_orcamento ? String(ordem.valor_orcamento) : '',
     });
     setShowEditModal(true);
   };
@@ -125,7 +125,7 @@ export default function OSPage() {
         veiculo_equipamento: formData.veiculo_equipamento,
         descricao_problema: formData.descricao_problema,
         colaborador_id: formData.colaborador_id || undefined,
-        valor: formData.valor ? parseFloat(formData.valor) : undefined,
+        valor_orcamento: formData.valor_orcamento ? parseFloat(formData.valor_orcamento) : undefined,
       };
 
       await updateMutation.mutateAsync({ id: editId, os: payload });
@@ -135,7 +135,7 @@ export default function OSPage() {
         veiculo_equipamento: "",
         descricao_problema: "",
         colaborador_id: "",
-        valor: "",
+        valor_orcamento: "",
       });
       setShowEditModal(false);
       setEditId(null);
@@ -300,7 +300,7 @@ export default function OSPage() {
                       label={os.status === 'aberta' ? 'Aberta' : os.status === 'concluida' ? 'Concluída' : os.status === 'cancelada' ? 'Cancelada' : 'Em Execução'}
                     />
                   </TableCell>
-                  <TableCell className="font-medium text-emerald-700">{formatarMoeda(os.valor)}</TableCell>
+                  <TableCell className="font-medium text-emerald-700">{formatarMoeda(os.valor_orcamento)}</TableCell>
                   <TableCell className="text-sm text-slate-500">{formatarData(os.criado_em)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">

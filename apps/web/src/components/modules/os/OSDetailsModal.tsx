@@ -52,7 +52,7 @@ export function OSDetailsModal({ isOpen, onClose, os, onUpdate }: OSDetailsModal
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`OS #${os.numero} - ${os.veiculo_equipamento}`} size="xl">
+    <Modal isOpen={isOpen} onClose={onClose} title={`OS #${os.numero} - ${os.veiculo_equipamento}`}>
       <div className="flex flex-col gap-6">
         {/* Header de Status e Timer */}
         <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-inner">
@@ -97,7 +97,7 @@ export function OSDetailsModal({ isOpen, onClose, os, onUpdate }: OSDetailsModal
               <span className="text-xs font-bold uppercase tracking-tight">Valor Total</span>
             </div>
             <p className="text-xl font-bold text-slate-800">
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lucro?.total_venda || os.valor)}
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lucro?.total_venda || os.valor_orcamento)}
             </p>
           </div>
           <div className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
@@ -115,7 +115,7 @@ export function OSDetailsModal({ isOpen, onClose, os, onUpdate }: OSDetailsModal
               <span className="text-xs font-bold uppercase tracking-tight">Lucro Estimado</span>
             </div>
             <p className="text-xl font-bold text-emerald-700">
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lucro?.lucro || os.valor)}
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lucro?.lucro || os.valor_orcamento)}
             </p>
           </div>
         </div>

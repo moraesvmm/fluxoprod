@@ -83,7 +83,7 @@ export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardP
                   <div className="flex items-center justify-between pt-3 border-t border-slate-50">
                     <div className="flex items-center gap-1.5 text-emerald-600">
                       <span className="text-xs font-bold">
-                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(os.valor)}
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(os.valor_orcamento)}
                       </span>
                     </div>
                     {os.tempo_total_minutos && os.tempo_total_minutos > 0 && (

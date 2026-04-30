@@ -312,7 +312,7 @@ export interface OrdemServico {
   descricao_problema?: string;
   colaborador_id?: string;
   status: string;
-  valor: number;
+  valor_orcamento: number;
   tempo_total_minutos?: number;
   timer_iniciado_em?: string;
   criado_em: string;
@@ -333,7 +333,7 @@ export interface OrdemServicoCreate {
   descricao_problema?: string;
   colaborador_id?: string;
   status?: string;
-  valor?: number;
+  valor_orcamento?: number;
 }
 
 export interface OrdemServicoUpdate {
@@ -1116,11 +1116,11 @@ export async function createOS(os: OrdemServicoCreate): Promise<OrdemServico> {
       p_veiculo_equipamento: os.veiculo_equipamento || null,
       p_descricao_problema: os.descricao_problema,
       p_status: 'aberta',
-      p_valor_orcamento: os.valor || 0
+      p_valor_orcamento: os.valor_orcamento || 0
     });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
-  return { id: data?.os_id, ...os, criado_em: new Date().toISOString() } as OrdemServico;
+  return { id: data?.os_id, ...os, valor_orcamento: os.valor_orcamento || 0, criado_em: new Date().toISOString() } as OrdemServico;
 }
 
 export async function deleteOS(id: string): Promise<void> {
@@ -1133,12 +1133,12 @@ export async function updateOS(id: string, os: OrdemServicoUpdate): Promise<Orde
   const { data, error } = await getSupabase()
     .rpc('tenant_atualizar_os', {
       p_os_id: id,
-      p_cliente_id: os.cliente_id,
-      p_colaborador_id: os.colaborador_id,
-      p_veiculo_equipamento: os.veiculo_equipamento,
-      p_descricao_problema: os.descricao_problema,
-      p_status: os.status || 'aberta',
-      p_valor_orcamento: os.valor_orcamento
+      p_cliente_id: os.cliente_id ?? null,
+      p_colaborador_id: os.colaborador_id ?? null,
+      p_veiculo_equipamento: os.veiculo_equipamento ?? null,
+      p_descricao_problema: os.descricao_problema ?? null,
+      p_status: os.status ?? null,
+      p_valor_orcamento: os.valor_orcamento ?? null
     });
   if (error) throw new Error(error.message);
   return data as OrdemServico;

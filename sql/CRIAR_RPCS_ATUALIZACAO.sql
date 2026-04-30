@@ -236,7 +236,14 @@ BEGIN
   -- Executar a atualização no schema do tenant
   EXECUTE format('
     UPDATE %I.ordens_servico
-    SET cliente_id = $2, colaborador_id = $3, veiculo_equipamento = $4, descricao_problema = $5, status = $6, valor_orcamento = $7, atualizado_em = NOW()
+    SET 
+      cliente_id = COALESCE($2, cliente_id), 
+      colaborador_id = COALESCE($3, colaborador_id), 
+      veiculo_equipamento = COALESCE($4, veiculo_equipamento), 
+      descricao_problema = COALESCE($5, descricao_problema), 
+      status = COALESCE($6, status), 
+      valor_orcamento = COALESCE($7, valor_orcamento), 
+      atualizado_em = NOW()
     WHERE id = $1
     RETURNING id, cliente_id, colaborador_id, veiculo_equipamento, descricao_problema, status, valor_orcamento, atualizado_em
   ', v_tenant_schema)
