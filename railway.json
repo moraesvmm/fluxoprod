@@ -10,7 +10,7 @@
         "restartPolicy": "always"
       }
     },
-    "web-app": {
+    "fluxoprod": {
       "source": {
         "root": "apps/web"
       }
