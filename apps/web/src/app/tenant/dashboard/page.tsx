@@ -139,13 +139,13 @@ export default function DashboardPage() {
           <KPICard title="Faturamento (Hoje)" value={formatarMoeda(dashboard.faturamentoHoje)} icon={Banknote} />
           <KPICard title="Vendas (Hoje)" value={String(dashboard.vendasHoje)} icon={ShoppingBag} />
           <KPICard title="Ticket Médio" value={formatarMoeda(dashboard.ticketMedio)} icon={BarChart} />
-          <KPICard title="Patrimônio em Estoque" value={formatarMoeda(dashboard.patrimonioEstoque)} icon={Package} className="border-indigo-200 bg-indigo-50/10" />
+          <KPICard title="Patrimônio em Estoque" value={formatarMoeda(dashboard.patrimonioEstoque)} icon={Package} className="border-indigo-500/20 bg-indigo-500/5" />
           <KPICard title="Clientes" value={String(dashboard.totalClientes)} icon={BadgeCheck} />
           {dashboard.modulosAtivos?.includes('os') && (
-            <KPICard title="OS Abertas" value={String(dashboard.osAbertas)} icon={Wrench} className="border-amber-200 bg-amber-50/10" />
+            <KPICard title="OS Abertas" value={String(dashboard.osAbertas)} icon={Wrench} className="border-amber-500/20 bg-amber-500/5" />
           )}
           {dashboard.modulosAtivos?.includes('obras') && (
-            <KPICard title="Obras em Andamento" value={String(dashboard.obrasEmAndamento || 0)} icon={Building2} className="border-blue-200 bg-blue-50/10" />
+            <KPICard title="Obras em Andamento" value={String(dashboard.obrasEmAndamento || 0)} icon={Building2} className="border-blue-500/20 bg-blue-500/5" />
           )}
         </div>
       )}
@@ -166,7 +166,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         {/* Chart */}
-        <div className="col-span-4 rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="col-span-4 rounded-xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-4">
             <h3 className="font-semibold tracking-tight">Faturamento (Últimos 6 Meses)</h3>
             <p className="text-sm text-muted-foreground">Evolução de receitas.</p>
@@ -191,7 +191,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Latest Sales */}
-        <div className="col-span-3 rounded-xl border border-border bg-white p-6 shadow-sm flex flex-col">
+        <div className="col-span-3 rounded-xl border border-border bg-card p-6 shadow-sm flex flex-col">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h3 className="font-semibold tracking-tight">Últimas Vendas</h3>
