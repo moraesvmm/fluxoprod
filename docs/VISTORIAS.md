@@ -607,4 +607,14 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
   - **Banco de Dados**: Criação da tabela `public.cupons` e RPCs de validação e uso atômico.
   - **API Route**: Integração do registro de uso de cupom na rota `/api/auth/register-trial`.
 
+### Vistoria 50
+- **Data:** 30/04/2026
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - **Módulo OS**: Implementação de visão Kanban com Drag & Drop para gestão de status.
+  - **Produtividade**: Sistema de Cronômetro (Timer) persistido no banco para rastreio de tempo de execução.
+  - **Financeiro OS**: Integração de custos de peças e cálculo automático de lucro por OS.
+  - **Documentação**: Novo Modal de Detalhes com visualização de lucro, histórico e botão de impressão de PDF.
+  - **Banco de Dados**: Script `rpc_os_expansion.sql` para suporte a itens, cronômetro e numeração de OS.
+
 
