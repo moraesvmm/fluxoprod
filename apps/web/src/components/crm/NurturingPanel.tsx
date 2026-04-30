@@ -74,6 +74,25 @@ export function NurturingPanel() {
     };
   };
 
+  const getDiasDesde = (dataString: string | null) => {
+    if (!dataString) return null;
+    const dias = Math.floor((Date.now() - new Date(dataString).getTime()) / (1000 * 60 * 60 * 24));
+    return dias;
+  };
+
+  const getDescricaoContextual = (item: Sugestao) => {
+    if (item.categoria === 'recompra') {
+      return item.produto_servico 
+        ? `Possível momento de recompra de "${item.produto_servico}".`
+        : 'Momento ideal para oferecer novos produtos.';
+    }
+    const dias = getDiasDesde(item.data_alerta);
+    if (dias !== null) {
+      return `Sem interação há ${dias} ${dias === 1 ? 'dia' : 'dias'}. Hora de reengajar!`;
+    }
+    return 'Cliente inativo. Hora de reengajar!';
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -131,11 +150,14 @@ export function NurturingPanel() {
               </div>
 
               <div className="mb-4">
-                <h3 className="font-bold text-slate-900 truncate">{item.cliente_nome}</h3>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                  {item.categoria === 'recompra' 
-                    ? `Possível fim do ciclo de ${item.produto_servico}.`
-                    : `Cliente sem compras há mais de ${item.data_alerta ? '60' : '15'} dias.`}
+                <h3 className="font-bold text-slate-900 truncate" title={item.cliente_nome}>
+                  {item.cliente_nome || 'Cliente sem nome'}
+                </h3>
+                {item.cliente_telefone && (
+                  <p className="text-[11px] text-slate-400 font-mono mt-0.5">{item.cliente_telefone}</p>
+                )}
+                <p className="text-xs text-slate-500 mt-1.5 line-clamp-2">
+                  {getDescricaoContextual(item)}
                 </p>
               </div>
 
