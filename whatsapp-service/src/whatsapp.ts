@@ -299,6 +299,18 @@ export class WhatsAppSession {
     );
   }
 
+  public nuke(): void {
+    console.log('[WhatsApp] NUKE: Apagando todas as credenciais e diretório de auth...');
+    this.cleanup();
+    if (this.socket) {
+      this.socket.end(undefined);
+      this.socket = null;
+    }
+    this.status = 'disconnected';
+    this.qrCode = null;
+    this.qrBase64 = null;
+  }
+
   private cleanup(): void {
     if (fs.existsSync(this.authDir)) {
       fs.rmSync(this.authDir, { recursive: true, force: true });

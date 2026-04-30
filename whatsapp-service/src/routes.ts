@@ -61,6 +61,16 @@ export function createRoutes(session: WhatsAppSession): Router {
       res.status(500).json({ success: false, error: err.message });
     }
   });
+  
+  // Rota de Emergência: Limpar tudo
+  router.post('/nuke', async (_req: Request, res: Response) => {
+    try {
+      session.nuke();
+      res.json({ success: true, message: 'Sessão e credenciais apagadas. Reinicie o serviço.' });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
 
   // Enviar mensagem individual
   router.post('/send', async (req: Request, res: Response) => {
