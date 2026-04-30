@@ -34,7 +34,8 @@ export class WhatsAppSession {
 
   constructor(store: MessageStore, authDir?: string) {
     this.store = store;
-    this.authDir = authDir || path.join(process.cwd(), 'auth_state');
+    // Prefer environment variable for persistent volume mounts in production (e.g., /data/auth_state)
+    this.authDir = authDir || process.env.AUTH_DIR || path.join(process.cwd(), 'auth_state');
   }
 
   getStatus(): ConnectionStatus {

@@ -52,10 +52,14 @@
     "typescript": "^5"
   },
   "optionalDependencies": {
-    "lightningcss-linux-x64-gnu": "^1.29.1",
-    "lightningcss-linux-x64-musl": "^1.29.1",
+    "lightningcss-linux-x64-gnu": ">=1.29.1",
+    "lightningcss-linux-x64-musl": ">=1.29.1",
+    "lightningcss-linux-arm64-gnu": ">=1.29.1",
+    "lightningcss-linux-arm64-musl": ">=1.29.1",
     "@tailwindcss/oxide-linux-x64-gnu": ">=4.0.0",
-    "@tailwindcss/oxide-linux-x64-musl": ">=4.0.0"
+    "@tailwindcss/oxide-linux-x64-musl": ">=4.0.0",
+    "@tailwindcss/oxide-linux-arm64-gnu": ">=4.0.0",
+    "@tailwindcss/oxide-linux-arm64-musl": ">=4.0.0"
   },
   "packageManager": "npm@11.13.0+sha1.1af5ccf2fc595e4ede1f46f4e6cda78cee0d7458"
 }

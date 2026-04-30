@@ -3,16 +3,20 @@
   "services": {
     "fluxo-whatsapp-service": {
       "source": {
-        "root": "whatsapp-service"
+        "root": "."
       },
       "config": {
-        "numReplicas": 1,
-        "restartPolicy": "always"
+        "buildCommand": "npm install && npm run build -w whatsapp-service",
+        "startCommand": "npm run start -w whatsapp-service"
       }
     },
     "fluxoprod": {
       "source": {
-        "root": "apps/web"
+        "root": "."
+      },
+      "config": {
+        "buildCommand": "npm install && npm run build -w apps/web",
+        "startCommand": "npm run start -w apps/web"
       }
     }
   }
