@@ -581,7 +581,19 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
 - **Correções:** Resolvido erro de "invalid date" no registro e listagem de transações financeiras. Implementado campo de `data_vencimento` nos formulários de criação e edição. O botão "Ver Detalhes" foi ativado e agora abre um modal com as informações completas da transação.
 - **Ações:** Adicionada validação de data no `formatarData`, inclusão de inputs tipo `date` no formulário e implementação do estado `showDetailModal`.
 
-### Vistoria 46
+### Vistoria 47
 - **Data:** 30/04/2026
 - **Componente:** `NurturingPanel.tsx`
 - **Correções:** Corrigido o card de Sugestões de Reengajamento para exibir corretamente o nome do cliente e telefone. Substituídas as descrições hardcoded por texto dinâmico que calcula os dias de ausência exatos. Adicionada função `getDescricaoContextual` e `getDiasDesde` para contextualizar o motivo do reengajamento de forma precisa.
+
+### Vistoria 48
+- **Data:** 30/04/2026
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - **Módulo de RH**: Implementação da Gestão de Documentos (Upload, Visualização e Exclusão).
+  - **Banco de Dados**: Criação da tabela `documentos_funcionarios` e novas colunas de dados pessoais (`cpf`, `rg`, `endereco`, etc.) em todos os schemas tenant.
+  - **Storage**: Configuração do bucket `documentos-rh` no Supabase Storage.
+  - **API Server-side**: Criação de rotas seguras para upload de arquivos grandes (10MB) e geração de URLs assinadas.
+  - **Frontend**: Criação dos componentes `DocumentosModal.tsx` e `DadosPessoaisForm.tsx` com interface premium (drag-and-drop).
+  - **Checkout**: Atualização das informações de funcionalidades do módulo de RH.
+

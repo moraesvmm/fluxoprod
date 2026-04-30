@@ -35,3 +35,4 @@ export function useDeleteFuncionario() {
     onSuccess: () => qc.invalidateQueries({ queryKey: FUNCIONARIOS_KEY }),
   });
 }
+export function usePagarFuncionario() { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, mes }: { id: string; mes: string }) => import('@/lib/api').then(m => m.registrarPagamentoRH(id, mes)), onSuccess: () => qc.invalidateQueries({ queryKey: FUNCIONARIOS_KEY }) }); } export function usePagarTodosFuncionarios() { const qc = useQueryClient(); return useMutation({ mutationFn: (mes: string) => import('@/lib/api').then(m => m.registrarPagamentoRHTodos(mes)), onSuccess: () => qc.invalidateQueries({ queryKey: FUNCIONARIOS_KEY }) }); }

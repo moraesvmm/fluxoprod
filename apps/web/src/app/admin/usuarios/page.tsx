@@ -2,6 +2,7 @@ import { requireMaster } from "@/utils/auth/requireMaster";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
+import DeleteUserButton from "./DeleteUserButton";
 
 async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
   const supabase = await createClient();
@@ -159,6 +160,7 @@ export default async function AdminUsuariosPage() {
               <th className="px-4 py-3 text-left font-semibold">User ID</th>
               <th className="px-4 py-3 text-left font-semibold">Empresa</th>
               <th className="px-4 py-3 text-left font-semibold">Role</th>
+              <th className="px-4 py-3 text-left font-semibold">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -167,11 +169,14 @@ export default async function AdminUsuariosPage() {
                 <td className="px-4 py-3 font-mono text-xs text-slate-700">{p.user_id}</td>
                 <td className="px-4 py-3 font-mono text-xs text-slate-700">{p.empresa_id ?? "-"}</td>
                 <td className="px-4 py-3 text-slate-800">{p.role}</td>
+                <td className="px-4 py-3">
+                  <DeleteUserButton userId={p.user_id} isMaster={p.role === "master"} />
+                </td>
               </tr>
             ))}
             {(!perfis || perfis.length === 0) && (
               <tr>
-                <td className="px-4 py-6 text-slate-500" colSpan={3}>
+                <td className="px-4 py-6 text-slate-500" colSpan={4}>
                   Nenhum perfil encontrado.
                 </td>
               </tr>

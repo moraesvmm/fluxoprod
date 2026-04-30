@@ -34,6 +34,7 @@ import {
 import { useDashboardData } from "@/lib/hooks/use-dashboard";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
 import BoasVindasBanner from "@/components/modules/base/BoasVindasBanner";
+import AlertasRH from "@/components/modules/rh/AlertasRH";
 import { FechamentoMesModal } from "@/components/modules/base/FechamentoMesModal";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -109,6 +110,8 @@ export default function DashboardPage() {
           userId={userProfile.userId}
         />
       )}
+
+      <AlertasRH />
 
       <div className="flex items-center justify-between">
         <div>

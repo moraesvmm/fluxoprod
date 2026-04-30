@@ -457,6 +457,16 @@ export interface Funcionario {
   telefone?: string;
   salario?: number;
   role?: string;
+  ultimo_mes_pago?: string;
+  dia_pagamento?: number;
+  cpf?: string;
+  rg?: string;
+  data_nascimento?: string;
+  nome_mae?: string;
+  endereco?: string;
+  pis_pasep?: string;
+  ctps?: string;
+  data_admissao?: string;
   criado_em: string;
   atualizado_em?: string;
 }
@@ -468,6 +478,8 @@ export interface FuncionarioCreate {
   telefone?: string;
   salario?: number;
   role?: string;
+  ultimo_mes_pago?: string;
+  dia_pagamento?: number;
 }
 
 export interface FuncionarioUpdate {
@@ -477,6 +489,31 @@ export interface FuncionarioUpdate {
   telefone?: string;
   salario?: number;
   role?: string;
+  ultimo_mes_pago?: string;
+  dia_pagamento?: number;
+}
+
+export interface DocumentoFuncionario {
+  id: string;
+  funcionario_id: string;
+  tipo: string;
+  nome_arquivo: string;
+  tamanho_bytes: number;
+  mime_type: string;
+  storage_path: string;
+  dados_extraidos?: Record<string, any>;
+  criado_em: string;
+}
+
+export interface DadosPessoais {
+  cpf?: string;
+  rg?: string;
+  data_nascimento?: string;
+  nome_mae?: string;
+  endereco?: string;
+  pis_pasep?: string;
+  ctps?: string;
+  data_admissao?: string;
 }
 
 export interface Financeiro {
@@ -1173,7 +1210,8 @@ export async function updateFuncionario(id: string, funcionario: FuncionarioUpda
       p_email: funcionario.email,
       p_telefone: funcionario.telefone,
       p_salario: funcionario.salario,
-      p_role: funcionario.role || 'funcionario'
+      p_role: funcionario.role || 'funcionario',
+      p_dia_pagamento: funcionario.dia_pagamento
     });
   if (error) throw new Error(error.message);
   return data as Funcionario;
@@ -1187,7 +1225,8 @@ export async function createFuncionario(funcionario: FuncionarioCreate): Promise
       p_email: funcionario.email,
       p_telefone: funcionario.telefone,
       p_salario: funcionario.salario,
-      p_role: funcionario.role || 'funcionario'
+      p_role: funcionario.role || 'funcionario',
+      p_dia_pagamento: funcionario.dia_pagamento
     });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
@@ -1198,6 +1237,95 @@ export async function deleteFuncionario(id: string): Promise<void> {
   const { error } = await getSupabase()
     .rpc('tenant_excluir_funcionario', { p_funcionario_id: id });
   if (error) throw new Error(error.message);
+}
+
+export async function registrarPagamentoRH(funcionarioId: string, mes: string): Promise<void> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_registrar_pagamento_rh', { p_funcionario_id: funcionarioId, p_mes: mes });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+}
+
+export async function registrarPagamentoRHTodos(mes: string): Promise<void> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_registrar_pagamento_rh_todos', { p_mes: mes });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+}
+
+// DOCUMENTOS RH
+export async function uploadDocumentoRH(funcionarioId: string, tipo: string, arquivo: File): Promise<DocumentoFuncionario> {
+  const supabase = getSupabase();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('Nao autenticado');
+
+  const formData = new FormData();
+  formData.append('arquivo', arquivo);
+  formData.append('funcionario_id', funcionarioId);
+  formData.append('tipo', tipo);
+
+  const res = await fetch('/api/tenant/rh/documentos/upload', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    body: formData,
+  });
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Erro no upload');
+  return result.documento;
+}
+
+export async function listarDocumentosRH(funcionarioId: string): Promise<DocumentoFuncionario[]> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_listar_documentos', { p_funcionario_id: funcionarioId });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function obterUrlDocumento(documentoId: string): Promise<string> {
+  const supabase = getSupabase();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('Nao autenticado');
+
+  const res = await fetch(`/api/tenant/rh/documentos/${documentoId}`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Erro ao obter URL');
+  return result.url;
+}
+
+export async function excluirDocumentoRH(documentoId: string): Promise<void> {
+  const supabase = getSupabase();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('Nao autenticado');
+
+  const res = await fetch(`/api/tenant/rh/documentos/${documentoId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+
+  const result = await res.json();
+  if (!res.ok) throw new Error(result.error || 'Erro ao excluir');
+}
+
+export async function atualizarDadosPessoais(funcionarioId: string, dados: DadosPessoais): Promise<void> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_atualizar_dados_pessoais', {
+      p_funcionario_id: funcionarioId,
+      p_cpf: dados.cpf || null,
+      p_rg: dados.rg || null,
+      p_data_nascimento: dados.data_nascimento || null,
+      p_nome_mae: dados.nome_mae || null,
+      p_endereco: dados.endereco || null,
+      p_pis_pasep: dados.pis_pasep || null,
+      p_ctps: dados.ctps || null,
+      p_data_admissao: dados.data_admissao || null,
+    });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
 }
 
 // FINANCEIRO - Usar RPCs para operações CRUD

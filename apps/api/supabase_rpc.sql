@@ -573,6 +573,16 @@ BEGIN
             cargo VARCHAR(100),
             salario NUMERIC(10, 2) CHECK (salario >= 0),
             role VARCHAR(50) DEFAULT ''funcionario'' CHECK (role IN (''funcionario'', ''gerente'', ''admin'', ''colaborador'')),
+            ultimo_mes_pago VARCHAR(7),
+            dia_pagamento INTEGER,
+            cpf VARCHAR(14),
+            rg VARCHAR(20),
+            data_nascimento DATE,
+            nome_mae VARCHAR(255),
+            endereco TEXT,
+            pis_pasep VARCHAR(20),
+            ctps VARCHAR(30),
+            data_admissao DATE,
             criado_em TIMESTAMPTZ DEFAULT NOW(),
             atualizado_em TIMESTAMPTZ DEFAULT NOW()
         );
@@ -582,6 +592,27 @@ BEGIN
     EXECUTE format('CREATE INDEX idx_%I_funcionarios_cargo ON %I.funcionarios(cargo);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_funcionarios_role ON %I.funcionarios(role);', novo_schema, novo_schema);
     EXECUTE format('CREATE INDEX idx_%I_funcionarios_nome ON %I.funcionarios(nome);', novo_schema, novo_schema);
+
+    -- 8.1. Tabela de Documentos de Funcionários
+    EXECUTE format('
+        CREATE TABLE %I.documentos_funcionarios (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            funcionario_id UUID NOT NULL REFERENCES %I.funcionarios(id) ON DELETE CASCADE,
+            tipo VARCHAR(50) NOT NULL CHECK (tipo IN (
+                ''rg'', ''cpf'', ''cnh'', ''ctps'', ''contrato'',
+                ''holerite'', ''comprovante_residencia'', ''atestado'', ''outros''
+            )),
+            nome_arquivo VARCHAR(255) NOT NULL,
+            tamanho_bytes BIGINT NOT NULL,
+            mime_type VARCHAR(100) NOT NULL,
+            storage_path TEXT NOT NULL,
+            dados_extraidos JSONB,
+            criado_em TIMESTAMPTZ DEFAULT NOW()
+        );
+    ', novo_schema, novo_schema);
+
+    EXECUTE format('CREATE INDEX idx_%I_docs_func_id ON %I.documentos_funcionarios(funcionario_id);', novo_schema, novo_schema);
+    EXECUTE format('CREATE INDEX idx_%I_docs_tipo ON %I.documentos_funcionarios(tipo);', novo_schema, novo_schema);
 
     -- 9. MÓDULO 9: Ordem de Serviço (O.S.)
     EXECUTE format('
