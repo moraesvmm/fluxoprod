@@ -3,18 +3,12 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy root package.json and package-lock.json
-COPY package*.json ./
-
-# Copy whatsapp-service package.json
-# We need to create the directory structure so npm workspaces work
-COPY whatsapp-service/package.json ./whatsapp-service/
+# Copy the entire workspace
+COPY . .
 
 # Install dependencies for the whole workspace
+# Since it's a monorepo, we need all workspace folders present for npm ci
 RUN npm ci
-
-# Copy the rest of the workspace
-COPY . .
 
 # Build the whatsapp-service
 RUN npm run whatsapp:build
