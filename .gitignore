@@ -1,3 +1,14 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+
+# build artifacts
+dist/
+build/
+out/
+
 # env files (never commit secrets)
 .env
 .env.*
