@@ -21,6 +21,7 @@ import { useClientes } from "@/lib/hooks/use-clientes";
 import { OSKanbanBoard } from "@/components/modules/os/OSKanbanBoard";
 import { OSDetailsModal } from "@/components/modules/os/OSDetailsModal";
 import { OrdemServico } from "@/lib/api";
+import { useToast, Toast } from "@/components/ui/toast";
 
 interface Funcionario {
   id: string;
