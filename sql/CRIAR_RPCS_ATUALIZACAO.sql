@@ -6,6 +6,7 @@
 -- Permissão: Use a service_role para executar este SQL
 
 -- 1. RPC para atualizar cliente
+DROP FUNCTION IF EXISTS public.tenant_atualizar_cliente(UUID, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR) CASCADE;
 CREATE OR REPLACE FUNCTION public.tenant_atualizar_cliente(
   p_cliente_id UUID,
   p_nome VARCHAR(255),
@@ -54,6 +55,7 @@ END;
 $$;
 
 -- 2. RPC para atualizar produto
+DROP FUNCTION IF EXISTS public.tenant_atualizar_produto(UUID, VARCHAR, TEXT, VARCHAR, NUMERIC, VARCHAR, NUMERIC, VARCHAR) CASCADE;
 CREATE OR REPLACE FUNCTION public.tenant_atualizar_produto(
   p_produto_id UUID,
   p_nome VARCHAR(255),
@@ -110,6 +112,7 @@ END;
 $$;
 
 -- 3. RPC para atualizar estoque
+DROP FUNCTION IF EXISTS public.tenant_atualizar_estoque(UUID, VARCHAR, INTEGER, INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.tenant_atualizar_estoque(
   p_estoque_id UUID,
   p_sku VARCHAR(100),
@@ -156,6 +159,7 @@ END;
 $$;
 
 -- 4. RPC para atualizar funcionário
+DROP FUNCTION IF EXISTS public.tenant_atualizar_funcionario(UUID, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, VARCHAR) CASCADE;
 CREATE OR REPLACE FUNCTION public.tenant_atualizar_funcionario(
   p_funcionario_id UUID,
   p_nome VARCHAR(255),
@@ -205,6 +209,7 @@ END;
 $$;
 
 -- 5. RPC para atualizar OS
+DROP FUNCTION IF EXISTS public.tenant_atualizar_os(UUID, UUID, UUID, VARCHAR, TEXT, VARCHAR, NUMERIC) CASCADE;
 CREATE OR REPLACE FUNCTION public.tenant_atualizar_os(
   p_os_id UUID,
   p_cliente_id UUID,
