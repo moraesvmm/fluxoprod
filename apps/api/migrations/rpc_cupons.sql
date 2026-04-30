@@ -52,8 +52,12 @@ BEGIN
         'id', v_cupom.id,
         'codigo', v_cupom.codigo,
         'tipo', v_cupom.tipo,
-        'valor', v_cupom.valor
+        'valor', v_cupom.valor,
+        'usos_atuais', v_cupom.usos_atuais,
+        'ativo', v_cupom.ativo,
+        'criado_em', v_cupom.criado_em
     );
+
 END;
 $$;
 
