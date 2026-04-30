@@ -306,17 +306,25 @@ export interface PrevisaoResult {
 export interface OrdemServico {
   id: string;
   empresa_id?: string;
-  numero?: number;
+  numero: number;
   cliente_id?: string;
   veiculo_equipamento?: string;
   descricao_problema?: string;
   colaborador_id?: string;
   status: string;
   valor: number;
+  tempo_total_minutos?: number;
+  timer_iniciado_em?: string;
   criado_em: string;
   atualizado_em?: string;
   cliente?: { nome: string }; // joined
   colaborador?: { nome: string }; // joined
+}
+
+export interface OSLucro {
+  total_venda: number;
+  total_custo: number;
+  lucro: number;
 }
 
 export interface OrdemServicoCreate {
@@ -1134,6 +1142,19 @@ export async function updateOS(id: string, os: OrdemServicoUpdate): Promise<Orde
     });
   if (error) throw new Error(error.message);
   return data as OrdemServico;
+}
+
+export async function fetchOSLucro(id: string): Promise<OSLucro> {
+  const { data, error } = await getSupabase()
+    .rpc('tenant_obter_lucro_os', { p_os_id: id });
+  if (error) throw new Error(error.message);
+  return data as OSLucro;
+}
+
+export async function gerenciarTimerOS(id: string, acao: 'iniciar' | 'parar'): Promise<void> {
+  const { error } = await getSupabase()
+    .rpc('tenant_gerenciar_timer_os', { p_os_id: id, p_acao: acao });
+  if (error) throw new Error(error.message);
 }
 
 // OBRAS - Usar RPCs para operações CRUD

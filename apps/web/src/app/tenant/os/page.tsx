@@ -16,9 +16,11 @@ import { Calendar as CalendarComponent } from "@/components/modules/base/Calenda
 import { createClient } from "@/utils/supabase/client";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
-import { useToast, Toast } from "@/components/ui/toast";
 import { useOS, useCreateOS, useDeleteOS, useUpdateOS } from "@/lib/hooks/use-os";
 import { useClientes } from "@/lib/hooks/use-clientes";
+import { OSKanbanBoard } from "@/components/modules/os/OSKanbanBoard";
+import { OSDetailsModal } from "@/components/modules/os/OSDetailsModal";
+import { OrdemServico } from "@/lib/api";
 
 interface Funcionario {
   id: string;
@@ -30,8 +32,6 @@ export default function OSPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
-  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [formData, setFormData] = useState({
     cliente_id: "",
     veiculo_equipamento: "",
@@ -39,6 +39,9 @@ export default function OSPage() {
     colaborador_id: "",
     valor: "",
   });
+  const [viewMode, setViewMode] = useState<'table' | 'calendar' | 'kanban'>('kanban');
+  const [selectedOS, setSelectedOS] = useState<OrdemServico | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   const { toasts, removeToast, success, error: toastError } = useToast();
   const supabase = createClient();
@@ -209,11 +212,12 @@ export default function OSPage() {
               className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
-          <button
-            onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-border rounded-md hover:bg-slate-50 transition-colors"
-          >
             {viewMode === 'table' ? (
+              <>
+                <LayoutGrid className="h-4 w-4" />
+                Kanban
+              </>
+            ) : viewMode === 'kanban' ? (
               <>
                 <Clock className="h-4 w-4" />
                 Calendário
@@ -227,7 +231,22 @@ export default function OSPage() {
           </button>
         </div>
 
-        {viewMode === 'table' ? (
+        {viewMode === 'kanban' ? (
+          <div className="p-6">
+            <OSKanbanBoard 
+              ordens={ordens || []} 
+              onEdit={(os) => { setSelectedOS(os); setShowDetails(true); }}
+              onStatusChange={async (id, status) => {
+                try {
+                  await updateMutation.mutateAsync({ id, os: { status } });
+                  success("Status atualizado!");
+                } catch (e) {
+                  toastError("Erro ao mover OS");
+                }
+              }}
+            />
+          </div>
+        ) : viewMode === 'table' ? (
           <Table>
           <TableHeader>
             <TableRow>
@@ -459,6 +478,18 @@ export default function OSPage() {
           </div>
         </form>
       </Modal>
+
+      {selectedOS && (
+        <OSDetailsModal 
+          isOpen={showDetails} 
+          onClose={() => { setShowDetails(false); setSelectedOS(null); }}
+          os={selectedOS}
+          onUpdate={() => {
+            // Recarregar dados via query invalidate já acontece no hook se for mutação, 
+            // mas aqui podemos forçar se necessário
+          }}
+        />
+      )}
     </div>
   );
 }
