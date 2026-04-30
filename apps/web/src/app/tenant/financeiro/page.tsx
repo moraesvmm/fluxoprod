@@ -36,6 +36,8 @@ export default function FinanceiroPage() {
   const updateFinanceiro = useUpdateFinanceiro();
   const [showForm, setShowForm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedTransacao, setSelectedTransacao] = useState<Transacao | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [syncConfirm, setSyncConfirm] = useState(false);
@@ -48,7 +50,8 @@ export default function FinanceiroPage() {
     valor: '',
     tipo: 'receber',
     categoria: '',
-    status: 'pendente'
+    status: 'pendente',
+    data_vencimento: new Date().toISOString().split('T')[0]
   });
   const { toasts, showToast, removeToast, success, error: toastError, info } = useToast();
 
@@ -61,17 +64,24 @@ export default function FinanceiroPage() {
         tipo: formData.tipo,
         descricao: formData.descricao,
         valor: parseFloat(formData.valor),
-        data_vencimento: new Date().toISOString(),
+        data_vencimento: new Date(formData.data_vencimento).toISOString(),
         status: 'pendente',
         categoria: formData.categoria
       });
 
-      setFormData({ descricao: '', valor: '', tipo: 'receber', categoria: '', status: 'pendente' });
+      setFormData({ 
+        descricao: '', 
+        valor: '', 
+        tipo: 'receber', 
+        categoria: '', 
+        status: 'pendente',
+        data_vencimento: new Date().toISOString().split('T')[0]
+      });
       setShowForm(false);
       success("Transação criada com sucesso!");
     } catch (err: any) {
       console.error("Erro ao criar transação:", err);
-      toastError("Erro ao criar transação. Verifique se as tabelas foram criadas no Supabase.");
+      toastError("Erro ao criar transação.");
     }
   };
 
@@ -88,16 +98,22 @@ export default function FinanceiroPage() {
     }
   };
 
-  const abrirEdicao = (transacao: Transacao) => {
+  const abrirEdicao = (transacao: any) => {
     setEditId(transacao.id);
     setFormData({
       descricao: transacao.descricao,
       valor: String(transacao.valor),
       tipo: transacao.tipo,
       categoria: transacao.categoria || '',
-      status: transacao.status
+      status: transacao.status,
+      data_vencimento: transacao.data_vencimento ? new Date(transacao.data_vencimento).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
     });
     setShowEditModal(true);
+  };
+
+  const abrirDetalhes = (transacao: any) => {
+    setSelectedTransacao(transacao);
+    setShowDetailModal(true);
   };
 
   const editarTransacao = async (e: React.FormEvent) => {
@@ -110,12 +126,20 @@ export default function FinanceiroPage() {
         valor: parseFloat(formData.valor),
         tipo: formData.tipo,
         status: formData.status,
+        data_vencimento: new Date(formData.data_vencimento).toISOString()
       };
       if (formData.categoria) payload.categoria = formData.categoria;
 
       await updateFinanceiro.mutateAsync({ id: editId, financeiro: payload });
 
-      setFormData({ descricao: '', valor: '', tipo: 'receber', categoria: '', status: 'pendente' });
+      setFormData({ 
+        descricao: '', 
+        valor: '', 
+        tipo: 'receber', 
+        categoria: '', 
+        status: 'pendente',
+        data_vencimento: new Date().toISOString().split('T')[0]
+      });
       setShowEditModal(false);
       setEditId(null);
       success("Transação atualizada com sucesso!");
@@ -138,7 +162,9 @@ export default function FinanceiroPage() {
   };
 
   const formatarData = (dataString: string) => {
+    if (!dataString) return '-';
     const data = new Date(dataString);
+    if (isNaN(data.getTime())) return '-';
     return data.toLocaleDateString('pt-BR');
   };
 
@@ -191,6 +217,23 @@ export default function FinanceiroPage() {
         cancelText="Cancelar"
       />
 
+      {/* Detalhes Modal (Simulado) */}
+      <ConfirmModal
+        isOpen={showDetailModal}
+        onConfirm={() => setShowDetailModal(false)}
+        onCancel={() => setShowDetailModal(false)}
+        title="Detalhes da Transação"
+        message={`
+          Descrição: ${selectedTransacao?.descricao}
+          Valor: ${formatarValor(selectedTransacao?.valor || 0)}
+          Tipo: ${selectedTransacao?.tipo === 'receber' ? 'Receita' : 'Despesa'}
+          Status: ${selectedTransacao?.status}
+          Data: ${formatarData(selectedTransacao?.criado_em || '')}
+        `}
+        confirmText="Fechar"
+        cancelText=""
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Financeiro & Conciliação</h2>
@@ -204,7 +247,17 @@ export default function FinanceiroPage() {
             Ver Fluxo de Caixa
           </button>
           <button 
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => {
+              setFormData({
+                descricao: '',
+                valor: '',
+                tipo: 'receber',
+                categoria: '',
+                status: 'pendente',
+                data_vencimento: new Date().toISOString().split('T')[0]
+              });
+              setShowForm(!showForm);
+            }}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-4 py-2"
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -247,6 +300,16 @@ export default function FinanceiroPage() {
                   onChange={(e) => setFormData({...formData, valor: e.target.value})}
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="0,00"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Data de Vencimento *</label>
+                <input
+                  type="date"
+                  value={formData.data_vencimento}
+                  onChange={(e) => setFormData({...formData, data_vencimento: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   required
                 />
               </div>
@@ -318,6 +381,16 @@ export default function FinanceiroPage() {
                   onChange={(e) => setFormData({...formData, valor: e.target.value})}
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="0,00"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Data de Vencimento *</label>
+                <input
+                  type="date"
+                  value={formData.data_vencimento}
+                  onChange={(e) => setFormData({...formData, data_vencimento: e.target.value})}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   required
                 />
               </div>
@@ -450,7 +523,7 @@ export default function FinanceiroPage() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                      <button className="text-slate-400 hover:text-primary p-1" title="Ver Detalhes">
+                      <button onClick={() => abrirDetalhes(item)} className="text-slate-400 hover:text-primary p-1" title="Ver Detalhes">
                         <ExternalLink className="h-4 w-4" />
                       </button>
                     </div>

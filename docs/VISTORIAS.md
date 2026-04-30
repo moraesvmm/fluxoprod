@@ -556,3 +556,9 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
 - **Componentes Alterados:** `OnboardingProvider.tsx`, `FiscalGuide.tsx`
 - **Banco de Dados:** Criadas RPCs `update_user_settings` e `get_user_settings`, além de adicionada coluna `settings` do tipo JSONB na tabela `user_profiles`.
 - **Ações:** Correção da lógica de tutorial para salvar o estado `tutorial_completed` no banco de dados, evitando que ele reapareça em cada novo login (que não preservava localStorage limpo). O botão flutuante do FiscalGuide no módulo de Vendas foi encapsulado em `motion.div` para se tornar arrastável (drag and drop).
+
+### Vistoria 45
+- **Data:** 30/04/2026
+- **Componente:** `FinanceiroPage.tsx`
+- **Correções:** Resolvido erro de "invalid date" no registro e listagem de transações financeiras. Implementado campo de `data_vencimento` nos formulários de criação e edição. O botão "Ver Detalhes" foi ativado e agora abre um modal com as informações completas da transação.
+- **Ações:** Adicionada validação de data no `formatarData`, inclusão de inputs tipo `date` no formulário e implementação do estado `showDetailModal`.
