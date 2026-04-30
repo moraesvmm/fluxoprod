@@ -1,20 +1,19 @@
 import { NextResponse } from 'next/server'
 
 import { createAdminClient } from '@/utils/supabase/admin'
-import { getAuthenticatedTenantContext } from '@/lib/server/tenant-context'
 
 export async function GET() {
   try {
-    const { tenantSchema } = await getAuthenticatedTenantContext()
     const admin = createAdminClient()
     const { data, error } = await admin
-      .schema(tenantSchema)
-      .from('produtos')
-      .select('id, ncm, cfop_padrao, origem')
-      .order('nome', { ascending: true })
+      .rpc('tenant_listar_produtos_fiscal')
 
     if (error) {
       throw new Error(error.message)
+    }
+
+    if ((data as any)?.error) {
+      throw new Error((data as any).error)
     }
 
     return NextResponse.json({ success: true, data: data || [] })
@@ -28,7 +27,6 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { tenantSchema } = await getAuthenticatedTenantContext()
     const admin = createAdminClient()
     const body = await request.json()
     const produtoId = String(body?.produtoId || '')
@@ -38,19 +36,21 @@ export async function POST(request: Request) {
     }
 
     const payload = {
-      ncm: body?.ncm ? String(body.ncm).trim() : null,
-      cfop_padrao: body?.cfop_padrao ? String(body.cfop_padrao).trim() : null,
-      origem: Number.isFinite(Number(body?.origem)) ? Number(body.origem) : 0,
+      p_produto_id: produtoId,
+      p_ncm: body?.ncm ? String(body.ncm).trim() : null,
+      p_cfop_padrao: body?.cfop_padrao ? String(body.cfop_padrao).trim() : null,
+      p_origem: Number.isFinite(Number(body?.origem)) ? Number(body.origem) : 0,
     }
 
-    const { error } = await admin
-      .schema(tenantSchema)
-      .from('produtos')
-      .update(payload)
-      .eq('id', produtoId)
+    const { data, error } = await admin
+      .rpc('tenant_atualizar_produto_fiscal', payload)
 
     if (error) {
       throw new Error(error.message)
+    }
+
+    if ((data as any)?.error) {
+      throw new Error((data as any).error)
     }
 
     return NextResponse.json({ success: true })
