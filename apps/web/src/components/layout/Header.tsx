@@ -4,6 +4,7 @@ import { Bell, Search, LogOut } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
@@ -13,6 +14,12 @@ interface HeaderProps {
 export function Header({ onSearchClick }: HeaderProps) {
   const supabase = createClient();
   const router = useRouter();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -58,8 +65,8 @@ export function Header({ onSearchClick }: HeaderProps) {
           </kbd>
         </button>
         <div className="flex items-center gap-x-4 lg:gap-x-6">
-          <div className="hidden lg:block text-sm text-muted-foreground/70 capitalize font-medium">
-            {currentDate}
+          <div className="hidden lg:block text-sm text-muted-foreground/70 capitalize font-medium min-w-[200px] text-right">
+            {mounted ? currentDate : ""}
           </div>
           
           <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-border/60" aria-hidden="true" />
