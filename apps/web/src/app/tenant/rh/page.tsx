@@ -19,18 +19,8 @@ import { useFuncionarios, useCreateFuncionario, useDeleteFuncionario, useUpdateF
 import { useRHConfig, useUpdateRHConfig } from "@/lib/hooks/use-rh-config";
 import { exportToCSV } from "@/lib/utils/export";
 import { DocumentosModal } from "@/components/modules/rh/DocumentosModal";
+import { type Funcionario } from "@/lib/api";
 
-interface Funcionario {
-  id: string;
-  nome: string;
-  cargo?: string;
-  email?: string;
-  telefone?: string;
-  salario?: number;
-  ultimo_mes_pago?: string;
-  dia_pagamento?: number;
-  criado_em: string;
-}
 
 export default function RHPage() {
   const { data: funcionarios, isLoading, error } = useFuncionarios();
@@ -386,7 +376,7 @@ export default function RHPage() {
                           </button>
                         )}
                         <button
-                          onClick={() => setDocFuncionario(f as Funcionario)}
+                          onClick={() => setDocFuncionario(f)}
                           className="text-slate-400 hover:text-purple-600 p-1 transition-colors"
                           title="Documentos"
                         >

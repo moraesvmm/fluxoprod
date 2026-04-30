@@ -2,12 +2,13 @@
 
 import { useState, useMemo, useEffect, Suspense, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ShieldCheck, CreditCard, ArrowRight, Loader2, Building2, UserCircle2, Server, X, Percent } from "lucide-react";
+import { Check, ShieldCheck, CreditCard, ArrowRight, Loader2, Building2, UserCircle2, Server, X, Percent, Ticket } from "lucide-react";
 import Image from "next/image";
 import AppIcon from "../../icon.png";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PaymentGatewayService, PaymentTransactionPayload } from "@/services/PaymentGatewayService";
 import { createClient } from "@/utils/supabase/client";
+import { validarCupom, type Cupom } from "@/lib/api";
 
 interface PlanoData { id: string; key: string; nome: string; preco: number; preco_promocional: number | null; descricao: string; modulos_incluidos: string[]; ordem_exibicao: number; }
 interface ModuloData { id: string; key: string; nome: string; preco: number; preco_promocional: number | null; descricao: string; icone: string; features: string[]; ordem_exibicao: number; }
@@ -123,14 +124,32 @@ function CheckoutContent() {
   const [companySize, setCompanySize] = useState("MPE");
   const [companySegment, setCompanySegment] = useState("Varejo");
 
+  // Cupons
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<Cupom | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
   const totalValue = useMemo(() => {
     const planPrice = selectedPlan ? getEffectivePrice(selectedPlan) : 0;
     const modulesPrice = selectedModules.reduce((sum, modKey) => {
       const mod = modulosAvulsos.find(m => m.key === modKey);
       return sum + (mod ? getEffectivePrice(mod) : 0);
     }, 0);
-    return planPrice + modulesPrice;
-  }, [selectedPlan, selectedModules, modulosAvulsos]);
+    
+    let subtotal = planPrice + modulesPrice;
+    
+    if (appliedCoupon) {
+      if (appliedCoupon.tipo === 'percentual') {
+        subtotal = subtotal * (1 - (appliedCoupon.valor / 100));
+      } else {
+        subtotal = Math.max(0, subtotal - appliedCoupon.valor);
+      }
+    }
+    
+    return subtotal;
+  }, [selectedPlan, selectedModules, modulosAvulsos, appliedCoupon]);
+
 
   const emailValido = (email: string) => {
     const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -149,6 +168,22 @@ function CheckoutContent() {
 
   const toggleModule = (id: string) => {
     setSelectedModules(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setIsApplyingCoupon(true);
+    setCouponError(null);
+    try {
+      const cupom = await validarCupom(couponCode);
+      setAppliedCoupon(cupom);
+      setCouponCode(""); // Limpar campo após aplicar
+    } catch (err: any) {
+      setCouponError(err.message || "Erro ao validar cupom");
+      setAppliedCoupon(null);
+    } finally {
+      setIsApplyingCoupon(false);
+    }
   };
 
   const handleCheckout = async () => {
@@ -183,7 +218,8 @@ function CheckoutContent() {
         companyDocument, 
         companySize, 
         companySegment,
-        password
+        password,
+        couponId: appliedCoupon?.id
       };
 
       const response = await fetch("/api/auth/register-trial", {
@@ -487,6 +523,46 @@ function CheckoutContent() {
                        <span className="text-gray-400">E-mail de Acesso</span>
                        <span className="font-medium text-white">{customerEmail}</span>
                      </div>
+
+                     {/* Campo de Cupom */}
+                     <div className="mb-6">
+                       <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Cupom de Desconto</label>
+                       <div className="flex gap-2">
+                         <div className="relative flex-1">
+                           <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                           <input 
+                             value={couponCode}
+                             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                             onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                             className="w-full bg-[#121216] border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none transition-all uppercase" 
+                             placeholder="CÓDIGO" 
+                           />
+                         </div>
+                         <button 
+                           onClick={handleApplyCoupon}
+                           disabled={isApplyingCoupon || !couponCode}
+                           className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-xs font-bold border border-white/10 transition-all disabled:opacity-50"
+                         >
+                           {isApplyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "APLICAR"}
+                         </button>
+                       </div>
+                       {couponError && <p className="text-rose-500 text-[10px] mt-1 font-medium">{couponError}</p>}
+                       {appliedCoupon && (
+                         <div className="mt-2 flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+                           <div className="flex items-center gap-2">
+                             <Check className="w-3 h-3 text-emerald-500" />
+                             <span className="text-xs font-bold text-emerald-400">CUPOM: {appliedCoupon.codigo}</span>
+                           </div>
+                           <span className="text-xs text-emerald-400">
+                             -{appliedCoupon.tipo === 'percentual' ? `${appliedCoupon.valor}%` : `R$ ${appliedCoupon.valor}`}
+                           </span>
+                           <button onClick={() => setAppliedCoupon(null)} className="text-gray-500 hover:text-white p-1">
+                             <X className="w-3 h-3" />
+                           </button>
+                         </div>
+                       )}
+                     </div>
+
                      <div className="flex justify-between items-end">
                        <span className="text-gray-400 font-medium uppercase tracking-tighter text-xs">Valor da Mensalidade</span>
                        <div className="text-right">

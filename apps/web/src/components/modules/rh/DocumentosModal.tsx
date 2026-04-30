@@ -19,21 +19,9 @@ import {
   useUploadDocumento,
   useExcluirDocumento,
 } from "@/lib/hooks/use-documentos-rh";
-import { obterUrlDocumento } from "@/lib/api";
+import { obterUrlDocumento, type Funcionario } from "@/lib/api";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 
-interface Funcionario {
-  id: string;
-  nome: string;
-  cpf?: string;
-  rg?: string;
-  data_nascimento?: string;
-  nome_mae?: string;
-  endereco?: string;
-  pis_pasep?: string;
-  ctps?: string;
-  data_admissao?: string;
-}
 
 interface DocumentosModalProps {
   isOpen: boolean;

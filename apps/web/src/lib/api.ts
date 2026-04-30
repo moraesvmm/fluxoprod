@@ -516,6 +516,18 @@ export interface DadosPessoais {
   data_admissao?: string;
 }
 
+export interface Cupom {
+  id: string;
+  codigo: string;
+  tipo: 'percentual' | 'fixo';
+  valor: number;
+  limite_usos?: number;
+  usos_atuais: number;
+  data_expiracao?: string;
+  ativo: boolean;
+  criado_em: string;
+}
+
 export interface Financeiro {
   id: string;
   tipo: string;
@@ -1847,3 +1859,42 @@ export async function fetchDRE(dataInicio: string, dataFim: string): Promise<DRE
   if (error) throw error;
   return data;
 }
+
+// ==========================================
+-- CUPONS (ADMIN & PUBLIC)
+// ==========================================
+
+export async function validarCupom(codigo: string): Promise<Cupom> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("validar_cupom", { p_codigo: codigo });
+  if (error) throw error;
+  if (data.error) throw new Error(data.error);
+  return data as Cupom;
+}
+
+export async function listarCuponsAdmin(): Promise<Cupom[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("admin_listar_cupons");
+  if (error) throw error;
+  return data as Cupom[];
+}
+
+export async function criarCupomAdmin(cupom: Partial<Cupom>): Promise<any> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("admin_criar_cupom", {
+    p_codigo: cupom.codigo,
+    p_tipo: cupom.tipo,
+    p_valor: cupom.valor,
+    p_limite_usos: cupom.limite_usos,
+    p_data_expiracao: cupom.data_expiracao
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function excluirCupomAdmin(id: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("admin_excluir_cupom", { p_id: id });
+  if (error) throw error;
+}
+

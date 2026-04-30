@@ -597,3 +597,14 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
   - **Frontend**: Criação dos componentes `DocumentosModal.tsx` e `DadosPessoaisForm.tsx` com interface premium (drag-and-drop).
   - **Checkout**: Atualização das informações de funcionalidades do módulo de RH.
 
+### Vistoria 49
+- **Data:** 30/04/2026
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - **Core**: Unificação das interfaces de `Funcionario` em `@/lib/api` para corrigir falhas de build na Vercel.
+  - **SaaS (Checkout)**: Implementação do sistema de cupons de desconto no fluxo de checkout.
+  - **Admin Master**: Criação de painel de gestão de cupons (`/admin/cupons`).
+  - **Banco de Dados**: Criação da tabela `public.cupons` e RPCs de validação e uso atômico.
+  - **API Route**: Integração do registro de uso de cupom na rota `/api/auth/register-trial`.
+
+

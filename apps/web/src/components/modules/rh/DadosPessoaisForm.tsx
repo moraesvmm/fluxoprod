@@ -1,25 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { type DadosPessoais } from "@/lib/api";
+import { type DadosPessoais, type Funcionario } from "@/lib/api";
 import { useAtualizarDadosPessoais } from "@/lib/hooks/use-documentos-rh";
 import { Loader2, Save } from "lucide-react";
 
 interface DadosPessoaisFormProps {
-  funcionario: {
-    id: string;
-    nome: string;
-    cpf?: string;
-    rg?: string;
-    data_nascimento?: string;
-    nome_mae?: string;
-    endereco?: string;
-    pis_pasep?: string;
-    ctps?: string;
-    data_admissao?: string;
-  };
+  funcionario: Funcionario;
   onToast: (message: string, type: "success" | "error") => void;
 }
+
 
 export function DadosPessoaisForm({ funcionario, onToast }: DadosPessoaisFormProps) {
   const [formData, setFormData] = useState<DadosPessoais>({});

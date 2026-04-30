@@ -13,6 +13,7 @@ interface TrialRegistrationPayload {
   companyDocument: string;
   companySize: string;
   companySegment: string;
+  couponId?: string;
 }
 
 function buildSchemaName(input: string) {
@@ -198,6 +199,22 @@ export async function POST(request: Request) {
 
     if (profileError) {
       throw new Error(profileError.message);
+    }
+
+    // Registrar uso do cupom (se houver)
+    if (payload.couponId) {
+      try {
+        await admin.from("cupons_utilizados").insert({
+          cupom_id: payload.couponId,
+          empresa_id: empresaId,
+          email_usuario: payload.customerEmail
+        });
+        
+        await admin.rpc("incrementar_uso_cupom", { p_cupom_id: payload.couponId });
+      } catch (err) {
+        console.error("Erro ao registrar uso de cupom:", err);
+        // Não trava o fluxo principal se falhar o registro do cupom
+      }
     }
 
     // 1. Gerar o link de confirmação oficial do Supabase
