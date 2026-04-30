@@ -173,7 +173,7 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors sm:hidden"
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
               title="Fechar chat"
             >
               <X className="w-5 h-5" />
