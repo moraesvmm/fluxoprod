@@ -53,6 +53,7 @@ export function ActionCard({
   className,
 }: ActionCardProps) {
   return (
+    <div
       className={twMerge(
         clsx(
           "group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-card p-6 border border-border/60 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary/40 shadow-sm",
