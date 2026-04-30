@@ -266,6 +266,7 @@ END;
 $$;
 
 -- 6. RPC para atualizar obra
+DROP FUNCTION IF EXISTS public.tenant_atualizar_obra(UUID, UUID, VARCHAR, TEXT, TEXT, DATE, DATE, VARCHAR, NUMERIC) CASCADE;
 CREATE OR REPLACE FUNCTION public.tenant_atualizar_obra(
   p_obra_id UUID,
   p_cliente_id UUID,
@@ -317,6 +318,7 @@ END;
 $$;
 
 -- 7. RPC para atualizar financeiro
+DROP FUNCTION IF EXISTS public.tenant_atualizar_financeiro(UUID, VARCHAR, TEXT, NUMERIC, DATE, VARCHAR, VARCHAR) CASCADE;
 CREATE OR REPLACE FUNCTION public.tenant_atualizar_financeiro(
   p_financeiro_id UUID,
   p_tipo VARCHAR(20),
@@ -366,6 +368,7 @@ END;
 $$;
 
 -- 8. RPC para atualizar comissão
+DROP FUNCTION IF EXISTS public.tenant_atualizar_comissao(UUID, VARCHAR, DATE) CASCADE;
 CREATE OR REPLACE FUNCTION public.tenant_atualizar_comissao(
   p_comissao_id UUID,
   p_status_pagamento VARCHAR(50),
