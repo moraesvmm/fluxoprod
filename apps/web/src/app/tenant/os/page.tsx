@@ -384,8 +384,8 @@ export default function OSPage() {
               <input
                 type="number"
                 step="0.01"
-                value={formData.valor}
-                onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                value={formData.valor_orcamento}
+                onChange={(e) => setFormData({ ...formData, valor_orcamento: e.target.value })}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="0.00"
               />
@@ -463,8 +463,8 @@ export default function OSPage() {
               <input
                 type="number"
                 step="0.01"
-                value={formData.valor}
-                onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                value={formData.valor_orcamento}
+                onChange={(e) => setFormData({ ...formData, valor_orcamento: e.target.value })}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="0.00"
               />
