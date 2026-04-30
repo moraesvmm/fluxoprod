@@ -196,23 +196,23 @@ export default function LojaPage() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-wider"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider"
           >
             <Tags className="w-3 h-3" /> Marketplace Fluxo
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl lg:text-5xl font-black text-white leading-tight"
+            className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white leading-tight"
           >
             Expanda seu negócio <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">sob demanda.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">sob demanda.</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-gray-400 text-lg leading-relaxed"
+            className="text-slate-600 dark:text-gray-400 text-lg leading-relaxed font-medium"
           >
             Adicione funcionalidades específicas para sua operação sem trocar de plano. 
             Módulos a la carte com ativação instantânea após o pagamento.
