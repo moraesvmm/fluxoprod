@@ -43,6 +43,7 @@ export default function OSPage() {
   const [viewMode, setViewMode] = useState<'table' | 'calendar' | 'kanban'>('kanban');
   const [selectedOS, setSelectedOS] = useState<OrdemServico | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
 
   const { toasts, removeToast, success, error: toastError } = useToast();
   const supabase = createClient();
