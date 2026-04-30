@@ -160,15 +160,60 @@ export default function CRMPage() {
 
     setCampanhaEnviando(true);
     try {
+      // Se tipo for WhatsApp, tentar envio direto via microserviço
+      if (campanhaData.tipo === 'whatsapp') {
+        const statusRes = await fetch('/api/whatsapp/status');
+        const statusData = await statusRes.json();
+
+        if (statusData.connected) {
+          // Filtrar clientes com telefone cadastrado
+          const clientesComTelefone = clientes.filter(c => c.telefone);
+          if (clientesComTelefone.length === 0) {
+            toastError("Nenhum cliente possui telefone cadastrado.");
+            setCampanhaEnviando(false);
+            return;
+          }
+
+          const messages = clientesComTelefone.map(c => ({
+            to: c.telefone!.replace(/\D/g, ''),
+            message: `*${campanhaData.titulo}*\n\n${campanhaData.mensagem}`,
+          }));
+
+          const res = await fetch('/api/whatsapp/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages, delay_ms: 20000 }),
+          });
+          const resultado = await res.json();
+
+          if (resultado.success) {
+            success(`Campanha enviada via WhatsApp! ${resultado.enviados} de ${resultado.total} clientes notificados.`);
+          } else {
+            toastError(resultado.error || "Erro ao enviar campanha via WhatsApp.");
+            setCampanhaEnviando(false);
+            return;
+          }
+        } else {
+          toastError("WhatsApp não está conectado. Conecte nas Configurações ou escolha outro canal.");
+          setCampanhaEnviando(false);
+          return;
+        }
+      } else {
+        // Fallback: registrar via RPC (e-mail/sms)
+        const clienteIds = clientes.map(c => c.id);
+        const resultado = await enviarCampanhaMassa(
+          clienteIds,
+          campanhaData.titulo,
+          campanhaData.mensagem,
+          campanhaData.tipo
+        );
+        success(`Campanha registrada! ${resultado.enviados} de ${resultado.total} clientes notificados.`);
+      }
+
+      // Registrar no banco em ambos os casos
       const clienteIds = clientes.map(c => c.id);
-      const resultado = await enviarCampanhaMassa(
-        clienteIds,
-        campanhaData.titulo,
-        campanhaData.mensagem,
-        campanhaData.tipo
-      );
-      
-      success(`Campanha enviada com sucesso! ${resultado.enviados} de ${resultado.total} clientes notificados.`);
+      await enviarCampanhaMassa(clienteIds, campanhaData.titulo, campanhaData.mensagem, campanhaData.tipo).catch(() => {});
+
       setCampanhaData({ titulo: '', mensagem: '', tipo: 'email' });
       setShowCampanhaModal(false);
     } catch {

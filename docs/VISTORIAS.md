@@ -1,5 +1,23 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 47 - Integração WhatsApp Headless (Baileys)
+- **Data:** 30/04/2026
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - Criação do microserviço `whatsapp-service/` com Baileys (Node.js/Express) para comunicação WhatsApp sem APIs pagas.
+  - 7 arquivos no microserviço: index.ts, whatsapp.ts (sessão Baileys), store.ts (memória), routes.ts, package.json, tsconfig.json, Dockerfile.
+  - 6 API Routes proxy em `/api/whatsapp/`: status, qr, send (individual + massa), conversations, messages, disconnect.
+  - 4 componentes frontend: WhatsAppFloatingButton (botão flutuante arrastável com badge), ChatDrawer (painel lateral de conversas), ChatWindow (chat individual estilo WhatsApp), WhatsAppConnection (painel QR nas Configurações).
+  - Integração do botão flutuante no TenantLayout (aparece em todas as páginas).
+  - Integração do painel de conexão na página de Configurações.
+  - Upgrade do `handleEnviarCampanha` no CRM: envio direto via microserviço quando tipo=whatsapp e conectado, fallback para RPC.
+  - Upgrade do `handleWhatsApp` no NurturingPanel: envio direto quando conectado, fallback para wa.me.
+  - Rate limiting (50 msg/campanha), delay anti-spam (15s), reconexão automática (5 tentativas).
+  - **Nenhuma RPC existente do CRM foi alterada** (conformidade com Regra de Ouro).
+- **Pendência:** Deploy do microserviço no Railway e configuração de env vars na Vercel.
+
+---
+
 ## VISTORIA 42 - NFe Nativa Node (Hardening de Seguranca e Contratos)
 - **Data:** 29/04/2026
 - **Status:** PENDENTE (Realizar vistoria o mais rapido possivel)

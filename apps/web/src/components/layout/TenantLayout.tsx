@@ -11,6 +11,7 @@ import { useEmpresa } from "@/lib/hooks/use-empresas";
 import { OnboardingProvider } from "@/components/onboarding/OnboardingProvider";
 import { TutorialCard } from "@/components/onboarding/TutorialCard";
 import { TutorialOverlay } from "@/components/onboarding/TutorialOverlay";
+import { WhatsAppFloatingButton } from "@/components/whatsapp/WhatsAppFloatingButton";
 
 export function TenantLayout({ children }: { children: ReactNode }) {
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
@@ -46,6 +47,7 @@ export function TenantLayout({ children }: { children: ReactNode }) {
         <GlobalSearch isOpen={showGlobalSearch} onClose={() => setShowGlobalSearch(false)} />
         <TutorialOverlay />
         <TutorialCard />
+        <WhatsAppFloatingButton />
       </div>
     </OnboardingProvider>
   );

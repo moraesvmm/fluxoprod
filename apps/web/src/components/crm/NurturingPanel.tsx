@@ -37,10 +37,33 @@ export function NurturingPanel() {
     }
   };
 
-  const handleWhatsApp = (sugestao: Sugestao) => {
+  const handleWhatsApp = async (sugestao: Sugestao) => {
     const num = sugestao.cliente_telefone.replace(/\D/g, '');
-    const msg = encodeURIComponent(sugestao.mensagem_sugerida || `Olá ${sugestao.cliente_nome}! Tudo bem?`);
-    window.open(`https://wa.me/55${num}?text=${msg}`, '_blank');
+    const msg = sugestao.mensagem_sugerida || `Olá ${sugestao.cliente_nome}! Tudo bem?`;
+
+    // Tentar envio direto via microserviço
+    try {
+      const statusRes = await fetch('/api/whatsapp/status');
+      const statusData = await statusRes.json();
+
+      if (statusData.connected) {
+        const res = await fetch('/api/whatsapp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: `55${num}`, message: msg }),
+        });
+        const result = await res.json();
+        if (result.success) {
+          toastSuccess(`Mensagem enviada para ${sugestao.cliente_nome} via WhatsApp!`);
+          return;
+        }
+      }
+    } catch {
+      // Silenciar — usar fallback
+    }
+
+    // Fallback: abrir wa.me
+    window.open(`https://wa.me/55${num}?text=${encodeURIComponent(msg)}`, '_blank');
     toastSuccess('WhatsApp aberto para ' + sugestao.cliente_nome);
   };
 

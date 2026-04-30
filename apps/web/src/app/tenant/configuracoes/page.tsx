@@ -16,6 +16,7 @@ import { useEmpresa, useUpdateEmpresa } from "@/lib/hooks/use-empresas";
 import { useToast, Toast } from "@/components/ui/toast";
 import { TutorialSettingsSection } from "@/components/onboarding/TutorialSettingsSection";
 import { FiscalGuide } from "@/components/modules/fiscal/FiscalGuide";
+import { WhatsAppConnection } from "@/components/configuracoes/WhatsAppConnection";
 
 interface FiscalConfigState {
   inscricao_estadual: string;
@@ -548,6 +549,9 @@ export default function ConfiguracoesPage() {
               </>
             )}
           </div>
+
+          {/* WhatsApp Connection */}
+          <WhatsAppConnection />
 
           <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">

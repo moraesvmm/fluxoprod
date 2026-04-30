@@ -1,0 +1,25 @@
+{
+  "name": "fluxo-whatsapp-service",
+  "version": "1.0.0",
+  "description": "WhatsApp Headless Service for Fluxo ERP",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "npx tsx watch src/index.ts",
+    "build": "npx tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.16",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/qrcode": "^1.5.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
