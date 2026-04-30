@@ -1,0 +1,19 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "services": {
+    "whatsapp-service": {
+      "source": {
+        "root": "whatsapp-service"
+      },
+      "config": {
+        "numReplicas": 1,
+        "restartPolicy": "always"
+      }
+    },
+    "web-app": {
+      "source": {
+        "root": "apps/web"
+      }
+    }
+  }
+}

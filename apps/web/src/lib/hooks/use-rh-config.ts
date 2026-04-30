@@ -13,16 +13,23 @@ export function useRHConfig() {
         .rpc('tenant_buscar_configuracao', { p_chave: 'rh_dia_pagamento' });
       
       if (error) {
-        // If the RPC doesn't exist or fails, fallback to direct query if possible, or just return null
-        const { data: directData, error: directError } = await getSupabase()
-          .from('configuracoes')
-          .select('valor')
-          .eq('chave', 'rh_dia_pagamento')
-          .single();
-          
-        if (directError) return { dia: null };
-        return { dia: directData?.valor ? parseInt(directData.valor, 10) : null };
+        // Se o erro for que a RPC não existe, tentamos o fallback. 
+        // Se for erro de permissão ou outro, retornamos nulo.
+        if (error.code === 'PGRST202') { // RPC not found
+          const { data: directData, error: directError } = await getSupabase()
+            .from('configuracoes')
+            .select('valor')
+            .eq('chave', 'rh_dia_pagamento')
+            .single();
+            
+          if (directError) return { dia: null };
+          return { dia: directData?.valor ? parseInt(directData.valor, 10) : null };
+        }
+        return { dia: null };
       }
+      
+      // Se data for null, significa que a configuração não existe no banco ou usuário sem tenant
+      if (!data) return { dia: null };
       
       return { dia: data?.valor ? parseInt(data.valor, 10) : null };
     },

@@ -1,0 +1,13 @@
+{
+  "name": "fluxoprod-root",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "whatsapp-service"
+  ],
+  "scripts": {
+    "web:dev": "npm run dev -w apps/web",
+    "whatsapp:dev": "npm run dev -w whatsapp-service",
+    "build": "npm run build --workspaces --if-present"
+  }
+}

@@ -34,6 +34,12 @@
 - **Data:** 29/04/2026
 - **Status:** PENDENTE (Realizar vistoria o mais rapido possivel)
 - **Alteracoes:**
+- [x] Fix Database RPCs (`tenant_buscar_configuracao`)
+- [x] Fix API Route (`fiscal-config/route.ts`)
+- [x] Fix Frontend Hook (`use-rh-config.ts`)
+- [x] Configure Railway Infrastructure (`railway.json`)
+- [x] Configure Root Workspace (`package.json`)
+- [x] Update Documentation (`VISTORIAS.md`)
   - Remocao da exposicao de segredos fiscais no frontend de Configuracoes.
   - Criacao de rotas server-side para configuracao fiscal, upload de certificado e leitura autenticada do XML da NFe.
   - Refatoracao da rota /api/fiscal/nfe/emitir e do NfeService para contexto explicito de tenant, sem dependencia de search_path implicito.
@@ -631,7 +637,10 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
 
 
 
-### Vistoria 51
+
+---
+
+## VISTORIA 51: Marketplace e Loja de Módulos
 - **Data:** 30/04/2026
 - **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
 - **Alterações:**
@@ -641,3 +650,18 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
   - **Checkout Incremental**: Integração do gateway Asaas para aquisição de módulos individuais por empresas já ativas.
   - **Automação**: Atualização do Webhook de pagamento para ativação automática de módulos na tabela `empresa_modulos` via metadados.
   - **Documentação**: Cards informativos da loja baseados integralmente na @DOCUMENTACAO_TECNICA.md.
+
+---
+
+## VISTORIA 52: Estabilização de Configurações e Infraestrutura (Build Fix)
+- **Data**: 30/04/2026
+- **Status**: ✅ CONCLUÍDO
+- **Alterações**:
+  - **Loop Fiscal-Config**:
+    - Rota `/api/tenant/fiscal-config` atualizada para tratar usuários `master` sem erro 400.
+    - RPCs de banco (`tenant_buscar_configuracao` e `tenant_salvar_configuracao`) tornadas resilientes a contextos sem tenant (retornam NULL graciosamente).
+    - Hook `useRHConfig` ajustado para evitar fallbacks de tabela inexistente no schema public, eliminando erro 400.
+  - **Infraestrutura Railway**:
+    - Adicionado `railway.json` na raiz para definir contextos de build (`Root Directory`) e suporte a monorepo.
+    - Criado `package.json` na raiz com configuração de `workspaces` para suporte nativo a monorepo pelo ambiente Node.js do Railway/Vercel.
+- **Pendência**: Monitorar o próximo deploy automático no Railway.
