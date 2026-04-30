@@ -2,12 +2,15 @@
   "name": "fluxoprod-root",
   "private": true,
   "workspaces": [
-    "apps/*",
+    "apps/web",
     "whatsapp-service"
   ],
   "scripts": {
-    "web:dev": "npm run dev -w apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev -w apps/web",
+    "start": "npm run start -w apps/web",
     "whatsapp:dev": "npm run dev -w whatsapp-service",
-    "build": "npm run build --workspaces --if-present"
+    "whatsapp:build": "npm run build -w whatsapp-service",
+    "web:build": "npm run build -w apps/web"
   }
 }
