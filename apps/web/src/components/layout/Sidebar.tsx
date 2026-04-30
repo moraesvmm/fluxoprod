@@ -147,6 +147,13 @@ export function Sidebar() {
               </li>
             );
           })}
+          
+          <li className="mt-4 pt-4 border-t border-sidebar-border/40">
+             <div className="flex items-center justify-between px-3">
+                <span className="text-xs font-medium text-muted-foreground/70">Tema do Sistema</span>
+                <ThemeToggle />
+             </div>
+          </li>
         </ul>
       </nav>
 
