@@ -665,3 +665,14 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
     - Adicionado `railway.json` na raiz para definir contextos de build (`Root Directory`) e suporte a monorepo.
     - Criado `package.json` na raiz com configuração de `workspaces` para suporte nativo a monorepo pelo ambiente Node.js do Railway/Vercel.
 - **Pendência**: Monitorar o próximo deploy automático no Railway.
+
+---
+
+## VISTORIA 53: Correção do Build (Vercel e Railway) e Revisão de Configurações WhatsApp
+- **Data:** 30/04/2026
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - **Vercel Build (Next.js)**: Adicionado `serverExternalPackages` no `next.config.ts` para isolar `xml-crypto` e dependências `@xmldom/is-dom-node`, resolvendo erro de bundle server-side.
+  - **Vercel Build (Tailwind)**: Adicionada a dependência opcional `lightningcss-linux-x64-gnu` no `apps/web/package.json` para evitar falha no Turbopack.
+  - **Railway Build (WhatsApp Service)**: Movidas `devDependencies` do `whatsapp-service/package.json` para `dependencies` e ajustado script de build para `tsc` direto, garantindo que o compilador TypeScript não seja removido em ambientes de produção (`NODE_ENV=production`).
+  - **Vistoria Módulo Configurações**: Confirmado que o componente de status do WhatsApp consome `/api/whatsapp/status` e que este depende da ENV `WHATSAPP_SERVICE_URL`. Sem modificações adicionais necessárias no frontend.
