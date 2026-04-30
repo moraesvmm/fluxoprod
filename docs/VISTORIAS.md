@@ -618,3 +618,14 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
   - **Banco de Dados**: Script `rpc_os_expansion.sql` para suporte a itens, cronômetro e numeração de OS.
 
 
+
+### Vistoria 51
+- **Data:** 30/04/2026
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - **SaaS (Marketplace)**: Implementação da "Loja de Módulos" como recurso nativo para todos os usuários.
+  - **Identidade Visual**: Design premium com Glassmorphism, Framer Motion e Dark Mode otimizado.
+  - **Roteamento**: Atualização do `proxy.ts` (white-list) e `Sidebar.tsx` para garantir acesso perpétuo ao marketplace.
+  - **Checkout Incremental**: Integração do gateway Asaas para aquisição de módulos individuais por empresas já ativas.
+  - **Automação**: Atualização do Webhook de pagamento para ativação automática de módulos na tabela `empresa_modulos` via metadados.
+  - **Documentação**: Cards informativos da loja baseados integralmente na @DOCUMENTACAO_TECNICA.md.

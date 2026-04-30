@@ -181,14 +181,32 @@ export async function POST(request: Request) {
          return NextResponse.json({ error: "Erro ao ativar empresa de upgrade" }, { status: 500 });
       }
 
+      // Ativar módulos específicos se fornecidos no metadata
+      const modulesToActivate = Array.isArray(metadata.modules)
+        ? metadata.modules
+        : typeof metadata.modules === "string"
+          ? JSON.parse(metadata.modules)
+          : [];
+
+      if (modulesToActivate.length > 0) {
+        for (const modKey of modulesToActivate) {
+          await admin.from("empresa_modulos").upsert({
+            empresa_id: upgradeEmpresaId,
+            modulo_key: modKey,
+            ativo: true,
+            atualizado_em: new Date().toISOString()
+          }, { onConflict: "empresa_id, modulo_key" });
+        }
+      }
+
       await admin.from("webhook_audit_log").insert({
         external_transaction_id: checkoutReference,
         status: "sucesso",
         payload: body,
-        detalhes: `Upgrade de Trial realizado com sucesso. empresa_id=${upgradeEmpresaId}`,
+        detalhes: `Upgrade/Adição de módulos realizada. empresa_id=${upgradeEmpresaId}. módulos=${modulesToActivate.join(",")}`,
       });
 
-      return NextResponse.json({ success: true, message: "Upgrade realizado com sucesso" });
+      return NextResponse.json({ success: true, message: "Upgrade/Adição processada" });
     }
 
     const { data: checkoutRow, error: checkoutError } = await admin

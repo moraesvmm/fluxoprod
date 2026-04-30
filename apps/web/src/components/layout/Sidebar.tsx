@@ -19,6 +19,7 @@ import {
   Building2,
   DollarSign,
   ShieldAlert,
+  ShoppingBag,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -35,6 +36,7 @@ const navigation = [
   { key: "obras", name: "Obras", href: "/tenant/obras", icon: Building2 },
   { key: "comissoes", name: "Comissoes", href: "/tenant/comissoes", icon: DollarSign },
   { key: "relatorios", name: "Relatorios", href: "/tenant/relatorios", icon: FileText },
+  { key: "loja", name: "Loja de Módulos", href: "/tenant/loja", icon: ShoppingBag },
   { key: "configuracoes", name: "Configuracoes", href: "/tenant/configuracoes", icon: Settings },
 ];
 
@@ -51,7 +53,7 @@ export function Sidebar() {
 
   const visibleNavigation = useMemo(() => {
     if (activeKeys === null) return [];
-    const base = navigation.filter((n) => activeKeys.includes(n.key) || n.key === "configuracoes");
+    const base = navigation.filter((n) => activeKeys.includes(n.key) || n.key === "configuracoes" || n.key === "loja");
     
     // Injetar link mestre se o usuário for master
     if (data?.role === "master") {
