@@ -3,11 +3,11 @@
   "services": {
     "fluxo-whatsapp-service": {
       "source": {
-        "root": "."
+        "root": "whatsapp-service"
       },
-      "config": {
-        "buildCommand": "npm install && npm run build -w whatsapp-service",
-        "startCommand": "npm run start -w whatsapp-service"
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "Dockerfile"
       }
     },
     "fluxoprod": {
