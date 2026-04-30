@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { TUTORIAL_DATA, Tutorial, TutorialStep } from '@/lib/onboarding/tutorials';
+import { TUTORIAL_DATA, Tutorial } from '@/lib/onboarding/tutorials';
+import { createClient } from '@/utils/supabase/client';
 
 interface OnboardingContextType {
   activeTutorial: Tutorial | null;
@@ -21,10 +22,26 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [activeTutorial, setActiveTutorial] = useState<Tutorial | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [userSettings, setUserSettings] = useState<Record<string, any>>({});
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const pathname = usePathname();
+  const supabase = createClient();
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const { data, error } = await supabase.rpc('get_user_settings');
+      if (!error && data) {
+        setUserSettings(data);
+      }
+      setSettingsLoaded(true);
+    };
+    loadSettings();
+  }, [supabase]);
 
   // Detecta mudança de rota para sugerir tutorial do módulo
   useEffect(() => {
+    if (!settingsLoaded) return;
+    
     const moduleMatch = pathname.match(/\/tenant\/([^/]+)/);
     if (moduleMatch) {
       const moduleKey = moduleMatch[1];
@@ -36,11 +53,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         return () => clearTimeout(timer);
       }
     }
-  }, [pathname]);
+  }, [pathname, settingsLoaded, userSettings]);
 
   const isStepCompleted = (tutorialKey: string): boolean => {
-    if (typeof window === 'undefined') return true;
-    return localStorage.getItem(`tutorial_completed_${tutorialKey}`) === 'true';
+    // Fallback para localStorage apenas se o DB falhar ou ainda não tiver carregado,
+    // mas priorizamos o DB.
+    if (userSettings[`tutorial_completed_${tutorialKey}`] === true) return true;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(`tutorial_completed_${tutorialKey}`) === 'true';
+    }
+    return true;
   };
 
   const startTutorial = (key: string) => {
@@ -72,9 +94,22 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     completeTutorial();
   };
 
-  const completeTutorial = () => {
+  const completeTutorial = async () => {
     if (activeTutorial) {
-      localStorage.setItem(`tutorial_completed_${activeTutorial.key}`, 'true');
+      const key = `tutorial_completed_${activeTutorial.key}`;
+      
+      // Salva no estado local para reflexão imediata
+      setUserSettings(prev => ({ ...prev, [key]: true }));
+      
+      // Salva no localStorage como fallback
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(key, 'true');
+      }
+      
+      // Salva no DB
+      await supabase.rpc('update_user_settings', {
+        p_settings: { [key]: true }
+      });
     }
     setIsVisible(false);
     setActiveTutorial(null);

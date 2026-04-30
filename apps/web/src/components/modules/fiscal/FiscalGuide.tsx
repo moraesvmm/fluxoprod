@@ -10,16 +10,23 @@ export function FiscalGuide() {
   return (
     <>
       {/* Floating Trigger Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-primary text-white shadow-lg shadow-indigo-500/30 flex items-center justify-center hover:scale-110 transition-all z-50 group"
-        title="Guia de Configuração Fiscal"
+      <motion.div 
+        drag 
+        dragMomentum={false}
+        dragConstraints={{ left: -1200, right: 20, top: -800, bottom: 20 }}
+        className="fixed bottom-6 right-6 z-50"
       >
-        <HelpCircle className="h-6 w-6" />
-        <span className="absolute right-14 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-bold uppercase tracking-wider">
-          Guia Fiscal
-        </span>
-      </button>
+        <button
+          onClick={() => setIsOpen(true)}
+          className="h-12 w-12 rounded-full bg-primary text-white shadow-lg shadow-indigo-500/30 flex items-center justify-center hover:scale-110 transition-all group"
+          title="Guia de Configuração Fiscal"
+        >
+          <HelpCircle className="h-6 w-6" />
+          <span className="absolute right-14 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-bold uppercase tracking-wider">
+            Guia Fiscal
+          </span>
+        </button>
+      </motion.div>
 
       <AnimatePresence>
         {isOpen && (
