@@ -176,10 +176,6 @@ export default function RelatoriosPage() {
     }
   };
 
-  useEffect(() => {
-    void gerarRelatorio();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reportType]);
 
   const renderCellValue = (row: ReportRow, header: string) => {
     switch (reportType) {
@@ -394,6 +390,22 @@ export default function RelatoriosPage() {
       toastError("Pop-up bloqueado. Permita pop-ups para gerar o PDF.");
     }
   };
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    void gerarRelatorio();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportType]);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-8 animate-pulse p-4 text-center text-muted-foreground">
+        Carregando interface de relatórios...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
