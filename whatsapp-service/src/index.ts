@@ -41,7 +41,14 @@ const session = new WhatsAppSession(store);
 app.use('/', createRoutes(session));
 
 // Iniciar servidor
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`[Fluxo WhatsApp Service] Rodando na porta ${PORT}`);
   console.log(`[Fluxo WhatsApp Service] Health: http://localhost:${PORT}/health`);
+  
+  // Tentar conectar automaticamente no boot
+  try {
+    await session.connect();
+  } catch (err) {
+    console.error('[WhatsApp] Erro ao iniciar conexão no boot:', err);
+  }
 });

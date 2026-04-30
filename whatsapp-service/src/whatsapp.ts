@@ -9,6 +9,7 @@ import makeWASocket, {
   WASocket,
   proto,
   makeCacheableSignalKeyStore,
+  fetchLatestBaileysVersion,
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import pino from 'pino';
@@ -17,7 +18,7 @@ import { MessageStore, Conversation, ChatMessage } from './store';
 import path from 'path';
 import fs from 'fs';
 
-const logger = pino({ level: 'silent' });
+const logger = pino({ level: 'info' });
 
 export type ConnectionStatus = 'disconnected' | 'qr_pending' | 'connecting' | 'connected';
 
@@ -61,6 +62,8 @@ export class WhatsAppSession {
     }
 
     const { state, saveCreds } = await useMultiFileAuthState(this.authDir);
+    const { version } = await fetchLatestBaileysVersion();
+    console.log(`[WhatsApp] Usando Baileys v${version.join('.')}`);
 
     this.socket = makeWASocket({
       auth: {
@@ -68,10 +71,13 @@ export class WhatsAppSession {
         keys: makeCacheableSignalKeyStore(state.keys, logger),
       },
       logger,
-      printQRInTerminal: true,
-      browser: ['Fluxo ERP', 'Chrome', '22.0'],
+      version,
+      browser: ['Ubuntu', 'Chrome', '20.0.04'],
       markOnlineOnConnect: true,
       generateHighQualityLinkPreview: false,
+      syncFullHistory: false,
+      connectTimeoutMs: 60000,
+      defaultQueryTimeoutMs: 0,
     });
 
     // Eventos de conexão
@@ -82,11 +88,12 @@ export class WhatsAppSession {
         this.qrCode = qr;
         this.qrBase64 = await QRCode.toDataURL(qr, { width: 300, margin: 2 });
         this.status = 'qr_pending';
-        console.log('[WhatsApp] QR Code gerado. Aguardando escaneamento...');
+        console.log('[WhatsApp] QR Code gerado.');
       }
 
       if (connection === 'close') {
         const reason = (lastDisconnect?.error as Boom)?.output?.statusCode;
+        console.log('[WhatsApp] Conexão fechada. Motivo:', reason);
 
         if (reason === DisconnectReason.loggedOut) {
           console.log('[WhatsApp] Sessão encerrada (logout). Limpando credenciais...');
@@ -96,11 +103,20 @@ export class WhatsAppSession {
           this.qrBase64 = null;
         } else if (this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
-          console.log(`[WhatsApp] Reconectando... (tentativa ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-          setTimeout(() => this.connect(), 3000);
+          this.status = 'connecting';
+          
+          // Se falhou 3 vezes, tenta limpar a pasta de auth para forçar novo QR
+          if (this.reconnectAttempts >= 3) {
+            console.log('[WhatsApp] Muitas falhas. Limpando auth_state para tentar novo QR...');
+            this.cleanup();
+          }
+
+          console.log(`[WhatsApp] Reconectando... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+          setTimeout(() => this.connect(), 5000);
         } else {
           console.log('[WhatsApp] Máximo de tentativas de reconexão atingido.');
           this.status = 'disconnected';
+          this.socket = null;
         }
       }
 

@@ -36,3 +36,5 @@ mcp-config.json
 .cursor/
 mcp-setup/
 nodejs/
+.vercel
+.env*.local

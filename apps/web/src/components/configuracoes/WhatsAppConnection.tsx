@@ -37,6 +37,11 @@ export function WhatsAppConnection() {
         } else if (data.status === "connected") {
           setStatus("connected");
           setQrBase64(null);
+        } else if (data.status === "connecting" || data.status === "qr_pending") {
+          // Mantém o estado atual, mas garante que não mude para disconnected erroneamente
+          setStatus(data.status);
+        } else {
+          setStatus("disconnected");
         }
       }
     } catch {
@@ -51,12 +56,13 @@ export function WhatsAppConnection() {
       if (status === "qr_pending" || status === "connecting") {
         fetchQR();
       }
-    }, 3000);
+    }, 4000); // Aumentado para 4s para evitar sobrecarga
     return () => clearInterval(interval);
   }, [fetchStatus, fetchQR, status]);
 
   const handleConnect = async () => {
     setLoading(true);
+    setQrBase64(null); // Limpa QR anterior
     try {
       const res = await fetch("/api/whatsapp/qr", { method: "POST" });
       if (res.ok) {
@@ -98,10 +104,16 @@ export function WhatsAppConnection() {
             <p className="text-xs text-slate-500">Serviço indisponível</p>
           </div>
         </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-          <p className="text-sm text-amber-800">
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+          <p className="text-sm text-amber-800 mb-3">
             O serviço de WhatsApp não está respondendo. Verifique se o microserviço está rodando no Railway.
           </p>
+          <button 
+            onClick={fetchStatus}
+            className="px-4 py-1.5 bg-amber-100 text-amber-800 rounded-md text-xs font-medium hover:bg-amber-200"
+          >
+            Tentar novamente
+          </button>
         </div>
       </div>
     );
@@ -132,7 +144,7 @@ export function WhatsAppConnection() {
             <span className="text-xs text-slate-500">
               {status === "connected" && "Conectado"}
               {status === "qr_pending" && "Aguardando escaneamento..."}
-              {status === "connecting" && "Conectando..."}
+              {status === "connecting" && "Iniciando conexão..."}
               {status === "disconnected" && "Desconectado"}
             </span>
           </div>
@@ -159,7 +171,7 @@ export function WhatsAppConnection() {
             ) : (
               <QrCode className="w-4 h-4" />
             )}
-            {loading ? "Iniciando..." : "Conectar WhatsApp"}
+            {loading ? "Preparando..." : "Conectar WhatsApp"}
           </button>
         </div>
       )}
@@ -193,6 +205,7 @@ export function WhatsAppConnection() {
                 <div className="text-center">
                   <RefreshCw className="w-8 h-8 text-slate-400 mx-auto animate-spin" />
                   <p className="text-xs text-slate-500 mt-2">Gerando QR Code...</p>
+                  <p className="text-[10px] text-slate-400 mt-1 max-w-[200px]">Isso pode levar até 30 segundos na primeira vez</p>
                 </div>
               </div>
             )}

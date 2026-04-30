@@ -1,8 +1,20 @@
 # VISTORIAS DO SISTEMA
 
-## VISTORIA 47 - Integração WhatsApp Headless (Baileys)
+## VISTORIA 48 - Estabilização Conexão WhatsApp e QR Code
 - **Data:** 30/04/2026
 - **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - Resolução do "loop infinito" na geração de QR Code: melhoria no gerenciamento de estados (`connecting`, `qr_pending`) no componente frontend.
+  - Correção de erro 405 (Connection Closed) no microserviço: atualização do Baileys para versão mais estável e ajuste de `appVersion` dinâmico via `fetchLatestBaileysVersion`.
+  - Sincronização de credenciais: alinhamento da `WHATSAPP_API_KEY` entre Vercel e Railway.
+  - Auto-connect no Boot: Microserviço agora tenta conectar sessões existentes automaticamente ao iniciar.
+  - UI Feedback: Adição de mensagens de status claras ("Gerando QR Code...", "Iniciando conexão...") e aumento do polling para 4s para evitar race conditions.
+
+---
+
+## VISTORIA 47 - Integração WhatsApp Headless (Baileys)
+- **Data:** 30/04/2026
+- **Status:** CONCLUÍDO
 - **Alterações:**
   - Criação do microserviço `whatsapp-service/` com Baileys (Node.js/Express) para comunicação WhatsApp sem APIs pagas.
   - 7 arquivos no microserviço: index.ts, whatsapp.ts (sessão Baileys), store.ts (memória), routes.ts, package.json, tsconfig.json, Dockerfile.
