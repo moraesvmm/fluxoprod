@@ -414,14 +414,14 @@ END;
 $$;
 
 -- Grant permissões para authenticated users
-GRANT EXECUTE ON FUNCTION public.tenant_atualizar_cliente TO authenticated;
-GRANT EXECUTE ON FUNCTION public.tenant_atualizar_produto TO authenticated;
-GRANT EXECUTE ON FUNCTION public.tenant_atualizar_estoque TO authenticated;
-GRANT EXECUTE ON FUNCTION public.tenant_atualizar_funcionario TO authenticated;
-GRANT EXECUTE ON FUNCTION public.tenant_atualizar_os TO authenticated;
-GRANT EXECUTE ON FUNCTION public.tenant_atualizar_obra TO authenticated;
-GRANT EXECUTE ON FUNCTION public.tenant_atualizar_financeiro TO authenticated;
-GRANT EXECUTE ON FUNCTION public.tenant_atualizar_comissao TO authenticated;
+GRANT EXECUTE ON FUNCTION public.tenant_atualizar_cliente(UUID, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.tenant_atualizar_produto(UUID, VARCHAR, TEXT, VARCHAR, NUMERIC, VARCHAR, NUMERIC, VARCHAR) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.tenant_atualizar_estoque(UUID, VARCHAR, INTEGER, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.tenant_atualizar_funcionario(UUID, VARCHAR, VARCHAR, VARCHAR, VARCHAR, NUMERIC, VARCHAR) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.tenant_atualizar_os(UUID, UUID, UUID, VARCHAR, TEXT, VARCHAR, NUMERIC) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.tenant_atualizar_obra(UUID, UUID, VARCHAR, TEXT, TEXT, DATE, DATE, VARCHAR, NUMERIC) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.tenant_atualizar_financeiro(UUID, VARCHAR, TEXT, NUMERIC, DATE, VARCHAR, VARCHAR) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.tenant_atualizar_comissao(UUID, VARCHAR, DATE) TO authenticated;
 
 -- Verificar se as RPCs de atualização foram criadas
 SELECT 
