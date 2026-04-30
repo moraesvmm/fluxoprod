@@ -122,7 +122,8 @@ export default function ConfiguracoesPage() {
     return () => {
       cancelled = true;
     };
-  }, [toastError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Carregar apenas uma vez — toastError não é estável entre renders
 
   const handleSave = async () => {
     if (!empresa?.id) return;

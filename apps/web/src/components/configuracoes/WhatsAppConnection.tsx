@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Smartphone, Wifi, WifiOff, QrCode, RefreshCw, Power } from "lucide-react";
 
 type ConnectionStatus = "disconnected" | "qr_pending" | "connecting" | "connected";
@@ -10,6 +10,13 @@ export function WhatsAppConnection() {
   const [qrBase64, setQrBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [serviceDown, setServiceDown] = useState(false);
+  // Ref para acessar status atual dentro do interval sem re-criar o efeito
+  const statusRef = useRef<ConnectionStatus>("disconnected");
+
+  // Sincronizar ref com estado
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   // Polling de status
   const fetchStatus = useCallback(async () => {
@@ -38,7 +45,6 @@ export function WhatsAppConnection() {
           setStatus("connected");
           setQrBase64(null);
         } else if (data.status === "connecting" || data.status === "qr_pending") {
-          // Mantém o estado atual, mas garante que não mude para disconnected erroneamente
           setStatus(data.status);
         } else {
           setStatus("disconnected");
@@ -49,16 +55,18 @@ export function WhatsAppConnection() {
     }
   }, []);
 
+  // Polling estável — sem 'status' nas deps para não recriar o interval a cada mudança
   useEffect(() => {
     fetchStatus();
     const interval = setInterval(() => {
       fetchStatus();
-      if (status === "qr_pending" || status === "connecting") {
+      // Lê do ref para não precisar do status como dependência
+      if (statusRef.current === "qr_pending" || statusRef.current === "connecting") {
         fetchQR();
       }
-    }, 4000); // Aumentado para 4s para evitar sobrecarga
+    }, 5000);
     return () => clearInterval(interval);
-  }, [fetchStatus, fetchQR, status]);
+  }, [fetchStatus, fetchQR]); // sem 'status' — evita piscamento
 
   const handleConnect = async () => {
     setLoading(true);
