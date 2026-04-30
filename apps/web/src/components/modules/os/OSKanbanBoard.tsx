@@ -64,7 +64,7 @@ export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardP
                   key={os.id}
                   layoutId={os.id}
                   draggable
-                  onDragStart={(e) => handleDragStart(e, os.id)}
+                  onDragStart={(e: any) => handleDragStart(e, os.id)}
                   className="group bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-violet-200 transition-all cursor-grab active:cursor-grabbing"
                 >
                   <div className="flex justify-between items-start mb-2">
