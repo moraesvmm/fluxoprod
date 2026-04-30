@@ -45,10 +45,17 @@ app.listen(PORT, async () => {
   console.log(`[Fluxo WhatsApp Service] Rodando na porta ${PORT}`);
   console.log(`[Fluxo WhatsApp Service] Health: http://localhost:${PORT}/health`);
   
-  // Tentar conectar automaticamente no boot
-  try {
-    await session.connect();
-  } catch (err) {
-    console.error('[WhatsApp] Erro ao iniciar conexão no boot:', err);
+  // Só reconectar automaticamente se já houver credenciais salvas (sessão prévia).
+  // Sem credenciais, esperar o usuário clicar "Conectar" no front-end para evitar
+  // gerar QR codes em loop, o que leva o WhatsApp a bloquear novos dispositivos.
+  if (session.hasSavedCredentials()) {
+    console.log('[WhatsApp] Credenciais salvas encontradas. Reconectando automaticamente...');
+    try {
+      await session.connect();
+    } catch (err) {
+      console.error('[WhatsApp] Erro ao iniciar conexão no boot:', err);
+    }
+  } else {
+    console.log('[WhatsApp] Nenhuma sessão salva. Aguardando conexão via front-end...');
   }
 });

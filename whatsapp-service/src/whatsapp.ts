@@ -31,6 +31,8 @@ export class WhatsAppSession {
   private authDir: string;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
+  private qrRetryCount = 0;
+  private maxQrRetries = 3; // Max QR code generations before stopping
 
   constructor(store: MessageStore, authDir?: string) {
     this.store = store;
@@ -48,6 +50,14 @@ export class WhatsAppSession {
 
   getStore(): MessageStore {
     return this.store;
+  }
+
+  /**
+   * Checks if there are saved credentials that allow auto-reconnection.
+   */
+  hasSavedCredentials(): boolean {
+    const credsPath = path.join(this.authDir, 'creds.json');
+    return fs.existsSync(credsPath);
   }
 
   async connect(): Promise<void> {
@@ -73,12 +83,13 @@ export class WhatsAppSession {
       },
       logger,
       version,
-      browser: ['Ubuntu', 'Chrome', '20.0.04'],
+      browser: ['Fluxo ERP', 'Chrome', '125.0.0'],
       markOnlineOnConnect: true,
       generateHighQualityLinkPreview: false,
       syncFullHistory: false,
       connectTimeoutMs: 60000,
       defaultQueryTimeoutMs: 0,
+      qrTimeout: 40000, // Tempo para cada QR code antes de gerar o próximo
     });
 
     // Eventos de conexão
@@ -86,10 +97,25 @@ export class WhatsAppSession {
       const { connection, lastDisconnect, qr } = update;
 
       if (qr) {
+        this.qrRetryCount++;
+        console.log(`[WhatsApp] QR Code gerado (${this.qrRetryCount}/${this.maxQrRetries}).`);
+
+        if (this.qrRetryCount > this.maxQrRetries) {
+          console.log('[WhatsApp] Limite de QR codes atingido. Parando para evitar bloqueio.');
+          this.status = 'disconnected';
+          this.qrCode = null;
+          this.qrBase64 = null;
+          this.qrRetryCount = 0;
+          if (this.socket) {
+            this.socket.end(undefined);
+            this.socket = null;
+          }
+          return;
+        }
+
         this.qrCode = qr;
         this.qrBase64 = await QRCode.toDataURL(qr, { width: 300, margin: 2 });
         this.status = 'qr_pending';
-        console.log('[WhatsApp] QR Code gerado.');
       }
 
       if (connection === 'close') {
@@ -102,28 +128,46 @@ export class WhatsAppSession {
           this.status = 'disconnected';
           this.qrCode = null;
           this.qrBase64 = null;
+        } else if (reason === 408 || reason === DisconnectReason.timedOut) {
+          // QR code timeout — Não reconectar automaticamente se não há credenciais salvas.
+          // Isto evita o loop infinito de geração de QR que causa o bloqueio do WhatsApp.
+          if (this.hasSavedCredentials()) {
+            this.reconnectAttempts++;
+            console.log(`[WhatsApp] Timeout com credenciais salvas. Reconectando... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+            if (this.reconnectAttempts < this.maxReconnectAttempts) {
+              this.status = 'connecting';
+              setTimeout(() => this.connect(), 5000);
+            } else {
+              console.log('[WhatsApp] Máximo de tentativas de reconexão atingido.');
+              this.status = 'disconnected';
+              this.socket = null;
+              this.reconnectAttempts = 0;
+            }
+          } else {
+            console.log('[WhatsApp] QR expirou sem escaneamento. Aguardando nova solicitação do usuário.');
+            this.status = 'disconnected';
+            this.qrCode = null;
+            this.qrBase64 = null;
+            this.qrRetryCount = 0;
+            this.socket = null;
+          }
         } else if (this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
           this.status = 'connecting';
-          
-          // Se falhou 3 vezes, tenta limpar a pasta de auth para forçar novo QR
-          if (this.reconnectAttempts >= 3) {
-            console.log('[WhatsApp] Muitas falhas. Limpando auth_state para tentar novo QR...');
-            this.cleanup();
-          }
-
           console.log(`[WhatsApp] Reconectando... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
           setTimeout(() => this.connect(), 5000);
         } else {
           console.log('[WhatsApp] Máximo de tentativas de reconexão atingido.');
           this.status = 'disconnected';
           this.socket = null;
+          this.reconnectAttempts = 0;
         }
       }
 
       if (connection === 'open') {
         this.status = 'connected';
         this.reconnectAttempts = 0;
+        this.qrRetryCount = 0;
         this.qrCode = null;
         this.qrBase64 = null;
         console.log('[WhatsApp] Conectado com sucesso!');
