@@ -132,12 +132,12 @@ export class WhatsAppSession {
           this.qrBase64 = null;
         } else if (reason === 515) {
           // 515 = Stream restart required — ocorre APÓS escaneamento bem-sucedido do QR.
-          // O WhatsApp confirma o pareamento e pede que a conexão seja reiniciada.
-          // Isto é comportamento NORMAL. Reconectar em 3s com as credenciais salvas.
           console.log('[WhatsApp] Stream restart (515) — Pareamento confirmado. Reconectando com credenciais...');
           this.socket = null;
-          this.status = 'connecting';
-          setTimeout(() => this.connect(), 3000);
+          this.status = 'disconnected'; // Deve ser disconnected para que o connect() não aborte
+          setTimeout(() => {
+            this.connect();
+          }, 3000);
         } else if (reason === 408 || reason === DisconnectReason.timedOut) {
           // QR code timeout — Não reconectar automaticamente se não há credenciais salvas.
           if (this.hasSavedCredentials()) {
