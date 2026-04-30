@@ -41,6 +41,7 @@ const navigation = [
 ];
 
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Sidebar() {
   const pathname = usePathname();
