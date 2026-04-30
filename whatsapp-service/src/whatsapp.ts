@@ -83,13 +83,15 @@ export class WhatsAppSession {
       },
       logger,
       version,
-      browser: ['Fluxo ERP', 'Chrome', '125.0.0'],
-      markOnlineOnConnect: true,
+      // Fingerprint consistente: Mac OS + Safari para evitar detecção de bot
+      // Não misturar Ubuntu/Desktop com Chrome — causa detecção pela Meta
+      browser: ['Mac OS', 'Safari', '605.1.15'],
+      markOnlineOnConnect: false, // não marcar online automaticamente
       generateHighQualityLinkPreview: false,
       syncFullHistory: false,
       connectTimeoutMs: 60000,
       defaultQueryTimeoutMs: 0,
-      qrTimeout: 40000, // Tempo para cada QR code antes de gerar o próximo
+      qrTimeout: 40000,
     });
 
     // Eventos de conexão
@@ -128,9 +130,16 @@ export class WhatsAppSession {
           this.status = 'disconnected';
           this.qrCode = null;
           this.qrBase64 = null;
+        } else if (reason === 515) {
+          // 515 = Stream restart required — ocorre APÓS escaneamento bem-sucedido do QR.
+          // O WhatsApp confirma o pareamento e pede que a conexão seja reiniciada.
+          // Isto é comportamento NORMAL. Reconectar em 3s com as credenciais salvas.
+          console.log('[WhatsApp] Stream restart (515) — Pareamento confirmado. Reconectando com credenciais...');
+          this.socket = null;
+          this.status = 'connecting';
+          setTimeout(() => this.connect(), 3000);
         } else if (reason === 408 || reason === DisconnectReason.timedOut) {
           // QR code timeout — Não reconectar automaticamente se não há credenciais salvas.
-          // Isto evita o loop infinito de geração de QR que causa o bloqueio do WhatsApp.
           if (this.hasSavedCredentials()) {
             this.reconnectAttempts++;
             console.log(`[WhatsApp] Timeout com credenciais salvas. Reconectando... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
