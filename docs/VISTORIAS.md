@@ -1,4 +1,4 @@
-﻿# VISTORIAS DO SISTEMA
+# VISTORIAS DO SISTEMA
 
 ## VISTORIA 42 - NFe Nativa Node (Hardening de Seguranca e Contratos)
 - **Data:** 29/04/2026
@@ -541,3 +541,12 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
 - **Arquitetura**: Motor fiscal 100% nativo.
 - **Vistoria**: PENDENTE.
 
+---
+
+## VISTORIA 43 - Estabilização de Relatórios e Resolução de Erros de Hydration
+- **Data:** 29/04/2026
+- **Status:** CONCLUÍDO
+- **Alterações:**
+  - Resolução do erro 418 (Hydration Failed) no `Header.tsx` e `RelatoriosPage.tsx` adicionando o estado global `mounted` para contornar discrepâncias de renderização do `Date.toLocaleDateString()` entre servidor (SSR) e cliente.
+  - Correção na RPC `tenant_obter_dre` (e re-validação das polimórficas financeiras) para apontar corretamente para colunas existentes (`valor_total` nas vendas), eliminando o erro "column does not exist" (400 Bad Request).
+  - Investigação da tela genérica "This page couldn't load": confirmado tratar-se de comportamento padrão do Next.js App Router (ChunkLoadError) ocorrendo ao se navegar em uma sessão ativa no exato momento de um deploy na Vercel, e não de um bug de código.
