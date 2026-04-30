@@ -1861,8 +1861,9 @@ export async function fetchDRE(dataInicio: string, dataFim: string): Promise<DRE
 }
 
 // ==========================================
--- CUPONS (ADMIN & PUBLIC)
+// CUPONS (ADMIN & PUBLIC)
 // ==========================================
+
 
 export async function validarCupom(codigo: string): Promise<Cupom> {
   const supabase = createClient();
