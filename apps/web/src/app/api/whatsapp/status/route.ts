@@ -8,7 +8,7 @@ import { createClient } from '@/utils/supabase/server';
 
 // Garantir que a URL não tenha barra no final e seja lida corretamente
 const WA_SERVICE_URL = 'https://fluxo-whatsapp-service-production.up.railway.app';
-const WA_API_KEY = process.env.WHATSAPP_API_KEY || 'fluxo-wa-secret-change-me';
+const WA_API_KEY = process.env.WHATSAPP_API_KEY || 'fluxo-wa-9f3k2m8x4p7q1r6t';
 
 export async function GET(request: NextRequest) {
   try {

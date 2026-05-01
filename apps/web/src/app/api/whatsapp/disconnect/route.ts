@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
 const WA_SERVICE_URL = 'https://fluxo-whatsapp-service-production.up.railway.app';
-const WA_API_KEY = process.env.WHATSAPP_API_KEY || 'fluxo-wa-secret-change-me';
+const WA_API_KEY = process.env.WHATSAPP_API_KEY || 'fluxo-wa-9f3k2m8x4p7q1r6t';
 
 export async function POST(request: NextRequest) {
   try {
