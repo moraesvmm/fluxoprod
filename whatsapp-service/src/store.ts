@@ -12,6 +12,7 @@ export interface ChatMessage {
   timestamp: number;
   fromMe: boolean;
   pushName?: string;
+  type?: 'text' | 'audio' | 'sticker' | 'image' | 'video' | 'document' | 'contact' | 'location' | 'unknown';
 }
 
 export interface Conversation {

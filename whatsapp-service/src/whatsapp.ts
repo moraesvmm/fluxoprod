@@ -201,7 +201,8 @@ export class WhatsAppSession {
 
         // Extrair texto da mensagem
         const text = this.extractMessageText(msg);
-        if (!text) continue;
+        const type = this.extractMessageType(msg);
+        if (!text && type === 'unknown') continue;
 
         // Extrair nome do contato
         const pushName = msg.pushName || phone;
@@ -210,14 +211,15 @@ export class WhatsAppSession {
           id: msg.key.id || Date.now().toString(),
           from: phone,
           to: 'me',
-          text,
+          text: text || '',
           timestamp: (msg.messageTimestamp as number) * 1000 || Date.now(),
           fromMe: false,
           pushName,
+          type,
         };
 
         this.store.addMessage(phone, chatMessage);
-        console.log(`[WhatsApp] Mensagem recebida de ${pushName} (${phone}): ${text.substring(0, 50)}...`);
+        console.log(`[WhatsApp] Mensagem recebida de ${pushName} (${phone}): ${(text || type)?.substring(0, 50)}...`);
       }
     });
   }
@@ -290,6 +292,20 @@ export class WhatsAppSession {
     return { enviados, falhas, total: messages.length };
   }
 
+  private extractMessageType(msg: proto.IWebMessageInfo): ChatMessage['type'] {
+    const m = msg.message;
+    if (!m) return 'unknown';
+    if (m.conversation || m.extendedTextMessage) return 'text';
+    if (m.audioMessage) return (m.audioMessage as any).ptt ? 'audio' : 'audio';
+    if (m.stickerMessage) return 'sticker';
+    if (m.imageMessage) return 'image';
+    if (m.videoMessage) return 'video';
+    if (m.documentMessage) return 'document';
+    if (m.contactMessage) return 'contact';
+    if (m.locationMessage) return 'location';
+    return 'unknown';
+  }
+
   private extractMessageText(msg: proto.IWebMessageInfo): string | null {
     const m = msg.message;
     if (!m) return null;
@@ -302,8 +318,8 @@ export class WhatsAppSession {
       m.documentMessage?.caption ||
       (m.contactMessage ? `[Contato: ${m.contactMessage.displayName}]` : null) ||
       (m.locationMessage ? `[Localização: ${m.locationMessage.degreesLatitude}, ${m.locationMessage.degreesLongitude}]` : null) ||
-      (m.audioMessage ? '[Áudio]' : null) ||
-      (m.stickerMessage ? '[Figurinha]' : null) ||
+      (m.audioMessage ? '' : null) ||
+      (m.stickerMessage ? '' : null) ||
       null
     );
   }

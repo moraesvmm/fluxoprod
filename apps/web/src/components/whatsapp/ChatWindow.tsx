@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, Smile } from "lucide-react";
+import { Send, Mic, Smile, FileText, MapPin, User, Film, Image } from "lucide-react";
 
 interface ChatMessageItem {
   id: string;
@@ -11,6 +11,7 @@ interface ChatMessageItem {
   timestamp: number;
   fromMe: boolean;
   pushName?: string;
+  type?: 'text' | 'audio' | 'sticker' | 'image' | 'video' | 'document' | 'contact' | 'location' | 'unknown';
 }
 
 interface ChatWindowProps {
@@ -132,6 +133,98 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
     return groups;
   };
 
+  const renderMessageContent = (msg: ChatMessageItem) => {
+    switch (msg.type) {
+      case 'audio':
+        return (
+          <div className="flex items-center gap-2 py-1">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <Mic className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[12px] text-slate-500 italic">Mensagem de áudio</span>
+              <div className="flex gap-0.5 mt-1">
+                {[4,6,8,5,7,4,6,8,5,7,4,6].map((h, i) => (
+                  <div key={i} className="w-1 bg-emerald-400 rounded-full opacity-70" style={{ height: h * 2 }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'sticker':
+        return (
+          <div className="flex flex-col items-center py-1">
+            <span className="text-4xl">🎭</span>
+            <span className="text-[10px] text-slate-400 mt-1">Figurinha</span>
+          </div>
+        );
+
+      case 'image':
+        return (
+          <div className="flex items-center gap-2 py-1">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <Image className="w-4 h-4 text-blue-600" />
+            </div>
+            <div>
+              <span className="text-[12px] text-slate-600 italic">Imagem</span>
+              {msg.text && <p className="text-[13px] text-slate-900 mt-0.5">{msg.text}</p>}
+            </div>
+          </div>
+        );
+
+      case 'video':
+        return (
+          <div className="flex items-center gap-2 py-1">
+            <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+              <Film className="w-4 h-4 text-purple-600" />
+            </div>
+            <div>
+              <span className="text-[12px] text-slate-600 italic">Vídeo</span>
+              {msg.text && <p className="text-[13px] text-slate-900 mt-0.5">{msg.text}</p>}
+            </div>
+          </div>
+        );
+
+      case 'document':
+        return (
+          <div className="flex items-center gap-2 py-1">
+            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <FileText className="w-4 h-4 text-amber-600" />
+            </div>
+            <span className="text-[12px] text-slate-600 italic">{msg.text || 'Documento'}</span>
+          </div>
+        );
+
+      case 'contact':
+        return (
+          <div className="flex items-center gap-2 py-1">
+            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
+              <User className="w-4 h-4 text-slate-500" />
+            </div>
+            <span className="text-[12px] text-slate-700">{msg.text}</span>
+          </div>
+        );
+
+      case 'location':
+        return (
+          <div className="flex items-center gap-2 py-1">
+            <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+              <MapPin className="w-4 h-4 text-red-500" />
+            </div>
+            <span className="text-[12px] text-slate-600 italic">{msg.text || 'Localização'}</span>
+          </div>
+        );
+
+      default: // 'text' ou sem type (mensagens antigas)
+        return (
+          <p className="text-[13.5px] text-slate-900 whitespace-pre-wrap break-words leading-5">
+            {msg.text}
+          </p>
+        );
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Fundo estilo WhatsApp */}
@@ -173,9 +266,7 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
                         : "bg-white rounded-tl-none"
                     }`}
                   >
-                    <p className="text-[13.5px] text-slate-900 whitespace-pre-wrap break-words leading-5">
-                      {msg.text}
-                    </p>
+                    {renderMessageContent(msg)}
                     <div className="flex justify-end items-center gap-1 mt-0.5">
                       <span className="text-[10px] text-slate-500">
                         {formatTime(msg.timestamp)}
