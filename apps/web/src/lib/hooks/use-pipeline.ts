@@ -36,7 +36,7 @@ export function usePipeline() {
   const query = useQuery({
     queryKey: PIPELINE_KEY,
     queryFn: async () => {
-      const result = await fetchClientes();
+      const result = await fetchClientes({ limit: 1000 });
       return result.data || [];
     },
   });
@@ -74,6 +74,7 @@ export function usePipeline() {
     onSettled: () => {
       // Recarregar dados para garantir consistência
       qc.invalidateQueries({ queryKey: PIPELINE_KEY });
+      qc.invalidateQueries({ queryKey: ['clientes'] });
     },
   });
 

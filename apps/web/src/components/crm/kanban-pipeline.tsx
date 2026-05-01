@@ -32,9 +32,14 @@ export default function KanbanPipeline({ onClienteClick }: KanbanPipelineProps) 
 
   const handleDrop = async (e: React.DragEvent, fase: string) => {
     e.preventDefault();
-    if (draggedCliente && draggedCliente.funil_fase !== fase) {
+    const clienteId = e.dataTransfer.getData("text/plain");
+    
+    if (clienteId) {
+      await moverCliente(clienteId, fase);
+    } else if (draggedCliente && draggedCliente.funil_fase !== fase) {
       await moverCliente(draggedCliente.id, fase);
     }
+    
     setDragOverFase(null);
   };
 
