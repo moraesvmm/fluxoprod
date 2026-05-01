@@ -14,6 +14,12 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
+interface OpenChatEventDetail {
+  phone: string;
+  name?: string;
+  message?: string;
+}
+
 export function WhatsAppFloatingButton() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
@@ -21,6 +27,10 @@ export function WhatsAppFloatingButton() {
   const [isServiceAvailable, setIsServiceAvailable] = useState(false);
   const dragControls = useDragControls();
   const constraintsRef = useRef<HTMLDivElement>(null);
+
+  const [targetPhone, setTargetPhone] = useState<string | null>(null);
+  const [targetName, setTargetName] = useState<string | null>(null);
+  const [targetMessage, setTargetMessage] = useState<string | null>(null);
 
   // Polling de status a cada 5 segundos
   const fetchStatus = useCallback(async () => {
@@ -42,6 +52,19 @@ export function WhatsAppFloatingButton() {
     const interval = setInterval(fetchStatus, 5000);
     return () => clearInterval(interval);
   }, [fetchStatus]);
+
+  useEffect(() => {
+    const handleOpen = (e: CustomEvent<OpenChatEventDetail>) => {
+      setIsDrawerOpen(true);
+      if (e.detail?.phone) {
+        setTargetPhone(e.detail.phone);
+        if (e.detail.name) setTargetName(e.detail.name);
+        if (e.detail.message) setTargetMessage(e.detail.message);
+      }
+    };
+    window.addEventListener('open-whatsapp-chat', handleOpen as EventListener);
+    return () => window.removeEventListener('open-whatsapp-chat', handleOpen as EventListener);
+  }, []);
 
   // Sempre exibir o botão para evitar que ele "suma" da tela
   return (
@@ -104,9 +127,15 @@ export function WhatsAppFloatingButton() {
             isOpen={isDrawerOpen}
             onClose={() => {
               setIsDrawerOpen(false);
+              setTargetPhone(null);
+              setTargetName(null);
+              setTargetMessage(null);
               fetchStatus(); // Atualizar badge ao fechar
             }}
             status={connectionStatus}
+            initialPhone={targetPhone}
+            initialName={targetName}
+            initialMessage={targetMessage}
           />
         )}
       </AnimatePresence>

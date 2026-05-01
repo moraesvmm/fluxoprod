@@ -16,12 +16,13 @@ interface ChatMessageItem {
 interface ChatWindowProps {
   phone: string;
   contactName: string;
+  initialMessage?: string | null;
   onBack: () => void;
 }
 
-export function ChatWindow({ phone, contactName, onBack }: ChatWindowProps) {
+export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessageItem[]>([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState(initialMessage || "");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -54,6 +55,13 @@ export function ChatWindow({ phone, contactName, onBack }: ChatWindowProps) {
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 300);
   }, []);
+
+  // Preencher mensagem inicial (se houver) ao abrir o chat para esse telefone
+  useEffect(() => {
+    if (initialMessage) {
+      setNewMessage(initialMessage);
+    }
+  }, [initialMessage, phone]);
 
   const handleSend = async () => {
     if (!newMessage.trim() || sending) return;

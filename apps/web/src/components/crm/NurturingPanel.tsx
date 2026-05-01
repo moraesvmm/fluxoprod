@@ -41,30 +41,25 @@ export function NurturingPanel() {
     const num = sugestao.cliente_telefone.replace(/\D/g, '');
     const msg = sugestao.mensagem_sugerida || `Olá ${sugestao.cliente_nome}! Tudo bem?`;
 
-    // Tentar envio direto via microserviço
+    // Tentar verificar status do microsserviço
     try {
       const statusRes = await fetch('/api/whatsapp/status');
       const statusData = await statusRes.json();
 
-      if (statusData.connected) {
-        const res = await fetch('/api/whatsapp/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ to: `55${num}`, message: msg }),
-        });
-        const result = await res.json();
-        if (result.success) {
-          toastSuccess(`Mensagem enviada para ${sugestao.cliente_nome} via WhatsApp!`);
-          return;
-        }
+      if (!statusData.serviceDown) {
+        // Se o serviço não estiver fora do ar, abrir o chat interno (mesmo se apenas desconectado/sem qrcode)
+        window.dispatchEvent(new CustomEvent('open-whatsapp-chat', { 
+          detail: { phone: `55${num}`, name: sugestao.cliente_nome, message: msg } 
+        }));
+        return;
       }
     } catch {
-      // Silenciar — usar fallback
+      // Silenciar
     }
 
-    // Fallback: abrir wa.me
+    // Fallback absoluto: só cai aqui se o backend Node / microsserviço estiver totalmente fora do ar
     window.open(`https://wa.me/55${num}?text=${encodeURIComponent(msg)}`, '_blank');
-    toastSuccess('WhatsApp aberto para ' + sugestao.cliente_nome);
+    toastSuccess('WhatsApp Web aberto para ' + sugestao.cliente_nome);
   };
 
   const handleFinalizar = async (id: string | null, clienteNome?: string) => {

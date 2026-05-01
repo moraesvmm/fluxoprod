@@ -17,11 +17,15 @@ interface ChatDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   status: string;
+  initialPhone?: string | null;
+  initialName?: string | null;
+  initialMessage?: string | null;
 }
 
-export function ChatDrawer({ isOpen, onClose, status }: ChatDrawerProps) {
+export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName, initialMessage }: ChatDrawerProps) {
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
-  const [selectedPhone, setSelectedPhone] = useState<string | null>(null);
+  const [selectedPhone, setSelectedPhone] = useState<string | null>(initialPhone || null);
+  const [selectedName, setSelectedName] = useState<string | null>(initialName || null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -48,6 +52,16 @@ export function ChatDrawer({ isOpen, onClose, status }: ChatDrawerProps) {
       return () => clearInterval(interval);
     }
   }, [isOpen, status, fetchConversations]);
+
+  useEffect(() => {
+    if (initialPhone && isOpen) {
+      setSelectedPhone(initialPhone);
+      setSelectedName(initialName || null);
+    } else if (!isOpen) {
+      setSelectedPhone(null);
+      setSelectedName(null);
+    }
+  }, [initialPhone, initialName, isOpen]);
 
   const filteredConversations = conversations.filter(
     (c) =>
@@ -104,7 +118,7 @@ export function ChatDrawer({ isOpen, onClose, status }: ChatDrawerProps) {
             </button>
             <div className="flex-1 min-w-0">
               <div className="font-medium truncate">
-                {conversations.find((c) => c.phone === selectedPhone)?.name || selectedPhone}
+                {selectedName || conversations.find((c) => c.phone === selectedPhone)?.name || selectedPhone}
               </div>
               <div className="text-xs text-white/70">
                 +{selectedPhone.replace(/(\d{2})(\d{2})(\d{5})(\d{4})/, "$1 ($2) $3-$4")}
@@ -153,8 +167,12 @@ export function ChatDrawer({ isOpen, onClose, status }: ChatDrawerProps) {
         /* Chat Individual */
         <ChatWindow
           phone={selectedPhone}
-          contactName={conversations.find((c) => c.phone === selectedPhone)?.name || selectedPhone}
-          onBack={() => setSelectedPhone(null)}
+          contactName={selectedName || conversations.find((c) => c.phone === selectedPhone)?.name || selectedPhone}
+          initialMessage={initialMessage}
+          onBack={() => {
+            setSelectedPhone(null);
+            setSelectedName(null);
+          }}
         />
       ) : (
         /* Lista de Conversas */
