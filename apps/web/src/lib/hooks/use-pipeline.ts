@@ -75,6 +75,7 @@ export function usePipeline() {
       // Recarregar dados para garantir consistência
       qc.invalidateQueries({ queryKey: PIPELINE_KEY });
       qc.invalidateQueries({ queryKey: ['clientes'] });
+      qc.invalidateQueries({ queryKey: ['dashboard-metricas'] });
     },
   });
 
