@@ -48,12 +48,14 @@ BEGIN
                     AND status IN (''inativo'', ''bloqueado'')
                     AND atualizado_em >= NOW() - INTERVAL ''30 days'';
                 
-                -- LTV médio (estimado via metadata valor_contrato)
-                SELECT COALESCE(AVG((metadata->>''valor_contrato'')::NUMERIC), 0) INTO v_ltv_medio
-                FROM clientes
-                WHERE deleted_at IS NULL 
-                    AND status = ''ativo''
-                    AND metadata ? ''valor_contrato'';
+                -- LTV médio (Lifetime Value - ticket médio total por cliente)
+                SELECT COALESCE(AVG(total_gasto), 0) INTO v_ltv_medio
+                FROM (
+                    SELECT SUM(valor_total) as total_gasto
+                    FROM vendas
+                    WHERE deleted_at IS NULL AND status = ''concluido''
+                    GROUP BY cliente_id
+                ) as subquery;
                 
                 -- Churn rate mensal
                 IF v_clientes_ativos > 0 THEN
