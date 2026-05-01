@@ -12,6 +12,8 @@ interface ChatMessageItem {
   fromMe: boolean;
   pushName?: string;
   type?: 'text' | 'audio' | 'sticker' | 'image' | 'video' | 'document' | 'contact' | 'location' | 'unknown';
+  hasMedia?: boolean;
+  mediaMime?: string;
 }
 
 interface ChatWindowProps {
@@ -137,39 +139,68 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
     switch (msg.type) {
       case 'audio':
         return (
-          <div className="flex items-center gap-2 py-1">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-              <Mic className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="flex flex-col">
+          <div className="flex flex-col gap-2 py-1 min-w-[200px]">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <Mic className="w-4 h-4 text-emerald-600" />
+              </div>
               <span className="text-[12px] text-slate-500 italic">Mensagem de áudio</span>
+            </div>
+            {msg.hasMedia ? (
+              <audio 
+                controls 
+                className="h-8 w-full max-w-[240px] [&::-webkit-media-controls-enclosure]:bg-emerald-50 [&::-webkit-media-controls-panel]:bg-emerald-50"
+              >
+                <source src={`/api/whatsapp/media/${msg.id}`} type={msg.mediaMime || 'audio/ogg'} />
+                Seu navegador não suporta áudio.
+              </audio>
+            ) : (
               <div className="flex gap-0.5 mt-1">
                 {[4,6,8,5,7,4,6,8,5,7,4,6].map((h, i) => (
                   <div key={i} className="w-1 bg-emerald-400 rounded-full opacity-70" style={{ height: h * 2 }} />
                 ))}
               </div>
-            </div>
+            )}
           </div>
         );
 
       case 'sticker':
         return (
           <div className="flex flex-col items-center py-1">
-            <span className="text-4xl">🎭</span>
-            <span className="text-[10px] text-slate-400 mt-1">Figurinha</span>
+            {msg.hasMedia ? (
+              <img 
+                src={`/api/whatsapp/media/${msg.id}`} 
+                alt="Figurinha" 
+                className="max-w-[120px] h-auto rounded-lg"
+              />
+            ) : (
+              <>
+                <span className="text-4xl">🎭</span>
+                <span className="text-[10px] text-slate-400 mt-1">Figurinha</span>
+              </>
+            )}
           </div>
         );
 
       case 'image':
         return (
-          <div className="flex items-center gap-2 py-1">
-            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-              <Image className="w-4 h-4 text-blue-600" />
-            </div>
-            <div>
-              <span className="text-[12px] text-slate-600 italic">Imagem</span>
-              {msg.text && <p className="text-[13px] text-slate-900 mt-0.5">{msg.text}</p>}
-            </div>
+          <div className="flex flex-col gap-2 py-1">
+            {msg.hasMedia ? (
+              <img 
+                src={`/api/whatsapp/media/${msg.id}`} 
+                alt="Imagem" 
+                className="max-w-full rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
+                onClick={() => window.open(`/api/whatsapp/media/${msg.id}`, '_blank')}
+              />
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <Image className="w-4 h-4 text-blue-600" />
+                </div>
+                <span className="text-[12px] text-slate-600 italic">Imagem</span>
+              </div>
+            )}
+            {msg.text && <p className="text-[13px] text-slate-900">{msg.text}</p>}
           </div>
         );
 

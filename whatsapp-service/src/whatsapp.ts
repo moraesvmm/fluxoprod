@@ -10,11 +10,13 @@ import makeWASocket, {
   proto,
   makeCacheableSignalKeyStore,
   fetchLatestBaileysVersion,
+  downloadMediaMessage,
+  WAMessage,
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import pino from 'pino';
 import * as QRCode from 'qrcode';
-import { MessageStore, Conversation, ChatMessage } from './store';
+import { MessageStore, MediaStore, Conversation, ChatMessage } from './store';
 import path from 'path';
 import fs from 'fs';
 
@@ -28,14 +30,16 @@ export class WhatsAppSession {
   private qrBase64: string | null = null;
   private status: ConnectionStatus = 'disconnected';
   private store: MessageStore;
+  private mediaStore: MediaStore;
   private authDir: string;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private qrRetryCount = 0;
   private maxQrRetries = 3; // Max QR code generations before stopping
 
-  constructor(store: MessageStore, authDir?: string) {
+  constructor(store: MessageStore, authDir?: string, mediaStore?: MediaStore) {
     this.store = store;
+    this.mediaStore = mediaStore || new MediaStore();
     // Prefer environment variable for persistent volume mounts in production (e.g., /data/auth_state)
     this.authDir = authDir || process.env.AUTH_DIR || path.join(process.cwd(), 'auth_state');
   }
@@ -50,6 +54,10 @@ export class WhatsAppSession {
 
   getStore(): MessageStore {
     return this.store;
+  }
+
+  getMediaStore(): MediaStore {
+    return this.mediaStore;
   }
 
   /**
@@ -207,8 +215,10 @@ export class WhatsAppSession {
         // Extrair nome do contato
         const pushName = msg.pushName || phone;
 
+        const messageId = msg.key.id || Date.now().toString();
+
         const chatMessage: ChatMessage = {
-          id: msg.key.id || Date.now().toString(),
+          id: messageId,
           from: phone,
           to: 'me',
           text: text || '',
@@ -217,6 +227,19 @@ export class WhatsAppSession {
           pushName,
           type,
         };
+
+        // Download de mídia em background (fire-and-forget, não bloqueia processamento)
+        if (['audio', 'sticker', 'image', 'video'].includes(type || '')) {
+          this.downloadAndStoreMedia(msg, messageId, type || 'unknown').then((result) => {
+            if (result) {
+              // Marcar na mensagem que mídia está disponível
+              chatMessage.hasMedia = true;
+              chatMessage.mediaMime = result.mime;
+            }
+          }).catch((err) => {
+            console.error(`[WhatsApp] Erro ao baixar mídia (${type}) de ${phone}:`, err.message);
+          });
+        }
 
         this.store.addMessage(phone, chatMessage);
         console.log(`[WhatsApp] Mensagem recebida de ${pushName} (${phone}): ${(text || type)?.substring(0, 50)}...`);
@@ -290,6 +313,36 @@ export class WhatsAppSession {
     }
 
     return { enviados, falhas, total: messages.length };
+  }
+
+  private async downloadAndStoreMedia(msg: proto.IWebMessageInfo, messageId: string, type: string): Promise<{ mime: string } | null> {
+    try {
+      const buffer = await downloadMediaMessage(
+        msg,
+        'buffer',
+        {},
+        {
+          logger,
+          rekey: false
+        }
+      );
+
+      let mime = 'application/octet-stream';
+      const m = msg.message;
+      if (m) {
+        if (type === 'audio') mime = m.audioMessage?.mimetype || 'audio/ogg; codecs=opus';
+        else if (type === 'sticker') mime = m.stickerMessage?.mimetype || 'image/webp';
+        else if (type === 'image') mime = m.imageMessage?.mimetype || 'image/jpeg';
+        else if (type === 'video') mime = m.videoMessage?.mimetype || 'video/mp4';
+      }
+
+      this.mediaStore.set(messageId, buffer as Buffer, mime);
+      console.log(`[WhatsApp] Mídia baixada e armazenada: ${messageId} (${type}, ${buffer.length} bytes)`);
+      return { mime };
+    } catch (err: any) {
+      console.error(`[WhatsApp] Erro no downloadMediaMessage (${type}):`, err.message);
+      return null;
+    }
   }
 
   private extractMessageType(msg: proto.IWebMessageInfo): ChatMessage['type'] {

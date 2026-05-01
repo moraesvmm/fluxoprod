@@ -128,5 +128,21 @@ export function createRoutes(session: WhatsAppSession): Router {
     res.json({ phone, messages, totalUnread: store.getTotalUnread() });
   });
 
+  // Obter arquivo de mídia binário
+  router.get('/media/:id', (req: Request, res: Response) => {
+    const messageId = req.params.id;
+    const mediaStore = session.getMediaStore();
+    
+    const media = mediaStore.get(messageId);
+    if (!media) {
+      res.status(404).json({ error: 'Mídia não encontrada ou já expirou.' });
+      return;
+    }
+
+    res.setHeader('Content-Type', media.mime);
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(media.buffer);
+  });
+
   return router;
 }

@@ -13,6 +13,36 @@ export interface ChatMessage {
   fromMe: boolean;
   pushName?: string;
   type?: 'text' | 'audio' | 'sticker' | 'image' | 'video' | 'document' | 'contact' | 'location' | 'unknown';
+  hasMedia?: boolean; // Flag indicando que há mídia disponível via /media/:id
+  mediaMime?: string; // MIME type da mídia (ex: audio/ogg, image/webp)
+}
+
+/**
+ * Armazenamento in-memory de mídia (buffers binários).
+ * Separado do MessageStore para não inflar o JSON das conversas.
+ * Limite de 200 itens com LRU simples (remove mais antigo).
+ */
+export class MediaStore {
+  private media: Map<string, { buffer: Buffer; mime: string; timestamp: number }> = new Map();
+  private maxItems = 200;
+
+  set(messageId: string, buffer: Buffer, mime: string): void {
+    if (this.media.size >= this.maxItems) {
+      // Remove o mais antigo (primeiro item do Map)
+      const oldestKey = this.media.keys().next().value;
+      if (oldestKey) this.media.delete(oldestKey);
+    }
+    this.media.set(messageId, { buffer, mime, timestamp: Date.now() });
+  }
+
+  get(messageId: string): { buffer: Buffer; mime: string } | null {
+    const entry = this.media.get(messageId);
+    return entry ? { buffer: entry.buffer, mime: entry.mime } : null;
+  }
+
+  has(messageId: string): boolean {
+    return this.media.has(messageId);
+  }
 }
 
 export interface Conversation {
