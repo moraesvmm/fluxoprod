@@ -30,6 +30,11 @@ BEGIN
                 v_funil_counts JSONB;
                 v_taxa_conversao JSONB;
                 v_velocidade_media NUMERIC;
+                v_reached_fechado INT;
+                v_reached_negociacao INT;
+                v_reached_proposta INT;
+                v_reached_qualificado INT;
+                v_reached_lead INT;
             BEGIN
                 -- Total de clientes
                 SELECT COUNT(*) INTO v_total_clientes
@@ -76,26 +81,33 @@ BEGIN
                 FROM clientes
                 WHERE deleted_at IS NULL;
                 
-                -- Taxa de conversão por fase
+                -- Calcular cumulativo para taxas de conversão precisas (aproximação em snapshot)
+                v_reached_fechado := COALESCE((v_funil_counts->>''fechado'')::INT, 0);
+                v_reached_negociacao := v_reached_fechado + COALESCE((v_funil_counts->>''negociacao'')::INT, 0);
+                v_reached_proposta := v_reached_negociacao + COALESCE((v_funil_counts->>''proposta'')::INT, 0);
+                v_reached_qualificado := v_reached_proposta + COALESCE((v_funil_counts->>''qualificado'')::INT, 0);
+                v_reached_lead := v_reached_qualificado + COALESCE((v_funil_counts->>''lead'')::INT, 0) + COALESCE((v_funil_counts->>''perdido'')::INT, 0);
+                
+                -- Taxa de conversão por fase (Cumulativa)
                 SELECT json_build_object(
                     ''lead_to_qualificado'', CASE 
-                        WHEN (v_funil_counts->>''lead'')::INT > 0 
-                        THEN ROUND(((v_funil_counts->>''qualificado'')::NUMERIC / (v_funil_counts->>''lead'')::NUMERIC) * 100, 2)
+                        WHEN v_reached_lead > 0 
+                        THEN ROUND((v_reached_qualificado::NUMERIC / v_reached_lead::NUMERIC) * 100, 2)
                         ELSE 0 
                     END,
                     ''qualificado_to_proposta'', CASE 
-                        WHEN (v_funil_counts->>''qualificado'')::INT > 0 
-                        THEN ROUND(((v_funil_counts->>''proposta'')::NUMERIC / (v_funil_counts->>''qualificado'')::NUMERIC) * 100, 2)
+                        WHEN v_reached_qualificado > 0 
+                        THEN ROUND((v_reached_proposta::NUMERIC / v_reached_qualificado::NUMERIC) * 100, 2)
                         ELSE 0 
                     END,
                     ''proposta_to_negociacao'', CASE 
-                        WHEN (v_funil_counts->>''proposta'')::INT > 0 
-                        THEN ROUND(((v_funil_counts->>''negociacao'')::NUMERIC / (v_funil_counts->>''proposta'')::NUMERIC) * 100, 2)
+                        WHEN v_reached_proposta > 0 
+                        THEN ROUND((v_reached_negociacao::NUMERIC / v_reached_proposta::NUMERIC) * 100, 2)
                         ELSE 0 
                     END,
                     ''negociacao_to_fechado'', CASE 
-                        WHEN (v_funil_counts->>''negociacao'')::INT > 0 
-                        THEN ROUND(((v_funil_counts->>''fechado'')::NUMERIC / (v_funil_counts->>''negociacao'')::NUMERIC) * 100, 2)
+                        WHEN v_reached_negociacao > 0 
+                        THEN ROUND((v_reached_fechado::NUMERIC / v_reached_negociacao::NUMERIC) * 100, 2)
                         ELSE 0 
                     END
                 ) INTO v_taxa_conversao;
