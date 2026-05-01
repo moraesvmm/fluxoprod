@@ -16,10 +16,10 @@ interface ConversationItem {
 interface ChatDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  isConnected: boolean;
+  status: string;
 }
 
-export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
+export function ChatDrawer({ isOpen, onClose, status }: ChatDrawerProps) {
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [selectedPhone, setSelectedPhone] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,12 +42,12 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
   }, []);
 
   useEffect(() => {
-    if (isOpen && isConnected) {
+    if (isOpen && (status === "connected" || status === "connecting")) {
       fetchConversations(false);
       const interval = setInterval(() => fetchConversations(true), 4000);
       return () => clearInterval(interval);
     }
-  }, [isOpen, isConnected, fetchConversations]);
+  }, [isOpen, status, fetchConversations]);
 
   const filteredConversations = conversations.filter(
     (c) =>
@@ -116,8 +116,8 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
             <div className="flex-1">
               <div className="font-semibold text-lg">WhatsApp</div>
               <div className="text-xs text-white/70 flex items-center gap-1">
-                <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`} />
-                {isConnected ? "Conectado" : "Desconectado"}
+                <span className={`w-2 h-2 rounded-full ${status === "connected" ? "bg-green-400" : status === "connecting" ? "bg-amber-400 animate-pulse" : "bg-red-400"}`} />
+                {status === "connected" ? "Conectado" : status === "connecting" ? "Sincronizando..." : "Desconectado"}
               </div>
             </div>
           </>
@@ -131,7 +131,7 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
       </div>
 
       {/* Conteúdo */}
-      {!isConnected ? (
+      {status === "disconnected" ? (
         /* Estado Desconectado */
         <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-4">
           <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center">
@@ -159,6 +159,12 @@ export function ChatDrawer({ isOpen, onClose, isConnected }: ChatDrawerProps) {
       ) : (
         /* Lista de Conversas */
         <div className="flex-1 flex flex-col overflow-hidden">
+          {status === "connecting" && (
+            <div className="bg-amber-50 border-b border-amber-200 px-3 py-2 flex items-center gap-2 text-amber-800 text-[11px] font-medium">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />
+              Sincronizando. O envio de mensagens pode atrasar.
+            </div>
+          )}
           {/* Busca */}
           <div className="px-3 py-2 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
             <div className="relative flex-1">

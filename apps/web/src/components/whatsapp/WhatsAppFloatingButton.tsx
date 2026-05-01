@@ -17,7 +17,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 export function WhatsAppFloatingButton() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
-  const [isConnected, setIsConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<string>("disconnected");
   const [isServiceAvailable, setIsServiceAvailable] = useState(false);
   const dragControls = useDragControls();
   const constraintsRef = useRef<HTMLDivElement>(null);
@@ -28,7 +28,7 @@ export function WhatsAppFloatingButton() {
       const res = await fetch("/api/whatsapp/status");
       if (res.ok) {
         const data = await res.json();
-        setIsConnected(data.connected || false);
+        setConnectionStatus(data.status || "disconnected");
         setTotalUnread(data.totalUnread || 0);
         setIsServiceAvailable(!data.serviceDown);
       }
@@ -64,7 +64,7 @@ export function WhatsAppFloatingButton() {
         className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center cursor-pointer pointer-events-auto transition-all duration-300 bg-primary/20 backdrop-blur-xl border border-primary/30 ring-1 ring-primary/20"
         whileHover={{ scale: 1.1, y: -4, backgroundColor: "rgba(var(--primary), 0.25)" }}
         whileTap={{ scale: 0.95 }}
-        title={isConnected ? "WhatsApp Fluxo" : "WhatsApp desconectado"}
+        title={connectionStatus === "connected" ? "WhatsApp Fluxo" : "WhatsApp " + connectionStatus}
       >
         <div className="relative flex items-center justify-center">
            {/* Ícone com cor primária forte para não sumir no branco */}
@@ -88,8 +88,10 @@ export function WhatsAppFloatingButton() {
         {/* Indicador de status elegante */}
         <span
           className={`absolute bottom-2 right-2 w-2.5 h-2.5 rounded-full shadow-sm ${
-            isConnected 
+            connectionStatus === "connected" 
               ? "bg-emerald-500 shadow-emerald-500/50" 
+              : connectionStatus === "connecting" || connectionStatus === "qr_pending"
+              ? "bg-amber-500 shadow-amber-500/50 animate-pulse"
               : "bg-rose-500 shadow-rose-500/50"
           }`}
         />
@@ -104,7 +106,7 @@ export function WhatsAppFloatingButton() {
               setIsDrawerOpen(false);
               fetchStatus(); // Atualizar badge ao fechar
             }}
-            isConnected={isConnected}
+            status={connectionStatus}
           />
         )}
       </AnimatePresence>

@@ -184,7 +184,7 @@ export function WhatsAppConnection() {
         </div>
       )}
 
-      {(status === "qr_pending" || status === "connecting") && (
+      {status === "qr_pending" && (
         <div className="space-y-4">
           <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
             <h4 className="font-medium text-emerald-800 text-sm mb-2">Como conectar:</h4>
@@ -227,6 +227,29 @@ export function WhatsAppConnection() {
             className="w-full px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
           >
             Cancelar
+          </button>
+        </div>
+      )}
+
+      {status === "connecting" && (
+        <div className="space-y-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 flex flex-col gap-3">
+            <h4 className="font-medium text-amber-800 text-sm flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 animate-spin" />
+              Sincronizando com o aparelho...
+            </h4>
+            <p className="text-sm text-amber-700 leading-relaxed">
+              Sua sessão já está salva! O sistema está aguardando o seu celular restabelecer o sinal de internet para retomar a comunicação.
+            </p>
+          </div>
+          
+          <button
+            onClick={handleDisconnect}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors disabled:opacity-50 mt-4 border border-slate-200 shadow-sm"
+          >
+            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Power className="w-4 h-4" />}
+            {loading ? "Desconectando..." : "Forçar Desconexão (Gerar novo QR)"}
           </button>
         </div>
       )}
