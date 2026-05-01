@@ -227,9 +227,9 @@ export default function RHPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowConfig(true)}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 h-10 px-4 py-2"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-border bg-card text-foreground hover:bg-muted/50 h-10 px-4 py-2 shadow-sm"
           >
-            <Settings className="mr-2 h-4 w-4 text-slate-500" />
+            <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
             Configurações
           </button>
           <button
@@ -254,14 +254,14 @@ export default function RHPage() {
       </div>
 
       {/* Tabela */}
-      <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
+      <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between bg-muted/20">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
               placeholder="Buscar por nome, cargo ou email..."
-              className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full bg-background border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div className="flex items-center gap-3">
@@ -277,7 +277,7 @@ export default function RHPage() {
             )}
             <button
               onClick={exportarFuncionarios}
-              className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-foreground transition-colors font-medium"
             >
               <Download className="h-4 w-4" />
               Exportar
@@ -312,9 +312,9 @@ export default function RHPage() {
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
-                    <Briefcase className="h-10 w-10 text-slate-200" />
-                    <p className="text-slate-500 text-sm">Nenhum colaborador cadastrado</p>
-                    <p className="text-slate-400 text-xs">Clique em &quot;Adicionar Colaborador&quot; para começar.</p>
+                    <Users className="h-10 w-10 text-muted/30" />
+                    <p className="text-foreground/60 text-sm font-medium">Nenhum colaborador cadastrado</p>
+                    <p className="text-muted-foreground text-xs">Clique em &quot;Adicionar Colaborador&quot; para começar.</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -325,8 +325,8 @@ export default function RHPage() {
                 const atrasado = diaEfetivo && diaAtual > diaEfetivo;
 
                 return (
-                  <TableRow key={f.id}>
-                    <TableCell className="font-medium text-slate-900">
+                  <TableRow key={f.id} className="hover:bg-muted/30">
+                    <TableCell className="font-medium text-foreground">
                       <div className="flex items-center gap-2">
                         {f.nome}
                         {pendente && diaEfetivo && diaAtual >= diaEfetivo && (
@@ -340,7 +340,7 @@ export default function RHPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                      <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
                         {f.cargo}
                       </span>
                     </TableCell>
@@ -428,7 +428,7 @@ export default function RHPage() {
             </button>
             <button
               onClick={() => setShowConfig(false)}
-              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground/80 px-4 py-2 rounded-md text-sm font-medium hover:bg-muted/80 transition-colors border border-border"
             >
               Cancelar
             </button>
@@ -441,69 +441,69 @@ export default function RHPage() {
         <form onSubmit={criarFuncionario} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Nome Completo *</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Nome Completo *</label>
               <input
                 type="text"
                 value={formData.nome}
                 onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: João Silva"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Cargo *</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Cargo *</label>
               <input
                 type="text"
                 value={formData.cargo}
                 onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: Vendedor"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Email</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="email@empresa.com"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Telefone</label>
               <input
                 type="tel"
                 value={formData.telefone}
                 onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="(00) 00000-0000"
               />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Salário Mensal</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Salário Mensal</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.salario}
                 onChange={(e) => setFormData({ ...formData, salario: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: 2500.00"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Dia de Pagamento Individual</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Dia de Pagamento Individual</label>
               <input
                 type="number"
                 min="1"
                 max="31"
                 value={formData.dia_pagamento}
                 onChange={(e) => setFormData({ ...formData, dia_pagamento: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: 10 (Opcional)"
               />
             </div>
@@ -518,7 +518,7 @@ export default function RHPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground/80 px-4 py-2 rounded-md text-sm font-medium hover:bg-muted/80 transition-colors border border-border"
             >
               Cancelar
             </button>
@@ -531,69 +531,69 @@ export default function RHPage() {
         <form onSubmit={editarFuncionario} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Nome Completo *</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Nome Completo *</label>
               <input
                 type="text"
                 value={formData.nome}
                 onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: João Silva"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Cargo *</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Cargo *</label>
               <input
                 type="text"
                 value={formData.cargo}
                 onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: Vendedor"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Email</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="email@empresa.com"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Telefone</label>
               <input
                 type="tel"
                 value={formData.telefone}
                 onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="(00) 00000-0000"
               />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Salário Mensal</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Salário Mensal</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.salario}
                 onChange={(e) => setFormData({ ...formData, salario: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: 2500.00"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Dia de Pagamento Individual</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Dia de Pagamento Individual</label>
               <input
                 type="number"
                 min="1"
                 max="31"
                 value={formData.dia_pagamento}
                 onChange={(e) => setFormData({ ...formData, dia_pagamento: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: 10 (Opcional)"
               />
             </div>

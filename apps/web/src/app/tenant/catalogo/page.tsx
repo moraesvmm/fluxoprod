@@ -274,14 +274,14 @@ export default function CatalogoPage() {
         />
       </div>
 
-      <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
+      <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between bg-muted/20">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
               placeholder="Buscar por nome, SKU ou categoria..."
-              className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full bg-background border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>
@@ -314,31 +314,31 @@ export default function CatalogoPage() {
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
-                    <Tags className="h-10 w-10 text-slate-200" />
-                    <p className="text-slate-500 text-sm">Nenhum produto cadastrado</p>
-                    <p className="text-slate-400 text-xs">Clique em &quot;Adicionar Produto&quot; para começar.</p>
+                    <Package className="h-10 w-10 text-muted/30" />
+                    <p className="text-foreground/60 text-sm font-medium">Nenhum produto cadastrado</p>
+                    <p className="text-muted-foreground text-xs">Clique em &quot;Adicionar Produto&quot; para começar.</p>
                   </div>
                 </TableCell>
               </TableRow>
             ) : (
               produtosComFiscal.map((p) => (
-                <TableRow key={p.id}>
+                <TableRow key={p.id} className="hover:bg-muted/30">
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-medium text-slate-900">{p.nome}</span>
+                      <span className="font-medium text-foreground">{p.nome}</span>
                       {p.descricao && <span className="text-xs text-muted-foreground line-clamp-1">{p.descricao}</span>}
                     </div>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-slate-500">{p.sku || "—"}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">{p.sku || "—"}</TableCell>
                   <TableCell>
                     {p.categoria ? (
-                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                      <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-foreground/80">
                         {p.categoria}
                       </span>
                     ) : "—"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{formatarMoeda(p.preco_custo)}</TableCell>
-                  <TableCell className="font-medium text-slate-900">{formatarMoeda(p.preco_venda)}</TableCell>
+                  <TableCell className="font-medium text-foreground">{formatarMoeda(p.preco_venda)}</TableCell>
                   <TableCell>
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -376,117 +376,117 @@ export default function CatalogoPage() {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Adicionar Produto ao Catálogo">
         <form onSubmit={criarProduto} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Produto *</label>
+            <label className="block text-sm font-medium text-foreground/80 mb-1">Nome do Produto *</label>
             <input
               type="text"
               value={formData.nome}
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
               placeholder="Ex: Cabo USB-C 100W"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+            <label className="block text-sm font-medium text-foreground/80 mb-1">Descrição</label>
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
               rows={2}
               placeholder="Descrição detalhada do produto..."
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">SKU</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">SKU</label>
               <input
                 type="text"
                 value={formData.sku}
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: CB-USBC-100W"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Categoria</label>
               <input
                 type="text"
                 value={formData.categoria}
                 onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: Acessórios"
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Preço de Custo</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Preço de Custo</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.preco_custo}
                 onChange={(e) => setFormData({ ...formData, preco_custo: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="R$ 0,00"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Preço de Venda</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Preço de Venda</label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.preco_venda}
                 onChange={(e) => setFormData({ ...formData, preco_venda: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="R$ 0,00"
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Estoque Inicial</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Estoque Inicial</label>
               <input
                 type="number"
                 value={formData.estoque_atual}
                 onChange={(e) => setFormData({ ...formData, estoque_atual: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
                 placeholder="0"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Estoque Mínimo</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Estoque Mínimo</label>
               <input
                 type="number"
                 value={formData.estoque_minimo}
                 onChange={(e) => setFormData({ ...formData, estoque_minimo: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
                 placeholder="10"
               />
             </div>
           </div>
 
-          <div className="border-t border-slate-100 pt-4">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Informações Fiscais (NFe)</h4>
+          <div className="border-t border-border pt-4">
+            <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Informações Fiscais (NFe)</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">NCM</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">NCM</label>
                 <input
                   type="text"
                   maxLength={8}
                   value={formData.ncm}
                   onChange={(e) => setFormData({ ...formData, ncm: e.target.value })}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                   placeholder="Ex: 85444200"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">CFOP Padrão</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">CFOP Padrão</label>
                 <input
                   type="text"
                   maxLength={4}
                   value={formData.cfop_padrao}
                   onChange={(e) => setFormData({ ...formData, cfop_padrao: e.target.value })}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                   placeholder="Ex: 5102"
                 />
               </div>
@@ -520,7 +520,7 @@ export default function CatalogoPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground/80 px-4 py-2 rounded-md text-sm font-medium hover:bg-muted/80 transition-colors border border-border"
             >
               Cancelar
             </button>
@@ -531,34 +531,34 @@ export default function CatalogoPage() {
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Produto">
         <form onSubmit={editarProduto} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Produto *</label>
+            <label className="block text-sm font-medium text-foreground/80 mb-1">Nome do Produto *</label>
             <input
               type="text"
               value={formData.nome}
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
               placeholder="Ex: Cabo USB-C 100W"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+            <label className="block text-sm font-medium text-foreground/80 mb-1">Descrição</label>
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
               rows={2}
               placeholder="Descrição detalhada do produto..."
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">SKU</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">SKU</label>
               <input
                 type="text"
                 value={formData.sku}
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Ex: CB-USBC-100W"
               />
             </div>

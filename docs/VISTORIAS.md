@@ -688,3 +688,46 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
   - **Browser Fingerprint:** Atualizado fingerprint para `Fluxo ERP (Chrome)` para reduzir chances de detecção de bot.
   - **Fix de Build (Docker):** Alterado `npm ci` para `npm install` no Dockerfile para suportar ambientes sem `package-lock.json` no subdiretório do monorepo.
   - ** Railway Config:** Adicionado `railway.json` local ao serviço de WhatsApp para forçar o uso do Dockerfile builder e isolar o contexto de deploy.
+
+---
+
+## VISTORIA 55: Estabilização de Infraestrutura WhatsApp e Padronização Dark Mode Premium
+- **Data: 01/05/2026**
+- **Status: PENDENTE (Realizar vistoria o mais rápido possível)**
+- **Alterações:**
+  - **WhatsApp (Infraestrutura)**:
+    - Resolução definitiva do erro 403 Forbidden no build da Vercel via `vercel.json` e isolamento de estado no `WhatsAppFloatingButton`.
+    - Conectividade direta: URLs e API Keys de produção do Railway foram fixadas nas rotas de API do Next.js para evitar problemas de cache de variáveis de ambiente.
+    - UI: Implementação de Glassmorphism no botão flutuante e painel de conexão.
+  - **Design System (Dark Mode)**:
+    - Padronização visual dos módulos de **CRM** e **Financeiro**.
+    - Substituição de cores estáticas (`bg-white`, `text-slate-900`) por tokens semânticos (`bg-card`, `text-foreground`, `border-border`).
+    - Refinamento de contraste em inputs, labels, tabelas e modais para garantir legibilidade e estética premium no tema escuro.
+  - **Estabilidade**: Sincronização de todos os commits e deploys entre GitHub, Vercel e Railway.
+- **Pendência**: Validar a experiência de uso no módulo de Obras e Vendas sob o novo padrão visual.
+
+---
+
+### VISTORIA 56 - Padronização UI Dark Mode (Premium)
+**Data:** 01/05/2026
+**Status:** ✅ CONCLUÍDO
+**Responsável:** Antigravity
+
+#### Alterações Realizadas:
+1.  **Módulo Catálogo:** Migração total de `bg-white` e `text-slate-900` para `bg-card` e `text-foreground`. Padronização de modais e tabelas.
+2.  **Módulo RH e Equipe:** Substituição de cores estáticas por tokens semânticos. Atualização de badges (cargos) e alertas de pagamento para alto contraste.
+3.  **Módulo Relatórios:** Redesenho da interface de listagem e botões de exportação. Implementação de estados de loading temáticos e contraste de tabela aprimorado.
+4.  **Módulo Configurações:** Auditoria completa de inputs, selects e containers. Conversão de seções de faturamento e dados fiscais para o sistema de cores dinâmico.
+5.  **Global:** Refinamento de sombras (`shadow-sm`) e bordas (`border-border`) para garantir profundidade visual em temas escuros.
+
+#### Arquivos Modificados:
+- `apps/web/src/app/tenant/catalogo/page.tsx`
+- `apps/web/src/app/tenant/rh/page.tsx`
+- `apps/web/src/app/tenant/relatorios/page.tsx`
+- `apps/web/src/app/tenant/configuracoes/page.tsx`
+
+#### Próximos Passos Sugeridos:
+- Realizar teste de fumaça (smoke test) em dispositivos móveis para validar contraste sob luz solar.
+- Verificar consistência em módulos menores (Obras, Vendas/PDV) que podem conter resquícios de cores estáticas.
+
+---

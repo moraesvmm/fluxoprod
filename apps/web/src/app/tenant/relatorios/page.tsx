@@ -426,16 +426,16 @@ export default function RelatoriosPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleExport("csv")}
-            className="inline-flex items-center justify-center rounded-md border border-border bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted/50 shadow-sm"
           >
-            <Download className="mr-2 h-4 w-4" />
+            <Download className="mr-2 h-4 w-4 text-muted-foreground" />
             CSV
           </button>
           <button
             onClick={() => handleExport("pdf")}
-            className="inline-flex items-center justify-center rounded-md border border-border bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted/50 shadow-sm"
           >
-            <FileText className="mr-2 h-4 w-4" />
+            <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
             PDF
           </button>
         </div>
@@ -453,45 +453,48 @@ export default function RelatoriosPage() {
             <button
               key={type}
               onClick={() => setReportType(type)}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-md px-4 py-2 text-sm font-medium transition-all shadow-sm ${
                 reportType === type
-                  ? "bg-primary text-primary-foreground"
-                  : "border border-border bg-white text-slate-700 hover:bg-slate-50"
+                  ? "bg-primary text-primary-foreground shadow-primary/20"
+                  : "border border-border bg-card text-foreground/70 hover:bg-muted/50 hover:text-foreground"
               }`}
             >
-              {type}
+              {type.toUpperCase()}
             </button>
           )
         )}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="hover:bg-transparent bg-muted/20">
               {REPORT_HEADERS[reportType].map((header) => (
-                <TableHead key={header}>{header}</TableHead>
+                <TableHead key={header} className="text-foreground/70 font-semibold py-4">{header}</TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={REPORT_HEADERS[reportType].length} className="py-8 text-center">
-                  Carregando relatório...
+                <TableCell colSpan={REPORT_HEADERS[reportType].length} className="py-12 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    <span className="text-muted-foreground text-sm">Carregando relatório...</span>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={REPORT_HEADERS[reportType].length} className="py-8 text-center">
+                <TableCell colSpan={REPORT_HEADERS[reportType].length} className="py-12 text-center text-muted-foreground">
                   Nenhum registro encontrado.
                 </TableCell>
               </TableRow>
             ) : (
               rows.map((row, index) => (
-                <TableRow key={row.id || index}>
+                <TableRow key={row.id || index} className="hover:bg-muted/30 border-border">
                   {REPORT_HEADERS[reportType].map((header) => (
-                    <TableCell key={header}>{renderCellValue(row, header)}</TableCell>
+                    <TableCell key={header} className="text-foreground/80 py-4 font-medium">{renderCellValue(row, header)}</TableCell>
                   ))}
                 </TableRow>
               ))
