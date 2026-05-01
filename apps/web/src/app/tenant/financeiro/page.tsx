@@ -242,7 +242,7 @@ export default function FinanceiroPage() {
         <div className="flex items-center gap-2">
           <button 
             onClick={verFluxoCaixa}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-border hover:bg-slate-50 text-slate-700 h-10 px-4 py-2"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border hover:bg-muted/50 text-foreground h-10 px-4 py-2 shadow-sm"
           >
             Ver Fluxo de Caixa
           </button>
@@ -276,49 +276,49 @@ export default function FinanceiroPage() {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-xl border border-border shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Nova Transação</h3>
+        <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+          <h3 className="text-lg font-semibold mb-4 text-foreground">Nova Transação</h3>
           <form onSubmit={criarTransacao} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição *</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Descrição *</label>
                 <input
                   type="text"
                   value={formData.descricao}
                   onChange={(e) => setFormData({...formData, descricao: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="Ex: Venda de produtos, pagamento de fornecedor"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Valor *</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Valor *</label>
                 <input
                   type="number"
                   step="0.01"
                   value={formData.valor}
                   onChange={(e) => setFormData({...formData, valor: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="0,00"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Data de Vencimento *</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Data de Vencimento *</label>
                 <input
                   type="date"
                   value={formData.data_vencimento}
                   onChange={(e) => setFormData({...formData, data_vencimento: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-background text-foreground"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tipo *</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Tipo *</label>
                 <select
                   value={formData.tipo}
                   onChange={(e) => setFormData({...formData, tipo: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-background text-foreground"
                   required
                 >
                   <option value="receber">Receita (a receber)</option>
@@ -326,12 +326,12 @@ export default function FinanceiroPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Categoria</label>
                 <input
                   type="text"
                   value={formData.categoria}
                   onChange={(e) => setFormData({...formData, categoria: e.target.value})}
-                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="Ex: Vendas, Aluguel, Marketing"
                 />
               </div>
@@ -346,7 +346,7 @@ export default function FinanceiroPage() {
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+                className="bg-muted text-foreground/80 px-4 py-2 rounded-md text-sm font-medium hover:bg-muted/80 transition-colors border border-border"
               >
                 Cancelar
               </button>
@@ -439,7 +439,7 @@ export default function FinanceiroPage() {
               <button
                 type="button"
                 onClick={() => setShowEditModal(false)}
-                className="bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+                className="bg-muted text-foreground/80 px-4 py-2 rounded-md text-sm font-medium hover:bg-muted/80 transition-colors border border-border"
               >
                 Cancelar
               </button>
@@ -449,19 +449,19 @@ export default function FinanceiroPage() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <KPICard title="Entradas (Total)" value={formatarValor(totalEntradas)} icon={ArrowDownToLine} className="border-emerald-200" />
-        <KPICard title="Saídas (Total)" value={formatarValor(totalSaidas)} icon={ArrowUpFromLine} className="border-red-200" />
-        <KPICard title="Transações Pendentes" value={String(pendentes)} icon={RefreshCcw} className="border-amber-200 bg-amber-50/10" />
+        <KPICard title="Entradas (Total)" value={formatarValor(totalEntradas)} icon={ArrowDownToLine} className="border-emerald-500/20 bg-emerald-500/5" />
+        <KPICard title="Saídas (Total)" value={formatarValor(totalSaidas)} icon={ArrowUpFromLine} className="border-red-500/20 bg-red-500/5" />
+        <KPICard title="Transações Pendentes" value={String(pendentes)} icon={RefreshCcw} className="border-amber-500/20 bg-amber-500/5" />
       </div>
 
-      <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
+      <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between bg-muted/20">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
               placeholder="Buscar histórico bancário..."
-              className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full bg-background border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>
@@ -497,9 +497,9 @@ export default function FinanceiroPage() {
               </TableRow>
             ) : (
               transacoes?.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow key={item.id} className="hover:bg-muted/30">
                   <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
-                  <TableCell className="font-medium text-slate-900">{item.descricao}</TableCell>
+                  <TableCell className="font-medium text-foreground">{item.descricao}</TableCell>
                   <TableCell>
                     <span className={item.tipo === 'receber' ? 'text-emerald-600' : 'text-red-600'}>
                       {item.tipo === 'receber' ? 'Receita' : 'Despesa'}

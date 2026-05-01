@@ -244,20 +244,20 @@ export default function CRMPage() {
 
       {/* Modal de Campanha em Massa */}
       {showCampanhaModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-lg max-w-2xl w-full max-h-[90vh] overflow-auto">
-            <div className="p-6 border-b border-slate-200">
-              <h3 className="text-lg font-semibold">Campanha em Massa</h3>
-              <p className="text-sm text-slate-500 mt-1">Enviar mensagem para {clientes.length} clientes</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-xl border border-border shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-lg font-semibold text-foreground">Campanha em Massa</h3>
+              <p className="text-sm text-muted-foreground mt-1">Enviar mensagem para {clientes.length} clientes</p>
             </div>
             
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Envio</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Tipo de Envio</label>
                 <select
                   value={campanhaData.tipo}
                   onChange={(e) => setCampanhaData({ ...campanhaData, tipo: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                 >
                   <option value="email">E-mail</option>
                   <option value="whatsapp">WhatsApp</option>
@@ -266,23 +266,23 @@ export default function CRMPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Título *</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Título *</label>
                 <input
                   type="text"
                   value={campanhaData.titulo}
                   onChange={(e) => setCampanhaData({ ...campanhaData, titulo: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="Título da campanha"
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Mensagem *</label>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Mensagem *</label>
                 <textarea
                   value={campanhaData.mensagem}
                   onChange={(e) => setCampanhaData({ ...campanhaData, mensagem: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="Mensagem da campanha..."
                   rows={6}
                   required
@@ -291,24 +291,24 @@ export default function CRMPage() {
               
               {/* Preview */}
               {campanhaData.titulo || campanhaData.mensagem ? (
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <h4 className="text-sm font-medium text-slate-700 mb-2">Preview</h4>
-                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                <div className="bg-muted/30 rounded-lg p-4 border border-border">
+                  <h4 className="text-sm font-medium text-foreground/70 mb-2">Preview</h4>
+                  <div className="bg-card rounded-lg p-4 border border-border">
                     {campanhaData.titulo && (
-                      <div className="font-semibold text-slate-900 mb-2">{campanhaData.titulo}</div>
+                      <div className="font-semibold text-foreground mb-2">{campanhaData.titulo}</div>
                     )}
                     {campanhaData.mensagem && (
-                      <div className="text-sm text-slate-600 whitespace-pre-wrap">{campanhaData.mensagem}</div>
+                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">{campanhaData.mensagem}</div>
                     )}
                   </div>
                 </div>
               ) : null}
             </div>
             
-            <div className="p-6 border-t border-slate-200 flex gap-2 justify-end">
+            <div className="p-6 border-t border-border flex gap-2 justify-end">
               <button
                 onClick={() => setShowCampanhaModal(false)}
-                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+                className="px-4 py-2 bg-muted text-foreground/80 rounded-md text-sm font-medium hover:bg-muted/80 transition-colors"
               >
                 Cancelar
               </button>
@@ -355,9 +355,9 @@ export default function CRMPage() {
             </button>
             <button
               onClick={() => setShowImportModal(true)}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 h-10 px-4 py-2"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border text-foreground hover:bg-muted/50 h-10 px-4 py-2 shadow-sm"
             >
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              <FileSpreadsheet className="mr-2 h-4 w-4 text-emerald-500" />
               Importar Excel
             </button>
             <button
@@ -378,8 +378,8 @@ export default function CRMPage() {
             onClick={() => setViewMode('lista')}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               viewMode === 'lista'
-                ? 'text-violet-600 border-b-2 border-violet-600'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Lista
@@ -388,8 +388,8 @@ export default function CRMPage() {
             onClick={() => setViewMode('pipeline')}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               viewMode === 'pipeline'
-                ? 'text-violet-600 border-b-2 border-violet-600'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <LayoutGrid className="w-4 h-4 inline mr-1" />
@@ -405,33 +405,33 @@ export default function CRMPage() {
           <form onSubmit={criarCliente} className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
-                <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="Nome completo" required />
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Nome *</label>
+                <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-muted/20 text-foreground" placeholder="Nome completo" required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="(00) 00000-0000" />
+                  <label className="block text-sm font-medium text-foreground/80 mb-1">Telefone</label>
+                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-muted/20 text-foreground" placeholder="(00) 00000-0000" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
-                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="000.000.000-00" />
+                  <label className="block text-sm font-medium text-foreground/80 mb-1">CPF/CNPJ</label>
+                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-muted/20 text-foreground" placeholder="000.000.000-00" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="email@exemplo.com" />
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Email</label>
+                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-muted/20 text-foreground" placeholder="email@exemplo.com" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
-                <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="Endereço completo" />
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Endereço</label>
+                <input type="text" value={formData.endereco} onChange={(e) => setFormData({...formData, endereco: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-muted/20 text-foreground" placeholder="Endereço completo" />
               </div>
             </div>
             <div className="flex gap-2 pt-4 border-t border-border mt-6">
               <button type="submit" disabled={createMutation.isPending} className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
                 {createMutation.isPending ? "Salvando..." : "Salvar Cliente"}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-muted text-foreground/80 rounded-md text-sm font-medium hover:bg-muted/80 transition-colors border border-border">
                 Cancelar
               </button>
             </div>
@@ -493,7 +493,7 @@ export default function CRMPage() {
             >
               {updateMutation.isPending ? "Salvando..." : "Atualizar Cliente"}
             </button>
-            <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+            <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 bg-muted text-foreground/80 rounded-md text-sm font-medium hover:bg-muted/80 transition-colors border border-border">
               Cancelar
             </button>
           </div>
@@ -502,8 +502,8 @@ export default function CRMPage() {
         {viewMode === 'pipeline' ? (
           <KanbanPipeline />
         ) : (
-          <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50 gap-4">
+          <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-border flex items-center justify-between bg-muted/20 gap-4">
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <input
@@ -511,7 +511,7 @@ export default function CRMPage() {
                   placeholder="Buscar por nome, telefone ou email..."
                   value={buscaCliente}
                   onChange={e => setBuscaCliente(e.target.value)}
-                  className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full bg-background border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <FiltroTags onFiltroChange={(tags, operador) => console.log('Filtro:', tags, operador)} />
@@ -548,9 +548,9 @@ export default function CRMPage() {
                   </TableRow>
                 ) : (
                   clientes.map((item: any) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium text-slate-900">{item.nome}</TableCell>
-                      <TableCell className="font-mono text-xs text-slate-600">{item.cpf_cnpj || '-'}</TableCell>
+                    <TableRow key={item.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium text-foreground">{item.nome}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{item.cpf_cnpj || '-'}</TableCell>
                         <TableCell>
                           <div className="flex flex-col">
                             <span className="text-sm">{item.telefone || '-'}</span>
