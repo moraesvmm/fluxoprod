@@ -55,7 +55,7 @@ export function WhatsAppFloatingButton() {
         style={{ zIndex: 9998 }}
       />
 
-      {/* Botão Flutuante */}
+      {/* Botão Flutuante Estilo Vidro (Glassmorphism) */}
       <motion.button
         drag
         dragControls={dragControls}
@@ -63,31 +63,37 @@ export function WhatsAppFloatingButton() {
         dragElastic={0.1}
         dragMomentum={false}
         onClick={() => setIsDrawerOpen(true)}
-        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full shadow-lg flex items-center justify-center cursor-pointer pointer-events-auto transition-shadow hover:shadow-xl active:shadow-md bg-primary text-primary-foreground"
-        whileHover={{ scale: 1.08 }}
+        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center cursor-pointer pointer-events-auto transition-all duration-300 hover:shadow-primary/20 bg-white/10 dark:bg-primary/20 backdrop-blur-xl border border-white/20 dark:border-primary/30 ring-1 ring-white/10"
+        whileHover={{ scale: 1.1, y: -4, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
         whileTap={{ scale: 0.95 }}
-        title={isConnected ? "Abrir conversas do WhatsApp" : "WhatsApp desconectado"}
+        title={isConnected ? "WhatsApp Fluxo" : "WhatsApp desconectado"}
       >
-        <WhatsAppIcon className="w-7 h-7 text-white" />
+        <div className="relative">
+           <WhatsAppIcon className="w-8 h-8 text-primary dark:text-white drop-shadow-sm" />
+           {/* Efeito de brilho interno */}
+           <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
 
-        {/* Badge de não lidas */}
+        {/* Badge de não lidas com animação de pulso */}
         <AnimatePresence>
           {totalUnread > 0 && (
             <motion.span
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale: 0, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0 }}
-              className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center shadow-md border-2 border-white"
+              className="absolute -top-2 -right-2 min-w-[24px] h-[24px] px-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-black flex items-center justify-center shadow-lg shadow-primary/40 border border-white/20"
             >
               {totalUnread > 99 ? "99+" : totalUnread}
             </motion.span>
           )}
         </AnimatePresence>
 
-        {/* Indicador de status */}
+        {/* Indicador de status elegante */}
         <span
-          className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm ${
-            isConnected ? "bg-green-400" : "bg-slate-400"
+          className={`absolute bottom-2 right-2 w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.2)] ${
+            isConnected 
+              ? "bg-emerald-500 animate-pulse shadow-emerald-500/50" 
+              : "bg-slate-400"
           }`}
         />
       </motion.button>
