@@ -731,3 +731,31 @@ Implementar emissão nativa de NFe 4.00 sem dependência de SaaS (FocusNFe/NFe.i
 - Verificar consistência em módulos menores (Obras, Vendas/PDV) que podem conter resquícios de cores estáticas.
 
 ---
+
+### VISTORIA 57 - Logística WhatsApp e CRM Kanban
+**Data:** 01/05/2026
+**Status:** ⚠️ PENDENTE (AGUARDANDO VISTORIA)
+**Responsável:** Antigravity
+
+#### Alterações Realizadas:
+1.  **Logística WhatsApp:** 
+    - Refatoração completa dos estados de conexão (`connected`, `connecting`, `qr_pending`, `disconnected`).
+    - Implementação de "Sincronização" (Soft Lock) que permite visualizar mensagens em cache enquanto o aparelho reconecta.
+    - Fim do loop infinito de QR Code no painel de configurações.
+2.  **CRM Kanban (Pipeline):**
+    - Correção do mau funcionamento do Drag and Drop (race condition de estado React).
+    - Sincronização automática de cache entre as visualizações de Lista e Pipeline.
+    - Aumento do limite de visualização de leads de 20 para 1000 no Kanban.
+
+#### Arquivos Modificados:
+- `apps/web/src/components/whatsapp/WhatsAppFloatingButton.tsx`
+- `apps/web/src/components/whatsapp/ChatDrawer.tsx`
+- `apps/web/src/components/configuracoes/WhatsAppConnection.tsx`
+- `apps/web/src/lib/hooks/use-pipeline.ts`
+- `apps/web/src/components/crm/kanban-pipeline.tsx`
+
+#### Próximos Passos:
+- Realizar teste de movimentação de leads em grande escala no Kanban.
+- Validar reconexão automática do WhatsApp em ambiente de produção (Vercel).
+
+---
