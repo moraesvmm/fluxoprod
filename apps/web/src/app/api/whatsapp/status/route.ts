@@ -12,15 +12,17 @@ const WA_API_KEY = process.env.WHATSAPP_API_KEY || 'fluxo-wa-9f3k2m8x4p7q1r6t';
 
 export async function GET(request: NextRequest) {
   try {
-    // Verificar autenticação
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
+    const { data: profile } = await supabase.from('user_profiles').select('empresa_id').eq('user_id', user.id).single();
+    if (!profile?.empresa_id) return NextResponse.json({ error: 'Empresa não encontrada.' }, { status: 400 });
+
     const response = await fetch(`${WA_SERVICE_URL}/status`, {
-      headers: { 'x-api-key': WA_API_KEY },
+      headers: { 'x-api-key': WA_API_KEY, 'x-tenant-id': profile.empresa_id },
     });
 
     if (!response.ok) {

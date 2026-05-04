@@ -18,6 +18,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
+    const { data: profile } = await supabase.from('user_profiles').select('empresa_id').eq('user_id', user.id).single();
+    if (!profile?.empresa_id) return NextResponse.json({ phone: '', messages: [], totalUnread: 0 }, { status: 200 });
+
     const { searchParams } = new URL(request.url);
     const phone = searchParams.get('phone');
 
@@ -26,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     const response = await fetch(`${WA_SERVICE_URL}/messages/${phone}`, {
-      headers: { 'x-api-key': WA_API_KEY },
+      headers: { 'x-api-key': WA_API_KEY, 'x-tenant-id': profile.empresa_id },
     });
 
     if (!response.ok) {

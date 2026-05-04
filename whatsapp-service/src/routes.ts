@@ -6,7 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { WhatsAppSession } from './whatsapp';
 
-export function createRoutes(session: WhatsAppSession): Router {
+export function createRoutes(getSession: (tenantId: string) => WhatsAppSession): Router {
   const router = Router();
 
   // Health check
@@ -14,8 +14,20 @@ export function createRoutes(session: WhatsAppSession): Router {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // Middleware para extrair tenantId
+  router.use((req, res, next) => {
+    const tenantId = req.headers['x-tenant-id'] as string;
+    if (!tenantId) {
+      res.status(400).json({ error: 'Header x-tenant-id é obrigatório.' });
+      return;
+    }
+    (req as any).tenantId = tenantId;
+    next();
+  });
+
   // Status da conexão
-  router.get('/status', (_req: Request, res: Response) => {
+  router.get('/status', (req: Request, res: Response) => {
+    const session = getSession((req as any).tenantId);
     const store = session.getStore();
     res.json({
       status: session.getStatus(),
@@ -25,7 +37,8 @@ export function createRoutes(session: WhatsAppSession): Router {
   });
 
   // QR Code para pareamento
-  router.get('/qr', (_req: Request, res: Response) => {
+  router.get('/qr', (req: Request, res: Response) => {
+    const session = getSession((req as any).tenantId);
     const qr = session.getQRBase64();
     const status = session.getStatus();
 
@@ -43,7 +56,8 @@ export function createRoutes(session: WhatsAppSession): Router {
   });
 
   // Conectar sessão
-  router.post('/connect', async (_req: Request, res: Response) => {
+  router.post('/connect', async (req: Request, res: Response) => {
+    const session = getSession((req as any).tenantId);
     try {
       await session.connect();
       res.json({ success: true, message: 'Conexão iniciada. Escaneie o QR Code.' });
@@ -53,7 +67,8 @@ export function createRoutes(session: WhatsAppSession): Router {
   });
 
   // Desconectar sessão
-  router.post('/disconnect', async (_req: Request, res: Response) => {
+  router.post('/disconnect', async (req: Request, res: Response) => {
+    const session = getSession((req as any).tenantId);
     try {
       await session.disconnect();
       res.json({ success: true, message: 'Desconectado com sucesso.' });
@@ -74,6 +89,7 @@ export function createRoutes(session: WhatsAppSession): Router {
 
   // Enviar mensagem individual
   router.post('/send', async (req: Request, res: Response) => {
+    const session = getSession((req as any).tenantId);
     const { to, message } = req.body;
 
     if (!to || !message) {
@@ -87,6 +103,7 @@ export function createRoutes(session: WhatsAppSession): Router {
 
   // Enviar mensagens em massa (campanha)
   router.post('/send-bulk', async (req: Request, res: Response) => {
+    const session = getSession((req as any).tenantId);
     const { messages, delay_ms = 20000 } = req.body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -105,7 +122,8 @@ export function createRoutes(session: WhatsAppSession): Router {
   });
 
   // Listar conversas
-  router.get('/conversations', (_req: Request, res: Response) => {
+  router.get('/conversations', (req: Request, res: Response) => {
+    const session = getSession((req as any).tenantId);
     const store = session.getStore();
     const conversations = store.getConversations().map((c) => ({
       phone: c.phone,
@@ -119,6 +137,7 @@ export function createRoutes(session: WhatsAppSession): Router {
 
   // Obter mensagens de uma conversa
   router.get('/messages/:phone', (req: Request, res: Response) => {
+    const session = getSession((req as any).tenantId);
     const phone = req.params.phone as string;
     const store = session.getStore();
 

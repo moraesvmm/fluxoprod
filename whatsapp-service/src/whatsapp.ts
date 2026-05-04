@@ -34,6 +34,7 @@ export class WhatsAppSession {
   private authDir: string;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
+<<<<<<< HEAD
   private qrRetryCount = 0;
   private maxQrRetries = 3; // Max QR code generations before stopping
 
@@ -42,6 +43,14 @@ export class WhatsAppSession {
     this.mediaStore = mediaStore || new MediaStore();
     // Prefer environment variable for persistent volume mounts in production (e.g., /data/auth_state)
     this.authDir = authDir || process.env.AUTH_DIR || path.join(process.cwd(), 'auth_state');
+=======
+  public tenantId: string;
+
+  constructor(tenantId: string, store: MessageStore) {
+    this.tenantId = tenantId;
+    this.store = store;
+    this.authDir = path.join(process.cwd(), 'auth_state', tenantId);
+>>>>>>> 8c8bc9b (feat: implement multi-tenant WhatsApp integration service with Baileys and API endpoints)
   }
 
   getStatus(): ConnectionStatus {
@@ -267,7 +276,16 @@ export class WhatsAppSession {
     try {
       // Normalizar número: remover caracteres e garantir formato
       const cleanPhone = phone.replace(/\D/g, '');
-      const jid = `${cleanPhone}@s.whatsapp.net`;
+      const jidCandidate = `${cleanPhone}@s.whatsapp.net`;
+
+      // Consultar JID exato nos servidores do WhatsApp (resolve problema do 9º dígito BR)
+      const jidResult = await this.socket.onWhatsApp(jidCandidate);
+
+      if (!jidResult || jidResult.length === 0 || !jidResult[0].exists) {
+        return { success: false, error: 'Número não registrado no WhatsApp.' };
+      }
+
+      const jid = jidResult[0].jid;
 
       const result = await this.socket.sendMessage(jid, { text });
 

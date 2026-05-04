@@ -18,6 +18,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
+    const { data: profile } = await supabase.from('user_profiles').select('empresa_id').eq('user_id', user.id).single();
+    if (!profile?.empresa_id) return NextResponse.json({ error: 'Empresa não encontrada.' }, { status: 400 });
+
     const body = await request.json();
     const { to, message, messages, delay_ms } = body;
 
@@ -25,7 +28,7 @@ export async function POST(request: NextRequest) {
     if (messages && Array.isArray(messages)) {
       const response = await fetch(`${WA_SERVICE_URL}/send-bulk`, {
         method: 'POST',
-        headers: { 'x-api-key': WA_API_KEY, 'Content-Type': 'application/json' },
+        headers: { 'x-api-key': WA_API_KEY, 'x-tenant-id': profile.empresa_id, 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages, delay_ms: delay_ms || 20000 }),
       });
 
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
     if (to && message) {
       const response = await fetch(`${WA_SERVICE_URL}/send`, {
         method: 'POST',
-        headers: { 'x-api-key': WA_API_KEY, 'Content-Type': 'application/json' },
+        headers: { 'x-api-key': WA_API_KEY, 'x-tenant-id': profile.empresa_id, 'Content-Type': 'application/json' },
         body: JSON.stringify({ to, message }),
       });
 

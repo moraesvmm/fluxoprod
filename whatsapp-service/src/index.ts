@@ -36,18 +36,32 @@ app.use((req, res, next) => {
   next();
 });
 
-// Inicializar store e sessão
-const store = new MessageStore();
-const session = new WhatsAppSession(store);
+// Mapa global de sessões
+const sessions = new Map<string, WhatsAppSession>();
+
+function getSession(tenantId: string): WhatsAppSession {
+  if (!sessions.has(tenantId)) {
+    console.log(`[WhatsApp] Inicializando nova sessão para o tenant: ${tenantId}`);
+    const store = new MessageStore();
+    const session = new WhatsAppSession(tenantId, store);
+    sessions.set(tenantId, session);
+  }
+  return sessions.get(tenantId)!;
+}
 
 // Registrar rotas
-app.use('/', createRoutes(session));
+app.use('/', createRoutes(getSession));
 
 // Iniciar servidor
+<<<<<<< HEAD
 app.listen(PORT, async () => {
   console.log(`[Fluxo WhatsApp Service] Rodando na porta ${PORT}`);
+=======
+app.listen(PORT, () => {
+  console.log(`[Fluxo WhatsApp Service] Rodando na porta ${PORT} (Multi-Tenant)`);
+>>>>>>> 8c8bc9b (feat: implement multi-tenant WhatsApp integration service with Baileys and API endpoints)
   console.log(`[Fluxo WhatsApp Service] Health: http://localhost:${PORT}/health`);
-  
+
   // Só reconectar automaticamente se já houver credenciais salvas (sessão prévia).
   // Sem credenciais, esperar o usuário clicar "Conectar" no front-end para evitar
   // gerar QR codes em loop, o que leva o WhatsApp a bloquear novos dispositivos.
