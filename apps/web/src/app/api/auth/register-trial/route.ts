@@ -170,15 +170,23 @@ export async function POST(request: Request) {
       }, { status: 500 });
     }
 
-    // Configura 7 dias de trial
     const trialEndsAt = new Date();
     trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
+    const limiteUsuariosMap: Record<string, number> = {
+      'Starter': 3, 'Business': 10, 'Pro': 50
+    };
+    const planKey = Object.keys(limiteUsuariosMap).find(k =>
+      payload.planName?.toLowerCase().includes(k.toLowerCase())
+    );
+    const limiteUsuarios = planKey ? limiteUsuariosMap[planKey] : 3;
 
     const { error: empresaUpdateError } = await admin.from("empresas").update({
       subscription_status: "TRIAL",
       status: "ativo",
       trial_ends_at: trialEndsAt.toISOString(),
       plan_name: payload.planName || "Trial",
+      limite_usuarios: limiteUsuarios,
     }).eq("id", empresaId);
 
     if (empresaUpdateError) {

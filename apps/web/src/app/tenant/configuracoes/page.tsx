@@ -17,6 +17,7 @@ import { useToast, Toast } from "@/components/ui/toast";
 import { TutorialSettingsSection } from "@/components/onboarding/TutorialSettingsSection";
 import { FiscalGuide } from "@/components/modules/fiscal/FiscalGuide";
 import { WhatsAppConnection } from "@/components/configuracoes/WhatsAppConnection";
+import { UserManagement } from "@/components/configuracoes/UserManagement";
 
 interface FiscalConfigState {
   inscricao_estadual: string;
@@ -614,6 +615,10 @@ export default function ConfiguracoesPage() {
                 </p>
               </div>
             </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+            <UserManagement />
           </div>
 
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm">

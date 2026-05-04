@@ -145,6 +145,21 @@ export async function proxy(request: NextRequest) {
             if (!modRow?.ativo) {
               return NextResponse.redirect(new URL('/tenant/sem-modulos', request.url))
             }
+
+            // Verificação granular: tenant_user só acessa módulos explicitamente permitidos
+            if (profile.role === 'tenant_user') {
+              const { data: userMod } = await supabase
+                .from('usuario_modulos_permitidos')
+                .select('permitido')
+                .eq('user_id', user.id)
+                .eq('empresa_id', profile.empresa_id)
+                .eq('modulo_key', moduleKey)
+                .maybeSingle()
+
+              if (!userMod?.permitido) {
+                return NextResponse.redirect(new URL('/tenant/sem-modulos', request.url))
+              }
+            }
           }
         }
       }

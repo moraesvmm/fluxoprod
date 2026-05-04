@@ -1,5 +1,53 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 62 - Gestão de Equipe e Controle Granular de Módulos por Tenant
+**Data:** 04/05/2026
+**Status:** ✅ IMPLEMENTADO — AGUARDANDO APLICAÇÃO DO SQL NO BANCO LIVE
+**Responsável:** Antigravity (Claude Sonnet)
+
+#### Arquitetura Adicionada:
+1. **Banco de Dados (SQL: `sql/gestao_usuarios.sql`):**
+   - Nova coluna `limite_usuarios` em `public.empresas` (DEFAULT 3, aditiva, não quebra tenants existentes).
+   - Nova tabela `public.usuario_modulos_permitidos` com índices (permissões granulares por módulo por usuário).
+   - Nova RPC `public.verificar_limite_usuarios(empresa_id)` — retorna contagem, limite e `pode_criar`.
+   - Nova RPC `public.tenant_listar_usuarios()` — só para `tenant_admin`, faz JOIN com `auth.users`.
+   - Nova RPC `public.tenant_listar_modulos_usuario(user_id)` — lista catálogo com status contratado+permitido.
+   - Nova RPC `public.tenant_atualizar_modulos_usuario(user_id, modulos[])` — UPSERT seguro de permissões.
+
+2. **Backend (API Routes):**
+   - `GET /api/tenant/users` — lista usuários do tenant com metadados de limite.
+   - `POST /api/tenant/users/create` — cria usuário no Auth + vincula em `user_profiles` + grava módulos iniciais.
+   - `DELETE /api/tenant/users/[id]` — soft-delete + ban no Auth. Proteção anti-autoexclusão.
+   - `PATCH /api/tenant/users/[id]` — altera role entre `tenant_admin` e `tenant_user`.
+   - `GET /api/tenant/users/[id]/modules` — lista módulos do usuário com status.
+   - `PATCH /api/tenant/users/[id]/modules` — atualiza permissões de módulo via UPSERT.
+
+3. **Middleware (`proxy.ts`):**
+   - Alteração cirúrgica mínima: verificação adicional em `usuario_modulos_permitidos` para `tenant_user`.
+   - `tenant_admin` é imune (acessa todos os módulos contratados).
+   - `dashboard` e `configuracoes` são sempre públicos (não verificados).
+
+4. **Frontend:**
+   - Hook `use-team.ts` com React Query para todos os endpoints.
+   - Componente `UserManagement.tsx` com tabela de equipe, barra de limite, modal de convite com seleção de módulos, botões de promoção/remoção e upsell automático.
+   - Componente `UserModulesModal.tsx` com toggles por módulo e proteção de módulos obrigatórios.
+   - Integrado na página `configuracoes/page.tsx` (nova seção antes de Tutoriais).
+   - `register-trial/route.ts` atualizado para definir `limite_usuarios` conforme o plano.
+
+#### Limites por Plano:
+| Plano    | limite_usuarios |
+|----------|-----------------|
+| A La Carte | 2             |
+| Starter  | 3               |
+| Business | 10              |
+| Pro      | 50              |
+
+#### ⚠️ AÇÃO PENDENTE OBRIGATÓRIA:
+**Executar `sql/gestao_usuarios.sql` no banco Supabase de produção antes de testar.**
+Sem isso, as RPCs e a tabela `usuario_modulos_permitidos` não existirão no banco live.
+
+---
+
 ## VISTORIA 61 - Onboarding Premium: Conclusão Total
 **Data:** 04/05/2026
 **Status:** ⚠️ PENDENTE (AGUARDANDO VISTORIA PÓS-DEPLOY)
