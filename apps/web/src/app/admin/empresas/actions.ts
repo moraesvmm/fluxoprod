@@ -1,6 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/utils/supabase/admin";
+import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function deleteEmpresaComUsuariosAction(empresaId: string) {
@@ -29,7 +30,8 @@ export async function deleteEmpresaComUsuariosAction(empresaId: string) {
     }
 
     // 3. Chamar a RPC para deletar o resto (schema, etc)
-    const { data, error: rpcError } = await admin.rpc('deletar_empresa_master', {
+    const supabase = await createClient();
+    const { data, error: rpcError } = await supabase.rpc('deletar_empresa_master', {
       p_empresa_id: empresaId,
       p_confirmacao_exclusao: true
     });
