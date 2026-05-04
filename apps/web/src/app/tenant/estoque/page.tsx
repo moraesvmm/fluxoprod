@@ -24,6 +24,7 @@ import ValorizacaoDashboard from "@/components/modules/estoque/ValorizacaoDashbo
 import CodigosPanel from "@/components/modules/estoque/CodigosPanel";
 import PrevisaoDemandaPanel from "@/components/modules/estoque/PrevisaoDemandaPanel";
 import BarcodeScanner from "@/components/modules/estoque/BarcodeScanner";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 export default function EstoquePage() {
   const [activeTab, setActiveTab] = useState("produtos");
@@ -165,9 +166,10 @@ export default function EstoquePage() {
           <button onClick={() => setExportConfirm(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-border hover:bg-slate-50 text-slate-700 h-10 px-4 py-2">
             Importar/Exportar
           </button>
-          <button onClick={() => setIsModalOpen(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+          <button onClick={() => setIsModalOpen(true)} data-tour="estoque-novo" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
             <Plus className="mr-2 h-4 w-4" /> Novo Produto
           </button>
+          <TutorialHelpButton moduleKey="estoque" />
         </div>
       </div>
 
@@ -180,9 +182,9 @@ export default function EstoquePage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="inline-flex rounded-lg bg-muted p-1">
           <TabsTrigger value="produtos" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Produtos</TabsTrigger>
-          <TabsTrigger value="alertas" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Alertas</TabsTrigger>
+          <TabsTrigger value="alertas" data-tour="estoque-alertas" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Alertas</TabsTrigger>
           <TabsTrigger value="kits" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Kits</TabsTrigger>
-          <TabsTrigger value="transferencias" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Transferências</TabsTrigger>
+          <TabsTrigger value="transferencias" data-tour="estoque-mov" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Transferências</TabsTrigger>
           <TabsTrigger value="valoracao" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Valoração</TabsTrigger>
           <TabsTrigger value="previsao" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Previsão</TabsTrigger>
         </TabsList>

@@ -31,6 +31,7 @@ import {
   Building2,
   Package,
 } from "lucide-react";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 import { useDashboardData } from "@/lib/hooks/use-dashboard";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
 import BoasVindasBanner from "@/components/modules/base/BoasVindasBanner";
@@ -118,14 +119,18 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-bold tracking-tight">Visão Geral</h2>
           <p className="text-muted-foreground">Acompanhe os principais indicadores da sua empresa.</p>
         </div>
-        <button
-          onClick={handleRefresh}
-          disabled={dashboard.isLoading}
-          className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors"
-        >
-          <RefreshCw className={`h-4 w-4 ${dashboard.isLoading ? "animate-spin" : ""}`} />
-          Atualizar
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleRefresh}
+            disabled={dashboard.isLoading}
+            data-tour="dash-refresh"
+            className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors"
+          >
+            <RefreshCw className={`h-4 w-4 ${dashboard.isLoading ? "animate-spin" : ""}`} />
+            Atualizar
+          </button>
+          <TutorialHelpButton moduleKey="dashboard" />
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -197,7 +202,7 @@ export default function DashboardPage() {
         {dashboard.isLoading ? (
           <CardSkeleton count={3} />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div data-tour="dash-actions" className="grid gap-4 sm:grid-cols-3">
             <ActionCard 
               title="Nova Venda" 
               description="Abra o PDV para registrar uma nova transação." 

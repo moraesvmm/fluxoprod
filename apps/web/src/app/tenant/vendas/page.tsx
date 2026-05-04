@@ -18,6 +18,7 @@ import { useVendas, useDeleteVenda, useCancelVenda } from "@/lib/hooks/use-venda
 import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { FiscalGuide } from "@/components/modules/fiscal/FiscalGuide";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 export default function VendasPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -130,11 +131,13 @@ export default function VendasPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/tenant/vendas/pdv"
+            data-tour="vendas-novo"
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
           >
             <Plus className="mr-2 h-4 w-4" />
             Nova Venda (PDV)
           </Link>
+          <TutorialHelpButton moduleKey="vendas" />
         </div>
       </div>
 
@@ -145,7 +148,7 @@ export default function VendasPage() {
         <KPICard title="Método Favorito" value="-" icon={CreditCard} />
       </div>
 
-      <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+      <div data-tour="vendas-historico" className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -170,7 +173,7 @@ export default function VendasPage() {
               <TableHead>Método</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>NFe</TableHead>
+              <TableHead data-tour="vendas-nfe">NFe</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>

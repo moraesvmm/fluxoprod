@@ -22,6 +22,7 @@ import { OSKanbanBoard } from "@/components/modules/os/OSKanbanBoard";
 import { OSDetailsModal } from "@/components/modules/os/OSDetailsModal";
 import { OrdemServico } from "@/lib/api";
 import { useToast, Toast } from "@/components/ui/toast";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 interface Funcionario {
   id: string;
@@ -188,13 +189,17 @@ export default function OSPage() {
           <h2 className="text-2xl font-bold tracking-tight">Ordens de Serviço</h2>
           <p className="text-muted-foreground">Gestão de ordens de serviço e histórico.</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Nova OS
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowModal(true)}
+            data-tour="os-nova"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nova OS
+          </button>
+          <TutorialHelpButton moduleKey="os" />
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
@@ -204,7 +209,7 @@ export default function OSPage() {
         <KPICard title="Canceladas" value={canceladas} icon={XCircle} className="border-red-200 bg-red-50/10" />
       </div>
 
-      <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+      <div data-tour="os-tabela" className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -215,6 +220,7 @@ export default function OSPage() {
             />
           </div>
           <button
+            data-tour="os-kanban"
             onClick={() => {
               if (viewMode === 'kanban') setViewMode('calendar');
               else if (viewMode === 'calendar') setViewMode('table');

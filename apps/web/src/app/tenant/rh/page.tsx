@@ -20,6 +20,7 @@ import { useRHConfig, useUpdateRHConfig } from "@/lib/hooks/use-rh-config";
 import { exportToCSV } from "@/lib/utils/export";
 import { DocumentosModal } from "@/components/modules/rh/DocumentosModal";
 import { type Funcionario } from "@/lib/api";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 
 export default function RHPage() {
@@ -232,8 +233,10 @@ export default function RHPage() {
             <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
             Configurações
           </button>
+          <TutorialHelpButton moduleKey="rh" />
           <button
             onClick={() => setShowModal(true)}
+            data-tour="rh-novo"
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
           >
             <UserPlus className="mr-2 h-4 w-4" />
@@ -246,11 +249,13 @@ export default function RHPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <KPICard title="Colaboradores Ativos" value={funcionarios?.length || 0} icon={Users} />
         <KPICard title="Cargos Distintos" value={new Set(funcionarios?.map(f => f.cargo) || []).size} icon={Briefcase} />
-        <KPICard
-          title="Folha Estimada"
-          value={formatarMoeda(funcionarios?.reduce((sum, f) => sum + (f.salario || 0), 0) || 0)}
-          icon={Briefcase}
-        />
+        <div data-tour="rh-desempenho">
+          <KPICard
+            title="Folha Estimada"
+            value={formatarMoeda(funcionarios?.reduce((sum, f) => sum + (f.salario || 0), 0) || 0)}
+            icon={Briefcase}
+          />
+        </div>
       </div>
 
       {/* Tabela */}

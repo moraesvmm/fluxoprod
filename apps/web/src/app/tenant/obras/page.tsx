@@ -28,6 +28,7 @@ import { FinanceiroDashboard } from "@/components/modules/obras/FinanceiroDashbo
 import { RecursosTabela } from "@/components/modules/obras/RecursosTabela";
 import { DocumentosGaleria } from "@/components/modules/obras/DocumentosGaleria";
 import type { Obra, ObraEtapaCreate, ObraEtapaUpdate, ObraCusto, ObraCustoCreate, ObraCustoUpdate, ObraRecurso, ObraRecursoCreate, ObraRecursoUpdate, ObraDocumento } from "@/lib/api";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 export default function ObrasPage() {
   const [showModal, setShowModal] = useState(false);
@@ -469,20 +470,26 @@ export default function ObrasPage() {
           <h2 className="text-2xl font-bold tracking-tight">Obras e Projetos</h2>
           <p className="text-muted-foreground">Gestão de obras com integração com OS e vendas.</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Obra
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowModal(true)}
+            data-tour="obras-nova"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Obra
+          </button>
+          <TutorialHelpButton moduleKey="obras" />
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
         <KPICard title="Planejadas" value={planejadas} icon={Calendar} className="border-slate-200 bg-slate-50/10" />
         <KPICard title="Em Andamento" value={andamento} icon={Building2} className="border-blue-200 bg-blue-50/10" />
         <KPICard title="Concluídas" value={concluidas} icon={Building2} className="border-emerald-200 bg-emerald-50/10" />
-        <KPICard title="Investimento Total" value={formatarMoeda(investimentoTotal)} icon={Building2} />
+        <div data-tour="obras-financeiro">
+          <KPICard title="Investimento Total" value={formatarMoeda(investimentoTotal)} icon={Building2} />
+        </div>
       </div>
 
       <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
@@ -497,6 +504,7 @@ export default function ObrasPage() {
           </div>
           <button
             onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
+            data-tour="obras-cronograma"
             className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-border rounded-md hover:bg-slate-50 transition-colors"
           >
             {viewMode === 'table' ? (

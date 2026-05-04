@@ -26,6 +26,7 @@ import {
   type DREData
 } from "@/lib/api";
 import { useSidebarData } from "@/lib/hooks/use-sidebar-data";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 type ReportType = "vendas" | "financeiro" | "estoque" | "crm" | "rh" | "comissoes" | "dre" | "os" | "obras";
 type ReportRow = Record<string, any>;
@@ -505,7 +506,8 @@ export default function RelatoriosPage() {
           <h2 className="text-2xl font-bold tracking-tight">Relatórios</h2>
           <p className="text-muted-foreground">Consolidação e exportação de dados via camada RPC.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-tour="relatorios-gerar">
+          <TutorialHelpButton moduleKey="relatorios" />
           <button
             onClick={() => handleExport("csv")}
             disabled={rows.length === 0}
@@ -531,7 +533,7 @@ export default function RelatoriosPage() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" data-tour="relatorios-personalizar">
         {reportTypes.map(
           (type) => {
             const active = isModuleActive(type);

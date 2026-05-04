@@ -1,5 +1,48 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 61 - Onboarding Premium: Conclusão Total
+**Data:** 04/05/2026
+**Status:** ⚠️ PENDENTE (AGUARDANDO VISTORIA PÓS-DEPLOY)
+**Responsável:** Antigravity
+
+#### Alterações Realizadas:
+1. **`data-tour` injetados em todos os 10 módulos:**
+   - Dashboard, CRM, Vendas, Estoque, OS, Obras, Financeiro, RH, Comissões e Relatórios.
+   - Cada módulo possui ao menos 2 âncoras de spotlight (botão de ação principal + elemento de dado chave).
+2. **Componente `TutorialHelpButton` criado:**
+   - Arquivo: `apps/web/src/components/onboarding/TutorialHelpButton.tsx`
+   - Ícone `HelpCircle` minimalista, inserido no cabeçalho interno de todos os 10 módulos.
+   - Permite replay do tutorial a qualquer momento pelo usuário.
+3. **Dicionário `tutorials.ts` corrigido e alinhado:**
+   - `targetSelector` de Comissões corrigidos de `com-regras`/`com-calcular` para `comissoes-regras`/`comissoes-apurar`.
+   - `targetSelector` de Relatórios corrigidos de `rel-dre`/`rel-exportar` para `relatorios-personalizar`/`relatorios-gerar`.
+4. **Importação inválida removida:**
+   - `SyncFeedbackModal` (inexistente) removido do `financeiro/page.tsx` para evitar erro de build.
+
+#### Arquivos Modificados:
+- `apps/web/src/lib/onboarding/tutorials.ts`
+- `apps/web/src/components/onboarding/TutorialHelpButton.tsx` *(novo)*
+- `apps/web/src/app/tenant/dashboard/page.tsx`
+- `apps/web/src/app/tenant/crm/page.tsx`
+- `apps/web/src/app/tenant/vendas/page.tsx`
+- `apps/web/src/app/tenant/estoque/page.tsx`
+- `apps/web/src/app/tenant/os/page.tsx`
+- `apps/web/src/app/tenant/obras/page.tsx`
+- `apps/web/src/app/tenant/financeiro/page.tsx`
+- `apps/web/src/app/tenant/rh/page.tsx`
+- `apps/web/src/app/tenant/comissoes/page.tsx`
+- `apps/web/src/app/tenant/relatorios/page.tsx`
+
+#### Pendências para a Vistoria:
+- [ ] Confirmar que o `TutorialHelpButton` renderiza corretamente dentro do `OnboardingProvider`
+- [ ] Verificar spotlight dos tours nos módulos Comissões e Relatórios (seletores recém-corrigidos)
+- [ ] Testar fluxo completo: acessar módulo → tutorial dispara → navegar passos → replay via botão Help
+- [ ] Garantir que a importação de `SyncFeedbackModal` não ficou quebrada em produção
+
+---
+
+
+
 ## VISTORIA 60 - Inteligência de Dashboard (Upsell Visual)
 **Data:** 04/05/2026
 **Status:** ⚠️ PENDENTE (AGUARDANDO VISTORIA)

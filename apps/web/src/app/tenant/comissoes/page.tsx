@@ -23,6 +23,7 @@ import {
   useUpdateComissao,
 } from "@/lib/hooks/use-comissoes";
 import { useFuncionarios } from "@/lib/hooks/use-funcionarios";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 function formatarMoeda(valor: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -147,13 +148,17 @@ export default function ComissoesPage() {
             Regras de comissão e histórico de pagamentos via camada RPC.
           </p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Regra
-        </button>
+        <div className="flex items-center gap-2">
+          <TutorialHelpButton moduleKey="comissoes" />
+          <button
+            onClick={() => setShowModal(true)}
+            data-tour="comissoes-regras"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Regra
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
@@ -185,6 +190,7 @@ export default function ComissoesPage() {
           </button>
           <button
             onClick={() => setActiveTab("historico")}
+            data-tour="comissoes-apurar"
             className={`pb-4 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "historico"
                 ? "border-primary text-primary"

@@ -18,6 +18,7 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useFinanceiro, useCreateFinanceiro, useDeleteFinanceiro, useUpdateFinanceiro } from "@/lib/hooks/use-financeiro";
 import { type FinanceiroUpdate } from "@/lib/api";
 import { ConciliacaoModal } from "@/components/financeiro/ConciliacaoModal";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 interface Transacao {
   id: string;
@@ -242,6 +243,7 @@ export default function FinanceiroPage() {
         <div className="flex items-center gap-2">
           <button 
             onClick={verFluxoCaixa}
+            data-tour="fin-dre"
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border hover:bg-muted/50 text-foreground h-10 px-4 py-2 shadow-sm"
           >
             Ver Fluxo de Caixa
@@ -259,6 +261,7 @@ export default function FinanceiroPage() {
               setShowForm(!showForm);
             }}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-4 py-2"
+            data-tour="fin-nova"
           >
             <Plus className="mr-2 h-4 w-4" />
             Nova Transação
@@ -267,11 +270,13 @@ export default function FinanceiroPage() {
             ref={syncBtnRef}
             onClick={() => setSyncConfirm(true)}
             disabled={syncing}
+            data-tour="fin-ofx"
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 disabled:opacity-50"
           >
             <RefreshCcw className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Sincronizando...' : 'Sincronizar Banco'}
           </button>
+          <TutorialHelpButton moduleKey="financeiro" />
         </div>
       </div>
 

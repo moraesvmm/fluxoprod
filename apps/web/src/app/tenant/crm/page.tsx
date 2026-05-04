@@ -27,6 +27,7 @@ import FiltroTags from '@/components/crm/filtro-tags';
 import { NurturingPanel } from '@/components/crm/NurturingPanel';
 import ImportadorClientesExcel from "@/components/crm/ImportadorClientesExcel";
 import { Modal } from "@/components/ui/modal";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 export default function CRMPage() {
   const [buscaCliente, setBuscaCliente] = useState('');
@@ -338,7 +339,9 @@ export default function CRMPage() {
 
       <div className="flex flex-col gap-8">
         {/* Painel de Inteligência e Reengajamento */}
-        <NurturingPanel />
+        <div data-tour="crm-nurturing">
+          <NurturingPanel />
+        </div>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -348,6 +351,7 @@ export default function CRMPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowCampanhaModal(true)}
+              data-tour="crm-campanha"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-4 py-2"
             >
               <MessageCircle className="mr-2 h-4 w-4" />
@@ -362,11 +366,13 @@ export default function CRMPage() {
             </button>
             <button
               onClick={() => setShowForm(!showForm)}
+              data-tour="crm-novo"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
               <Plus className="mr-2 h-4 w-4" />
               Novo Cliente
             </button>
+            <TutorialHelpButton moduleKey="crm" />
           </div>
         </div>
 
@@ -386,6 +392,7 @@ export default function CRMPage() {
           </button>
           <button
             onClick={() => setViewMode('pipeline')}
+            data-tour="crm-funnel"
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               viewMode === 'pipeline'
                 ? 'text-primary border-b-2 border-primary'
