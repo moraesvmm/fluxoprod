@@ -54,7 +54,11 @@ export function Sidebar() {
 
   const visibleNavigation = useMemo(() => {
     if (activeKeys === null) return [];
-    const base = navigation.filter((n) => activeKeys.includes(n.key) || n.key === "configuracoes" || n.key === "loja");
+    
+    // Dashboard, Relatórios, Loja e Configurações são módulos CORE e devem estar sempre visíveis
+    const coreModules = ["dashboard", "relatorios", "loja", "configuracoes"];
+    
+    const base = navigation.filter((n) => activeKeys.includes(n.key) || coreModules.includes(n.key));
     
     // Injetar link mestre se o usuário for master
     if (data?.role === "master") {

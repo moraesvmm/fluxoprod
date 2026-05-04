@@ -134,7 +134,7 @@ export async function proxy(request: NextRequest) {
           const parts = pathname.split('/').filter(Boolean)
           const moduleKey = parts.length >= 2 ? parts[1] : 'dashboard'
 
-          if (moduleKey !== 'sem-modulos' && moduleKey !== 'dashboard' && moduleKey !== 'configuracoes' && moduleKey !== 'loja') {
+          if (moduleKey !== 'sem-modulos' && moduleKey !== 'dashboard' && moduleKey !== 'configuracoes' && moduleKey !== 'loja' && moduleKey !== 'relatorios') {
             const { data: modRow } = await supabase
               .from('v_empresa_modulos')
               .select('ativo')

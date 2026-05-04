@@ -20,7 +20,7 @@ export function useActiveModules() {
       if (error) throw error;
       return data?.map(m => m.modulo_key) || [];
     },
-    staleTime: 10 * 60_000,
+    staleTime: 30 * 1000, // 30 segundos (garante feedback rápido após compra)
     retry: 2,
     enabled: !!userId,
   });

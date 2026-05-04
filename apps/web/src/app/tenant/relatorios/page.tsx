@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { DollarSign, Download, FileText, Package, TrendingUp, Users } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { DollarSign, Download, FileText, Package, TrendingUp, Users, Wrench, Building2, Lock } from "lucide-react";
 
 import { KPICard } from "@/components/modules/base/KPICard";
 import {
@@ -21,10 +21,13 @@ import {
   fetchProdutos,
   fetchVendas,
   fetchDRE,
+  fetchOS,
+  fetchObras,
   type DREData
 } from "@/lib/api";
+import { useSidebarData } from "@/lib/hooks/use-sidebar-data";
 
-type ReportType = "vendas" | "financeiro" | "estoque" | "crm" | "rh" | "comissoes" | "dre";
+type ReportType = "vendas" | "financeiro" | "estoque" | "crm" | "rh" | "comissoes" | "dre" | "os" | "obras";
 type ReportRow = Record<string, any>;
 
 const REPORT_HEADERS: Record<ReportType, string[]> = {
@@ -35,6 +38,20 @@ const REPORT_HEADERS: Record<ReportType, string[]> = {
   rh: ["Colaborador", "Cargo", "Salário", "Cadastro"],
   comissoes: ["Colaborador", "Venda", "Valor Venda", "Comissão", "Status"],
   dre: ["Indicador", "Valor", "Margem (%)"],
+  os: ["Número", "Cliente", "Equipamento", "Status", "Valor Orçamento", "Criado em"],
+  obras: ["Obra", "Cliente", "Orçamento", "Status", "Início", "Previsão Fim"],
+};
+
+const REPORT_CONFIG: Record<ReportType, { module: string; label: string }> = {
+  vendas: { module: "vendas", label: "Vendas" },
+  financeiro: { module: "financeiro", label: "Financeiro" },
+  dre: { module: "financeiro", label: "DRE" },
+  estoque: { module: "estoque", label: "Estoque" },
+  crm: { module: "crm", label: "CRM" },
+  rh: { module: "rh", label: "RH" },
+  comissoes: { module: "comissoes", label: "Comissões" },
+  os: { module: "os", label: "Ordens de Serviço" },
+  obras: { module: "obras", label: "Obras" },
 };
 
 function formatarMoeda(valor: number) {
@@ -54,13 +71,26 @@ function formatarData(data?: string) {
 }
 
 export default function RelatoriosPage() {
+  const { data: sidebarData, isLoading: loadingModules } = useSidebarData();
+  const activeKeys = useMemo(() => sidebarData?.activeKeys || [], [sidebarData]);
+
   const [reportType, setReportType] = useState<ReportType>("vendas");
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<ReportRow[]>([]);
   const [kpis, setKpis] = useState<{ label: string; value: string; icon: any }[]>([]);
   const { toasts, removeToast, info, success, error: toastError } = useToast();
 
+  const isModuleActive = (type: ReportType) => {
+    const config = REPORT_CONFIG[type];
+    return activeKeys.includes(config.module);
+  };
+
   const gerarRelatorio = async (tipo: ReportType = reportType) => {
+    if (!isModuleActive(tipo)) {
+      // Se não for ativo, não permitimos gerar
+      return;
+    }
+
     setLoading(true);
     setRows([]);
     setKpis([]);
@@ -70,7 +100,7 @@ export default function RelatoriosPage() {
         case "vendas": {
           const vendas = await fetchVendas();
           setRows(vendas);
-          const total = vendas.reduce((sum, venda) => sum + (venda.valor || 0), 0);
+          const total = vendas.reduce((sum, venda) => sum + (venda.valor || venda.valor_total || 0), 0);
           const ticket = vendas.length > 0 ? total / vendas.length : 0;
           setKpis([
             { label: "Total Vendas", value: formatarMoeda(total), icon: DollarSign },
@@ -166,6 +196,30 @@ export default function RelatoriosPage() {
           ]);
           break;
         }
+        case "os": {
+          const ordens = await fetchOS();
+          setRows(ordens);
+          const totalOrcado = ordens.reduce((sum, os) => sum + (os.valor_orcamento || 0), 0);
+          const abertas = ordens.filter(os => os.status !== 'concluida' && os.status !== 'cancelada').length;
+          setKpis([
+            { label: "Total de OS", value: String(ordens.length), icon: Wrench },
+            { label: "Valor Orçado", value: formatarMoeda(totalOrcado), icon: DollarSign },
+            { label: "OS em Aberto", value: String(abertas), icon: TrendingUp },
+          ]);
+          break;
+        }
+        case "obras": {
+          const obras = await fetchObras();
+          setRows(obras);
+          const orcamentoTotal = obras.reduce((sum, obra) => sum + (obra.orcamento || 0), 0);
+          const emAndamento = obras.filter(obra => obra.status === 'em_andamento').length;
+          setKpis([
+            { label: "Total de Obras", value: String(obras.length), icon: Building2 },
+            { label: "Orçamentos", value: formatarMoeda(orcamentoTotal), icon: DollarSign },
+            { label: "Em Andamento", value: String(emAndamento), icon: TrendingUp },
+          ]);
+          break;
+        }
       }
 
       success("Relatório gerado com sucesso!");
@@ -225,6 +279,22 @@ export default function RelatoriosPage() {
         if (header === "Valor") return formatarMoeda(row.valor);
         if (header === "Margem (%)") return `${row.margem.toFixed(2)}%`;
         break;
+      case "os":
+        if (header === "Número") return row.numero || "—";
+        if (header === "Cliente") return row.cliente?.nome || row.cliente || "—";
+        if (header === "Equipamento") return row.veiculo_equipamento || "—";
+        if (header === "Status") return row.status || "—";
+        if (header === "Valor Orçamento") return formatarMoeda(row.valor_orcamento || 0);
+        if (header === "Criado em") return formatarData(row.criado_em);
+        break;
+      case "obras":
+        if (header === "Obra") return row.nome || "—";
+        if (header === "Cliente") return row.cliente?.nome || row.cliente || "—";
+        if (header === "Orçamento") return formatarMoeda(row.orcamento || 0);
+        if (header === "Status") return row.status || "—";
+        if (header === "Início") return formatarData(row.data_inicio);
+        if (header === "Previsão Fim") return formatarData(row.data_fim_prevista);
+        break;
     }
 
     return "—";
@@ -237,7 +307,7 @@ export default function RelatoriosPage() {
     }
 
     const headers = REPORT_HEADERS[reportType];
-    const relatorioNome = reportType.charAt(0).toUpperCase() + reportType.slice(1);
+    const relatorioNome = REPORT_CONFIG[reportType].label;
     
     if (format === "csv") {
       const escapeCsv = (value: any) => {
@@ -395,17 +465,29 @@ export default function RelatoriosPage() {
 
   useEffect(() => {
     setMounted(true);
-    void gerarRelatorio();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reportType]);
+    // Se o módulo padrão (vendas) não estiver ativo, tentar o primeiro ativo
+    if (sidebarData?.activeKeys && sidebarData.activeKeys.length > 0 && !sidebarData.activeKeys.includes("vendas")) {
+       const firstActive = (Object.keys(REPORT_CONFIG) as ReportType[]).find(type => sidebarData.activeKeys.includes(REPORT_CONFIG[type].module));
+       if (firstActive) setReportType(firstActive);
+    }
+  }, [sidebarData?.activeKeys]);
 
-  if (!mounted) {
+  useEffect(() => {
+    if (mounted && isModuleActive(reportType)) {
+      void gerarRelatorio();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportType, mounted]);
+
+  if (!mounted || loadingModules) {
     return (
       <div className="space-y-8 animate-pulse p-4 text-center text-muted-foreground">
         Carregando interface de relatórios...
       </div>
     );
   }
+
+  const reportTypes: ReportType[] = ["vendas", "financeiro", "dre", "estoque", "crm", "rh", "comissoes", "os", "obras"];
 
   return (
     <div className="space-y-8">
@@ -426,14 +508,16 @@ export default function RelatoriosPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => handleExport("csv")}
-            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted/50 shadow-sm"
+            disabled={rows.length === 0}
+            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted/50 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="mr-2 h-4 w-4 text-muted-foreground" />
             CSV
           </button>
           <button
             onClick={() => handleExport("pdf")}
-            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted/50 shadow-sm"
+            disabled={rows.length === 0}
+            className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted/50 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
             PDF
@@ -448,20 +532,29 @@ export default function RelatoriosPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(["vendas", "financeiro", "dre", "estoque", "crm", "rh", "comissoes"] as ReportType[]).map(
-          (type) => (
-            <button
-              key={type}
-              onClick={() => setReportType(type)}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition-all shadow-sm ${
-                reportType === type
-                  ? "bg-primary text-primary-foreground shadow-primary/20"
-                  : "border border-border bg-card text-foreground/70 hover:bg-muted/50 hover:text-foreground"
-              }`}
-            >
-              {type.toUpperCase()}
-            </button>
-          )
+        {reportTypes.map(
+          (type) => {
+            const active = isModuleActive(type);
+            const config = REPORT_CONFIG[type];
+            
+            return (
+              <button
+                key={type}
+                onClick={() => active && setReportType(type)}
+                title={!active ? `Para ter acesso a esse relatório, adquira o módulo ${config.label}` : undefined}
+                className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all shadow-sm ${
+                  !active 
+                    ? "bg-muted/50 text-muted-foreground/50 border border-dashed border-border cursor-not-allowed opacity-70"
+                    : reportType === type
+                      ? "bg-primary text-primary-foreground shadow-primary/20"
+                      : "border border-border bg-card text-foreground/70 hover:bg-muted/50 hover:text-foreground"
+                }`}
+              >
+                {!active && <Lock className="h-3 w-3" />}
+                {type.toUpperCase()}
+              </button>
+            );
+          }
         )}
       </div>
 

@@ -136,17 +136,58 @@ export default function DashboardPage() {
           data-tour="kpi-cards"
           className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6"
         >
-          <KPICard title="Faturamento (Hoje)" value={formatarMoeda(dashboard.faturamentoHoje)} icon={Banknote} />
-          <KPICard title="Vendas (Hoje)" value={String(dashboard.vendasHoje)} icon={ShoppingBag} />
-          <KPICard title="Ticket Médio" value={formatarMoeda(dashboard.ticketMedio)} icon={BarChart} />
-          <KPICard title="Patrimônio em Estoque" value={formatarMoeda(dashboard.patrimonioEstoque)} icon={Package} className="border-indigo-500/20 bg-indigo-500/5" />
-          <KPICard title="Clientes" value={String(dashboard.totalClientes)} icon={BadgeCheck} />
-          {dashboard.modulosAtivos?.includes('os') && (
-            <KPICard title="OS Abertas" value={String(dashboard.osAbertas)} icon={Wrench} className="border-amber-500/20 bg-amber-500/5" />
-          )}
-          {dashboard.modulosAtivos?.includes('obras') && (
-            <KPICard title="Obras em Andamento" value={String(dashboard.obrasEmAndamento || 0)} icon={Building2} className="border-blue-500/20 bg-blue-500/5" />
-          )}
+          <KPICard 
+            title="Faturamento (Hoje)" 
+            value={formatarMoeda(dashboard.faturamentoHoje)} 
+            icon={Banknote} 
+            disabled={!dashboard.modulosAtivos?.includes('vendas')}
+            disabledMessage="Para acompanhar seu faturamento em tempo real, adquira o módulo de Vendas."
+          />
+          <KPICard 
+            title="Vendas (Hoje)" 
+            value={String(dashboard.vendasHoje)} 
+            icon={ShoppingBag} 
+            disabled={!dashboard.modulosAtivos?.includes('vendas')}
+            disabledMessage="Para acompanhar suas transações diárias, adquira o módulo de Vendas."
+          />
+          <KPICard 
+            title="Ticket Médio" 
+            value={formatarMoeda(dashboard.ticketMedio)} 
+            icon={BarChart} 
+            disabled={!dashboard.modulosAtivos?.includes('vendas')}
+            disabledMessage="Para calcular seu ticket médio automático, adquira o módulo de Vendas."
+          />
+          <KPICard 
+            title="Patrimônio em Estoque" 
+            value={formatarMoeda(dashboard.patrimonioEstoque)} 
+            icon={Package} 
+            className="border-indigo-500/20 bg-indigo-500/5" 
+            disabled={!dashboard.modulosAtivos?.includes('estoque')}
+            disabledMessage="Para gerir seu capital imobilizado, adquira o módulo de Estoque."
+          />
+          <KPICard 
+            title="Clientes" 
+            value={String(dashboard.totalClientes)} 
+            icon={BadgeCheck} 
+            disabled={!dashboard.modulosAtivos?.includes('crm')}
+            disabledMessage="Para gerir sua base de clientes, adquira o módulo de CRM."
+          />
+          <KPICard 
+            title="OS Abertas" 
+            value={String(dashboard.osAbertas)} 
+            icon={Wrench} 
+            className="border-amber-500/20 bg-amber-500/5" 
+            disabled={!dashboard.modulosAtivos?.includes('os')}
+            disabledMessage="Para gerir suas ordens de serviço, adquira o módulo de OS."
+          />
+          <KPICard 
+            title="Obras em Andamento" 
+            value={String(dashboard.obrasEmAndamento || 0)} 
+            icon={Building2} 
+            className="border-blue-500/20 bg-blue-500/5" 
+            disabled={!dashboard.modulosAtivos?.includes('obras')}
+            disabledMessage="Para gerir seus projetos e obras, adquira o módulo de Obras."
+          />
         </div>
       )}
 
@@ -157,9 +198,30 @@ export default function DashboardPage() {
           <CardSkeleton count={3} />
         ) : (
           <div className="grid gap-4 sm:grid-cols-3">
-            <ActionCard title="Nova Venda" description="Abra o PDV para registrar uma nova transação." icon={ShoppingCart} href="/tenant/vendas/pdv" />
-            <ActionCard title="Conciliar Extrato" description="Analise pendências do extrato bancário." icon={ClipboardCheck} href="/tenant/financeiro" />
-            <ActionCard title="Cadastrar Cliente" description="Adicione um novo cliente ao CRM." icon={UserPlus} href="/tenant/crm" />
+            <ActionCard 
+              title="Nova Venda" 
+              description="Abra o PDV para registrar uma nova transação." 
+              icon={ShoppingCart} 
+              href="/tenant/vendas/pdv" 
+              disabled={!dashboard.modulosAtivos?.includes('vendas')}
+              disabledMessage="Adquira o módulo de Vendas para utilizar o PDV Nativo."
+            />
+            <ActionCard 
+              title="Conciliar Extrato" 
+              description="Analise pendências do extrato bancário." 
+              icon={ClipboardCheck} 
+              href="/tenant/financeiro" 
+              disabled={!dashboard.modulosAtivos?.includes('financeiro')}
+              disabledMessage="Adquira o módulo Financeiro para utilizar a conciliação bancária."
+            />
+            <ActionCard 
+              title="Cadastrar Cliente" 
+              description="Adicione um novo cliente ao CRM." 
+              icon={UserPlus} 
+              href="/tenant/crm" 
+              disabled={!dashboard.modulosAtivos?.includes('crm')}
+              disabledMessage="Adquira o módulo CRM para gerir sua base de clientes."
+            />
           </div>
         )}
       </div>

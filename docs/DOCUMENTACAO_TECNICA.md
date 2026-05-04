@@ -33,6 +33,15 @@ Para garantir a integridade do sistema em caso de rollbacks e evitar quebra de p
 
 ---
 
+## 📂 GOVERNANÇA DE DOCUMENTAÇÃO (BACKLOG)
+
+Para manter a organização do repositório, utilizamos apenas dois arquivos de planejamento:
+
+1. **[PENDENCIAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PENDENCIAS.md)**: Exclusivo para **alterações de código**, dívidas técnicas, refatorações, correções de bugs e riscos de escalabilidade. Se envolve código existente ou estrutura, fica aqui.
+2. **[MELHORIAS_FUTURAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/MELHORIAS_FUTURAS.md)**: Exclusivo para **novas funcionalidades**, melhorias de UX/UI, expansão de módulos e novas integrações. Se é algo que o sistema ainda não faz, fica aqui.
+
+---
+
 ## 📋 ESTRUTURA DO SISTEMA
 
 ### Arquitetura Geral (OPÇÃO A - IMPLEMENTADA)

@@ -1,5 +1,58 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 60 - Inteligência de Dashboard (Upsell Visual)
+**Data:** 04/05/2026
+**Status:** ⚠️ PENDENTE (AGUARDANDO VISTORIA)
+**Responsável:** Antigravity
+
+#### Alterações Realizadas:
+1.  **Dashboard Adaptativo (KPIs):**
+    - Refatoração dos cartões de KPI (Faturamento, Vendas, Estoque, CRM, OS e Obras) para utilizar a estratégia de "Upsell Visual".
+    - Cartões de módulos não contratados agora aparecem em estado desabilitado (cinza) com ícone de cadeado e valor omitido.
+    - Implementação de tooltip informativa: *"Para ter acesso a estes dados, adquira o módulo X"*.
+2.  **Ações Rápidas Condicionais:**
+    - Atalhos de "Nova Venda", "Conciliar Extrato" e "Cadastrar Cliente" agora respeitam a contratação do tenant.
+    - Botões ficam inativos e exibem aviso de bloqueio quando o módulo correspondente está ausente.
+3.  **Componentização Core:**
+    - Atualização dos componentes `KPICard` e `ActionCard` no diretório base para suportar os estados `disabled` e `disabledMessage` de forma nativa e reutilizável.
+
+#### Arquivos Modificados:
+- `apps/web/src/components/modules/base/KPICard.tsx`
+- `apps/web/src/components/modules/base/ActionCard.tsx`
+- `apps/web/src/app/tenant/dashboard/page.tsx`
+
+#### Próximos Passos:
+- Verificar se novos cartões de ação (ex: "Nova OS") devem ser adicionados dinamicamente para usuários que possuem o módulo de OS mas não o de Vendas.
+
+---
+
+## VISTORIA 59 - Inteligência de Relatórios (Upsell & Expansão OS/Obras)
+**Data:** 04/05/2026
+**Status:** ⚠️ PENDENTE (AGUARDANDO VISTORIA)
+**Responsável:** Antigravity
+
+#### Alterações Realizadas:
+1.  **Estratégia de Upsell Visual:**
+    - Implementação de botões de relatório dinâmicos que ficam desabilitados (cinzas) e exibem alerta de aquisição quando o módulo correspondente não está ativo no tenant.
+    - Adição de ícones de cadeado (`Lock`) e tooltips informativos para incentivar a contratação de novos módulos.
+2.  **Expansão de Relatórios:**
+    - Inclusão dos módulos de **Ordem de Serviço (OS)** e **Obras** na aba de Relatórios.
+    - Implementação de KPIs específicos (Total de OS, Orçamentos, Obras em Andamento) e listagem analítica com dados reais via RPC.
+3.  **Integração de Módulos:**
+    - Sincronização da interface de relatórios com o estado real de contratação do tenant via hook `useSidebarData`.
+4.  **Checkout & Marketing:**
+    - Atualização dos cards informativos na página de Checkout (`/checkout`) para incluir as novas funcionalidades de relatórios analíticos em todos os módulos.
+
+#### Arquivos Modificados:
+- `apps/web/src/app/tenant/relatorios/page.tsx`
+- `apps/web/src/app/(auth)/checkout/page.tsx`
+
+#### Próximos Passos:
+- Validar a Tooltip nativa em diferentes navegadores.
+- Testar a geração de relatórios de OS e Obras com dados reais de produção.
+
+---
+
 ## VISTORIA 57 - Logística WhatsApp e CRM Kanban
 **Data:** 01/05/2026
 **Status:** ⚠️ PENDENTE (AGUARDANDO VISTORIA)

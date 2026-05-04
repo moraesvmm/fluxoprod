@@ -1,6 +1,6 @@
 "use client";
 
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, Lock } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -24,6 +24,10 @@ interface KPICardProps {
     /** Indica se a tendência é positiva ou negativa */
     isPositive: boolean;
   };
+  /** Indica se o card está desabilitado (upsell) */
+  disabled?: boolean;
+  /** Mensagem exibida no tooltip quando desabilitado */
+  disabledMessage?: string;
   /** Classes CSS adicionais para customização */
   className?: string;
 }
@@ -36,35 +40,39 @@ interface KPICardProps {
  * 
  * @param {KPICardProps} props - Props do componente
  * @returns {JSX.Element} Componente KPICard
- * 
- * @example
- * ```tsx
- * <KPICard 
- *   title="Faturamento" 
- *   value="R$ 10.000" 
- *   icon={Banknote} 
- *   trend={{ value: 15, label: "vs mês anterior", isPositive: true }}
- * />
- * ```
  */
-export function KPICard({ title, value, icon: Icon, trend, className }: KPICardProps) {
+export function KPICard({ title, value, icon: Icon, trend, className, disabled, disabledMessage }: KPICardProps) {
   return (
-    <div className={twMerge(clsx("relative overflow-hidden rounded-xl bg-card p-6 border border-border/60 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1", className))}>
+    <div 
+      title={disabled ? disabledMessage : undefined}
+      className={twMerge(
+        clsx(
+          "relative overflow-hidden rounded-xl p-6 border transition-all duration-300 shadow-sm",
+          disabled 
+            ? "bg-muted/30 border-border/40 grayscale opacity-70 cursor-not-allowed" 
+            : "bg-card border-border/60 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1",
+          className
+        )
+      )}
+    >
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-muted-foreground transition-colors group-hover:text-foreground">
           {title}
         </p>
-        <div className="rounded-xl bg-primary/10 p-2.5 text-primary shadow-inner ring-1 ring-primary/20">
-          <Icon className="h-5 w-5" />
+        <div className={clsx(
+          "rounded-xl p-2.5 shadow-inner ring-1",
+          disabled ? "bg-muted text-muted-foreground ring-border/20" : "bg-primary/10 text-primary ring-primary/20"
+        )}>
+          {disabled ? <Lock className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
         </div>
       </div>
       <div className="mt-4 flex items-baseline gap-x-2">
         <h3 className="text-3xl font-bold tracking-tight text-foreground">
-          {value}
+          {disabled ? "—" : value}
         </h3>
       </div>
       
-      {trend && (
+      {!disabled && trend && (
         <div className="mt-4 flex items-center text-sm">
           <span
             className={twMerge(
