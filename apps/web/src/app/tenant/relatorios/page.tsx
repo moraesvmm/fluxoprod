@@ -101,7 +101,7 @@ export default function RelatoriosPage() {
         case "vendas": {
           const vendas = await fetchVendas();
           setRows(vendas);
-          const total = vendas.reduce((sum, venda) => sum + (venda.valor || venda.valor_total || 0), 0);
+          const total = vendas.reduce((sum, venda) => sum + (venda.valor || venda.valor_total || venda.total || 0), 0);
           const ticket = vendas.length > 0 ? total / vendas.length : 0;
           setKpis([
             { label: "Total Vendas", value: formatarMoeda(total), icon: DollarSign },
@@ -237,7 +237,7 @@ export default function RelatoriosPage() {
       case "vendas":
         if (header === "Data") return formatarData(row.criado_em);
         if (header === "Cliente") return row.cliente || "—";
-        if (header === "Valor") return formatarMoeda(row.valor || row.valor_total || 0);
+        if (header === "Valor") return formatarMoeda(row.valor || row.valor_total || row.total || 0);
         if (header === "Método") return row.metodo || row.metodo_pagamento || "—";
         if (header === "Status") return row.status || "—";
         break;

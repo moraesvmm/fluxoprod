@@ -5,12 +5,17 @@ export { createClient as getSupabase };
 export interface Venda {
   id: string;
   cliente: string;
+  cliente_id?: string;
   valor: number;
+  valor_total?: number;
+  total?: number;
   metodo: string;
-  status: 'concluido' | 'pendente' | 'cancelado' | 'parcialmente_devolvida';
+  metodo_pagamento?: string;
+  status: 'concluido' | 'pendente' | 'cancelado' | 'parcialmente_devolvida' | string;
   vendedor_id?: string;
   vendedor_nome?: string;
   criado_em: string;
+  data_venda?: string;
   atualizado_em?: string;
   nfe_status?: 'nao_emitida' | 'pendente' | 'emitida' | 'erro' | 'cancelada';
   nfe_chave?: string;
