@@ -325,7 +325,7 @@ export interface OrdemServico {
   timer_iniciado_em?: string;
   criado_em: string;
   atualizado_em?: string;
-  cliente?: { nome: string }; // joined
+  cliente?: { nome: string; documento?: string; email?: string }; // joined
   colaborador?: { nome: string }; // joined
 }
 
