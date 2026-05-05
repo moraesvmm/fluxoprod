@@ -16,6 +16,7 @@ type CheckoutConfig = {
   company_document?: string;
   company_size?: string;
   company_segment?: string;
+  plan_name?: string;
 };
 
 type ProvisionResult = {
