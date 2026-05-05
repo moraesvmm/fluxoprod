@@ -14,7 +14,7 @@ export async function sendWelcomeEmail(to: string, name: string, activationLink?
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bem-vindo à Fluxoprod</title>
+        <title>Bem-vindo ao Fluxo</title>
         <style>
           body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #ffffff; margin: 0; padding: 0; }
           .container { max-width: 600px; margin: 40px auto; background-color: #111111; border: 1px solid #222222; border-radius: 20px; overflow: hidden; }
@@ -42,7 +42,7 @@ export async function sendWelcomeEmail(to: string, name: string, activationLink?
       <body>
         <div class="container">
           <div class="header">
-            <h1 style="margin: 0; font-size: 40px; font-weight: 800;">Fluxoprod</h1>
+            <h1 style="margin: 0; font-size: 40px; font-weight: 800;">Fluxo</h1>
           </div>
           <div class="content">
             <h1>Olá, ${name}! 🚀</h1>
@@ -77,9 +77,9 @@ export async function sendWelcomeEmail(to: string, name: string, activationLink?
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Fluxoprod <onboarding@seufluxoerp.com.br>",
+        from: "Fluxo <onboarding@seufluxoerp.com.br>",
         to: [to],
-        subject: "Bem-vindo à Fluxoprod! Ative sua conta 🚀",
+        subject: "Bem-vindo ao Fluxo! Ative sua conta 🚀",
         html: html,
       }),
     });
