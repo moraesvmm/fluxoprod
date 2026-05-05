@@ -147,6 +147,8 @@ export default function OSPage() {
         descricao_problema: "",
         colaborador_id: "",
         valor_orcamento: "",
+        equipamento_serial: "",
+        laudo_tecnico: "",
       });
       setShowEditModal(false);
       setEditId(null);
