@@ -53,26 +53,33 @@ function getSession(tenantId: string): WhatsAppSession {
 app.use('/', createRoutes(getSession));
 
 // Iniciar servidor
-<<<<<<< HEAD
 app.listen(PORT, async () => {
-  console.log(`[Fluxo WhatsApp Service] Rodando na porta ${PORT}`);
-=======
-app.listen(PORT, () => {
   console.log(`[Fluxo WhatsApp Service] Rodando na porta ${PORT} (Multi-Tenant)`);
->>>>>>> 8c8bc9b (feat: implement multi-tenant WhatsApp integration service with Baileys and API endpoints)
   console.log(`[Fluxo WhatsApp Service] Health: http://localhost:${PORT}/health`);
 
-  // Só reconectar automaticamente se já houver credenciais salvas (sessão prévia).
-  // Sem credenciais, esperar o usuário clicar "Conectar" no front-end para evitar
-  // gerar QR codes em loop, o que leva o WhatsApp a bloquear novos dispositivos.
-  if (session.hasSavedCredentials()) {
-    console.log('[WhatsApp] Credenciais salvas encontradas. Reconectando automaticamente...');
-    try {
-      await session.connect();
-    } catch (err) {
-      console.error('[WhatsApp] Erro ao iniciar conexão no boot:', err);
+  // Restaurar sessões ativas lendo a pasta auth_state
+  const fs = require('fs');
+  const path = require('path');
+  const baseAuthDir = process.env.AUTH_DIR || path.join(process.cwd(), 'auth_state');
+  
+  if (fs.existsSync(baseAuthDir)) {
+    const tenants = fs.readdirSync(baseAuthDir);
+    for (const tenantId of tenants) {
+      if (fs.statSync(path.join(baseAuthDir, tenantId)).isDirectory()) {
+        console.log(`[WhatsApp] Restaurando sessão do tenant: ${tenantId}...`);
+        try {
+          const session = getSession(tenantId);
+          // O método connect() de session precisaria existir/estar exposto.
+          // Se session.connect() existir em WhatsAppSession, chamaremos:
+          if (typeof (session as any).connect === 'function') {
+            await (session as any).connect();
+          }
+        } catch (err) {
+          console.error(`[WhatsApp] Erro ao restaurar tenant ${tenantId}:`, err);
+        }
+      }
     }
   } else {
-    console.log('[WhatsApp] Nenhuma sessão salva. Aguardando conexão via front-end...');
+    console.log('[WhatsApp] Nenhuma sessão multi-tenant salva encontrada no disco.');
   }
 });

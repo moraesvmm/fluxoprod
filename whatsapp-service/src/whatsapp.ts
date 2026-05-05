@@ -34,23 +34,17 @@ export class WhatsAppSession {
   private authDir: string;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-<<<<<<< HEAD
   private qrRetryCount = 0;
   private maxQrRetries = 3; // Max QR code generations before stopping
-
-  constructor(store: MessageStore, authDir?: string, mediaStore?: MediaStore) {
-    this.store = store;
-    this.mediaStore = mediaStore || new MediaStore();
-    // Prefer environment variable for persistent volume mounts in production (e.g., /data/auth_state)
-    this.authDir = authDir || process.env.AUTH_DIR || path.join(process.cwd(), 'auth_state');
-=======
   public tenantId: string;
 
-  constructor(tenantId: string, store: MessageStore) {
+  constructor(tenantId: string, store: MessageStore, authDir?: string, mediaStore?: MediaStore) {
     this.tenantId = tenantId;
     this.store = store;
-    this.authDir = path.join(process.cwd(), 'auth_state', tenantId);
->>>>>>> 8c8bc9b (feat: implement multi-tenant WhatsApp integration service with Baileys and API endpoints)
+    this.mediaStore = mediaStore || new MediaStore();
+    
+    const baseAuthDir = authDir || process.env.AUTH_DIR || path.join(process.cwd(), 'auth_state');
+    this.authDir = path.join(baseAuthDir, tenantId);
   }
 
   getStatus(): ConnectionStatus {
