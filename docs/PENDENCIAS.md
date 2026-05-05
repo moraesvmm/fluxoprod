@@ -34,10 +34,6 @@ Este documento é destinado exclusivamente para o registro de alterações de c�
 
 ## 🟡 ESCALABILIDADE E MANUTENÇÃO
 
-### 1. Modularização do `provisionar_empresa`
-**Risco:** Manutenibilidade (Função com 800+ linhas).
-**Ação:** Quebrar o provisionamento em funções menores por módulo.
-
 ### 2. Paginação Cursor-Based
 **Risco:** Performance em grandes volumes (LIMIT/OFFSET lento em tabelas grandes).
 **Ação:** Substituir paginação por chaves (keyset pagination).

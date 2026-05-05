@@ -1,0 +1,244 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+    --primary: #D58F65; /* Terracotta/Gold Base */
+    --gold-gradient: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+    --dark: #1A1A1A;
+    --light: #FFFFFF;
+    --bg-cream: #FDFBF7;
+    --text-muted: #666666;
+    --border-soft: rgba(213, 143, 101, 0.2);
+    
+    /* Print Specs */
+    --page-width: 297mm;
+    --page-height: 210mm;
+    --bleed: 3mm;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #E0E0E0;
+    color: var(--dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 0;
+}
+
+/* Page Layout */
+.page {
+    width: calc(var(--page-width) + (var(--bleed) * 2));
+    height: calc(var(--page-height) + (var(--bleed) * 2));
+    background: var(--light);
+    margin-bottom: 40px;
+    display: flex;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    padding: var(--bleed);
+    overflow: hidden;
+}
+
+/* Bleed Area Indicators (Visual Only) */
+.page::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border: var(--bleed) solid rgba(255, 0, 0, 0.1);
+    pointer-events: none;
+    z-index: 100;
+}
+
+.panel {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-cream);
+    z-index: 1;
+}
+
+/* Fold Lines (Visual Only) */
+.panel:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 5%;
+    height: 90%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.05), transparent);
+}
+
+/* Specific Panel Styles */
+.panel-hero {
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('petita_product_shot_1777839261401.png');
+    background-size: cover;
+    background-position: center;
+    color: var(--light);
+    justify-content: flex-end;
+    padding-bottom: 80px;
+}
+
+.panel-accent {
+    background-color: var(--primary);
+    color: var(--light);
+}
+
+.panel-dark {
+    background-color: var(--dark);
+    color: var(--light);
+}
+
+/* Typography */
+h1, h2, h3, .luxury-text {
+    font-family: 'Playfair Display', serif;
+    line-height: 1.1;
+}
+
+h1 {
+    font-size: 56px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -2px;
+}
+
+h2 {
+    font-size: 34px;
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+.panel-accent h2, .panel-dark h2 {
+    color: var(--light);
+}
+
+.gold-text {
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
+
+.tagline {
+    font-size: 14px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    margin-bottom: 15px;
+    opacity: 0.9;
+}
+
+.description {
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 25px;
+    font-weight: 300;
+}
+
+/* Products */
+.product-item {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 6px;
+}
+
+.product-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.product-price {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 16px;
+}
+
+.product-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    max-width: 85%;
+}
+
+/* Components */
+.glass-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 30px;
+    border-radius: 4px;
+}
+
+.ornament {
+    width: 60px;
+    height: 1px;
+    background: var(--primary);
+    margin: 25px 0;
+}
+
+.panel-accent .ornament { background: var(--light); }
+
+.testimonial {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.testimonial-text {
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    font-weight: 300;
+}
+
+.testimonial-author {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--primary);
+}
+
+/* QR Code Area */
+.qr-container {
+    text-align: center;
+    margin-top: auto;
+    padding-top: 40px;
+}
+
+.qr-box {
+    background: white;
+    padding: 12px;
+    display: inline-block;
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Print Overrides */
+@media print {
+    body { background: none; padding: 0; }
+    .page {
+        margin: 0;
+        box-shadow: none;
+        page-break-after: always;
+        width: calc(var(--page-width) + (var(--bleed) * 2));
+        height: calc(var(--page-height) + (var(--bleed) * 2));
+    }
+    .page::before { display: none; } /* Hide bleed helper in actual print */
+}
