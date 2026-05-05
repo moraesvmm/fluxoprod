@@ -39,7 +39,7 @@ const REPORT_HEADERS: Record<ReportType, string[]> = {
   rh: ["Colaborador", "Cargo", "Salário", "Cadastro"],
   comissoes: ["Colaborador", "Venda", "Valor Venda", "Comissão", "Status"],
   dre: ["Indicador", "Valor", "Margem (%)"],
-  os: ["Número", "Cliente", "Equipamento", "Status", "Valor Orçamento", "Criado em"],
+  os: ["Número", "Cliente", "Equipamento", "Série/IMEI", "Status", "Valor Orçamento", "Laudo", "Criado em"],
   obras: ["Obra", "Cliente", "Orçamento", "Status", "Início", "Previsão Fim"],
 };
 
@@ -284,9 +284,11 @@ export default function RelatoriosPage() {
         if (header === "Número") return row.numero || "—";
         if (header === "Cliente") return row.cliente?.nome || row.cliente || "—";
         if (header === "Equipamento") return row.veiculo_equipamento || "—";
+        if (header === "Série/IMEI") return row.equipamento_serial || "—";
         if (header === "Status") return row.status || "—";
-        if (header === "Valor Orçamento") return formatarMoeda(row.valor_orcamento || 0);
-        if (header === "Criado em") return formatarData(row.criado_em);
+        if (header === "Valor Orçamento") return formatarMoeda(row.valor_orcamento || row.valor_orcado || 0);
+        if (header === "Laudo") return row.laudo_tecnico || row.laudo || "—";
+        if (header === "Criado em") return formatarData(row.criado_em || row.data_criacao);
         break;
       case "obras":
         if (header === "Obra") return row.nome || "—";

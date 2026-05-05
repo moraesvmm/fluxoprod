@@ -318,6 +318,9 @@ export interface OrdemServico {
   colaborador_id?: string;
   status: string;
   valor_orcamento: number;
+  equipamento_serial?: string;
+  laudo_tecnico?: string;
+  checklist_entrada?: any;
   tempo_total_minutos?: number;
   timer_iniciado_em?: string;
   criado_em: string;
@@ -339,6 +342,9 @@ export interface OrdemServicoCreate {
   colaborador_id?: string;
   status?: string;
   valor_orcamento?: number;
+  equipamento_serial?: string;
+  laudo_tecnico?: string;
+  checklist_entrada?: any;
 }
 
 export interface OrdemServicoUpdate {
@@ -348,6 +354,9 @@ export interface OrdemServicoUpdate {
   descricao_problema?: string;
   status?: string;
   valor_orcamento?: number;
+  equipamento_serial?: string;
+  laudo_tecnico?: string;
+  checklist_entrada?: any;
 }
 
 export interface Obra {
@@ -1119,10 +1128,13 @@ export async function createOS(os: OrdemServicoCreate): Promise<OrdemServico> {
     .rpc('tenant_criar_os', {
       p_cliente_id: os.cliente_id || null,
       p_colaborador_id: os.colaborador_id || null,
-      p_veiculo_equipamento: os.veiculo_equipamento || null,
+      p_veiculo_equipamento: os.veiculo_equipamento,
       p_descricao_problema: os.descricao_problema,
-      p_status: 'aberta',
-      p_valor_orcamento: os.valor_orcamento || 0
+      p_status: os.status,
+      p_valor_orcamento: os.valor_orcamento,
+      p_equipamento_serial: os.equipamento_serial || null,
+      p_laudo_tecnico: os.laudo_tecnico || null,
+      p_checklist_entrada: os.checklist_entrada || null
     });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
@@ -1144,7 +1156,10 @@ export async function updateOS(id: string, os: OrdemServicoUpdate): Promise<Orde
       p_veiculo_equipamento: os.veiculo_equipamento ?? null,
       p_descricao_problema: os.descricao_problema ?? null,
       p_status: os.status ?? null,
-      p_valor_orcamento: os.valor_orcamento ?? null
+      p_valor_orcamento: os.valor_orcamento ?? null,
+      p_equipamento_serial: os.equipamento_serial ?? null,
+      p_laudo_tecnico: os.laudo_tecnico ?? null,
+      p_checklist_entrada: os.checklist_entrada ?? null
     });
   if (error) throw new Error(error.message);
   return data as OrdemServico;

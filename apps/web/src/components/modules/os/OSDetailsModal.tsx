@@ -47,8 +47,204 @@ export function OSDetailsModal({ isOpen, onClose, os, onUpdate }: OSDetailsModal
   };
 
   const handlePrintPDF = () => {
-    // Implementação simplificada de impressão profissional
-    window.print();
+    const formatarMoeda = (valor: number) => {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
+    };
+
+    const formatarData = (data?: string) => {
+      if (!data) return "—";
+      return new Date(data).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
+
+    const printHtml = `
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title>Orçamento OS #${os.numero}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+          
+          body { 
+            font-family: 'Inter', sans-serif; 
+            padding: 40px; 
+            color: #1e293b;
+            line-height: 1.5;
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .brand {
+            color: #4f46e5;
+            font-size: 24px;
+            font-weight: 800;
+          }
+          .os-info {
+            text-align: right;
+          }
+          .os-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+          }
+          .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+          }
+          .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 10px;
+            letter-spacing: 0.05em;
+          }
+          .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+          }
+          .label {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+          }
+          .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+          }
+          .description-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #475569;
+            white-space: pre-wrap;
+          }
+          .total-section {
+            margin-top: 40px;
+            padding: 25px;
+            background: #4f46e5;
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .total-label {
+            font-size: 16px;
+            font-weight: 600;
+          }
+          .total-value {
+            font-size: 32px;
+            font-weight: 800;
+          }
+          .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+          }
+          @media print {
+            body { padding: 0; }
+            .section { break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="brand">Fluxo ERP</div>
+            <div style="font-size: 12px; color: #64748b;">Orçamento de Prestação de Serviços</div>
+          </div>
+          <div class="os-info">
+            <div class="os-number">OS #${os.numero}</div>
+            <div style="font-size: 12px; color: #64748b;">Emitido em: ${formatarData(new Date().toISOString())}</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Dados do Cliente</div>
+          <div class="grid">
+            <div>
+              <div class="label">Nome / Razão Social</div>
+              <div class="value">${os.cliente?.nome || '—'}</div>
+            </div>
+            <div>
+              <div class="label">Documento</div>
+              <div class="value">${os.cliente?.documento || '—'}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Dados do Equipamento</div>
+          <div class="grid">
+            <div>
+              <div class="label">Modelo / Descrição</div>
+              <div class="value">${os.veiculo_equipamento || '—'}</div>
+            </div>
+            <div>
+              <div class="label">Série / IMEI</div>
+              <div class="value">${os.equipamento_serial || '—'}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Descrição do Problema</div>
+          <div class="description-box">${os.descricao_problema || 'Nenhuma descrição informada.'}</div>
+        </div>
+
+        ${os.laudo_tecnico ? `
+          <div class="section" style="border-left: 4px solid #4f46e5;">
+            <div class="section-title" style="color: #4f46e5;">Diagnóstico Técnico</div>
+            <div class="description-box">${os.laudo_tecnico}</div>
+          </div>
+        ` : ''}
+
+        <div class="total-section">
+          <div class="total-label">Valor Total do Orçamento</div>
+          <div class="total-value">${formatarMoeda(os.valor_orcamento)}</div>
+        </div>
+
+        <div class="footer">
+          Este documento é uma proposta comercial válida por 5 dias.<br/>
+          <strong>Fluxo ERP - Tecnologia em Gestão</strong>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printHtml);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    }
   };
 
   return (
@@ -156,6 +352,24 @@ export function OSDetailsModal({ isOpen, onClose, os, onUpdate }: OSDetailsModal
                   <p className="font-medium text-slate-900">{os.colaborador?.nome || "Não alocado"}</p>
                 </div>
               </div>
+
+              {os.equipamento_serial && (
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase">Série/IMEI</label>
+                  <p className="font-medium text-slate-900 bg-slate-50 p-2 rounded border border-dashed border-slate-200">
+                    {os.equipamento_serial}
+                  </p>
+                </div>
+              )}
+
+              {os.laudo_tecnico && (
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase">Laudo Técnico (Diagnóstico)</label>
+                  <div className="mt-1 text-sm text-slate-700 bg-violet-50/30 p-4 rounded-lg border border-violet-100/50 whitespace-pre-wrap">
+                    {os.laudo_tecnico}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {activeTab === 'pecas' && (

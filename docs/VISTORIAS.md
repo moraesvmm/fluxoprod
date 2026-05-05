@@ -1,5 +1,33 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 64 - Expansão do Módulo OS (Assistência Técnica)
+**Data:** 05/05/2026
+**Status:** ✅ CONCLUÍDO
+**Responsável:** Antigravity
+
+#### Alterações Realizadas:
+1. **Banco de Dados (SQL: `apps/api/migrations/rpc_os_assistencia_tecnica.sql`):**
+   - Novas colunas `equipamento_serial` (TEXT), `laudo_tecnico` (TEXT) e `checklist_entrada` (JSONB) adicionadas via migração multi-tenant (LOOP em schemas `tenant_*`).
+   - Atualização da RPC `public.provisionar_empresa` para incluir estas colunas nativamente em novos tenants.
+   - **Relatórios:** Atualizada a RPC `public.tenant_listar_ordens_servico` para incluir campos de assistência técnica.
+2. **API e Tipagem (`apps/web/src/lib/api.ts`):**
+   - Atualizadas interfaces `OrdemServico`, `OrdemServicoCreate` e `OrdemServicoUpdate`.
+   - Funções `createOS` e `updateOS` agora enviam os novos campos para as RPCs.
+3. **Frontend (UI Premium):**
+   - **Página de OS (`os/page.tsx`):** Novos campos de "Série/IMEI" nos formulários de criação e edição.
+   - **Detalhes da OS (`OSDetailsModal.tsx`):** Exibição elegante do Série/IMEI e do Laudo Técnico (Diagnóstico) na aba Geral.
+   - **Relatórios (`relatorios/page.tsx`):** Inclusão das colunas de Série/IMEI e Laudo no relatório analítico de OS.
+   - **Exportação (Orçamento):** Implementado gerador de HTML customizado para impressão de orçamentos profissionais, ocultando dados internos e focando no cliente.
+   - **Checkout:** Atualizado card informativo do módulo OS para incluir "Rastreabilidade por Série/IMEI e Diagnóstico".
+
+#### ⚠️ AÇÕES PENDENTES OBRIGATÓRIAS:
+1. **Executar `apps/api/migrations/rpc_os_assistencia_tecnica.sql` no banco Supabase.**
+2. **Executar `apps/api/migrations/update_os_report_rpc.sql` no banco Supabase.**
+Sem isso, as novas colunas e assinaturas de RPC não existirão nos schemas existentes.
+
+---
+
+
 ## VISTORIA 63 - Auditoria Técnica de Gestão de Usuários e Segurança
 **Data:** 05/05/2026
 **Status:** ✅ CONCLUÍDO

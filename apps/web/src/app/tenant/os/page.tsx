@@ -40,6 +40,8 @@ export default function OSPage() {
     descricao_problema: "",
     colaborador_id: "",
     valor_orcamento: "",
+    equipamento_serial: "",
+    laudo_tecnico: "",
   });
   const [viewMode, setViewMode] = useState<'table' | 'calendar' | 'kanban'>('kanban');
   const [selectedOS, setSelectedOS] = useState<OrdemServico | null>(null);
@@ -76,6 +78,8 @@ export default function OSPage() {
         colaborador_id: formData.colaborador_id || undefined,
         valor_orcamento: formData.valor_orcamento ? parseFloat(formData.valor_orcamento) : 0,
         status: "aberta",
+        equipamento_serial: formData.equipamento_serial || undefined,
+        laudo_tecnico: formData.laudo_tecnico || undefined,
       });
       success("OS criada com sucesso!");
       setShowModal(false);
@@ -112,6 +116,8 @@ export default function OSPage() {
       descricao_problema: ordem.descricao_problema || '',
       colaborador_id: ordem.colaborador_id || '',
       valor_orcamento: ordem.valor_orcamento ? String(ordem.valor_orcamento) : '',
+      equipamento_serial: ordem.equipamento_serial || '',
+      laudo_tecnico: ordem.laudo_tecnico || '',
     });
     setShowEditModal(true);
   };
@@ -127,6 +133,8 @@ export default function OSPage() {
         descricao_problema: formData.descricao_problema,
         colaborador_id: formData.colaborador_id || undefined,
         valor_orcamento: formData.valor_orcamento ? parseFloat(formData.valor_orcamento) : undefined,
+        equipamento_serial: formData.equipamento_serial || undefined,
+        laudo_tecnico: formData.laudo_tecnico || undefined,
       };
 
       await updateMutation.mutateAsync({ id: editId, os: payload });
@@ -364,6 +372,16 @@ export default function OSPage() {
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Série/IMEI</label>
+            <input
+              type="text"
+              value={formData.equipamento_serial}
+              onChange={(e) => setFormData({ ...formData, equipamento_serial: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Número de série ou IMEI do aparelho"
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Descrição do Problema</label>
             <textarea
               value={formData.descricao_problema}
@@ -396,6 +414,16 @@ export default function OSPage() {
                 placeholder="0.00"
               />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Laudo Técnico (Diagnóstico)</label>
+            <textarea
+              value={formData.laudo_tecnico}
+              onChange={(e) => setFormData({ ...formData, laudo_tecnico: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              rows={3}
+              placeholder="Relatório técnico do diagnóstico realizado..."
+            />
           </div>
           <div className="flex gap-3 pt-4">
             <button

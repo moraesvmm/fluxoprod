@@ -621,7 +621,10 @@ BEGIN
             cliente_id UUID REFERENCES %I.clientes(id) ON DELETE SET NULL,
             colaborador_id UUID REFERENCES %I.funcionarios(id) ON DELETE SET NULL,
             veiculo_equipamento VARCHAR(255),
+            equipamento_serial TEXT,
             descricao_problema TEXT,
+            laudo_tecnico TEXT,
+            checklist_entrada JSONB,
             status VARCHAR(50) DEFAULT ''aberta'' CHECK (status IN (''aberta'', ''em_execucao'', ''concluida'', ''cancelada'')),
             valor_orcamento NUMERIC(10, 2) CHECK (valor_orcamento >= 0),
             criado_em TIMESTAMPTZ DEFAULT NOW(),
@@ -1607,7 +1610,10 @@ BEGIN
           p_descricao_problema TEXT,
           p_status VARCHAR(50),
           p_valor_orcamento NUMERIC(10, 2),
-          p_idempotency_key TEXT DEFAULT NULL
+          p_idempotency_key TEXT DEFAULT NULL,
+          p_equipamento_serial TEXT DEFAULT NULL,
+          p_laudo_tecnico TEXT DEFAULT NULL,
+          p_checklist_entrada JSONB DEFAULT NULL
         )
         RETURNS JSONB
         LANGUAGE plpgsql
@@ -1629,8 +1635,16 @@ BEGIN
             END IF;
           END IF;
 
-          INSERT INTO ordens_servico (cliente_id, colaborador_id, veiculo_equipamento, descricao_problema, status, valor_orcamento)
-          VALUES (p_cliente_id, p_colaborador_id, p_veiculo_equipamento, p_descricao_problema, p_status, p_valor_orcamento)
+          INSERT INTO ordens_servico (
+            cliente_id, colaborador_id, veiculo_equipamento, 
+            descricao_problema, status, valor_orcamento,
+            equipamento_serial, laudo_tecnico, checklist_entrada
+          )
+          VALUES (
+            p_cliente_id, p_colaborador_id, p_veiculo_equipamento, 
+            p_descricao_problema, p_status, p_valor_orcamento,
+            p_equipamento_serial, p_laudo_tecnico, p_checklist_entrada
+          )
           RETURNING id INTO v_os_id;
 
           v_cached_result := json_build_object(
@@ -1646,7 +1660,7 @@ BEGIN
 
           RETURN v_cached_result;
         EXCEPTION WHEN OTHERS THEN
-          RAISE EXCEPTION ''Erro ao criar OS: %'', SQLERRM;
+          RAISE EXCEPTION ''Erro ao criar OS: %%'', SQLERRM;
         END;
         $func$;
     ', novo_schema, novo_schema);
