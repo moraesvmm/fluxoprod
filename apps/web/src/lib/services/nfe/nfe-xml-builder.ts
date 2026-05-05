@@ -27,12 +27,12 @@ export class NfeXmlBuilder {
       cpf_cnpj?: string | null
       endereco?: string | null
     },
-    opts?: { ambiente?: 'homologacao' | 'producao'; serie?: number; nNF?: number; natOp?: string }
+    opts: { ambiente?: 'homologacao' | 'producao'; serie: number; nNF: number; natOp?: string; tpEmis?: number }
   ): string {
     const agora = new Date().toISOString()
     const cnf = Math.floor(10000000 + Math.random() * 90000000).toString()
-    const ambiente = opts?.ambiente || 'homologacao'
-    const serie = opts?.serie ?? 1
+    const ambiente = opts.ambiente || 'homologacao'
+    const serie = opts.serie
     const natOp = opts?.natOp || 'Venda de Mercadoria'
     const codigoMunicipio = String(emitente.codigo_municipio_ibge || '').replace(/\D/g, '')
     const nomeMunicipio = emitente.cidade || ''
@@ -45,7 +45,7 @@ export class NfeXmlBuilder {
     const metodo = String(venda?.metodo_pagamento ?? venda?.metodo ?? '')
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>`
-    const chaveSemDV = this.gerarChaveAcessoSemDV(venda, emitente, cnf, serie, opts?.nNF)
+    const chaveSemDV = this.gerarChaveAcessoSemDV(venda, emitente, cnf, serie, opts.nNF)
     const cDV = this.calcularDV(chaveSemDV)
     const chave = `${chaveSemDV}${cDV}`
     xml += `<NFe xmlns="http://www.portalfiscal.inf.br/nfe">`
@@ -57,13 +57,13 @@ export class NfeXmlBuilder {
     xml += `<natOp>${natOp}</natOp>`
     xml += `<mod>55</mod>`
     xml += `<serie>${serie}</serie>`
-    xml += `<nNF>${String(opts?.nNF ?? 1).padStart(1, '0')}</nNF>`
+    xml += `<nNF>${String(opts.nNF).padStart(1, '0')}</nNF>`
     xml += `<dhEmi>${agora}</dhEmi>`
     xml += `<tpNF>1</tpNF>`
     xml += `<idDest>1</idDest>`
     xml += `<cMunFG>${codigoMunicipio}</cMunFG>`
     xml += `<tpImp>1</tpImp>`
-    xml += `<tpEmis>1</tpEmis>`
+    xml += `<tpEmis>${opts.tpEmis ?? 1}</tpEmis>`
     xml += `<cDV>${cDV}</cDV>`
     xml += `<tpAmb>${ambiente === 'producao' ? 1 : 2}</tpAmb>`
     xml += `<finNFe>1</finNFe>`
@@ -155,7 +155,7 @@ export class NfeXmlBuilder {
     },
     cnf: string,
     serie: number,
-    nNF?: number
+    nNF: number
   ): string {
     const now = new Date()
     const aa = String(now.getFullYear()).slice(-2)
@@ -164,7 +164,7 @@ export class NfeXmlBuilder {
     const cnpj = String(emitente.cnpj || '').replace(/\D/g, '').padStart(14, '0')
     const mod = '55'
     const serie3 = String(serie).padStart(3, '0')
-    const nNF9 = String(nNF ?? 1).padStart(9, '0')
+    const nNF9 = String(nNF).padStart(9, '0')
     const tpEmis = '1'
     const cnf8 = String(cnf).padStart(8, '0')
     return `${cUF}${aa}${mm}${cnpj}${mod}${serie3}${nNF9}${tpEmis}${cnf8}`

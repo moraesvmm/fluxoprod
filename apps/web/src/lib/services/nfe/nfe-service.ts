@@ -255,10 +255,29 @@ export class NfeService {
         throw new Error('Cliente da venda não encontrado para emissão fiscal.')
       }
 
-      const xmlRaw = NfeXmlBuilder.build(venda, empresa, venda.clientes)
+      const ambiente = empresa.nfe_ambiente || 'homologacao'
+      const serieFiscal = 1 // Padrão
+      const modeloFiscal = '55' // NFe
+
+      const { data: nNF, error: rpcError } = await admin.rpc('incrementar_numero_nfe', {
+        p_empresa_id: empresa.id,
+        p_ambiente: ambiente,
+        p_serie: serieFiscal,
+        p_modelo: modeloFiscal,
+      })
+
+      if (rpcError || !nNF) {
+        throw new Error(`Falha ao obter numeração sequencial (nNF): ${rpcError?.message || 'Retorno vazio'}`)
+      }
+
+      const xmlRaw = NfeXmlBuilder.build(venda, empresa, venda.clientes, {
+        ambiente,
+        serie: serieFiscal,
+        nNF: Number(nNF),
+        tpEmis: 1 // 1=Normal. Preparado para 7=SVC-RS em contingência
+      })
       const xmlSigned = NfeSigner.sign(xmlRaw, certData.privateKeyPem, certData.certificatePem)
 
-      const ambiente = empresa.nfe_ambiente || 'homologacao'
       const urls = getSefazUrl(empresa.uf || 'RS', ambiente)
       const responseSoap = await SefazClient.sendSoap(
         urls.autorizacao,

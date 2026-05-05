@@ -38,10 +38,18 @@ Este documento é destinado exclusivamente para o planejamento de novas funciona
 
 ## 📈 EXPANSÃO DE MÓDULOS
 
-### 1. Automação Bancária (Software House)
+### 1. Motor Fiscal: Impostos e Tributação Dinâmica (Refatoração Crítica)
+**Objetivo:** Substituir a tributação chumbada (Hardcoded: CSOSN 102, ICMS/PIS/COFINS zerados) por um motor de regras fiscais inteligente baseado no Regime Tributário do Emitente e na NCM/CFOP do Produto.
+- **Técnico:**
+  - Criar interface de `Configurações Fiscais do Produto` (Regras de ICMS, PIS, COFINS, IPI).
+  - Atualizar o `nfe-xml-builder.ts` para aplicar regras de cálculo percentual e de base de cálculo (CST/CSOSN dinâmico) ao construir as tags `<imposto>`.
+  - Suporte a Lucro Presumido e Lucro Real (CST 00, 20, 40) além do Simples Nacional.
+- **Impacto:** Permite que empresas de diferentes regimes emitam NFe sem risco de autuação fiscal por erro tributário.
+
+### 2. Automação Bancária (Software House)
 - Integração via API com Efí/Asaas para baixa automática de boletos e Pix sem intervenção manual.
 
-### 2. Gestão de Documentos (Storage)
+### 3. Gestão de Documentos (Storage)
 - Galeria de evidências em OS e comprovantes no Financeiro via Supabase Storage.
 
 ---
