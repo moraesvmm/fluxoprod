@@ -13,8 +13,6 @@ import { UserModulesModal } from './UserModulesModal';
 import { useToast } from '@/components/ui/toast';
 import { createClient } from '@/utils/supabase/client';
 
-const LIMITE_MAP: Record<string, number> = { starter: 3, business: 10, pro: 50 };
-
 interface InviteForm {
   nome: string;
   email: string;

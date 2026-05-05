@@ -1,8 +1,8 @@
 # DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
--- Status: Vistoria 39 Implementada - Motor Fiscal Nativo (Custo Zero) --
+-- Status: Vistoria 63 Implementada - Gestão de Equipe Multi-Tenant --
 ## ESTADO ATUAL: PRODUCTION-READY (QUALIFICADO)
-## ÚLTIMA ATUALIZAÇÃO: 29/04/2026 (NFe Nativa, mTLS, XMLDSIG)
-## VERSÃO: 2.5
+## ÚLTIMA ATUALIZAÇÃO: 05/05/2026 (Auditoria Gestão de Usuários)
+## VERSÃO: 2.6
 
 ---
 
@@ -121,7 +121,7 @@ Estado real consolidado pela Vistoria 17 (22/04/2026):
 
 ### Tabelas do Schema Public (Governança)
 1. **empresas** - Empresas/tenants
-   - Colunas: id, cnpj, razao_social, porte, segmento, schema_name, criado_em, atualizado_em, status, **deleted_at**
+   - Colunas: id, cnpj, razao_social, porte, segmento, schema_name, criado_em, atualizado_em, status, **deleted_at**, limite_usuarios
    - Índices: idx_empresas_cnpj, idx_empresas_schema_name, idx_public_empresas_not_deleted
 
 2. **modulos_catalogo** - Catálogo de módulos disponíveis
@@ -145,6 +145,11 @@ Estado real consolidado pela Vistoria 17 (22/04/2026):
 
 7. **v_empresa_modulos** - View para módulos ativos por empresa
    - JOIN: empresa_modulos + modulos_catalogo
+
+8. **usuario_modulos_permitidos** - Permissões granulares de módulo por usuário (tenant_user)
+   - Colunas: user_id, empresa_id, modulo_key, permitido, criado_em
+   - Índices: pk_usuario_modulos_permitidos, idx_usuario_modulos_empresa
+   - RLS: Sim (leitura própria, gerência por tenant_admin)
 
 ### Tabelas do Schema Tenant (Soft Delete Implementado)
 Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices parciais `WHERE deleted_at IS NULL`.
@@ -222,6 +227,12 @@ Todas as tabelas abaixo possuem a coluna `deleted_at TIMESTAMPTZ` e índices par
 - **provisionar_empresa(p_cnpj, p_razao_social, p_porte, p_segmento, p_modulos)** - Cria tenant completo
 - **set_tenant_schema(p_user_id)** - Configura search_path para o schema do usuário
 - **upgrade_all_tenants(p_target_version)** - Aplica migrations em todos os schemas tenant
+
+#### Gestão de Equipe (Multi-Tenant)
+- **verificar_limite_usuarios(p_empresa_id)** - Valida limite de assentos baseado no plano
+- **criar_usuario_tenant(p_empresa_id, p_email, p_nome, p_role)** - (OBSOLETO, delegada para API route `create/route.ts`)
+- **remover_usuario_tenant(p_empresa_id, p_user_id)** - Executa soft delete (deleted_at) de um membro
+- **atualizar_role_usuario_tenant(p_empresa_id, p_user_id, p_new_role)** - Promove ou rebaixa um membro
 
 #### Dashboard
 - **tenant_dashboard_kpis()** - Retorna KPIs agregados (faturamento, vendas, clientes, produtos, OS, obras em andamento, estoque baixo, saldo)
@@ -564,6 +575,8 @@ apps/web/src/
 - **use-financeiro:** CRUD de transações financeiras
 - **use-dashboard:** KPIs do dashboard
 - **use-email:** Envio de e-mails via Resend
+- **use-team:** Gestão de equipe e módulos permitidos
+- **use-sidebar-data:** Estrutura e filtragem da navegação lateral
 
 **Interfaces TypeScript:**
 ```typescript

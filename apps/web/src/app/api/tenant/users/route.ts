@@ -40,22 +40,24 @@ export async function GET() {
 
     if (profilesError) throw new Error(profilesError.message);
 
-    // Buscar emails via auth (listUsers)
-    const userIds = (profiles || []).map(p => p.user_id);
+    // Buscar emails via auth (listUsers em batch, não N+1)
+    const userIds = new Set((profiles || []).map(p => p.user_id));
     const emailMap: Record<string, { email: string; ultimo_login: string | null }> = {};
 
-    // Buscar em lotes de 50 para evitar sobrecarga
-    for (let i = 0; i < userIds.length; i += 50) {
-      const chunk = userIds.slice(i, i + 50);
-      for (const uid of chunk) {
-        const { data: authUser } = await admin.auth.admin.getUserById(uid);
-        if (authUser?.user) {
-          emailMap[uid] = {
-            email: authUser.user.email || '',
-            ultimo_login: authUser.user.last_sign_in_at || null,
+    let page = 1;
+    while (page <= 10) {
+      const { data: listData } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (!listData?.users?.length) break;
+      for (const u of listData.users) {
+        if (userIds.has(u.id)) {
+          emailMap[u.id] = {
+            email: u.email || '',
+            ultimo_login: u.last_sign_in_at || null,
           };
         }
       }
+      if (listData.users.length < 1000) break;
+      page++;
     }
 
     const result = (profiles || []).map(p => ({

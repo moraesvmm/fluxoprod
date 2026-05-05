@@ -62,14 +62,30 @@ export function useSidebarData() {
         ? (palavras[0][0] + palavras[1][0]).toUpperCase()
         : nome.substring(0, 2).toUpperCase();
 
-      const activeKeys = (modsRes.data || [])
+      let activeKeys = (modsRes.data || [])
         .filter((m: any) => m.ativo)
         .map((m: any) => m.modulo_key);
+
+      // Filtragem granular: tenant_user só vê módulos explicitamente permitidos
+      if (profile.role === 'tenant_user') {
+        const { data: userMods } = await supabase
+          .from('usuario_modulos_permitidos')
+          .select('modulo_key, permitido')
+          .eq('user_id', user.id)
+          .eq('empresa_id', profile.empresa_id);
+
+        const allowedKeys = new Set(
+          (userMods || []).filter((m: any) => m.permitido).map((m: any) => m.modulo_key)
+        );
+        // Interseccionar: módulo deve ser contratado E permitido para o usuário
+        activeKeys = activeKeys.filter((k: string) => allowedKeys.has(k));
+      }
 
       return {
         empresaNome: nome,
         empresaIniciais: iniciais,
-        activeKeys
+        activeKeys,
+        role: profile.role
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes cache

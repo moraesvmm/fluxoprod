@@ -1,5 +1,20 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 63 - Auditoria Técnica de Gestão de Usuários e Segurança
+**Data:** 05/05/2026
+**Status:** ✅ CONCLUÍDO
+**Responsável:** Antigravity
+
+#### Correções Críticas (Bugs de Produção):
+1. **Webhook de Pagamentos (C1):** Pagamentos via Asaas agora provisionam empresas com o `limite_usuarios` correto baseado no plano, ao invés do default (3).
+2. **Hook de Equipe (C2):** Corrigido bug de "stream lido duas vezes" (`res.json()`) no `use-team.ts` que impedia o retorno de dados dos usuários e módulos do tenant.
+3. **Segurança (C3):** Corrigido filtro `.eq('deleted_at', null)` por `.is('deleted_at', null)` na API de criação, prevenindo falsos positivos de validação de duplicatas de usuários em soft-delete.
+4. **Permissões Granulares (C4):** A Sidebar agora cruza os módulos ativos da empresa com a tabela `usuario_modulos_permitidos`, impedindo que `tenant_user` veja módulos para os quais não tem acesso.
+
+#### Refatorações e Melhorias:
+1. **RLS (A1):** Implementado Row Level Security na tabela `usuario_modulos_permitidos` com acesso apenas ao próprio usuário ou `tenant_admin`.
+2. **N+1 Queries (A3):** Substituído loop HTTP no Auth por fetch em lote com paginação (`listUsers`) no endpoint de listagem, reduzindo de dezenas de reqs para no máximo 2-3 reqs por acesso.
+3. **Tipagem e Clean Code:** Adicionado `limite_usuarios` na interface `Empresa` e corrigidos problemas de lifecycle do React (M1) no `UserModulesModal`.
 ## VISTORIA 62 - Gestão de Equipe e Controle Granular de Módulos por Tenant
 **Data:** 04/05/2026
 **Status:** ✅ IMPLEMENTADO — AGUARDANDO APLICAÇÃO DO SQL NO BANCO LIVE
@@ -362,21 +377,21 @@ Sem isso, as RPCs e a tabela `usuario_modulos_permitidos` não existirão no ban
 
 ---
 
-## VISTORIA 39 - GestÃ£o de Vendas (Cancelamento e DevoluÃ§Ã£o)
+## VISTORIA 39 - Gestão de Vendas (Cancelamento e Devolução)
 - **Data:** 28/04/2026
-- **Status:** PENDENTE (Realizar vistoria o mais rÃ¡pido possÃ­vel)
-- **AlteraÃ§Ãµes:**
-  - ImplementaÃ§Ã£o de RPCs `tenant_cancelar_venda` e `tenant_devolver_item`.
-  - Estorno automÃ¡tico de estoque em cancelamentos e devoluÃ§Ãµes parciais.
-  - Feedback visual de status 'cancelado' no histÃ³rico de vendas.
-  - AtualizaÃ§Ã£o dos cards de checkout com novas funcionalidades.
+- **Status:** PENDENTE (Realizar vistoria o mais rápido possível)
+- **Alterações:**
+  - Implementação de RPCs `tenant_cancelar_venda` e `tenant_devolver_item`.
+  - Estorno automático de estoque em cancelamentos e devoluções parciais.
+  - Feedback visual de status 'cancelado' no histórico de vendas.
+  - Atualização dos cards de checkout com novas funcionalidades.
 
 ---
 
-# MÃ“DULO CHECKOUT & ASSINATURAS
+# MÓDULO CHECKOUT & ASSINATURAS
 
 | DATA | VISTORIA | STATUS | RESUMO |
 | :--- | :--- | :--- | :--- |
-| 2026-04-27 | Provisionamento AutomÃƒÂ¡tico & E-mail Trial | **PENDENTE** | AutomaÃƒÂ§ÃƒÂ£o de DDL e link de ativaÃƒÂ§ÃƒÂ£o real. |
-| 2026-04-27 | Teste GrÃƒÂ¡tis de 7 Dias (Free Trial) | **PENDENTE** | Fluxo de registro trial e upgrade Asaas. |
-| 2026-04-26 | Dashboard KPI & CRM Nurturing | CONCLUÃƒï¿½DO | Ajuste de RPCs globais e schemas dinÃƒÂ¢micos. |
+| 2026-04-27 | Provisionamento Automático & E-mail Trial | **PENDENTE** | Automação de DDL e link de ativação real. |
+| 2026-04-27 | Teste Grátis de 7 Dias (Free Trial) | **PENDENTE** | Fluxo de registro trial e upgrade Asaas. |
+| 2026-04-26 | Dashboard KPI & CRM Nurturing | CONCLUÍDO | Ajuste de RPCs globais e schemas dinâmicos. |

@@ -433,6 +433,7 @@ export interface Empresa {
   focusnfe_token_homologacao?: string;
   nfe_ambiente?: 'producao' | 'homologacao';
   nfe_certificado_senha?: string;
+  limite_usuarios?: number;
 }
 
 export interface EmpresaUpdate {

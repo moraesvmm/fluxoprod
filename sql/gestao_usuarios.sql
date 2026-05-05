@@ -39,6 +39,27 @@ COMMENT ON TABLE public.usuario_modulos_permitidos IS
   'Permissões granulares de módulo por usuário dentro do tenant. '
   'tenant_admin sempre tem acesso total. Esta tabela só se aplica a tenant_user.';
 
+-- RLS: proteger permissões de módulo contra acesso não autorizado
+ALTER TABLE public.usuario_modulos_permitidos ENABLE ROW LEVEL SECURITY;
+
+-- Usuário pode ler suas próprias permissões
+DROP POLICY IF EXISTS "usuario_modulos_leitura_propria" ON public.usuario_modulos_permitidos;
+CREATE POLICY "usuario_modulos_leitura_propria" ON public.usuario_modulos_permitidos
+  FOR SELECT USING (user_id = auth.uid());
+
+-- tenant_admin pode gerenciar permissões de usuários do seu tenant
+DROP POLICY IF EXISTS "usuario_modulos_admin_gerencia" ON public.usuario_modulos_permitidos;
+CREATE POLICY "usuario_modulos_admin_gerencia" ON public.usuario_modulos_permitidos
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.user_profiles
+      WHERE user_id = auth.uid()
+        AND empresa_id = usuario_modulos_permitidos.empresa_id
+        AND role = 'tenant_admin'
+        AND deleted_at IS NULL
+    )
+  );
+
 -- ------------------------------------------------------------
 -- 3. Helper: verificar limite de usuários
 -- ------------------------------------------------------------

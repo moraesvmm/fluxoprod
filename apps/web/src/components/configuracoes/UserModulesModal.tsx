@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Settings, Check, Loader2 } from 'lucide-react';
 import {
   useTeamMemberModules,
@@ -22,15 +22,15 @@ export function UserModulesModal({ userId, userName, onClose, onSuccess }: Props
   const updateMutation = useUpdateTeamMemberModules();
 
   const [localState, setLocalState] = useState<Record<string, boolean>>({});
-  const [initialized, setInitialized] = useState(false);
 
   // Inicializar estado local a partir dos dados carregados
-  if (modulos && !initialized) {
-    const init: Record<string, boolean> = {};
-    modulos.forEach(m => { init[m.modulo_key] = m.permitido; });
-    setLocalState(init);
-    setInitialized(true);
-  }
+  useEffect(() => {
+    if (modulos && modulos.length > 0) {
+      const init: Record<string, boolean> = {};
+      modulos.forEach(m => { init[m.modulo_key] = m.permitido; });
+      setLocalState(init);
+    }
+  }, [modulos]);
 
   const toggle = (key: string) => {
     if (ALWAYS_ALLOWED.includes(key)) return;

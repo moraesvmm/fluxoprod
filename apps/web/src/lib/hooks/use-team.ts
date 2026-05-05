@@ -26,8 +26,9 @@ export function useTeam() {
     queryKey: TEAM_KEY,
     queryFn: async () => {
       const res = await fetch('/api/tenant/users');
-      if (!res.ok) throw new Error((await res.json()).error || 'Erro ao carregar equipe.');
-      return (await res.json()).data;
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Erro ao carregar equipe.');
+      return json;
     },
   });
 }
@@ -93,8 +94,9 @@ export function useTeamMemberModules(userId: string | null) {
     queryKey: ['tenant', 'team', 'modules', userId],
     queryFn: async () => {
       const res = await fetch(`/api/tenant/users/${userId}/modules`);
-      if (!res.ok) throw new Error((await res.json()).error || 'Erro ao carregar módulos.');
-      return (await res.json()).data;
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Erro ao carregar módulos.');
+      return json.data;
     },
     enabled: !!userId,
   });

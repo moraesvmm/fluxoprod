@@ -344,11 +344,22 @@ export async function POST(request: Request) {
     const dataVencimentoInicial = new Date();
     dataVencimentoInicial.setDate(dataVencimentoInicial.getDate() + 30);
 
+    // Calcula limite de usuários conforme plano
+    const planName = String(metadata.planName || config.plan_name || '');
+    const limiteUsuariosMap: Record<string, number> = {
+      'Starter': 3, 'Business': 10, 'Pro': 50
+    };
+    const planKey = Object.keys(limiteUsuariosMap).find(k =>
+      planName.toLowerCase().includes(k.toLowerCase())
+    );
+    const limiteUsuarios = planKey ? limiteUsuariosMap[planKey] : 3;
+
     const { error: empresaUpdateError } = await admin.from("empresas").update({
       subscription_id: subscriptionId,
       subscription_status: "ACTIVE",
       data_vencimento: dataVencimentoInicial.toISOString(),
-      status: "ativo"
+      status: "ativo",
+      limite_usuarios: limiteUsuarios,
     }).eq("id", empresaId);
 
     if (empresaUpdateError) {

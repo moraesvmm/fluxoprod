@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       .from('user_profiles')
       .select('role, empresa_id')
       .eq('user_id', caller.id)
-      .eq('deleted_at', null)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (!callerProfile || callerProfile.role !== 'tenant_admin') {
