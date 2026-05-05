@@ -89,6 +89,8 @@ export default function OSPage() {
         descricao_problema: "",
         colaborador_id: "",
         valor_orcamento: "",
+        equipamento_serial: "",
+        laudo_tecnico: "",
       });
     } catch (err: any) {
       toastError("Erro ao criar OS: " + (err.message || "Tente novamente"));
@@ -503,6 +505,26 @@ export default function OSPage() {
                 placeholder="0.00"
               />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Série/IMEI</label>
+            <input
+              type="text"
+              value={formData.equipamento_serial}
+              onChange={(e) => setFormData({ ...formData, equipamento_serial: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Número de série ou IMEI do aparelho"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Laudo Técnico (Diagnóstico)</label>
+            <textarea
+              value={formData.laudo_tecnico}
+              onChange={(e) => setFormData({ ...formData, laudo_tecnico: e.target.value })}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              rows={3}
+              placeholder="Relatório técnico do diagnóstico realizado..."
+            />
           </div>
           <div className="flex gap-3 pt-4">
             <button
