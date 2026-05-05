@@ -226,7 +226,7 @@ export async function POST(request: Request) {
     }
 
     // 1. Gerar o link de confirmação oficial do Supabase
-    const origin = req.headers.get("origin") || "https://fluxoprod.vercel.app";
+    const origin = request.headers.get("origin") || "https://fluxoprod.vercel.app";
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'signup',
       email: payload.customerEmail,
