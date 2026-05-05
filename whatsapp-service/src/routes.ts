@@ -78,8 +78,9 @@ export function createRoutes(getSession: (tenantId: string) => WhatsAppSession):
   });
   
   // Rota de Emergência: Limpar tudo
-  router.post('/nuke', async (_req: Request, res: Response) => {
+  router.post('/nuke', async (req: Request, res: Response) => {
     try {
+      const session = getSession((req as any).tenantId);
       session.nuke();
       res.json({ success: true, message: 'Sessão e credenciais apagadas. Reinicie o serviço.' });
     } catch (err: any) {
@@ -150,6 +151,7 @@ export function createRoutes(getSession: (tenantId: string) => WhatsAppSession):
   // Obter arquivo de mídia binário
   router.get('/media/:id', (req: Request, res: Response) => {
     const messageId = req.params.id;
+    const session = getSession((req as any).tenantId);
     const mediaStore = session.getMediaStore();
     
     const media = mediaStore.get(messageId);
