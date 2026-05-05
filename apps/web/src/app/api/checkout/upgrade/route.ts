@@ -25,10 +25,10 @@ export async function POST(request: Request) {
     }
 
     // Obter módulos ativos para calcular o preço
-    // Como os módulos estão em empresa_modulos (que é preenchido pelo provisionar_empresa_master)
+    // empresa_modulos usa modulo_key (text) que referencia modulos_catalogo.key
     const { data: modulosAtivos, error: modulosError } = await supabase
       .from("empresa_modulos")
-      .select("modulo_id, modulos_catalogo(nome, preco, preco_promocional)")
+      .select("modulo_key")
       .eq("empresa_id", empresaId)
       .eq("ativo", true);
 
@@ -37,23 +37,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Erro ao calcular preço da assinatura" }, { status: 500 });
     }
 
-    // Calcular o total
+    // Calcular o total baseado no plano da empresa (fonte da verdade: tabela planos)
     let totalValue = 0;
-    const modulesNames: string[] = [];
+    const modulesNames: string[] = (modulosAtivos || []).map((m: any) => m.modulo_key);
     
-    if (modulosAtivos && modulosAtivos.length > 0) {
-      modulosAtivos.forEach((m: any) => {
-        const cat = m.modulos_catalogo;
-        if (cat) {
-          totalValue += (cat.preco_promocional ?? cat.preco ?? 0);
-          modulesNames.push(cat.nome);
-        }
-      });
+    if (empresa.plan_name) {
+      const { data: planoInfo } = await supabase
+        .from("planos")
+        .select("preco, preco_promocional")
+        .ilike("nome", empresa.plan_name)
+        .maybeSingle();
+      
+      if (planoInfo) {
+        totalValue = planoInfo.preco_promocional ?? planoInfo.preco ?? 0;
+      }
     }
 
-    // Se o valor for 0, talvez fallback pra preço base se não encontrou.
+    // Fallback: se não encontrou preço do plano
     if (totalValue === 0) {
-       totalValue = 249; // Default starter value ou baseado no plan_name
+       totalValue = 249; // Default starter value
     }
 
     // Extrair email do auth_user_id (vem do user_profiles join auth.users se possível)

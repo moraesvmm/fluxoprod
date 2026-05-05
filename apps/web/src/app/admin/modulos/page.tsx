@@ -11,11 +11,18 @@ async function setModuleActive(formData: FormData) {
   if (!empresaId || !moduloKey) return;
 
   const supabase = await createClient();
+  // Usar upsert para criar o registro se não existir (fix: update silencioso quando módulo não estava cadastrado)
   await supabase
     .from("empresa_modulos")
-    .update({ ativo, atualizado_em: new Date().toISOString() })
-    .eq("empresa_id", empresaId)
-    .eq("modulo_key", moduloKey);
+    .upsert(
+      {
+        empresa_id: empresaId,
+        modulo_key: moduloKey,
+        ativo,
+        atualizado_em: new Date().toISOString(),
+      },
+      { onConflict: "empresa_id,modulo_key" }
+    );
 
   revalidatePath("/admin/modulos");
 }

@@ -1,5 +1,39 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 65 — Correção: Exclusão de Empresa, Módulos Gelucos e Setup Master
+**Data:** 05/05/2026
+**Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
+**Responsável:** Antigravity
+
+#### Problema 1: FK `cupons_utilizados` impedia exclusão de empresa
+- **Causa:** Tabela `cupons_utilizados` tinha FK para `empresas(id)` com `ON DELETE NO ACTION` e a RPC `deletar_empresa_master` não limpava essa tabela antes de deletar a empresa.
+- **Correção (Banco):** FK alterada para `ON DELETE CASCADE` + RPC atualizada para incluir `DELETE FROM cupons_utilizados` e `DELETE FROM checkout_vendas` na sequência de limpeza antes da exclusão da empresa.
+
+#### Problema 2: Empresa "gelucos" (plano Pro) sem acesso a módulos
+- **Causa:** Tabela `empresa_modulos` estava vazia para gelucos — provisionamento recebeu `modules: []` do frontend, e a RPC não inseriu nenhum módulo.
+- **Correção (Banco):** Inseridos os 11 módulos do plano Pro (dashboard, crm, catalogo, estoque, vendas, financeiro, rh, os, obras, comissoes, relatorios) via `INSERT ON CONFLICT`.
+- **Correção (Frontend):** `register-trial/route.ts` agora busca `modulos_incluidos` da tabela `planos` quando `payload.modules` vem vazio, com fallback mínimo para módulos Starter.
+
+#### Problema 3: Setup Master → Módulos não salvava
+- **Causa:** `/admin/modulos/page.tsx` usava `update` que falhava silenciosamente quando o registro não existia em `empresa_modulos`.
+- **Correção:** Trocado `update` por `upsert` com `onConflict: "empresa_id,modulo_key"`.
+- **Correção adicional:** `/api/checkout/upgrade/route.ts` referenciava coluna inexistente `modulo_id` e join inválido com `modulos_catalogo`. Substituído por lookup direto na tabela `planos`.
+
+#### Arquivos Modificados:
+- `apps/web/src/app/admin/modulos/page.tsx`
+- `apps/web/src/app/api/auth/register-trial/route.ts`
+- `apps/web/src/app/api/checkout/upgrade/route.ts`
+- **Banco:** RPC `deletar_empresa_master`, FK `cupons_utilizados_empresa_id_fkey`, dados `empresa_modulos`
+
+#### Validação:
+- [x] `tsc --noEmit` passou sem erros
+- [x] FK confirmada como `CASCADE` no banco
+- [x] Gelucos confirmada com 11 módulos ativos no banco
+- [ ] Teste de exclusão de empresa no setup master (produção)
+- [ ] Teste de salvamento de módulos no setup master (produção)
+
+---
+
 ## VISTORIA 64 - Expansão do Módulo OS (Assistência Técnica)
 **Data:** 05/05/2026
 **Status:** ✅ CONCLUÍDO
@@ -27,7 +61,6 @@ Sem isso, as novas colunas e assinaturas de RPC não existirão nos schemas exis
 
 ---
 
-
 ## VISTORIA 63 - Auditoria Técnica de Gestão de Usuários e Segurança
 **Data:** 05/05/2026
 **Status:** ✅ CONCLUÍDO
@@ -43,6 +76,51 @@ Sem isso, as novas colunas e assinaturas de RPC não existirão nos schemas exis
 1. **RLS (A1):** Implementado Row Level Security na tabela `usuario_modulos_permitidos` com acesso apenas ao próprio usuário ou `tenant_admin`.
 2. **N+1 Queries (A3):** Substituído loop HTTP no Auth por fetch em lote com paginação (`listUsers`) no endpoint de listagem, reduzindo de dezenas de reqs para no máximo 2-3 reqs por acesso.
 3. **Tipagem e Clean Code:** Adicionado `limite_usuarios` na interface `Empresa` e corrigidos problemas de lifecycle do React (M1) no `UserModulesModal`.
+
+---
+
+## VISTORIA 63 — Correção de Ambiguidade: `provisionar_empresa` (Checkout 500)
+**Data:** 04/05/2026
+**Status:** ✅ CONCLUÍDO
+**Responsável:** Antigravity
+
+#### Problema:
+O endpoint `/api/auth/register-trial` retornava HTTP 500 em todas as tentativas de cadastro no checkout.
+
+#### Causa Raiz (Banco de Dados):
+Existiam **duas versões sobrecarregadas (overloaded)** da função `public.provisionar_empresa` com assinaturas ambíguas:
+- `provisionar_empresa(novo_schema text, p_modules text[] DEFAULT ...)`
+- `provisionar_empresa(novo_schema text, p_modules jsonb DEFAULT ...)`
+
+Quando a função `provisionar_empresa_master` fazia a chamada `public.provisionar_empresa(p_schema_name)` (apenas 1 argumento), o PostgreSQL não conseguia determinar qual versão executar, resultando no erro fatal: `function public.provisionar_empresa(text) is not unique`.
+
+#### Correção Aplicada:
+```sql
+DROP FUNCTION IF EXISTS public.provisionar_empresa(text, jsonb);
+```
+
+A versão `jsonb` era uma duplicata experimental sem consumidores ativos. A versão com `text[]` é a correta e utilizada pela `provisionar_empresa_master`.
+
+#### Validação:
+- Query de resolução `SELECT public.provisionar_empresa('_test_...')` retornou `resolucao_ok: true` sem ambiguidade.
+- Schema de teste removido em seguida.
+- Erro `is not unique` **não mais aparece** nos logs do Postgres.
+
+- **Banco:** `DROP FUNCTION public.provisionar_empresa(text, jsonb)` — resolvendo a sobrecarga.
+- **Resolução de Integridade:** O script original de provisionamento (`supabase_rpc.sql`) era grande demais (>4700 lines) causando erro de payload na API do Supabase e resultando numa função "casca vazia" sem tabelas de negócio.
+- **Engenharia de Refatoração:** A função foi dividida em 4 helpers (`_provisionar_tabelas`, `_provisionar_rpcs_leitura`, `_provisionar_rpcs_escrita_a`, `_provisionar_rpcs_escrita_b`).
+- **Correções Estruturais no DDL:**
+  1. Typo no índice (`colaboradorador_id`) corrigido.
+  2. Mismatch de `format()`: `EXECUTE format` tinha mais `%I` do que variáveis fornecidas (corrigido para bater quantidade de argumentos).
+  3. Ordem de dependência: Módulo 7 (`funcionarios`) foi movido para antes do Módulo 6 (`vendas`) para resolver o erro `relation does not exist` na chave estrangeira.
+  4. Escapes de `%`: Em queries com `LIKE '%termo%'`, as porcentagens foram escapadas para `%%` para evitar erro de formatação (`unrecognized format() type specifier`).
+- **Resultado:** A nova função master `public.provisionar_empresa` orquestra os 4 helpers criando perfeitamente o schema com as 27 tabelas e seus triggers/RPCs. O endpoint `register-trial` agora volta a operar 100%.
+
+> [!WARNING] PENDÊNCIA DE VISTORIA GERAL
+> Devido ao número crítico de alterações nos metadados de orquestração do banco de dados (reengenharia em 4 helpers de provisionamento, alteração na ordem das tabelas e correções estruturais pesadas no formato DDL), é necessário realizar uma Vistoria Geral Técnica O MAIS RÁPIDO POSSÍVEL para validar integralmente o ecossistema do banco, a política de triggers e o checkout.
+
+---
+
 ## VISTORIA 62 - Gestão de Equipe e Controle Granular de Módulos por Tenant
 **Data:** 04/05/2026
 **Status:** ✅ IMPLEMENTADO — AGUARDANDO APLICAÇÃO DO SQL NO BANCO LIVE
@@ -131,8 +209,6 @@ Sem isso, as RPCs e a tabela `usuario_modulos_permitidos` não existirão no ban
 - [ ] Garantir que a importação de `SyncFeedbackModal` não ficou quebrada em produção
 
 ---
-
-
 
 ## VISTORIA 60 - Inteligência de Dashboard (Upsell Visual)
 **Data:** 04/05/2026
@@ -412,7 +488,7 @@ Sem isso, as RPCs e a tabela `usuario_modulos_permitidos` não existirão no ban
   - Implementação de RPCs `tenant_cancelar_venda` e `tenant_devolver_item`.
   - Estorno automático de estoque em cancelamentos e devoluções parciais.
   - Feedback visual de status 'cancelado' no histórico de vendas.
-  - Atualização dos cards de checkout com novas funcionalidades.
+  - Atualização dos cards de checkout with novas funcionalidades.
 
 ---
 

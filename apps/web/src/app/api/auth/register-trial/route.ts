@@ -143,6 +143,25 @@ export async function POST(request: Request) {
     const empresaId = randomUUID();
     const schemaName = buildSchemaName(payload.companyName);
 
+    // Resolver módulos: se payload.modules vazio, buscar do plano na tabela planos
+    let modulesToProvision = payload.modules || [];
+    if (modulesToProvision.length === 0 && payload.planName) {
+      const { data: planoData } = await admin
+        .from("planos")
+        .select("modulos_incluidos")
+        .ilike("nome", payload.planName)
+        .maybeSingle();
+      
+      if (planoData?.modulos_incluidos && Array.isArray(planoData.modulos_incluidos)) {
+        modulesToProvision = planoData.modulos_incluidos;
+      }
+    }
+
+    // Fallback final: se ainda vazio, usar módulos mínimos do Starter
+    if (modulesToProvision.length === 0) {
+      modulesToProvision = ["dashboard", "crm", "catalogo", "estoque"];
+    }
+
     // Chama o provisionamento
     const { data: provisionData, error: provisionError } = await admin.rpc(
       "provisionar_empresa_master",
@@ -153,7 +172,7 @@ export async function POST(request: Request) {
         p_porte: payload.companySize,
         p_segmento: payload.companySegment,
         p_schema_name: schemaName,
-        p_modules: payload.modules || [],
+        p_modules: modulesToProvision,
       }
     );
 
