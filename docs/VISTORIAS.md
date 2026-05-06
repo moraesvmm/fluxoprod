@@ -1,5 +1,44 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 67 - Automação de Testes ERP (Vitest)
+**Data:** 06/05/2026
+**Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
+**Responsável:** Antigravity
+
+#### Alterações Realizadas:
+1. **Infraestrutura de Testes:**
+   - Implementação do framework Vitest no workspace `apps/web`.
+   - Configuração de mocks globais para o cliente Supabase (`rpc`, `from`, `select`, `update`, etc) permitindo testes unitários sem dependência de banco real.
+   - Criação do `vitest.config.mts` com suporte a aliases de caminho (`@/*`).
+2. **Cobertura de Módulos (36 Testes):**
+   - **CRM:** Validação de CRUD de clientes, interações, segmentação por tags e campanhas em massa.
+   - **Estoque:** Testes de produtos, kits, alertas de reposição, transferências entre locais e valoração por custo médio.
+   - **Financeiro:** Validação de lançamentos, comissões, DRE e motor de cupons de desconto.
+   - **Obras & Projetos:** Gestão de obras, etapas, acompanhamento físico e alocação de recursos.
+   - **Fiscal (NF-e):** Validação de geração de XML, chaves de acesso e consistência de totais.
+   - **Infraestrutura:** Testes de provisionamento de tenant (register-trial) e fluxo de checkout/upgrade.
+3. **Documentação de Qualidade:**
+   - Criação do `docs/RELATORIO_TESTES.md` consolidando todos os resultados e métricas de execução.
+
+#### Arquivos Criados/Modificados:
+- `apps/web/vitest.config.mts`
+- `apps/web/package.json`
+- `apps/web/src/lib/__tests__/crm-api.test.ts`
+- `apps/web/src/lib/__tests__/inventory-api.test.ts`
+- `apps/web/src/lib/__tests__/finance-api.test.ts`
+- `apps/web/src/lib/__tests__/construction-api.test.ts`
+- `apps/web/src/lib/services/nfe/__tests__/nfe-xml-builder.test.ts`
+- `apps/web/src/app/api/auth/register-trial/__tests__/register-trial.test.ts`
+- `apps/web/src/app/api/checkout/upgrade/__tests__/upgrade.test.ts`
+- `docs/RELATORIO_TESTES.md`
+- `docs/VISTORIAS.md`
+
+#### Próximos Passos:
+- Integrar a execução do `npm test` no pipeline de CI/CD (GitHub Actions/Vercel).
+- Expandir cobertura para componentes UI (via JSDOM).
+
+---
+
 ## VISTORIA 66 - Hardening Fiscal NFe (Simples Nacional)
 **Data:** 06/05/2026
 **Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
