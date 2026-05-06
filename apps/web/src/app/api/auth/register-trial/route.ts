@@ -279,7 +279,6 @@ export async function POST(request: Request) {
       await admin.auth.admin.deleteUser(createdUserId).catch(() => undefined);
     }
 
-    console.error("Erro detalhado no registro de trial:", error);
     return NextResponse.json(
       { 
         error: "Erro interno no registro", 
