@@ -407,16 +407,16 @@ export default function ConfiguracoesPage() {
                   <div>
                     <h4 className="text-sm font-bold text-blue-900 mb-1">Iniciando com Notas Fiscais no Fluxo?</h4>
                     <p className="text-xs text-blue-800 leading-relaxed mb-3">
-                      Para emitir NF-e no fluxo nativo, sua empresa precisa do certificado A1 e do credenciamento para emissão em software próprio na SEFAZ da UF correspondente.
+                      Para emitir NF-e no fluxo nativo, sua empresa precisa operar no <strong>Simples Nacional</strong>, possuir certificado A1 e estar credenciada para emissão em software próprio na SEFAZ da UF correspondente.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px]">
                       <div className="bg-white/50 p-2 rounded border border-blue-200">
-                        <span className="font-bold text-blue-900 block mb-1">1. Certificado Digital A1 (.pfx)</span>
+                        <span className="font-bold text-blue-900 block mb-1">1. Simples Nacional + Certificado A1</span>
                         O certificado é usado pelo backend para assinar o XML da NF-e com validade jurídica.
                       </div>
                       <div className="bg-white/50 p-2 rounded border border-blue-200">
-                        <span className="font-bold text-blue-900 block mb-1">2. Credenciamento na SEFAZ</span>
-                        Solicite ao contador o credenciamento para emissão via software próprio no estado da empresa.
+                        <span className="font-bold text-blue-900 block mb-1">2. Credenciamento e UF suportada</span>
+                        O fluxo nativo atende RS, SP, MG e estados operados pela SVRS. Solicite ao contador o credenciamento para emissão via software próprio.
                       </div>
                     </div>
                   </div>
@@ -450,10 +450,11 @@ export default function ConfiguracoesPage() {
                       className="mt-1 block w-full rounded-md border border-border bg-background py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm text-foreground"
                     >
                       <option value="">Selecione...</option>
-                      <option value="Simples Nacional">Simples Nacional</option>
-                      <option value="Simples Nacional - Excesso de limite">Simples Nacional - Excesso de limite</option>
-                      <option value="Regime Normal">Regime Normal (Lucro Presumido/Real)</option>
+                      <option value="1">Simples Nacional</option>
                     </select>
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      A emissão nativa de NF-e do Fluxo está habilitada somente para empresas do Simples Nacional.
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground/80">Código IBGE do Município</label>

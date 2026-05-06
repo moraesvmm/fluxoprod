@@ -21,6 +21,22 @@ export interface FiscalConfigUpdateInput {
   codigo_municipio_ibge?: string
 }
 
+function normalizeRegimeTributario(value: string | undefined): string {
+  const normalized = value?.trim().toLowerCase()
+  if (!normalized) return ''
+  if (normalized === '1' || normalized === 'simples nacional') return '1'
+  throw new Error('O fluxo nativo de NF-e está disponível somente para empresas do Simples Nacional.')
+}
+
+function getRegimeTributarioForView(value: string | number | null | undefined): string {
+  if (value == null) return ''
+  try {
+    return normalizeRegimeTributario(String(value))
+  } catch {
+    return ''
+  }
+}
+
 export async function getFiscalConfig(empresaId: string): Promise<FiscalConfigView> {
   const admin = createAdminClient()
   const { data: empresa, error } = await admin
@@ -46,7 +62,7 @@ export async function getFiscalConfig(empresaId: string): Promise<FiscalConfigVi
   return {
     inscricao_estadual: empresa.inscricao_estadual || '',
     inscricao_municipal: empresa.inscricao_municipal || '',
-    regime_tributario: empresa.regime_tributario != null ? String(empresa.regime_tributario) : '',
+    regime_tributario: getRegimeTributarioForView(empresa.regime_tributario),
     nfe_ambiente: empresa.nfe_ambiente === 'producao' ? 'producao' : 'homologacao',
     codigo_municipio_ibge: empresa.codigo_municipio_ibge || '',
     certificado_configurado: (files || []).some((file) => file.name === 'certificado.pfx'),
@@ -62,7 +78,7 @@ export async function updateFiscalConfig(
   const payload: Record<string, string> = {
     inscricao_estadual: input.inscricao_estadual?.trim() || '',
     inscricao_municipal: input.inscricao_municipal?.trim() || '',
-    regime_tributario: input.regime_tributario?.trim() || '',
+    regime_tributario: normalizeRegimeTributario(input.regime_tributario),
     nfe_ambiente: input.nfe_ambiente === 'producao' ? 'producao' : 'homologacao',
     codigo_municipio_ibge: input.codigo_municipio_ibge?.trim() || '',
   }

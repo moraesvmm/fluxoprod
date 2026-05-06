@@ -1,5 +1,45 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 66 - Hardening Fiscal NFe (Simples Nacional)
+**Data:** 06/05/2026
+**Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
+**Responsável:** Antigravity
+
+#### Alterações Realizadas:
+1. **Assinatura e Transporte Fiscal:**
+   - Correção da assinatura XML da NF-e para `SHA-256` no `NfeSigner`, alinhando a implementação com o contrato técnico documentado.
+   - Remoção de telemetria local residual (`127.0.0.1`) do `SefazClient`, limpando o caminho de emissão em produção.
+2. **Escopo Operacional do Módulo Fiscal:**
+   - Bloqueio server-side da emissão nativa para empresas fora do **Simples Nacional**.
+   - Remoção do fallback silencioso de UF no roteamento SEFAZ: agora o sistema falha explicitamente quando a UF não está mapeada no backend.
+3. **Consistência Fiscal do XML:**
+   - Correção do cálculo de `vProd`, `vDesc` e `vNF` no `NfeXmlBuilder` para manter coerência entre itens, desconto e total da nota.
+   - Adição de validação de consistência dos totais antes da emissão em `NfeService`.
+4. **Frontend e Contrato Comercial:**
+   - Atualização do painel de Configurações e do `FiscalGuide` para comunicar claramente que a emissão nativa está liberada somente para Simples Nacional.
+   - Atualização do card informativo do módulo `Vendas & PDV` no checkout para refletir o escopo real da funcionalidade fiscal.
+5. **Documentação Base da Verdade:**
+   - Atualização da `DOCUMENTACAO_TECNICA.md` com o escopo real do módulo fiscal e as UFs atualmente suportadas no backend.
+
+#### Arquivos Modificados:
+- `apps/web/src/lib/services/nfe/nfe-signer.ts`
+- `apps/web/src/lib/services/nfe/nfe-xml-builder.ts`
+- `apps/web/src/lib/services/nfe/sefaz-client.ts`
+- `apps/web/src/lib/services/nfe/sefaz-urls.ts`
+- `apps/web/src/lib/services/nfe/nfe-service.ts`
+- `apps/web/src/lib/server/fiscal-config.ts`
+- `apps/web/src/components/modules/fiscal/FiscalGuide.tsx`
+- `apps/web/src/app/tenant/configuracoes/page.tsx`
+- `apps/web/src/app/(auth)/checkout/page.tsx`
+- `docs/DOCUMENTACAO_TECNICA.md`
+- `docs/VISTORIAS.md`
+
+#### Próximos Passos:
+- Validar emissão em homologação com empresa do Simples Nacional e certificado A1 válido.
+- Confirmar comportamento de erro para UF não mapeada e para regime tributário fora do escopo suportado.
+
+---
+
 ## VISTORIA 65 — Correção: Exclusão de Empresa, Módulos Gelucos e Setup Master
 **Data:** 05/05/2026
 **Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)

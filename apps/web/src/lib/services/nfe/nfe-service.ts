@@ -74,6 +74,17 @@ interface VendaFiscal {
   } | null
 }
 
+function isSimplesNacional(regime: string | number | undefined): boolean {
+  if (typeof regime === 'number') {
+    return regime === 1
+  }
+
+  if (!regime) return false
+
+  const normalized = String(regime).trim().toLowerCase()
+  return normalized === '1' || normalized === 'simples nacional'
+}
+
 export class NfeService {
   private static parseAutorizacaoResponse(xml: string): {
     ok: boolean
@@ -201,6 +212,10 @@ export class NfeService {
       throw new Error(`Emitente incompleto para NF-e. Campos pendentes: ${requiredEmitente.map(([field]) => field).join(', ')}`)
     }
 
+    if (!isSimplesNacional(empresa.regime_tributario)) {
+      throw new Error('A emissão nativa de NF-e do Fluxo está liberada somente para empresas do Simples Nacional.')
+    }
+
     if (!venda.clientes?.cpf_cnpj) {
       throw new Error('Cliente da venda sem CPF/CNPJ. A NF-e exige destinatário identificado neste fluxo.')
     }
@@ -218,6 +233,17 @@ export class NfeService {
         .map((item) => item.produtos?.nome || item.produto_id)
         .join(', ')
       throw new Error(`Produtos sem NCM/CFOP configurados: ${productNames}`)
+    }
+
+    const valorItens = venda.vendas_itens.reduce((total, item) => {
+      const subtotal = Number(item.subtotal ?? (item.preco_unitario * item.quantidade) ?? 0)
+      return total + subtotal
+    }, 0)
+    const desconto = Number(venda.desconto_aplicado || 0)
+    const valorEsperado = Math.max(valorItens - desconto, 0)
+
+    if (Math.abs(valorEsperado - Number(venda.valor_total || 0)) > 0.01) {
+      throw new Error('Venda com totais fiscais inconsistentes. Revise subtotal dos itens, desconto e valor total antes de emitir a NF-e.')
     }
   }
 

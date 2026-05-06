@@ -89,10 +89,12 @@ Estado real consolidado pela Vistoria 17 (22/04/2026):
 
 ### Módulo Fiscal (NFe Nativa - OPÇÃO CUSTO ZERO)
 - **Motor**: Node.js Nativo (`node-forge` + `xml-crypto` + `axios`)
+- **Escopo Atual**: Emissão nativa liberada somente para empresas do **Simples Nacional**.
 - **Certificado (Multi-tenant)**: Armazenamento isolado em Supabase Storage (`fiscal/{empresa_id}/certificado.pfx`).
 - **Gestão**: Cada empresa realiza o upload de seu próprio certificado e senha via painel de Configurações.
 - **Assinatura**: Padrão XMLDSIG (Sha256) executado server-side via API Route (`/api/fiscal/nfe/emitir`).
 - **Transmissão**: mTLS (Mutual TLS) direto para os Web Services da SEFAZ utilizando o certificado do tenant.
+- **UFs Atendidas no Backend**: `RS`, `SP`, `MG` e estados operados pela `SVRS` (`AC`, `AL`, `AP`, `DF`, `PB`, `PI`, `RJ`, `RN`, `RO`, `RR`, `SC`, `SE`, `TO`).
 - **Componentes Core**:
   - `NfeXmlBuilder`: Geração de XML 4.00.
   - `NfeSigner`: Assinatura digital do XML.

@@ -17,10 +17,6 @@ export class SefazClient {
     keyPem: string,
     opts?: { ambiente?: 'homologacao' | 'producao' }
   ): Promise<string> {
-    // #region agent log
-    fetch('http://127.0.0.1:7386/ingest/98d300c3-d003-40d3-afaf-0f1637391f9d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4abf1b'},body:JSON.stringify({sessionId:'4abf1b',runId:'pre-fix',hypothesisId:'E',location:'apps/web/src/lib/services/nfe/sefaz-client.ts:15',message:'SefazClient.sendSoap start',data:{url,xmlChars:typeof nfeAutorizacaoPayloadXml==='string'?nfeAutorizacaoPayloadXml.length:null},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
     const ambiente = opts?.ambiente || 'homologacao';
 
     const soapEnvelope = `
@@ -47,17 +43,9 @@ export class SefazClient {
         timeout: 30000 // 30 segundos
       });
 
-      // #region agent log
-      fetch('http://127.0.0.1:7386/ingest/98d300c3-d003-40d3-afaf-0f1637391f9d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4abf1b'},body:JSON.stringify({sessionId:'4abf1b',runId:'pre-fix',hypothesisId:'E',location:'apps/web/src/lib/services/nfe/sefaz-client.ts:48',message:'SefazClient.sendSoap success',data:{status:response?.status||null,responseChars:typeof response?.data==='string'?response.data.length:null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-
       return response.data;
     } catch (error: any) {
       console.error('Erro na comunicação SOAP SEFAZ:', error.response?.data || error.message);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7386/ingest/98d300c3-d003-40d3-afaf-0f1637391f9d',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4abf1b'},body:JSON.stringify({sessionId:'4abf1b',runId:'pre-fix',hypothesisId:'E',location:'apps/web/src/lib/services/nfe/sefaz-client.ts:55',message:'SefazClient.sendSoap error',data:{errorMessage:error?.message||String(error),status:error?.response?.status||null,hasResponseData:!!error?.response?.data},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
 
       throw new Error('Falha na comunicação com os servidores da SEFAZ.');
     }

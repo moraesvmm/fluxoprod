@@ -41,7 +41,14 @@ export class NfeXmlBuilder {
       : Array.isArray(venda?.itens)
         ? venda.itens
         : []
-    const valorTotal = Number(venda?.valor_total ?? venda?.valor ?? 0)
+    const descontoAplicado = Number(venda?.desconto_aplicado || 0)
+    const valorItens = itens.reduce((total, item) => {
+      const quantidade = Number(item.quantidade ?? 0)
+      const precoUnitario = Number(item.preco_unitario ?? 0)
+      const subtotal = Number(item.subtotal ?? (precoUnitario * quantidade))
+      return total + subtotal
+    }, 0)
+    const valorTotal = Math.max(valorItens - descontoAplicado, 0)
     const metodo = String(venda?.metodo_pagamento ?? venda?.metodo ?? '')
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>`
@@ -130,8 +137,8 @@ export class NfeXmlBuilder {
 
     xml += `<total><ICMSTot>`
     xml += `<vBC>0.00</vBC><vICMS>0.00</vICMS><vICMSDeson>0.00</vICMSDeson><vFCP>0.00</vFCP><vBCST>0.00</vBCST><vST>0.00</vST>`
-    xml += `<vFCPST>0.00</vFCPST><vFCPSTRet>0.00</vFCPSTRet><vProd>${valorTotal.toFixed(2)}</vProd>`
-    xml += `<vFrete>0.00</vFrete><vSeg>0.00</vSeg><vDesc>${Number(venda?.desconto_aplicado || 0).toFixed(2)}</vDesc>`
+    xml += `<vFCPST>0.00</vFCPST><vFCPSTRet>0.00</vFCPSTRet><vProd>${valorItens.toFixed(2)}</vProd>`
+    xml += `<vFrete>0.00</vFrete><vSeg>0.00</vSeg><vDesc>${descontoAplicado.toFixed(2)}</vDesc>`
     xml += `<vII>0.00</vII><vIPI>0.00</vIPI><vIPIDevol>0.00</vIPIDevol><vPIS>0.00</vPIS><vCOFINS>0.00</vCOFINS><vOutro>0.00</vOutro>`
     xml += `<vNF>${valorTotal.toFixed(2)}</vNF>`
     xml += `</ICMSTot></total>`

@@ -66,7 +66,7 @@ export function FiscalGuide() {
                     <div>
                       <h4 className="text-sm font-bold text-slate-900 mb-1">Por que o Fluxo pede Certificado A1?</h4>
                       <p className="text-xs text-slate-500 leading-relaxed">
-                        Diferente de portais manuais do governo, o Fluxo é um ERP de alta performance. O Certificado A1 é o "combustível" que permite ao sistema assinar e emitir notas em milissegundos sem você precisar sair da tela de venda.
+                        Diferente de portais manuais do governo, o Fluxo é um ERP de alta performance. O Certificado A1 é o "combustível" que permite ao sistema assinar e emitir notas sem você precisar sair da tela de venda.
                       </p>
                     </div>
                   </div>
@@ -105,9 +105,9 @@ export function FiscalGuide() {
                 <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl flex gap-3">
                   <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
                   <div>
-                    <p className="text-xs font-bold text-amber-900 mb-1">Dica de Especialista</p>
+                    <p className="text-xs font-bold text-amber-900 mb-1">Escopo Atual da Emissão Nativa</p>
                     <p className="text-[11px] text-amber-800 leading-tight">
-                      Sistemas como Conta Azul e Omie seguem exatamente este padrão. Ao configurar isso no Fluxo, você está elevando sua empresa ao nível das maiores operações do Brasil.
+                      Hoje o Fluxo emite NF-e nativa somente para empresas do <strong>Simples Nacional</strong>. As UFs mapeadas no backend são <strong>RS, SP, MG</strong> e os estados atendidos pela <strong>SVRS</strong> (AC, AL, AP, DF, PB, PI, RJ, RN, RO, RR, SC, SE e TO).
                     </p>
                   </div>
                 </div>

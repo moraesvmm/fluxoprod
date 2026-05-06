@@ -10,6 +10,8 @@ export interface SefazUrls {
   statusServico: string;
 }
 
+const SVRS_STATES = ['AC', 'AL', 'AP', 'DF', 'PB', 'PI', 'RJ', 'RN', 'RO', 'RR', 'SC', 'SE', 'TO'] as const;
+
 export const SEFAZ_WS: Record<string, { homologacao: SefazUrls; producao: SefazUrls }> = {
   // Rio Grande do Sul (SVRS atende diversos estados)
   RS: {
@@ -77,11 +79,13 @@ export const SEFAZ_WS: Record<string, { homologacao: SefazUrls; producao: SefazU
  * Retorna o Web Service correto baseado na UF e ambiente
  */
 export function getSefazUrl(uf: string, ambiente: 'homologacao' | 'producao'): SefazUrls {
-  const svrsStates = ['AC', 'AL', 'AP', 'DF', 'PB', 'PI', 'RJ', 'RN', 'RO', 'RR', 'SC', 'SE', 'TO'];
-  
   let key = uf.toUpperCase();
-  if (svrsStates.includes(key)) key = 'SVRS';
-  
-  const config = SEFAZ_WS[key] || SEFAZ_WS['SVRS'];
+  if (SVRS_STATES.includes(key as (typeof SVRS_STATES)[number])) key = 'SVRS';
+
+  const config = SEFAZ_WS[key];
+  if (!config) {
+    throw new Error(`UF sem autorizador NFe mapeado no Fluxo: ${key}. Atualmente o fluxo nativo atende RS, SP, MG e estados operados pela SVRS.`);
+  }
+
   return config[ambiente];
 }
