@@ -335,7 +335,7 @@ export class WhatsAppSession {
         {},
         {
           logger,
-          rekey: false
+          reuploadRequest: async (m) => m
         }
       );
 

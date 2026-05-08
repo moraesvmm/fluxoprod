@@ -150,7 +150,7 @@ export function createRoutes(getSession: (tenantId: string) => WhatsAppSession):
 
   // Obter arquivo de mídia binário
   router.get('/media/:id', (req: Request, res: Response) => {
-    const messageId = req.params.id;
+    const messageId = req.params.id as string;
     const session = getSession((req as any).tenantId);
     const mediaStore = session.getMediaStore();
     
