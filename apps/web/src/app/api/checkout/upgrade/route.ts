@@ -118,6 +118,8 @@ export async function POST(request: Request) {
       modules: modulosAtivosKeys,
       companyName: empresa.razao_social,
       companyDocument: empresa.cnpj || "",
+      companySize: empresa.tamanho_empresa || "1-5",
+      companySegment: empresa.segmento || "Geral",
       metadata: {
         empresaId: empresaId,
         isUpgrade: true
