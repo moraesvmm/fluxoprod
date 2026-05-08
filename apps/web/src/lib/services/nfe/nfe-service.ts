@@ -236,7 +236,7 @@ export class NfeService {
     }
 
     const valorItens = venda.vendas_itens.reduce((total, item) => {
-      const subtotal = Number(item.subtotal ?? (item.preco_unitario * item.quantidade) ?? 0)
+      const subtotal = Number(item.subtotal ?? (item.preco_unitario * item.quantidade))
       return total + subtotal
     }, 0)
     const desconto = Number(venda.desconto_aplicado || 0)
