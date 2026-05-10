@@ -1,5 +1,33 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 68 - Agente de Prospecção B2B (E-mail Marketing)
+**Data:** 10/05/2026
+**Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
+**Responsável:** Antigravity
+
+#### Alterações Realizadas:
+1. **Infraestrutura de Prospecção:**
+   - Criação do `agente_prospeccao.md` detalhando a estratégia de cold mail e script de automação.
+   - Implementação do script `scripts/disparo_prospeccao.js` para disparos automatizados via Resend API.
+   - Configuração de templates HTML personalizados com logo e CTAs para o Fluxo ERP.
+2. **Controle e Logs:**
+   - Criação do `log_envios.md` para rastreamento de campanhas e métricas de conversão.
+   - Inclusão de ativos visuais (`logo-fluxo.png`) para consistência de marca nos e-mails.
+
+#### Arquivos Criados/Modificados:
+- `agente_prospeccao.md`
+- `scripts/disparo_prospeccao.js`
+- `log_envios.md`
+- `apps/web/scripts/logo-fluxo.png`
+- `scripts/logo-fluxo.png`
+- `docs/VISTORIAS.md`
+
+#### Próximos Passos:
+- Realizar teste de disparo real com 5 leads de controle.
+- Validar taxa de entrega e abertura via painel Resend.
+
+---
+
 ## VISTORIA 67 - Automação de Testes ERP (Vitest)
 **Data:** 06/05/2026
 **Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
