@@ -31,6 +31,20 @@ Para garantir a integridade do sistema em caso de rollbacks e evitar quebra de p
 3. **Independência de Rollback**:
    - O sistema deve ser projetado para que o rollback de um commit do Frontend (Git) não resulte em falha catastrófica devido ao estado "mais novo" do Banco de Dados.
 
+4. **Sincronização de Tipos (Estático)**:
+   - **Histórico e Sincronização**: Sempre que você alterar o banco de dados por migrações ou pelo Editor SQL do Supabase, basta rodar o seguinte comando (já deixei o binário `supabase.exe` na raiz do seu projeto local para facilitar, dispensando o uso de npx/node global):
+     ```powershell
+     $env:SUPABASE_ACCESS_TOKEN="SEU_TOKEN_DO_SUPABASE"
+     .\supabase.exe gen types typescript --project-id wkxtlvxotvutycbupfuh > apps/web/src/types/database.types.ts
+     ```
+   - **CONFORMIDADE OBRIGATÓRIA**: Qualquer alteração de schema, nova tabela, view ou RPC exige a execução imediata deste comando de geração e o commit conjunto do arquivo `database.types.ts` atualizado. Todos os inicializadores de cliente do Supabase no projeto usam estritamente o tipo genérico `<Database>`, forçando o compilador Next.js a barrar qualquer deploy que possua falha de comunicação entre frontend e banco.
+
+5. **Política de Testes de Regressão (Bug-First Testing)**:
+   - Toda e qualquer correção de bug realizada por agentes ou humanos **deve** ser acompanhada de um caso de teste correspondente no Vitest (`vitest run`). O teste deve reproduzir a falha e validar que a correção se mantém estável, evitando que um agente futuro reverta a solução.
+
+6. **Mensagens de Commit Semânticas (Rastreabilidade)**:
+   - Commits de alterações de código devem obrigatoriamente seguir as diretrizes do Conventional Commits (ex: `fix(checkout): adjust coupon counter schema validation`). Isso garante rastreabilidade total via `git log` ou `git blame` para identificar qual agente e qual commit ocasionou qualquer regressão.
+
 ---
 
 ## 📂 GOVERNANÇA DE DOCUMENTAÇÃO (BACKLOG)
