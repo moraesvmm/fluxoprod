@@ -168,6 +168,7 @@ export interface Produto {
   metodo_valoracao?: string;
   codigo_barras?: string;
   codigo_qr?: string;
+  preco_base?: number;
   criado_em: string;
 }
 
@@ -309,6 +310,12 @@ export interface PrevisaoResult {
   demanda_prevista: number;
   media_venda_diaria: number;
   previsao_id: string;
+  dias_para_zerar: number | null;
+  periodo_inicio: string;
+  periodo_fim: string;
+  produto_nome?: string;
+  demanda_real?: number | null;
+  precisao?: number | null;
 }
 
 export interface OrdemServico {
