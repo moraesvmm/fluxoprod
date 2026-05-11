@@ -143,8 +143,14 @@ export async function POST(request: Request) {
     const empresaId = randomUUID();
     const schemaName = buildSchemaName(payload.companyName);
 
+    // Chaves técnicas válidas no modulos_catalogo — usadas como whitelist
+    const VALID_MODULE_KEYS = new Set([
+      "dashboard", "crm", "catalogo", "estoque", "vendas",
+      "financeiro", "rh", "os", "obras", "comissoes", "relatorios"
+    ]);
+
     // Resolver módulos: se payload.modules vazio, buscar do plano na tabela planos
-    let modulesToProvision = payload.modules || [];
+    let modulesToProvision = (payload.modules || []).filter(m => VALID_MODULE_KEYS.has(m));
     if (modulesToProvision.length === 0 && payload.planName) {
       const { data: planoData } = await admin
         .from("planos")
@@ -153,7 +159,10 @@ export async function POST(request: Request) {
         .maybeSingle();
       
       if (planoData?.modulos_incluidos && Array.isArray(planoData.modulos_incluidos)) {
-        modulesToProvision = planoData.modulos_incluidos;
+        // Filtrar apenas chaves técnicas válidas — descartar strings de marketing
+        modulesToProvision = (planoData.modulos_incluidos as string[]).filter(
+          (m: string) => VALID_MODULE_KEYS.has(m)
+        );
       }
     }
 

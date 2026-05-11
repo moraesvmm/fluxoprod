@@ -1,5 +1,33 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 69 — Correção: 500 no register-trial (Módulos Inválidos no Payload)
+**Data:** 11/05/2026
+**Status:** ✅ CORRIGIDO
+**Responsável:** Antigravity
+
+#### Problema:
+Erro HTTP 500 ao clicar em "Criar Conta e Iniciar Teste" no checkout.
+
+#### Causa Raiz:
+A função `provisionar_empresa_master` valida todos os módulos recebidos contra a tabela `modulos_catalogo`. Os planos no banco (`listar_planos_checkout`) incluem strings de marketing no campo `modulos_incluidos` (ex: `"email_real"`, `"Inteligência de Vendas"`, `"Dark Mode Premium v2.0"`) que **não existem** como chaves em `modulos_catalogo`. Quando esses valores chegavam ao backend, a RPC lançava `'Módulos inválidos no payload'` (HTTP 400), que o `route.ts` capturava e convertia em 500.
+
+**Sequência nos logs do Supabase:**
+1. ✅ `POST /auth/v1/admin/users` → 200 (usuário criado)
+2. ✅ `GET /rest/v1/planos` → 200 (módulos do plano buscados)
+3. ❌ `POST /rpc/provisionar_empresa_master` → **400** (módulos inválidos rejeitados)
+4. 🗑️ `DELETE /auth/v1/admin/users` → 200 (rollback automático)
+
+#### Correção Aplicada:
+Adicionada whitelist `VALID_MODULE_KEYS` em `register-trial/route.ts` com as 11 chaves técnicas válidas do catálogo. O array de módulos é filtrado **antes** de chamar o provisionamento, descartando silenciosamente strings de marketing e rótulos visuais.
+
+#### Arquivos Modificados:
+- `apps/web/src/app/api/auth/register-trial/route.ts`
+
+#### Observação:
+A exclusão do login via master (mencionada pelo usuário) é um evento anterior e independente — visível nos logs como `deletar_empresa_master` bem-sucedido. Não tem relação causal com o 500.
+
+---
+
 ## VISTORIA 68 - Agente de Prospecção B2B (E-mail Marketing)
 **Data:** 10/05/2026
 **Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
