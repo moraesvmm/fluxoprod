@@ -6,6 +6,7 @@ import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, X, Loader2 } from "
 import { useImportClientes } from "@/lib/hooks/use-clientes";
 import { useToast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
+import type { ClienteCreate } from "@/lib/api";
 
 interface ImportadorProps {
   isOpen: boolean;
@@ -15,7 +16,7 @@ interface ImportadorProps {
 
 export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: ImportadorProps) {
   const [file, setFile] = useState<File | null>(null);
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<ClienteCreate[]>([]);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'upload' | 'preview'>('upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,10 +31,12 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
     reader.onload = (event) => {
       try {
         const bstr = event.target?.result;
+        if (typeof bstr !== "string") return;
+
         const workbook = XLSX.read(bstr, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(worksheet);
+        const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet);
         
         const mappedData = mapFields(json);
         
@@ -52,17 +55,15 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
     reader.readAsBinaryString(uploadedFile);
   };
 
-  const mapFields = (rawJson: any[]) => {
+  const mapFields = (rawJson: Record<string, unknown>[]): ClienteCreate[] => {
     return rawJson.map(row => {
-      const obj: any = {};
+      const obj: ClienteCreate = { nome: '' };
       
-      // Normalização das chaves para facilitar busca
       const rowKeys = Object.keys(row).reduce((acc, k) => {
         acc[k.toLowerCase().trim()] = k;
         return acc;
       }, {} as Record<string, string>);
 
-      // Mapeamento Inteligente de Campos Básicos
       Object.entries(row).forEach(([key, value]) => {
         const k = key.toLowerCase().trim();
         const v = String(value || '').trim();
@@ -74,10 +75,7 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
         else if (['cpf', 'cnpj', 'documento', 'cpf/cnpj', 'cpf_cnpj'].includes(k)) obj.cpf_cnpj = v;
       });
 
-      // Lógica de Endereço (Subinformações)
-      const enderecoParts = [];
-      
-      // Busca por campos de subinformação de endereço
+      const enderecoParts: string[] = [];
       const fieldPatterns = {
         rua: ['rua', 'logradouro', 'endereço', 'endereco', 'address'],
         num: ['numero', 'número', 'nº', 'number'],
@@ -111,7 +109,7 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
       }
 
       return obj;
-    }).filter(p => p.nome); // Filtrar linhas sem nome (obrigatório)
+    }).filter(p => p.nome);
   };
 
   const handleImport = async () => {
@@ -123,24 +121,19 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
       let totalImported = 0;
       const totalChunks = Math.ceil(data.length / CHUNK_SIZE);
 
-      console.log(`[Importador] Iniciando importação de ${data.length} registros em ${totalChunks} lotes.`);
-
       for (let i = 0; i < data.length; i += CHUNK_SIZE) {
         const chunk = data.slice(i, i + CHUNK_SIZE);
-        const currentChunkNum = Math.floor(i / CHUNK_SIZE) + 1;
-        
-        console.log(`[Importador] Processando lote ${currentChunkNum}/${totalChunks}...`);
-        
         const res = await importMutation.mutateAsync(chunk);
-        totalImported += (res.count || chunk.length);
+        // importMutation.mutateAsync retorna o que importarClientesLote retorna
+        // No api.ts importarClientesLote costuma retornar { count: number }
+        totalImported += (res as { count?: number })?.count || chunk.length;
       }
 
       success(`${totalImported} clientes importados com sucesso!`);
       onSuccess?.();
       onClose();
-    } catch (err: any) {
-      console.error("[Importador] Erro fatal:", err);
-      toastError("Erro na importação: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro na importação: " + (err instanceof Error ? err.message : "Tente novamente."));
     } finally {
       setLoading(false);
     }

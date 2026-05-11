@@ -137,7 +137,7 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
                 <label className="block text-sm font-medium text-slate-700 mb-1">Tipo *</label>
                 <select
                   value={formData.tipo}
-                  onChange={(e) => setFormData({ ...formData, tipo: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, tipo: e.target.value as InteracaoClienteCreate['tipo'] })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                   required
                 >

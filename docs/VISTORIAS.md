@@ -1,5 +1,12 @@
 # VISTORIAS DO SISTEMA
 
+## ⚠️ VISTORIA PENDENTE — Blindagem E2E de Tipagem: Módulo CRM (Vistoria 73)
+**Data:** 11/05/2026
+**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Motivo:** Concluída blindagem E2E do módulo **CRM**. Refatorados hooks de clientes e pipeline para garantir tipagem estrita. Componentes `ImportadorClientesExcel`, `DashboardKPIs` e `TimelineInteracoes` agora utilizam contratos estritos do Supabase. Adicionada RPC tipada `fetchCRMDashboardMetricas` no `api.ts`. Build `tsc --noEmit` validado.
+
+---
+
 ## ⚠️ VISTORIA PENDENTE — Blindagem E2E de Tipagem Concluída (Vistoria 72)
 **Data:** 11/05/2026
 **Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!

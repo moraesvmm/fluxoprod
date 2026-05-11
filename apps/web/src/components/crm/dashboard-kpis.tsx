@@ -4,33 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { TableSkeleton } from "@/components/modules/base/TableSkeleton";
 import { DollarSign, TrendingDown, TrendingUp, Clock, BarChart3 } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
+import { fetchCRMDashboardMetricas, type CRMDashboardMetricas } from "@/lib/api";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
-interface DashboardMetricas {
-  total_clientes: number;
-  clientes_ativos: number;
-  clientes_inativos_30d: number;
-  ltv_medio: number;
-  churn_rate: number;
-  funil_counts: {
-    lead: number;
-    qualificado: number;
-    proposta: number;
-    negociacao: number;
-    fechado: number;
-    perdido: number;
-  };
-  taxa_conversao: {
-    lead_to_qualificado: number;
-    qualificado_to_proposta: number;
-    proposta_to_negociacao: number;
-    negociacao_to_fechado: number;
-  };
-  velocidade_media: number;
-}
-
-const EMPTY_METRICAS: DashboardMetricas = {
+const EMPTY_METRICAS: CRMDashboardMetricas = {
   total_clientes: 0,
   clientes_ativos: 0,
   clientes_inativos_30d: 0,
@@ -41,29 +18,14 @@ const EMPTY_METRICAS: DashboardMetricas = {
   velocidade_media: 0,
 };
 
-async function fetchDashboardMetricas(): Promise<DashboardMetricas> {
-  const supabase = createClient();
-  const { data, error } = await supabase.rpc('tenant_dashboard_metricas');
-  // Erros de rede/PostgREST → retornar zerado em vez de crashar
-  if (error) {
-    console.warn('[DashboardKPIs] RPC error (graceful fallback):', error.message);
-    return EMPTY_METRICAS;
-  }
-  // RPC retornou {} ou {error:...} → zerado
-  if (!data || typeof data !== 'object' || Object.keys(data).length === 0 || data.error) {
-    return EMPTY_METRICAS;
-  }
-  return data as DashboardMetricas;
-}
-
 export default function DashboardKPIs() {
-  // Obter userId do auth para usar como guard
   const { userId } = useUserProfile();
 
-  const { data: metricas, isLoading } = useQuery({
+  const { data: metricas, isLoading, error } = useQuery({
     queryKey: ['dashboard-metricas'],
-    queryFn: fetchDashboardMetricas,
-    enabled: !!userId, // Só executar se usuário estiver autenticado
+    queryFn: fetchCRMDashboardMetricas,
+    enabled: !!userId,
+    retry: 1,
   });
 
   if (isLoading) {
@@ -76,7 +38,11 @@ export default function DashboardKPIs() {
     );
   }
 
-  // Nunca mostrar "Erro" — sempre exibir métricas (mesmo zeradas)
+  // Fallback seguro em caso de erro da RPC
+  if (error) {
+    console.warn('[CRM Dashboard] RPC failed, using fallback:', error);
+  }
+
   const m = metricas || EMPTY_METRICAS;
 
   const formatCurrency = (value?: number | null) => {
@@ -87,14 +53,12 @@ export default function DashboardKPIs() {
 
   const formatDays = (value?: number | null) => `${(value || 0).toFixed(0)} dias`;
 
-  // Gráfico de barras do funil SVG (com proteções null safety)
-  const funilCounts = m.funil_counts || { lead: 0, qualificado: 0, proposta: 0, negociacao: 0, fechado: 0, perdido: 0 };
-  const maxCount = Math.max(...Object.values(funilCounts), 1); // mínimo 1 para evitar divisão por zero
+  const funilCounts = m.funil_counts || EMPTY_METRICAS.funil_counts;
+  const maxCount = Math.max(...Object.values(funilCounts), 1);
   const barWidth = (count: number) => (count / maxCount) * 100;
 
   return (
     <div className="space-y-6">
-      {/* KPIs principais */}
       <div className="grid gap-4 sm:grid-cols-3">
         <KPICard
           title="LTV Médio"
@@ -116,7 +80,6 @@ export default function DashboardKPIs() {
         />
       </div>
 
-      {/* Gráfico de barras do funil */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <BarChart3 className="w-5 h-5" />
@@ -141,7 +104,6 @@ export default function DashboardKPIs() {
         </div>
       </div>
 
-      {/* Taxa de conversão por fase */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5" />

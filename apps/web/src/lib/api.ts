@@ -318,6 +318,29 @@ export interface PrevisaoResult {
   precisao?: number | null;
 }
 
+export interface CRMDashboardMetricas {
+  total_clientes: number;
+  clientes_ativos: number;
+  clientes_inativos_30d: number;
+  ltv_medio: number;
+  churn_rate: number;
+  funil_counts: {
+    lead: number;
+    qualificado: number;
+    proposta: number;
+    negociacao: number;
+    fechado: number;
+    perdido: number;
+  };
+  taxa_conversao: {
+    lead_to_qualificado: number;
+    qualificado_to_proposta: number;
+    proposta_to_negociacao: number;
+    negociacao_to_fechado: number;
+  };
+  velocidade_media: number;
+}
+
 export interface OrdemServico {
   id: string;
   empresa_id?: string;
@@ -1892,3 +1915,13 @@ export async function excluirCupomAdmin(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function fetchCRMDashboardMetricas(): Promise<CRMDashboardMetricas> {
+  const supabase = getSupabaseStrict();
+  const { data, error } = await supabase.rpc('tenant_dashboard_metricas');
+  
+  if (error || !data) {
+    throw error || new Error("Falha ao carregar métricas do CRM");
+  }
+
+  return (data as unknown) as CRMDashboardMetricas;
+}
