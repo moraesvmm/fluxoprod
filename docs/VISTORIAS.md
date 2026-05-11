@@ -3,7 +3,7 @@
 ## ⚠️ VISTORIA PENDENTE — Nova vistoria pendente pós-alterações (Vistoria 71)
 **Data:** 11/05/2026
 **Status:** 🚨 PENDENTE — Deve ser realizada o mais rápido possível!
-**Motivo:** Realizadas alterações no frontend do checkout (campo segmento), e no backend do register-trial (resolução de problemas de A La Carte vazia, whitelist do dashboard e tipo de link de confirmação para magiclink).
+**Motivo:** Realizadas alterações no frontend do checkout (campo segmento), no backend do register-trial (A La Carte vazia, whitelist do dashboard, link magiclink) e adicionada BLINDAGEM de tipos estática gerando o arquivo `database.types.ts` e tipando os clientes do Supabase (`client.ts`, `server.ts` e `admin.ts`).
 
 ---
 
