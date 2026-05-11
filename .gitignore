@@ -49,3 +49,6 @@ mcp-setup/
 nodejs/
 .vercel
 .env*.local
+supabase/
+scratch/
+*.exe
