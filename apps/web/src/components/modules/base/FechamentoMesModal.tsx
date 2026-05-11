@@ -6,9 +6,10 @@ import { useFechamentoPendente } from "@/lib/hooks/use-dashboard";
 export function FechamentoMesModal() {
   const { data, isLoading, marcarVisto, isMarking } = useFechamentoPendente();
   const [isOpen, setIsOpen] = useState(false);
+  const fechamentoData = data as any;
 
   useEffect(() => {
-    if (!isLoading && data?.pendente) {
+    if (!isLoading && fechamentoData?.pendente) {
       setIsOpen(true);
       // Disparar confetes se houve faturamento
       // Comentado temporariamente devido a erro de módulo no ambiente local
@@ -27,11 +28,11 @@ export function FechamentoMesModal() {
     }
   }, [data, isLoading]);
 
-  if (!isOpen || !data?.pendente) return null;
+  if (!isOpen || !fechamentoData?.pendente) return null;
 
   const handleEntendi = async () => {
     try {
-      await marcarVisto(data.mes);
+      await marcarVisto(fechamentoData.mes);
       setIsOpen(false);
     } catch (error) {
       console.error("Erro ao fechar modal:", error);
@@ -43,7 +44,7 @@ export function FechamentoMesModal() {
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor);
 
   const mesFormatado = (() => {
-    const [ano, mes] = data.mes.split('-');
+    const [ano, mes] = fechamentoData.mes.split('-');
     const dataObj = new Date(parseInt(ano), parseInt(mes) - 1, 1);
     return dataObj.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }).toUpperCase();
   })();
@@ -71,7 +72,7 @@ export function FechamentoMesModal() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Faturamento Total</p>
-                <p className="text-2xl font-black text-slate-800">{formatarMoeda(data.faturamento)}</p>
+                <p className="text-2xl font-black text-slate-800">{formatarMoeda(fechamentoData.faturamento)}</p>
               </div>
             </div>
 
@@ -82,7 +83,7 @@ export function FechamentoMesModal() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-slate-400 uppercase">Total Vendas</p>
-                  <p className="text-lg font-bold text-slate-700">{data.total_vendas}</p>
+                  <p className="text-lg font-bold text-slate-700">{fechamentoData.total_vendas}</p>
                 </div>
               </div>
 
@@ -92,7 +93,7 @@ export function FechamentoMesModal() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-slate-400 uppercase">Ticket Médio</p>
-                  <p className="text-lg font-bold text-slate-700">{formatarMoeda(data.ticket_medio)}</p>
+                  <p className="text-lg font-bold text-slate-700">{formatarMoeda(fechamentoData.ticket_medio)}</p>
                 </div>
               </div>
             </div>

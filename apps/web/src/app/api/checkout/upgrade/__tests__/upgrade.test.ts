@@ -46,7 +46,7 @@ describe('Upgrade/Checkout API', () => {
 
     // Mock genérico para .then() que sempre resolve para um array vazio em 'data'
     // Isso evita "map is not a function" se não mockarmos especificamente.
-    mockDbChain.then.mockImplementation((resolve) => resolve({ data: [], error: null }))
+    mockDbChain.then.mockImplementation((resolve: any) => resolve({ data: [], error: null }))
   })
 
   it('deve atualizar módulos e gerar link de pagamento com sucesso', async () => {
@@ -69,7 +69,7 @@ describe('Upgrade/Checkout API', () => {
 
     // 3. Mock a sequência de chamadas 'thenable' (sem terminal)
     let thenCall = 0;
-    mockDbChain.then.mockImplementation((resolve) => {
+    mockDbChain.then.mockImplementation((resolve: any) => {
       thenCall++;
       // Await 1: update(empresa_modulos) reset -> {}
       // Await 2: insert(crm) -> {}

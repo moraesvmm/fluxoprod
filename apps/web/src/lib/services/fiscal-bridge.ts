@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/utils/supabase/client';
+import type { Database } from "@/types/database.types";
 
 interface EmitirNfeParams {
   vendaId: string;
@@ -11,7 +12,7 @@ interface EmitirNfeParams {
 }
 
 export async function solicitarEmissaoNfe({ vendaId, ambiente }: EmitirNfeParams) {
-  const supabase = createClient();
+  const supabase = createClient() as import('@supabase/supabase-js').SupabaseClient<Database>;
 
   // 1. Buscar dados completos da venda e da empresa (emitente)
   // Nota: Implementação simplificada para demonstração da arquitetura
@@ -29,7 +30,7 @@ export async function solicitarEmissaoNfe({ vendaId, ambiente }: EmitirNfeParams
     .select('*')
     .single(); // No multi-tenant real, buscar pelo ID da empresa logada
 
-  if (!empresa?.focusnfe_token_homologacao && !process.env.FISCAL_BRIDGE_URL) {
+  if (!(empresa as any)?.focusnfe_token_homologacao && !process.env.FISCAL_BRIDGE_URL) {
     // Caso ainda não tenha o micro-serviço, apenas logamos o que aconteceria
     console.log('Simulação de envio para Ponte Fiscal:', { venda, ambiente });
     return { success: true, message: 'Simulação concluída (Aguardando Micro-serviço)' };
@@ -49,7 +50,7 @@ export async function solicitarEmissaoNfe({ vendaId, ambiente }: EmitirNfeParams
         config: {
           ambiente,
           // Certificado viria do Supabase Storage
-          cert_url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/certificados/${empresa.id}.pfx`,
+          cert_url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/certificados/${empresa?.id}.pfx`,
         }
       }),
     });
@@ -64,7 +65,7 @@ export async function solicitarEmissaoNfe({ vendaId, ambiente }: EmitirNfeParams
           nfe_status: 'emitida',
           nfe_chave: result.chave,
           nfe_xml: result.xml_url
-        })
+        } as any)
         .eq('id', vendaId);
     }
 

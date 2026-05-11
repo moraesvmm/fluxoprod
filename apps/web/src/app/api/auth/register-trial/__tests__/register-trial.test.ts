@@ -12,7 +12,7 @@ const mockDbChain: any = {
   eq: vi.fn().mockReturnThis(),
   single: vi.fn().mockImplementation(() => Promise.resolve({ data: {}, error: null })),
   maybeSingle: vi.fn().mockImplementation(() => Promise.resolve({ data: null, error: null })),
-  then: vi.fn().mockImplementation((resolve) => resolve({ data: {}, error: null })),
+  then: vi.fn().mockImplementation((resolve: any) => resolve({ data: {}, error: null })),
 }
 
 const mockAdmin: any = {
@@ -50,7 +50,7 @@ describe('Register Trial API', () => {
     mockAdmin.auth.admin.generateLink.mockResolvedValue({ data: { properties: { action_link: 'http://activate.me' } }, error: null })
     mockAdmin.auth.admin.listUsers.mockResolvedValue({ data: { users: [] }, error: null })
     mockAdmin.rpc.mockResolvedValue({ data: { status: 'success' }, error: null })
-    mockDbChain.then.mockImplementation((resolve) => resolve({ data: {}, error: null }))
+    mockDbChain.then.mockImplementation((resolve: any) => resolve({ data: {}, error: null }))
   })
 
   it('deve retornar erro 400 se o payload for inválido', async () => {

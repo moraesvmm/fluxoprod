@@ -17,13 +17,13 @@ export function useRHConfig() {
         // Se for erro de permissão ou outro, retornamos nulo.
         if (error.code === 'PGRST202') { // RPC not found
           const { data: directData, error: directError } = await getSupabase()
-            .from('configuracoes')
+            .from('configuracoes' as any)
             .select('valor')
             .eq('chave', 'rh_dia_pagamento')
             .single();
             
           if (directError) return { dia: null };
-          return { dia: directData?.valor ? parseInt(directData.valor, 10) : null };
+          return { dia: (directData as any)?.valor ? parseInt((directData as any).valor, 10) : null };
         }
         return { dia: null };
       }
@@ -31,7 +31,7 @@ export function useRHConfig() {
       // Se data for null, significa que a configuração não existe no banco ou usuário sem tenant
       if (!data) return { dia: null };
       
-      return { dia: data?.valor ? parseInt(data.valor, 10) : null };
+      return { dia: (data as any)?.valor ? parseInt((data as any).valor, 10) : null };
     },
   });
 }
@@ -50,7 +50,7 @@ export function useUpdateRHConfig() {
       if (error) {
         // Fallback to direct upsert
         const { error: directError } = await getSupabase()
-          .from('configuracoes')
+          .from('configuracoes' as any)
           .upsert({ 
             chave: 'rh_dia_pagamento', 
             valor: dia.toString(), 

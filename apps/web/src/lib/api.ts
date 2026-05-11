@@ -1920,15 +1920,15 @@ export async function listarCuponsAdmin(): Promise<Cupom[]> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc("admin_listar_cupons");
   if (error) throw error;
-  return data as Cupom[];
+  return (data as unknown) as Cupom[];
 }
 
 export async function criarCupomAdmin(cupom: Partial<Cupom>): Promise<any> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc("admin_criar_cupom", {
-    p_codigo: cupom.codigo,
-    p_tipo: cupom.tipo,
-    p_valor: cupom.valor,
+    p_codigo: cupom.codigo || '',
+    p_tipo: cupom.tipo || 'desconto_fixo',
+    p_valor: cupom.valor || 0,
     p_limite_usos: cupom.limite_usos,
     p_data_expiracao: cupom.data_expiracao
   });

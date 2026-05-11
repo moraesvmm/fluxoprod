@@ -3,8 +3,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { useUserProfile } from "./use-user-profile";
+import type { Database } from "@/types/database.types";
 
-const supabase = createClient();
+// Opt-in de tipagem estrita (Gradual Typing)
+const supabase = createClient() as import('@supabase/supabase-js').SupabaseClient<Database>;
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 export function useActiveModules() {
@@ -39,7 +41,7 @@ export function useDashboardData() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_dashboard_kpis');
       if (error) throw error;
-      return data;
+      return data as any;
     },
     staleTime: 5 * 60_000,
     retry: 2,
@@ -52,7 +54,7 @@ export function useDashboardData() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_listar_vendas', { p_limit: 5 });
       if (error) throw error;
-      return data || [];
+      return (data as any[]) || [];
     },
     staleTime: 60_000,
     retry: 2,
@@ -66,9 +68,9 @@ export function useDashboardData() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_dashboard_kpis_por_mes', { p_meses: 6 });
       if (error) throw error;
-      // Normalização defensiva: garantir que sempre retorne array
-      const normalized = Array.isArray(data) ? data : (data?.data ?? data?.kpis ?? []);
-      return (normalized as Array<{ mes: string; faturamento: number; total_vendas: number; ticket_medio: number }>) || [];
+      // Normalização defensiva compatível com a tipagem estrita
+      const normalized = Array.isArray(data) ? data : [];
+      return (normalized as unknown as Array<{ mes: string; faturamento: number; total_vendas: number; ticket_medio: number }>) || [];
     },
     staleTime: 5 * 60_000,
     retry: 2,
@@ -85,7 +87,7 @@ export function useDashboardData() {
   const obrasEmAndamento = kpis?.[0]?.qtd_obras_em_andamento || 0;
   const estoqueBaixo = kpis?.[0]?.estoque_baixo || 0;
   const saldo = kpis?.[0]?.saldo || 0;
-  const patrimonioEstoque = kpis?.[0]?.patrimonio_estoque || 0;
+  const patrimonioEstoque = (kpis?.[0] as any)?.patrimonio_estoque || 0;
 
   // Dados do gráfico a partir da RPC de série temporal (sem Math.random)
   const chartData = (kpisPorMes || []).map(item => {
@@ -125,7 +127,7 @@ export function useFechamentoPendente() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_obter_fechamento_pendente');
       if (error) throw error;
-      return data;
+      return data as any;
     },
     enabled: !!userId,
     staleTime: 60 * 60_000, // 1h
