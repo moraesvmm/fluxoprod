@@ -143,9 +143,9 @@ export async function POST(request: Request) {
     const empresaId = randomUUID();
     const schemaName = buildSchemaName(payload.companyName);
 
-    // Chaves técnicas válidas no modulos_catalogo — usadas como whitelist
+    // Chaves técnicas válidas no modulos_catalogo — usadas como whitelist (dashboard é nativo e não precisa constar aqui)
     const VALID_MODULE_KEYS = new Set([
-      "dashboard", "crm", "catalogo", "estoque", "vendas",
+      "crm", "catalogo", "estoque", "vendas",
       "financeiro", "rh", "os", "obras", "comissoes", "relatorios"
     ]);
 
@@ -168,7 +168,13 @@ export async function POST(request: Request) {
 
     // Fallback final: se ainda vazio, usar módulos mínimos do Starter
     if (modulesToProvision.length === 0) {
-      modulesToProvision = ["dashboard", "crm", "catalogo", "estoque"];
+      if (!payload.planName || payload.planName.toLowerCase().includes("la carte")) {
+        return NextResponse.json({ 
+          error: "Seleção inválida", 
+          details: "É necessário selecionar pelo menos um plano ou módulo." 
+        }, { status: 400 });
+      }
+      modulesToProvision = ["crm", "catalogo", "estoque"];
     }
 
     // Chama o provisionamento
@@ -256,9 +262,8 @@ export async function POST(request: Request) {
     // 1. Gerar o link de confirmação oficial do Supabase
     const origin = request.headers.get("origin") || "https://fluxoprod.vercel.app";
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-      type: 'signup',
+      type: 'magiclink',
       email: payload.customerEmail,
-      password: payload.password, // Importante para link de signup via admin
       options: {
         redirectTo: `${origin}/login?confirmed=true`
       }

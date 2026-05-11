@@ -485,6 +485,18 @@ function CheckoutContent() {
                          <option>Grande</option>
                        </select>
                      </div>
+                     <div>
+                       <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">Segmento</label>
+                       <select value={companySegment} onChange={e=>setCompanySegment(e.target.value)} className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl p-4 text-white hover:border-white/20 transition-colors outline-none cursor-pointer">
+                         <option>Varejo</option>
+                         <option>Indústria</option>
+                         <option>Serviços</option>
+                         <option>Tecnologia</option>
+                         <option>Saúde</option>
+                         <option>Educação</option>
+                         <option>Outros</option>
+                       </select>
+                     </div>
                    </div>
                 </div>
 

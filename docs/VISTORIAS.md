@@ -1,5 +1,12 @@
 # VISTORIAS DO SISTEMA
 
+## ⚠️ VISTORIA PENDENTE — Nova vistoria pendente pós-alterações (Vistoria 71)
+**Data:** 11/05/2026
+**Status:** 🚨 PENDENTE — Deve ser realizada o mais rápido possível!
+**Motivo:** Realizadas alterações no frontend do checkout (campo segmento), e no backend do register-trial (resolução de problemas de A La Carte vazia, whitelist do dashboard e tipo de link de confirmação para magiclink).
+
+---
+
 ## VISTORIA 70 — Auditoria e Correção P0/P1: Logística de Provisionamento & Checkout
 **Data:** 11/05/2026
 **Status:** ✅ CORRIGIDO — ⚠️ PENDENTE: Aplicar `fix_indexes_checkout_webhook.sql` no banco
