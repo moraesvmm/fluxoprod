@@ -200,13 +200,12 @@ export async function POST(request: Request) {
         }
       }
 
-      // FIX BUG-06: schema correto de webhook_audit_log (gateway, evento, payload, status_processamento, erro)
+      // Auditoria do upgrade — schema real: external_transaction_id, status, payload, detalhes
       await admin.from("webhook_audit_log").insert({
-        gateway: "asaas",
-        evento: body.event || "UPGRADE",
+        external_transaction_id: checkoutReference,
+        status: "sucesso",
         payload: body,
-        status_processamento: "sucesso",
-        erro: null,
+        detalhes: `Upgrade/Adição de módulos realizada. empresa_id=${upgradeEmpresaId}. módulos=${modulesToActivate.join(",")}`,
       });
 
       return NextResponse.json({ success: true, message: "Upgrade/Adição processada" });
@@ -228,13 +227,11 @@ export async function POST(request: Request) {
     }
 
     if (checkoutRow.status === "paga") {
-      // FIX BUG-06: schema correto de webhook_audit_log
       await admin.from("webhook_audit_log").insert({
-        gateway: "asaas",
-        evento: body.event || "PAYMENT_CONFIRMED",
+        external_transaction_id: checkoutReference,
+        status: "ignorado",
         payload: body,
-        status_processamento: "ignorado",
-        erro: "Evento repetido recebido após checkout já processado.",
+        detalhes: "Evento repetido recebido após checkout já processado.",
       });
 
       return NextResponse.json({
@@ -270,13 +267,11 @@ export async function POST(request: Request) {
     }
 
     if (!customerEmail || !password) {
-      // FIX BUG-06: schema correto de webhook_audit_log
       await admin.from("webhook_audit_log").insert({
-        gateway: "asaas",
-        evento: body.event || "PAYMENT_CONFIRMED",
+        external_transaction_id: checkoutReference,
+        status: "falha",
         payload: body,
-        status_processamento: "falha",
-        erro: "Dados insuficientes para provisionamento (email ou senha ausentes).",
+        detalhes: "Dados insuficientes para provisionamento (email ou senha ausentes).",
       });
 
       return NextResponse.json(
@@ -399,17 +394,16 @@ export async function POST(request: Request) {
       throw new Error(checkoutUpdateError.message);
     }
 
-    // FIX BUG-06: schema correto de webhook_audit_log
+    // Auditoria de provisionamento bem-sucedido — schema real da tabela
     const { error: auditError } = await admin.from("webhook_audit_log").insert({
-      gateway: "asaas",
-      evento: body.event || "PAYMENT_CONFIRMED",
+      external_transaction_id: checkoutReference,
+      status: "sucesso",
       payload: body,
-      status_processamento: "sucesso",
-      erro: null,
+      detalhes: `Tenant provisionado via backend. schema=${schemaName}. subscription=${subscriptionId}`,
     });
 
     if (auditError) {
-      // Não derrubar o fluxo por falha de auditoria, apenas logar
+      // Não derrubar o fluxo por falha de auditoria — apenas logar
       console.error("Erro ao registrar audit log:", auditError.message);
     }
 

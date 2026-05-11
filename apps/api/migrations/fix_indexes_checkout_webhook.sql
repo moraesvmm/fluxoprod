@@ -11,8 +11,9 @@ CREATE INDEX IF NOT EXISTS idx_checkout_vendas_ext_tx
   ON public.checkout_vendas(external_transaction_id);
 
 -- INC-02: Índices de suporte ao webhook_audit_log para rastreio e diagnóstico
+-- Colunas reais da tabela: id, external_transaction_id, status, payload, detalhes, criado_em
 CREATE INDEX IF NOT EXISTS idx_webhook_audit_log_status
-  ON public.webhook_audit_log(status_processamento);
+  ON public.webhook_audit_log(status);
 
 CREATE INDEX IF NOT EXISTS idx_webhook_audit_log_ts
   ON public.webhook_audit_log(criado_em DESC);
