@@ -34,9 +34,9 @@ Antes de qualquer outra ação, usar o conteúdo já extraído do site `https://
 ### Passo 1 — Identificar o dia
 Identifique o dia da semana atual e aplique o gancho contextual correspondente em TODOS os e-mails do dia.
 
-### Passo 2 — Gerar lista de 20 prospects
-Gere uma lista de 20 empresas fictícias mas altamente realistas que seriam clientes ideais para o Fluxo ERP.
-Para cada empresa, identifique uma dor específica que um módulo ou funcionalidade real do sistema resolve.
+### Passo 2 — Gerar lista de 20 prospects reais
+Pesquise e selecione uma lista de 20 empresas reais e ativas que representem perfeitamente o perfil de cliente ideal (ICP) para o Fluxo ERP.
+Para cada empresa real selecionada, identifique uma dor específica que um módulo ou funcionalidade do sistema resolva de verdade.
 
 ### Passo 3 — Validar e-mails
 Antes de enviar, verifique se o e-mail de cada prospect é coerente com o domínio da empresa listada.
