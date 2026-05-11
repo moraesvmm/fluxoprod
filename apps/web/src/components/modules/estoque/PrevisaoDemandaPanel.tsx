@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { TrendingUp, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { usePrevisoesDemanda, useGerarPrevisaoDemanda, useAtualizarDemandaReal } from "@/lib/hooks/use-previsao-demanda";
 import { useProdutos } from "@/lib/hooks/use-produtos";
 import { useToast, Toast } from "@/components/ui/toast";
+import type { PrevisaoResult } from "@/lib/api";
 
 export default function PrevisaoDemandaPanel() {
   const { data: previsoes = [], isLoading, refetch } = usePrevisoesDemanda();
@@ -16,7 +17,7 @@ export default function PrevisaoDemandaPanel() {
   const [produtoSelecionado, setProdutoSelecionado] = useState("");
   const [diasAnalise, setDiasAnalise] = useState(30);
   const [diasPrevisao, setDiasPrevisao] = useState(30);
-  const [ultimaPrevisao, setUltimaPrevisao] = useState<any>(null);
+  const [ultimaPrevisao, setUltimaPrevisao] = useState<PrevisaoResult | null>(null);
   const [editandoDemandaReal, setEditandoDemandaReal] = useState<{ [key: string]: number }>({});
 
   const handleGerarPrevisao = async () => {
@@ -32,10 +33,10 @@ export default function PrevisaoDemandaPanel() {
         diasPrevisao
       });
       setUltimaPrevisao(result);
-      success("Previsão gerada com sucesso!");
+      success("PrevisÃ£o gerada com sucesso!");
       refetch();
-    } catch (err: any) {
-      toastError("Erro ao gerar previsão: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao gerar previsÃ£o: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 
@@ -51,8 +52,8 @@ export default function PrevisaoDemandaPanel() {
         return rest;
       });
       refetch();
-    } catch (err: any) {
-      toastError("Erro ao atualizar demanda: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao atualizar demanda: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 
@@ -72,11 +73,11 @@ export default function PrevisaoDemandaPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-teal-500" />
-          <h3 className="text-lg font-semibold">Previsão de Demanda</h3>
+          <h3 className="text-lg font-semibold">PrevisÃ£o de Demanda</h3>
         </div>
       </div>
 
-      {/* Gerador de Previsão */}
+      {/* Gerador de PrevisÃ£o */}
       <div className="p-4 rounded-lg border border-slate-200 bg-white">
         <div className="grid gap-4 sm:grid-cols-4">
           <div>
@@ -93,7 +94,7 @@ export default function PrevisaoDemandaPanel() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Dias de Análise</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Dias de AnÃ¡lise</label>
             <input
               type="number"
               value={diasAnalise}
@@ -103,7 +104,7 @@ export default function PrevisaoDemandaPanel() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Dias de Previsão</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Dias de PrevisÃ£o</label>
             <input
               type="number"
               value={diasPrevisao}
@@ -118,7 +119,7 @@ export default function PrevisaoDemandaPanel() {
               disabled={gerarPrevisaoMutation.isPending}
               className="w-full inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-teal-600 text-white hover:bg-teal-700 h-9 disabled:opacity-50"
             >
-              <TrendingUp className="mr-2 h-4 w-4" /> Gerar Previsão
+              <TrendingUp className="mr-2 h-4 w-4" /> Gerar PrevisÃ£o
             </button>
           </div>
         </div>
@@ -132,16 +133,16 @@ export default function PrevisaoDemandaPanel() {
                 <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
               )}
               <div>
-                <h4 className="font-medium text-slate-900">Previsão Gerada</h4>
+                <h4 className="font-medium text-slate-900">PrevisÃ£o Gerada</h4>
                 <p className="text-sm text-slate-700 mt-1">
                   Demanda prevista: <strong>{ultimaPrevisao.demanda_prevista}</strong> unidades
                 </p>
                 <p className="text-sm text-slate-700">
-                  Média diária: <strong>{ultimaPrevisao.media_venda_diaria.toFixed(2)}</strong> unidades/dia
+                  MÃ©dia diÃ¡ria: <strong>{ultimaPrevisao.media_venda_diaria.toFixed(2)}</strong> unidades/dia
                 </p>
                 {ultimaPrevisao.dias_para_zerar !== null && ultimaPrevisao.dias_para_zerar < diasPrevisao && (
                   <p className="text-sm text-red-700 mt-2 font-medium">
-                    ⚠️ Reposição urgente necessária (estoque zera em {ultimaPrevisao.dias_para_zerar} dias)
+                    âš ï¸ ReposiÃ§Ã£o urgente necessÃ¡ria (estoque zera em {ultimaPrevisao.dias_para_zerar} dias)
                   </p>
                 )}
               </div>
@@ -150,22 +151,22 @@ export default function PrevisaoDemandaPanel() {
         )}
       </div>
 
-      {/* Tabela de Previsões */}
+      {/* Tabela de PrevisÃµes */}
       <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-          <h4 className="font-medium text-slate-900">Histórico de Previsões</h4>
+          <h4 className="font-medium text-slate-900">HistÃ³rico de PrevisÃµes</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="text-left p-3 font-medium text-slate-700">Produto</th>
-                <th className="text-left p-3 font-medium text-slate-700">Período</th>
+                <th className="text-left p-3 font-medium text-slate-700">PerÃ­odo</th>
                 <th className="text-left p-3 font-medium text-slate-700">Previsto</th>
                 <th className="text-left p-3 font-medium text-slate-700">Real</th>
-                <th className="text-left p-3 font-medium text-slate-700">Precisão</th>
+                <th className="text-left p-3 font-medium text-slate-700">PrecisÃ£o</th>
                 <th className="text-left p-3 font-medium text-slate-700">Dias p/ Zerar</th>
-                <th className="text-left p-3 font-medium text-slate-700">Ações</th>
+                <th className="text-left p-3 font-medium text-slate-700">AÃ§Ãµes</th>
               </tr>
             </thead>
             <tbody>

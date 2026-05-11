@@ -10,6 +10,16 @@ interface SidebarData {
   role?: string;
 }
 
+interface ModuloItem {
+  modulo_key: string;
+  ativo: boolean | null;
+}
+
+interface UserModuloItem {
+  modulo_key: string;
+  permitido: boolean | null;
+}
+
 export function useSidebarData() {
   const supabase = createClient();
 
@@ -31,19 +41,18 @@ export function useSidebarData() {
       }
 
       if (profile.role === "master") {
-        return { 
-          empresaNome: "Administrador Master", 
-          empresaIniciais: "AM", 
+        return {
+          empresaNome: "Administrador Master",
+          empresaIniciais: "AM",
           activeKeys: ["dashboard"],
           role: "master"
         };
       }
 
       if (!profile.empresa_id) {
-        return { empresaNome: "", empresaIniciais: "", activeKeys: [], role: profile.role };
+        return { empresaNome: "", empresaIniciais: "", activeKeys: [], role: profile.role ?? undefined };
       }
 
-      // Execute in parallel for better performance
       const [empresaRes, modsRes] = await Promise.all([
         supabase
           .from("empresas")
@@ -62,9 +71,10 @@ export function useSidebarData() {
         ? (palavras[0][0] + palavras[1][0]).toUpperCase()
         : nome.substring(0, 2).toUpperCase();
 
-      let activeKeys = (modsRes.data || [])
-        .filter((m: any) => m.ativo)
-        .map((m: any) => m.modulo_key);
+      const mods = (modsRes.data || []) as ModuloItem[];
+      let activeKeys = mods
+        .filter((m) => m.ativo)
+        .map((m) => m.modulo_key);
 
       // Filtragem granular: tenant_user só vê módulos explicitamente permitidos
       if (profile.role === 'tenant_user') {
@@ -74,20 +84,20 @@ export function useSidebarData() {
           .eq('user_id', user.id)
           .eq('empresa_id', profile.empresa_id);
 
+        const typedUserMods = (userMods || []) as UserModuloItem[];
         const allowedKeys = new Set(
-          (userMods || []).filter((m: any) => m.permitido).map((m: any) => m.modulo_key)
+          typedUserMods.filter((m) => m.permitido).map((m) => m.modulo_key)
         );
-        // Interseccionar: módulo deve ser contratado E permitido para o usuário
-        activeKeys = activeKeys.filter((k: string) => allowedKeys.has(k));
+        activeKeys = activeKeys.filter((k) => allowedKeys.has(k));
       }
 
       return {
         empresaNome: nome,
         empresaIniciais: iniciais,
         activeKeys,
-        role: profile.role
+        role: profile.role ?? undefined
       };
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime: 5 * 60 * 1000,
   });
 }

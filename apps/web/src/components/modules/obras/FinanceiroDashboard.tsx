@@ -126,7 +126,7 @@ export function FinanceiroDashboard({ resumo, custos, onAdd, onEdit, onDelete }:
                   return (
                     <tr key={custo.id} className="border-b hover:bg-muted/50">
                       <td className="p-3 text-sm text-foreground">
-                        {new Date(custo.data).toLocaleDateString('pt-BR')}
+                        {custo.data ? new Date(custo.data).toLocaleDateString('pt-BR') : '-'}
                       </td>
                       <td className="p-3 text-sm text-foreground">{custo.categoria}</td>
                       <td className="p-3">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AlertTriangle, Check, Eye, X } from "lucide-react";
 import { useAlertasEstoque, useResolverAlertaEstoque, useVerificarAlertasEstoque } from "@/lib/hooks/use-alertas-estoque";
@@ -14,8 +14,8 @@ export default function AlertasEstoquePanel() {
     try {
       await resolverMutation.mutateAsync({ alertaId, status });
       success(status === "resolvido" ? "Alerta resolvido com sucesso!" : "Alerta visualizado!");
-    } catch (err: any) {
-      toastError("Erro ao resolver alerta: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao resolver alerta: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 
@@ -23,8 +23,8 @@ export default function AlertasEstoquePanel() {
     try {
       const result = await verificarMutation.mutateAsync();
       success(`${result.alertas_criados} alertas criados!`);
-    } catch (err: any) {
-      toastError("Erro ao verificar alertas: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao verificar alertas: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 
@@ -86,7 +86,7 @@ export default function AlertasEstoquePanel() {
                   <p className="text-sm text-slate-600 mb-2">{alerta.mensagem}</p>
                   <div className="flex items-center gap-4 text-xs text-slate-500">
                     <span>Estoque atual: <strong className={alerta.estoque_atual === 0 ? "text-red-600" : "text-amber-600"}>{alerta.estoque_atual}</strong></span>
-                    <span>Mínimo: <strong>{alerta.estoque_minimo}</strong></span>
+                    <span>MÃ­nimo: <strong>{alerta.estoque_minimo}</strong></span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

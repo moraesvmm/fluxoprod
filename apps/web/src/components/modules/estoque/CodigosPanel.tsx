@@ -1,12 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { QrCode, Search, Plus, CheckCircle } from "lucide-react";
 import { useProdutos } from "@/lib/hooks/use-produtos";
 import { useGerarCodigoBarras, useBuscarProdutoPorCodigo } from "@/lib/hooks/use-valoracao";
 import { useToast, Toast } from "@/components/ui/toast";
+import type { Produto } from "@/lib/api";
 
-// Para scanner físico, integrar com biblioteca html5-qrcode ou react-qr-reader na Sessão 6 (integração final)
+// Para scanner fÃƒÂ­sico, integrar com biblioteca html5-qrcode ou react-qr-reader na SessÃƒÂ£o 6 (integraÃƒÂ§ÃƒÂ£o final)
 
 export default function CodigosPanel() {
   const { data: produtos = [] } = useProdutos();
@@ -15,14 +16,14 @@ export default function CodigosPanel() {
   const { toasts, removeToast, success, error: toastError } = useToast();
   
   const [codigoBusca, setCodigoBusca] = useState("");
-  const [produtoEncontrado, setProdutoEncontrado] = useState<any>(null);
+  const [produtoEncontrado, setProdutoEncontrado] = useState<Produto | null>(null);
 
   const handleGerarCodigo = async (produtoId: string) => {
     try {
       await gerarCodigoMutation.mutateAsync(produtoId);
-      success("Código de barras gerado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao gerar código: " + (err.message || "Tente novamente."));
+      success("CÃƒÂ³digo de barras gerado com sucesso!");
+    } catch (err: unknown) {
+      toastError("Erro ao gerar cÃƒÂ³digo: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 
@@ -38,8 +39,8 @@ export default function CodigosPanel() {
         setProdutoEncontrado(result);
         success("Produto encontrado!");
       }
-    } catch (err: any) {
-      toastError("Erro ao buscar produto: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao buscar produto: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
       setProdutoEncontrado(null);
     }
   };
@@ -53,11 +54,11 @@ export default function CodigosPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <QrCode className="h-5 w-5 text-indigo-500" />
-          <h3 className="text-lg font-semibold">Códigos de Barras e QR</h3>
+          <h3 className="text-lg font-semibold">CÃƒÂ³digos de Barras e QR</h3>
         </div>
       </div>
 
-      {/* Busca por código */}
+      {/* Busca por cÃƒÂ³digo */}
       <div className="p-4 rounded-lg border border-slate-200 bg-white">
         <div className="flex items-center gap-2">
           <Search className="h-5 w-5 text-slate-400" />
@@ -66,7 +67,7 @@ export default function CodigosPanel() {
             value={codigoBusca}
             onChange={(e) => setCodigoBusca(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleBuscarPorCodigo()}
-            placeholder="Digite o código de barras ou QR..."
+            placeholder="Digite o cÃƒÂ³digo de barras ou QR..."
             className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
           <button
@@ -85,10 +86,10 @@ export default function CodigosPanel() {
               <div>
                 <h4 className="font-medium text-green-900">{produtoEncontrado.nome}</h4>
                 <p className="text-sm text-green-700 mt-1">
-                  Código: {produtoEncontrado.codigo_barras || produtoEncontrado.codigo_qr || "-"}
+                  CÃƒÂ³digo: {produtoEncontrado.codigo_barras || produtoEncontrado.codigo_qr || "-"}
                 </p>
                 <p className="text-sm text-green-700">
-                  Preço: R$ {produtoEncontrado.preco_base?.toFixed(2) || "0,00"}
+                  PreÃƒÂ§o: R$ {produtoEncontrado.preco_base?.toFixed(2) || "0,00"}
                 </p>
               </div>
             </div>
@@ -96,19 +97,19 @@ export default function CodigosPanel() {
         )}
       </div>
 
-      {/* Lista de produtos com códigos */}
+      {/* Lista de produtos com cÃƒÂ³digos */}
       <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-          <h4 className="font-medium text-slate-900">Códigos por Produto</h4>
+          <h4 className="font-medium text-slate-900">CÃƒÂ³digos por Produto</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="text-left p-3 font-medium text-slate-700">Produto</th>
-                <th className="text-left p-3 font-medium text-slate-700">Código de Barras</th>
+                <th className="text-left p-3 font-medium text-slate-700">CÃƒÂ³digo de Barras</th>
                 <th className="text-left p-3 font-medium text-slate-700">QR Code</th>
-                <th className="text-left p-3 font-medium text-slate-700">Ações</th>
+                <th className="text-left p-3 font-medium text-slate-700">AÃƒÂ§ÃƒÂµes</th>
               </tr>
             </thead>
             <tbody>
@@ -143,10 +144,10 @@ export default function CodigosPanel() {
                         disabled={gerarCodigoMutation.isPending}
                         className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 h-7 px-2 disabled:opacity-50"
                       >
-                        <Plus className="mr-1 h-3 w-3" /> Gerar Código
+                        <Plus className="mr-1 h-3 w-3" /> Gerar CÃƒÂ³digo
                       </button>
                     ) : (
-                      <span className="text-xs text-slate-500">Código gerado</span>
+                      <span className="text-xs text-slate-500">CÃƒÂ³digo gerado</span>
                     )}
                   </td>
                 </tr>

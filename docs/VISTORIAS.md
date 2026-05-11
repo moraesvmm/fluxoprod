@@ -1,5 +1,12 @@
 # VISTORIAS DO SISTEMA
 
+## ⚠️ VISTORIA PENDENTE — Blindagem E2E de Tipagem Concluída (Vistoria 72)
+**Data:** 11/05/2026
+**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Motivo:** Concluída migração completa do `api.ts` da tipagem `any` para contrato estrito `<Database>` via `getSupabaseStrict()`. RPCs não mapeadas no `database.types.ts` migradas para padrão `_untyped()` (escape hatch documentado). Interfaces perdidas restauradas (`ObraCusto`, `ObraResumoFinanceiro`, `ObraRecurso`, `ObraDocumento`). Build `tsc --noEmit` passou com **zero erros**. Arquivos modificados: `api.ts`, `FinanceiroDashboard.tsx`.
+
+---
+
 ## ⚠️ VISTORIA PENDENTE — Nova vistoria pendente pós-alterações (Vistoria 71)
 **Data:** 11/05/2026
 **Status:** 🚨 PENDENTE — Deve ser realizada o mais rápido possível!

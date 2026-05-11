@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Package, Plus, Trash2, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
@@ -70,8 +70,8 @@ export default function KitsManager() {
       success("Kit criado com sucesso!");
       setIsModalOpen(false);
       setFormData({ produto_id: "", nome: "", descricao: "", itens: [] });
-    } catch (err: any) {
-      toastError("Erro ao criar kit: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao criar kit: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 
@@ -79,7 +79,7 @@ export default function KitsManager() {
     if (!deleteId) return;
     try {
       await excluirMutation.mutateAsync(deleteId);
-      success("Kit excluído com sucesso!");
+      success("Kit excluÃ­do com sucesso!");
     } catch {
       toastError("Erro ao excluir kit. Tente novamente.");
     } finally {
@@ -92,8 +92,8 @@ export default function KitsManager() {
     try {
       await venderMutation.mutateAsync({ kitId: venderId, quantidade: venderQuantidade });
       success(`Kit vendido (${venderQuantidade}x) com sucesso!`);
-    } catch (err: any) {
-      toastError("Erro ao vender kit: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao vender kit: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     } finally {
       setVenderId(null);
       setVenderQuantidade(1);
@@ -148,7 +148,7 @@ export default function KitsManager() {
                     </button>
                     <span className="font-medium text-slate-900">{kit.nome}</span>
                   </div>
-                  <p className="text-sm text-slate-600 mb-2">{kit.descricao || "Sem descrição"}</p>
+                  <p className="text-sm text-slate-600 mb-2">{kit.descricao || "Sem descriÃ§Ã£o"}</p>
                   <div className="flex items-center gap-4 text-xs text-slate-500">
                     <span>Produto pai: <strong>{kit.produto_nome}</strong></span>
                     <span>Itens: <strong>{kit.itens.length}</strong></span>
@@ -216,7 +216,7 @@ export default function KitsManager() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">DescriÃ§Ã£o</label>
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
@@ -289,13 +289,13 @@ export default function KitsManager() {
         </form>
       </Modal>
 
-      {/* Modal Confirmar Exclusão */}
+      {/* Modal Confirmar ExclusÃ£o */}
       <ConfirmModal
         isOpen={!!deleteId}
         onCancel={() => setDeleteId(null)}
         onConfirm={handleExcluirKit}
         title="Excluir Kit"
-        message="Tem certeza que deseja excluir este kit? Esta ação não pode ser desfeita."
+        message="Tem certeza que deseja excluir este kit? Esta aÃ§Ã£o nÃ£o pode ser desfeita."
         variant="danger"
       />
 

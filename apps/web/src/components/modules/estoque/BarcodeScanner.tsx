@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { Barcode, X, CheckCircle, AlertCircle } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { buscarProdutoPorCodigo } from "@/lib/api";
 import { useToast, Toast } from "@/components/ui/toast";
+import type { Produto } from "@/lib/api";
 
 type BarcodeDetectorConstructor = new (options?: {
   formats?: string[];
@@ -21,7 +22,7 @@ declare global {
 interface BarcodeScannerProps {
   isOpen: boolean;
   onClose: () => void;
-  onProdutoEncontrado?: (produto: any) => void;
+  onProdutoEncontrado?: (produto: Produto) => void;
 }
 
 export default function BarcodeScanner({
@@ -35,7 +36,7 @@ export default function BarcodeScanner({
   }>({ stream: null, animationFrame: null });
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [produtoEncontrado, setProdutoEncontrado] = useState<any>(null);
+  const [produtoEncontrado, setProdutoEncontrado] = useState<Produto | null>(null);
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toasts, removeToast, success, error: toastError } = useToast();
@@ -160,8 +161,8 @@ export default function BarcodeScanner({
       } else {
         toastError("Produto nao encontrado para o codigo: " + codigo);
       }
-    } catch (err: any) {
-      toastError("Erro ao buscar produto: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao buscar produto: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 

@@ -4,10 +4,36 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/utils/supabase/client";
 import { useUserProfile } from "./use-user-profile";
 import type { Database } from "@/types/database.types";
+import type { Venda } from "@/lib/api";
 
-// Opt-in de tipagem estrita (Gradual Typing)
+// Cliente estrito — integra com o contrato Database
 const supabase = createClient() as import('@supabase/supabase-js').SupabaseClient<Database>;
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+// Tipos derivados dos retornos de RPC
+interface DashboardKPI {
+  total_vendas?: number;
+  qtd_vendas?: number;
+  qtd_clientes?: number;
+  qtd_produtos?: number;
+  qtd_os_abertas?: number;
+  qtd_obras_em_andamento?: number;
+  estoque_baixo?: number;
+  saldo?: number;
+  patrimonio_estoque?: number;
+}
+
+interface KPIPorMes {
+  mes: string;
+  faturamento: number;
+  total_vendas: number;
+  ticket_medio: number;
+}
+
+interface FechamentoPendente {
+  mes: string;
+  pendente: boolean;
+}
 
 export function useActiveModules() {
   const { userId } = useUserProfile();
@@ -22,74 +48,64 @@ export function useActiveModules() {
       if (error) throw error;
       return data?.map(m => m.modulo_key) || [];
     },
-    staleTime: 30 * 1000, // 30 segundos (garante feedback rápido após compra)
+    staleTime: 30 * 1000,
     retry: 2,
     enabled: !!userId,
   });
 }
 
 export function useDashboardData() {
-  // Obter userId do auth para usar como guard
   const { userId } = useUserProfile();
-
-  // Buscar módulos ativos para validar feature flags
   const { data: modulosAtivos } = useActiveModules();
 
-  // Usar RPC tenant_dashboard_kpis para obter todos os KPIs calculados no banco
-  const { data: kpis, isLoading, error } = useQuery({
+  const { data: kpisRaw, isLoading, error } = useQuery({
     queryKey: ["dashboard", "kpis"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_dashboard_kpis');
       if (error) throw error;
-      return data as any;
+      return (data as unknown as DashboardKPI[]) || [];
     },
     staleTime: 5 * 60_000,
     retry: 2,
-    enabled: !!userId, // Só executar se usuário estiver autenticado
+    enabled: !!userId,
   });
 
-  // Buscar últimas vendas separadamente (já existe RPC para isso)
   const { data: ultimasVendas, error: vendasError } = useQuery({
     queryKey: ["dashboard", "ultimas-vendas"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_listar_vendas', { p_limit: 5 });
       if (error) throw error;
-      return (data as any[]) || [];
+      return (data as unknown as Venda[]) || [];
     },
     staleTime: 60_000,
     retry: 2,
-    enabled: !!userId, // Só executar se usuário estiver autenticado
+    enabled: !!userId,
   });
 
-
-  // Série temporal real: faturamento dos últimos 6 meses por mês
   const { data: kpisPorMes, isLoading: isLoadingChart } = useQuery({
     queryKey: ["dashboard", "kpis-por-mes"],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_dashboard_kpis_por_mes', { p_meses: 6 });
       if (error) throw error;
-      // Normalização defensiva compatível com a tipagem estrita
-      const normalized = Array.isArray(data) ? data : [];
-      return (normalized as unknown as Array<{ mes: string; faturamento: number; total_vendas: number; ticket_medio: number }>) || [];
+      return (data as unknown as KPIPorMes[]) || [];
     },
     staleTime: 5 * 60_000,
     retry: 2,
-    enabled: !!userId, // Só executar se usuário estiver autenticado
+    enabled: !!userId,
   });
 
-  // Derive KPIs a partir do resultado da RPC
-  const faturamentoHoje = kpis?.[0]?.total_vendas || 0;
-  const vendasHoje = kpis?.[0]?.qtd_vendas || 0;
+  const kpis = kpisRaw?.[0];
+  const faturamentoHoje = kpis?.total_vendas || 0;
+  const vendasHoje = kpis?.qtd_vendas || 0;
   const ticketMedio = vendasHoje > 0 ? faturamentoHoje / vendasHoje : 0;
-  const totalClientes = kpis?.[0]?.qtd_clientes || 0;
-  const totalProdutos = kpis?.[0]?.qtd_produtos || 0;
-  const osAbertas = kpis?.[0]?.qtd_os_abertas || 0;
-  const obrasEmAndamento = kpis?.[0]?.qtd_obras_em_andamento || 0;
-  const estoqueBaixo = kpis?.[0]?.estoque_baixo || 0;
-  const saldo = kpis?.[0]?.saldo || 0;
-  const patrimonioEstoque = (kpis?.[0] as any)?.patrimonio_estoque || 0;
+  const totalClientes = kpis?.qtd_clientes || 0;
+  const totalProdutos = kpis?.qtd_produtos || 0;
+  const osAbertas = kpis?.qtd_os_abertas || 0;
+  const obrasEmAndamento = kpis?.qtd_obras_em_andamento || 0;
+  const estoqueBaixo = kpis?.estoque_baixo || 0;
+  const saldo = kpis?.saldo || 0;
+  const patrimonioEstoque = kpis?.patrimonio_estoque || 0;
 
-  // Dados do gráfico a partir da RPC de série temporal (sem Math.random)
   const chartData = (kpisPorMes || []).map(item => {
     const [, monthStr] = item.mes.split('-');
     return {
@@ -99,7 +115,7 @@ export function useDashboardData() {
   });
 
   return {
-    isLoading: isLoading || !kpis,
+    isLoading: isLoading || !kpisRaw,
     isLoadingChart,
     error: error || vendasError,
     faturamentoHoje,
@@ -127,17 +143,16 @@ export function useFechamentoPendente() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tenant_obter_fechamento_pendente');
       if (error) throw error;
-      return data as any;
+      return (data as unknown as FechamentoPendente | null);
     },
     enabled: !!userId,
-    staleTime: 60 * 60_000, // 1h
+    staleTime: 60 * 60_000,
   });
 
   const mutation = useMutation({
     mutationFn: async (mes: string) => {
-      const { data, error } = await supabase.rpc('tenant_marcar_fechamento_visto', { p_mes: mes });
+      const { error } = await supabase.rpc('tenant_marcar_fechamento_visto', { p_mes: mes });
       if (error) throw error;
-      return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["dashboard", "fechamento-pendente"] });
@@ -151,4 +166,3 @@ export function useFechamentoPendente() {
     isMarking: mutation.isPending
   };
 }
-
