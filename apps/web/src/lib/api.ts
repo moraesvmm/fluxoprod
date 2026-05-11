@@ -1,5 +1,8 @@
 import { createClient } from '@/utils/supabase/client';
+import type { Database } from '@/types/database.types';
 export { createClient as getSupabase };
+
+export const getSupabaseStrict = () => createClient() as import('@supabase/supabase-js').SupabaseClient<Database>;
 
 // ─── Types ───────────────────────────────────────────────
 export interface Venda {
@@ -673,21 +676,21 @@ export async function deleteVenda(id: string): Promise<void> {
 
 // CLIENTES - Usar RPCs para operações CRUD
 export async function fetchClientes(params?: ClienteListParams): Promise<ClienteListResult> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_clientes', {
-      p_cursor: params?.cursor || null,
+      p_cursor: params?.cursor || undefined,
       p_limit: params?.limit || 20,
-      p_status: params?.status || null,
-      p_funil_fase: params?.funil_fase || null,
-      p_busca: params?.busca || null,
+      p_status: params?.status || undefined,
+      p_funil_fase: params?.funil_fase || undefined,
+      p_busca: params?.busca || undefined,
       p_order_by: params?.order_by || 'criado_em',
       p_order_dir: params?.order_dir || 'DESC',
-      p_tags: params?.tags || null
+      p_tags: params?.tags || undefined
     });
   if (error) throw new Error(error.message);
   
   // Extrair next_cursor do último item
-  const clientes = data || [];
+  const clientes = (data as any[]) || [];
   const next_cursor = clientes.length > 0 ? clientes[clientes.length - 1].next_cursor : null;
   
   // Remover next_cursor dos objetos de cliente
@@ -700,64 +703,64 @@ export async function fetchClientes(params?: ClienteListParams): Promise<Cliente
 }
 
 export async function createCliente(cliente: ClienteCreate): Promise<Cliente> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await getSupabaseStrict()
     .rpc('tenant_criar_cliente', {
       p_nome: cliente.nome,
       p_email: cliente.email,
       p_telefone: cliente.telefone,
-      p_endereco: cliente.endereco || null,
+      p_endereco: cliente.endereco || undefined,
       p_funil_fase: 'lead',
       p_status: 'ativo',
-      p_cpf_cnpj: cliente.cpf_cnpj || null
+      p_cpf_cnpj: cliente.cpf_cnpj || undefined
     });
   if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error);
-  return { id: data?.cliente_id, ...cliente, criado_em: new Date().toISOString() } as Cliente;
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return { id: (data as any)?.cliente_id, ...cliente, criado_em: new Date().toISOString() } as Cliente;
 }
 
 export async function importarClientesLote(clientes: any[]): Promise<{ count: number }> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await getSupabaseStrict()
     .rpc('tenant_importar_clientes_lote', {
       p_clientes: clientes
     });
   if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error);
-  return { count: data?.count || 0 };
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return { count: (data as any)?.count || 0 };
 }
 
 export async function obterSugestoesNurturing() {
-  const { data, error } = await getSupabase().rpc('tenant_obter_sugestoes_nurturing');
+  const { data, error } = await getSupabaseStrict().rpc('tenant_obter_sugestoes_nurturing');
   if (error) throw new Error(error.message);
-  return data;
+  return data as any[];
 }
 
-export async function finalizarAlertaNurturing(id: string | null) {
-  const { data, error } = await getSupabase().rpc('tenant_finalizar_alerta_nurturing', { p_alerta_id: id });
+export async function finalizarAlertaNurturing(id: string) {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_finalizar_alerta_nurturing', { p_alerta_id: id });
   if (error) throw new Error(error.message);
   return data;
 }
 
 export async function deleteCliente(id: string): Promise<void> {
-  const { error } = await getSupabase()
+  const { error } = await getSupabaseStrict()
     .rpc('tenant_excluir_cliente', { p_cliente_id: id });
   if (error) throw new Error(error.message);
 }
 
 export async function updateCliente(id: string, cliente: ClienteUpdate): Promise<Cliente> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await getSupabaseStrict()
     .rpc('tenant_atualizar_cliente', {
       p_cliente_id: id,
-      p_nome: cliente.nome ?? null,
-      p_email: cliente.email ?? null,
-      p_telefone: cliente.telefone ?? null,
-      p_funil_fase: cliente.funil_fase ?? null,
-      p_status: cliente.status ?? null,
-      p_cpf_cnpj: cliente.cpf_cnpj ?? null,
-      p_endereco: cliente.endereco ?? null
+      p_nome: cliente.nome ?? undefined,
+      p_email: cliente.email ?? undefined,
+      p_telefone: cliente.telefone ?? undefined,
+      p_funil_fase: cliente.funil_fase ?? undefined,
+      p_status: cliente.status ?? undefined,
+      p_cpf_cnpj: cliente.cpf_cnpj ?? undefined,
+      p_endereco: cliente.endereco ?? undefined
     });
   if (error) throw new Error(error.message);
-  if (data?.error) throw new Error(data.error);
-  return data as Cliente;
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return (data as unknown) as Cliente;
 }
 
 // INTERAÇÕES DE CLIENTES - Usar RPCs para operações CRUD
