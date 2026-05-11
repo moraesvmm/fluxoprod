@@ -1,5 +1,36 @@
 # VISTORIAS DO SISTEMA
 
+## VISTORIA 70 — Auditoria e Correção P0/P1: Logística de Provisionamento & Checkout
+**Data:** 11/05/2026
+**Status:** ✅ CORRIGIDO — ⚠️ PENDENTE: Aplicar `fix_indexes_checkout_webhook.sql` no banco
+**Responsável:** Antigravity
+
+#### Bugs Corrigidos:
+| ID | Severidade | Arquivo | Problema | Correção |
+|----|------------|---------|----------|----------|
+| BUG-01 | 🔴 P0 | `upgrade/route.ts` | JOIN inválido `auth_users!inner` → 500 imediato em qualquer upgrade | Removido JOIN; email obtido via `admin.auth.admin.getUserById()` |
+| BUG-02 | 🔴 P0 | `upgrade/route.ts` | Consulta tabela `modulos` (inexistente) → preço extras sempre zerado | Corrigido para `modulos_avulsos` com `preco_promocional ?? preco` |
+| BUG-03 | 🔴 P0 | `upgrade/route.ts` | `UPDATE empresas` com `valor_mensalidade` e `modulos_ativos_count` (inexistentes) → 400 ignorado | Update removido (colunas não existem no schema) |
+| BUG-04 | 🟠 P1 | `upgrade/route.ts` | Campo `empresa.tamanho_empresa` inexistente → gateway sempre recebe `"1-5"` | Corrigido para `empresa.porte` |
+| BUG-05 | 🟠 P1 | `webhook/payment/route.ts` | `upsert empresa_modulos` com `atualizado_em` (inexistente) → módulos não ativados em upgrades | Coluna removida do upsert |
+| BUG-06 | 🔴 P0 | `webhook/payment/route.ts` | `webhook_audit_log` recebia colunas erradas → tabela 100% vazia, zero rastreio | Corrigido para `gateway`, `evento`, `status_processamento`, `erro` |
+| INC-04 | 🟡 P3 | `checkout/page.tsx` | `PLANOS_FALLBACK` continha strings de marketing inválidas (risco de reintroduzir bug 69) | Fallback limpo com apenas chaves técnicas válidas |
+| INC-05 | 🟡 P2 | `upgrade/route.ts` | `createClient()` SSR (com RLS) em rota que manipula `empresa_modulos` | Migrado para `createAdminClient()` (service_role, sem RLS) |
+
+#### ⚠️ AÇÃO PENDENTE OBRIGATÓRIA:
+**Executar `apps/api/migrations/fix_indexes_checkout_webhook.sql` no banco Supabase (SQL Editor).**
+- `idx_checkout_vendas_ext_tx` — índice no campo de lookup do webhook
+- `idx_webhook_audit_log_status` — índice para filtro por status
+- `idx_webhook_audit_log_ts` — índice para ordenação cronológica
+
+#### Arquivos Modificados:
+- `apps/web/src/app/api/checkout/upgrade/route.ts`
+- `apps/web/src/app/api/webhook/payment/route.ts`
+- `apps/web/src/app/(auth)/checkout/page.tsx`
+- `apps/api/migrations/fix_indexes_checkout_webhook.sql` *(novo)*
+
+---
+
 ## VISTORIA 69 — Correção: 500 no register-trial (Módulos Inválidos no Payload)
 **Data:** 11/05/2026
 **Status:** ✅ CORRIGIDO
