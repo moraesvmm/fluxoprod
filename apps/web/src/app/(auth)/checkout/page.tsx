@@ -13,11 +13,11 @@ import { validarCupom, type Cupom } from "@/lib/api";
 interface PlanoData { id: string; key: string; nome: string; preco: number; preco_promocional: number | null; descricao: string; modulos_incluidos: string[]; ordem_exibicao: number; }
 interface ModuloData { id: string; key: string; nome: string; preco: number; preco_promocional: number | null; descricao: string; icone: string; features: string[]; ordem_exibicao: number; }
 
-/* Fallbacks caso o banco esteja indisponível */
+/* Fallbacks caso o banco esteja indisponível — APENAS chaves técnicas válidas (sem strings de marketing) */
 const PLANOS_FALLBACK: PlanoData[] = [
-  { id: "starter", key: "starter", nome: "Starter", preco: 249, preco_promocional: null, descricao: "Entrada e Visibilidade", modulos_incluidos: ["dashboard","crm","catalogo","estoque", "email_real", "Dark Mode Premium v2.0"], ordem_exibicao: 1 },
-  { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh", "Inteligência de Vendas", "email_real", "Interface Deep Midnight UI"], ordem_exibicao: 2 },
-  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios", "Inteligência de Vendas", "email_real", "UX Experimental & Premium UI"], ordem_exibicao: 3 },
+  { id: "starter", key: "starter", nome: "Starter", preco: 249, preco_promocional: null, descricao: "Entrada e Visibilidade", modulos_incluidos: ["dashboard","crm","catalogo","estoque"], ordem_exibicao: 1 },
+  { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh"], ordem_exibicao: 2 },
+  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios"], ordem_exibicao: 3 },
 ];
 const MODULOS_FALLBACK: ModuloData[] = [
   { id: "vendas", key: "vendas", nome: "Vendas & PDV", preco: 99.90, preco_promocional: null, icone: "🛍️", descricao: "Operação completa de frente de caixa e gestão comercial.", features: ["PDV Ágil com integração financeira automática", "Emissão e Gestão de NFe nativa para Simples Nacional", "Relatórios analíticos de vendas e ticket médio"], ordem_exibicao: 0 },
