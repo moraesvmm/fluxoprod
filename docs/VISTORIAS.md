@@ -1,4 +1,16 @@
-# VISTORIAS DO SISTEMA
+## ⚠️ VISTORIA PENDENTE — Blindagem E2E Batch: Dashboard, Configs, Relatórios, CRM, Catálogo, Loja e DANFE (Vistoria 75)
+**Data:** 12/05/2026
+**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Motivo:** Blindagem em lote de 8 módulos/páginas: Dashboard (iterador `Venda`, StatusBadge sem `as any`, Recharts formatter), Configurações (4 catch blocks), Relatórios (ReportRow → `Record<string, unknown>`, helper `get<T>()`, LucideIcon em KPIs), Comissões (3 catch blocks), Catálogo (FiscalItem interface, ProdutoCreate, 4 catch blocks), CRM (`abrirEdicao` e iterador tipados com `Cliente`), Loja (ICON_MAP → `LucideIcon`) e DANFE (catch block). Build `tsc --noEmit` validado com **zero erros**. Cobertura avançou de ~60% para ~80%.
+
+---
+
+## ⚠️ VISTORIA PENDENTE — Blindagem E2E de Tipagem: Módulos RH, OS e Obras (Vistoria 74)
+**Data:** 12/05/2026
+**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Motivo:** Concluída blindagem E2E dos módulos **RH**, **OS** e **Obras**. Eliminadas 25+ instâncias de `any` nas três páginas e no componente `OSKanbanBoard`. Payloads migrados para contratos estritos (`FuncionarioCreate`, `FuncionarioUpdate`, `OrdemServicoUpdate`, `ObraUpdate`). Corrigido mapeamento de campo `orcamento` → `orcamento_total` na interface `ObraUpdate`. Conflito de tipo Framer Motion / HTML5 DragEvent resolvido sem regressão funcional. Build `tsc --noEmit` validado com **zero erros**. Cobertura de tipagem avançou de ~40% para ~60%.
+
+---
 
 ## ⚠️ VISTORIA PENDENTE — Blindagem E2E de Tipagem: Módulo CRM (Vistoria 73)
 **Data:** 11/05/2026

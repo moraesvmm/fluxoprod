@@ -44,9 +44,9 @@ export class SefazClient {
       });
 
       return response.data;
-    } catch (error: any) {
-      console.error('Erro na comunicação SOAP SEFAZ:', error.response?.data || error.message);
-
+    } catch (error: unknown) {
+      const axiosErr = error as { response?: { data?: unknown }; message?: string };
+      console.error('Erro na comunicação SOAP SEFAZ:', axiosErr?.response?.data || (error instanceof Error ? error.message : error));
       throw new Error('Falha na comunicação com os servidores da SEFAZ.');
     }
   }

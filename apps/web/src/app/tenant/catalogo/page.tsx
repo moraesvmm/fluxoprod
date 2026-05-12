@@ -15,7 +15,14 @@ import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useToast, Toast } from "@/components/ui/toast";
 import { useProdutos, useCreateProduto, useDeleteProduto, useUpdateProduto } from "@/lib/hooks/use-produtos";
-import { type ProdutoUpdate } from "@/lib/api";
+import { type ProdutoCreate, type ProdutoUpdate } from "@/lib/api";
+
+interface FiscalItem {
+  id: string;
+  ncm?: string;
+  cfop_padrao?: string;
+  origem?: number;
+}
 
 interface Produto {
   id: string;
@@ -74,7 +81,7 @@ export default function CatalogoPage() {
         }
 
         const nextMap = Object.fromEntries(
-          (payload.data || []).map((item: any) => [
+          (payload.data || []).map((item: FiscalItem) => [
             item.id,
             {
               ncm: item.ncm || "",
@@ -84,8 +91,8 @@ export default function CatalogoPage() {
           ])
         );
         setFiscalByProduct(nextMap);
-      } catch (err: any) {
-        toastError("Erro ao carregar dados fiscais do catálogo: " + err.message);
+      } catch (err: unknown) {
+        toastError("Erro ao carregar dados fiscais do catálogo: " + (err instanceof Error ? err.message : "Tente novamente."));
       }
     };
 
@@ -141,7 +148,7 @@ export default function CatalogoPage() {
     if (!formData.nome.trim()) return;
 
     try {
-      const payload: any = {
+      const payload: ProdutoCreate = {
         nome: formData.nome,
         estoque_atual: parseInt(formData.estoque_atual, 10) || 0,
         estoque_minimo: parseInt(formData.estoque_minimo, 10) || 10,
@@ -158,8 +165,8 @@ export default function CatalogoPage() {
       resetForm();
       setShowModal(false);
       success("Produto cadastrado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao cadastrar produto: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao cadastrar produto: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -173,8 +180,8 @@ export default function CatalogoPage() {
         return next;
       });
       success("Produto removido com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao remover produto: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao remover produto: " + (err instanceof Error ? err.message : "Tente novamente."));
     } finally {
       setDeleteId(null);
     }
@@ -218,8 +225,8 @@ export default function CatalogoPage() {
       setShowEditModal(false);
       setEditId(null);
       success("Produto atualizado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao atualizar produto: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao atualizar produto: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 

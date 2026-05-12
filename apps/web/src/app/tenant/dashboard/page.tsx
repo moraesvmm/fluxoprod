@@ -38,6 +38,7 @@ import BoasVindasBanner from "@/components/modules/base/BoasVindasBanner";
 import AlertasRH from "@/components/modules/rh/AlertasRH";
 import { FechamentoMesModal } from "@/components/modules/base/FechamentoMesModal";
 import { useQueryClient } from "@tanstack/react-query";
+import { type Venda } from "@/lib/api";
 
 // Lazy load Recharts — only loaded when chart data exists
 const LazyAreaChart = dynamic(
@@ -56,7 +57,7 @@ const LazyAreaChart = dynamic(
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(value) => `R$${(value / 1000).toFixed(0)}k`} />
-            <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: any) => [formatarMoeda(Number(value ?? 0)), 'Faturamento']} />
+            <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value) => [formatarMoeda(Number(value ?? 0)), 'Faturamento']} />
             <Area type="monotone" dataKey="total" stroke="#4f46e5" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" />
           </AreaChart>
         </ResponsiveContainer>
@@ -276,7 +277,7 @@ export default function DashboardPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {dashboard.ultimasVendas.map((v: any) => (
+                  {dashboard.ultimasVendas.map((v: Venda) => (
                     <TableRow key={v.id}>
                       <TableCell>
                         <div className="flex flex-col">
@@ -286,7 +287,9 @@ export default function DashboardPage() {
                       </TableCell>
                       <TableCell className="font-medium">{formatarMoeda(v.valor)}</TableCell>
                       <TableCell>
-                        <StatusBadge status={v.status as any} />
+                        <StatusBadge
+                          status={v.status === 'concluida' ? 'success' : v.status === 'cancelada' ? 'error' : v.status === 'pendente' ? 'warning' : 'info'}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}

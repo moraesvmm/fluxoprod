@@ -14,6 +14,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PackageOpen, AlertTriangle, Boxes, Plus, Search, Filter, Edit, Trash2, Barcode } from "lucide-react";
 import { useProdutos, useCreateProduto, useDeleteProduto, useUpdateProduto } from "@/lib/hooks/use-produtos";
+import { type Produto } from "@/lib/api";
 import { useToast, Toast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/modal";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -84,7 +85,7 @@ export default function EstoquePage() {
     estoque_atual: '0', estoque_minimo: '10', categoria: ''
   });
 
-  const abrirEdicaoProduto = (item: any) => {
+  const abrirEdicaoProduto = (item: Produto) => {
     setEditProdutoId(item.id);
     setEditFormData({
       nome: item.nome || '',
@@ -231,7 +232,7 @@ export default function EstoquePage() {
                 ) : (
                   produtosFiltrados.map((item) => (
                     <TableRow key={item.id} className="group">
-                      <TableCell><StatusBadge status={getStatus(item.estoque_atual, item.estoque_minimo) as any} /></TableCell>
+                      <TableCell><StatusBadge status={getStatus(item.estoque_atual, item.estoque_minimo)} /></TableCell>
                       <TableCell className="font-mono text-xs text-slate-500">{item.sku || '-'}</TableCell>
                       <TableCell className="font-medium text-slate-900">{item.nome}</TableCell>
                       <TableCell className="text-right font-bold text-slate-700">

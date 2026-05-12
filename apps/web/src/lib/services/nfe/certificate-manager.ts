@@ -48,8 +48,8 @@ export class CertificateManager {
         commonName,
         notAfter
       };
-    } catch (error: any) {
-      console.error('Erro ao processar certificado:', error.message);
+    } catch (error: unknown) {
+      console.error('Erro ao processar certificado:', error instanceof Error ? error.message : error);
       throw new Error('Falha ao descriptografar o certificado. Verifique a senha.');
     }
   }

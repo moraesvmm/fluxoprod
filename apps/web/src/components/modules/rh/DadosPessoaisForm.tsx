@@ -38,8 +38,8 @@ export function DadosPessoaisForm({ funcionario, onToast }: DadosPessoaisFormPro
         dados: formData,
       });
       onToast("Dados pessoais atualizados com sucesso!", "success");
-    } catch (err: any) {
-      onToast("Erro ao salvar: " + (err.message || "Tente novamente."), "error");
+    } catch (err: unknown) {
+      onToast("Erro ao salvar: " + (err instanceof Error ? err.message : "Tente novamente."), "error");
     }
   };
 

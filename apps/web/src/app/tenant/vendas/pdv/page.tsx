@@ -14,12 +14,23 @@ interface Funcionario {
   cargo: string;
 }
 
+
+
 interface ProdutoEstoque {
   id: string;
   nome: string;
   preco_venda: number;
   estoque_atual: number;
   estoque_minimo: number;
+  sku: string;
+}
+
+interface EstoqueRPCItem {
+  id: string;
+  produto_nome: string;
+  produto_preco_base: number;
+  quantidade: number;
+  quantidade_minima: number;
   sku: string;
 }
 
@@ -61,7 +72,7 @@ export default function PDVPage() {
         if (dbError) throw dbError;
 
         // Mapear dados da RPC para o formato esperado pelo PDV
-        const produtosMapeados = (data || []).map((item: any) => ({
+        const produtosMapeados = (data || []).map((item: EstoqueRPCItem) => ({
           id: item.id,
           nome: item.produto_nome,
           preco_venda: item.produto_preco_base,
@@ -71,7 +82,7 @@ export default function PDVPage() {
         }));
 
         setProdutos(produtosMapeados);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError("Erro ao carregar produtos do estoque. Verifique a conexão.");
       } finally {
         setLoading(false);
@@ -234,7 +245,7 @@ export default function PDVPage() {
       const { data: produtosAtualizados } = await supabase
         .rpc('tenant_listar_estoque');
 
-      const produtosMapeados = (produtosAtualizados || []).map((item: any) => ({
+      const produtosMapeados = (produtosAtualizados || []).map((item: EstoqueRPCItem) => ({
         id: item.id,
         nome: item.produto_nome,
         preco_venda: item.produto_preco_base,
@@ -244,8 +255,8 @@ export default function PDVPage() {
       }));
 
       setProdutos(produtosMapeados);
-    } catch (err: any) {
-      toastError('Erro ao processar pagamento: ' + (err.message || 'Tente novamente.'));
+    } catch (err: unknown) {
+      toastError('Erro ao processar pagamento: ' + (err instanceof Error ? err.message : 'Tente novamente.'));
       throw err; // Propagar erro (não silencioso)
     } finally {
       setSubmitting(false);

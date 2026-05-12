@@ -19,7 +19,8 @@ import {
   DollarSign,
   LayoutDashboard,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  type LucideIcon
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { ModuleCard } from "@/components/loja/ModuleCard";
@@ -38,7 +39,7 @@ interface ModuloData {
   ordem_exibicao: number;
 }
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, LucideIcon> = {
   vendas: ShoppingCart,
   crm: Users,
   estoque: Package,
@@ -107,9 +108,9 @@ export default function LojaPage() {
           setCatalog(catalogData as ModuloData[]);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro ao carregar loja:", err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {
       setLoading(false);
     }
@@ -155,8 +156,8 @@ export default function LojaPage() {
       } else {
         throw new Error(data.error || "Erro ao iniciar checkout");
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {
       setLoading(false);
     }

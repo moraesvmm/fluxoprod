@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { DollarSign, Download, FileText, Package, TrendingUp, Users, Wrench, Building2, Lock } from "lucide-react";
+import { DollarSign, Download, FileText, Package, TrendingUp, Users, Wrench, Building2, Lock, type LucideIcon } from "lucide-react";
 
 import { KPICard } from "@/components/modules/base/KPICard";
 import {
@@ -29,7 +29,7 @@ import { useSidebarData } from "@/lib/hooks/use-sidebar-data";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 type ReportType = "vendas" | "financeiro" | "estoque" | "crm" | "rh" | "comissoes" | "dre" | "os" | "obras";
-type ReportRow = Record<string, any>;
+type ReportRow = Record<string, unknown>;
 
 const REPORT_HEADERS: Record<ReportType, string[]> = {
   vendas: ["Data", "Cliente", "Valor", "Método", "Status"],
@@ -78,7 +78,7 @@ export default function RelatoriosPage() {
   const [reportType, setReportType] = useState<ReportType>("vendas");
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<ReportRow[]>([]);
-  const [kpis, setKpis] = useState<{ label: string; value: string; icon: any }[]>([]);
+  const [kpis, setKpis] = useState<{ label: string; value: string; icon: LucideIcon }[]>([]);
   const { toasts, removeToast, info, success, error: toastError } = useToast();
 
   const isModuleActive = (type: ReportType) => {
@@ -100,7 +100,7 @@ export default function RelatoriosPage() {
       switch (tipo) {
         case "vendas": {
           const vendas = await fetchVendas();
-          setRows(vendas);
+          setRows(vendas as unknown as ReportRow[]);
           const total = vendas.reduce((sum, venda) => sum + (venda.valor || venda.valor_total || venda.total || 0), 0);
           const ticket = vendas.length > 0 ? total / vendas.length : 0;
           setKpis([
@@ -112,7 +112,7 @@ export default function RelatoriosPage() {
         }
         case "financeiro": {
           const transacoes = await fetchFinanceiro();
-          setRows(transacoes);
+          setRows(transacoes as unknown as ReportRow[]);
           const receitas = transacoes
             .filter((item) => item.tipo === "receber" || item.tipo === "receita")
             .reduce((sum, item) => sum + (item.valor || 0), 0);
@@ -128,7 +128,7 @@ export default function RelatoriosPage() {
         }
         case "estoque": {
           const produtos = await fetchProdutos();
-          setRows(produtos);
+          setRows(produtos as unknown as ReportRow[]);
           const valorEstoque = produtos.reduce(
             (sum, produto) => sum + ((produto.preco_venda || 0) * (produto.estoque_atual || 0)),
             0
@@ -146,13 +146,13 @@ export default function RelatoriosPage() {
         case "crm": {
           const clientesResult = await fetchClientes({ limit: 100 });
           const clientes = clientesResult.data;
-          setRows(clientes);
+          setRows(clientes as unknown as ReportRow[]);
           setKpis([{ label: "Clientes Ativos", value: String(clientes.length), icon: Users }]);
           break;
         }
         case "rh": {
           const funcionarios = await fetchFuncionarios();
-          setRows(funcionarios);
+          setRows(funcionarios as unknown as ReportRow[]);
           const folha = funcionarios.reduce((sum, item) => sum + (item.salario || 0), 0);
           setKpis([
             { label: "Colaboradores", value: String(funcionarios.length), icon: Users },
@@ -162,7 +162,7 @@ export default function RelatoriosPage() {
         }
         case "comissoes": {
           const comissoes = await fetchComissoes();
-          setRows(comissoes);
+          setRows(comissoes as unknown as ReportRow[]);
           const totalComissoes = comissoes.reduce(
             (sum, item) => sum + (item.valor_comissao || 0),
             0
@@ -199,7 +199,7 @@ export default function RelatoriosPage() {
         }
         case "os": {
           const ordens = await fetchOS();
-          setRows(ordens);
+          setRows(ordens as unknown as ReportRow[]);
           const totalOrcado = ordens.reduce((sum, os) => sum + (os.valor_orcamento || 0), 0);
           const abertas = ordens.filter(os => os.status !== 'concluida' && os.status !== 'cancelada').length;
           setKpis([
@@ -211,7 +211,7 @@ export default function RelatoriosPage() {
         }
         case "obras": {
           const obras = await fetchObras();
-          setRows(obras);
+          setRows(obras as unknown as ReportRow[]);
           const orcamentoTotal = obras.reduce((sum, obra) => sum + (obra.orcamento || 0), 0);
           const emAndamento = obras.filter(obra => obra.status === 'em_andamento').length;
           setKpis([
@@ -224,79 +224,80 @@ export default function RelatoriosPage() {
       }
 
       success("Relatório gerado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao gerar relatório: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao gerar relatório: " + (err instanceof Error ? err.message : "Tente novamente."));
     } finally {
       setLoading(false);
     }
   };
 
 
-  const renderCellValue = (row: ReportRow, header: string) => {
+  const renderCellValue = (row: ReportRow, header: string): string => {
+    const get = <T,>(key: string): T => row[key] as T;
     switch (reportType) {
       case "vendas":
-        if (header === "Data") return formatarData(row.criado_em);
-        if (header === "Cliente") return row.cliente || "—";
-        if (header === "Valor") return formatarMoeda(row.valor || row.valor_total || row.total || 0);
-        if (header === "Método") return row.metodo || row.metodo_pagamento || "—";
-        if (header === "Status") return row.status || "—";
+        if (header === "Data") return formatarData(get<string>("criado_em"));
+        if (header === "Cliente") return get<string>("cliente") || "—";
+        if (header === "Valor") return formatarMoeda(get<number>("valor") || get<number>("valor_total") || get<number>("total") || 0);
+        if (header === "Método") return get<string>("metodo") || get<string>("metodo_pagamento") || "—";
+        if (header === "Status") return get<string>("status") || "—";
         break;
       case "financeiro":
-        if (header === "Data") return formatarData(row.criado_em);
-        if (header === "Tipo") return row.tipo || "—";
-        if (header === "Descrição") return row.descricao || "—";
-        if (header === "Valor") return formatarMoeda(row.valor || 0);
-        if (header === "Status") return row.status || "—";
+        if (header === "Data") return formatarData(get<string>("criado_em"));
+        if (header === "Tipo") return get<string>("tipo") || "—";
+        if (header === "Descrição") return get<string>("descricao") || "—";
+        if (header === "Valor") return formatarMoeda(get<number>("valor") || 0);
+        if (header === "Status") return get<string>("status") || "—";
         break;
       case "estoque":
-        if (header === "Produto") return row.nome || "—";
-        if (header === "SKU") return row.sku || "—";
-        if (header === "Categoria") return row.categoria || "—";
-        if (header === "Est. Atual") return String(row.estoque_atual ?? 0);
-        if (header === "Est. Mínimo") return String(row.estoque_minimo ?? 0);
-        if (header === "Preço Venda") return formatarMoeda(row.preco_venda || 0);
+        if (header === "Produto") return get<string>("nome") || "—";
+        if (header === "SKU") return get<string>("sku") || "—";
+        if (header === "Categoria") return get<string>("categoria") || "—";
+        if (header === "Est. Atual") return String(get<number>("estoque_atual") ?? 0);
+        if (header === "Est. Mínimo") return String(get<number>("estoque_minimo") ?? 0);
+        if (header === "Preço Venda") return formatarMoeda(get<number>("preco_venda") || 0);
         break;
       case "crm":
-        if (header === "Cliente") return row.nome || "—";
-        if (header === "Email") return row.email || "—";
-        if (header === "Telefone") return row.telefone || "—";
-        if (header === "Cadastro") return formatarData(row.criado_em);
+        if (header === "Cliente") return get<string>("nome") || "—";
+        if (header === "Email") return get<string>("email") || "—";
+        if (header === "Telefone") return get<string>("telefone") || "—";
+        if (header === "Cadastro") return formatarData(get<string>("criado_em"));
         break;
       case "rh":
-        if (header === "Colaborador") return row.nome || "—";
-        if (header === "Cargo") return row.cargo || "—";
-        if (header === "Salário") return formatarMoeda(row.salario || 0);
-        if (header === "Cadastro") return formatarData(row.criado_em);
+        if (header === "Colaborador") return get<string>("nome") || "—";
+        if (header === "Cargo") return get<string>("cargo") || "—";
+        if (header === "Salário") return formatarMoeda(get<number>("salario") || 0);
+        if (header === "Cadastro") return formatarData(get<string>("criado_em"));
         break;
       case "comissoes":
-        if (header === "Colaborador") return row.colaborador_id || "—";
-        if (header === "Venda") return row.venda_id ? `${row.venda_id}`.slice(0, 8) + "..." : "—";
-        if (header === "Valor Venda") return formatarMoeda(row.valor_venda || 0);
-        if (header === "Comissão") return formatarMoeda(row.valor_comissao || 0);
-        if (header === "Status") return row.status_pagamento || "—";
+        if (header === "Colaborador") return get<string>("colaborador_id") || "—";
+        if (header === "Venda") return get<string>("venda_id") ? `${get<string>("venda_id")}`.slice(0, 8) + "..." : "—";
+        if (header === "Valor Venda") return formatarMoeda(get<number>("valor_venda") || 0);
+        if (header === "Comissão") return formatarMoeda(get<number>("valor_comissao") || 0);
+        if (header === "Status") return get<string>("status_pagamento") || "—";
         break;
       case "dre":
-        if (header === "Indicador") return row.indicador;
-        if (header === "Valor") return formatarMoeda(row.valor);
-        if (header === "Margem (%)") return `${row.margem.toFixed(2)}%`;
+        if (header === "Indicador") return get<string>("indicador");
+        if (header === "Valor") return formatarMoeda(get<number>("valor"));
+        if (header === "Margem (%)") return `${(get<number>("margem") || 0).toFixed(2)}%`;
         break;
       case "os":
-        if (header === "Número") return row.numero || "—";
-        if (header === "Cliente") return row.cliente?.nome || row.cliente || "—";
-        if (header === "Equipamento") return row.veiculo_equipamento || "—";
-        if (header === "Série/IMEI") return row.equipamento_serial || "—";
-        if (header === "Status") return row.status || "—";
-        if (header === "Valor Orçamento") return formatarMoeda(row.valor_orcamento || row.valor_orcado || 0);
-        if (header === "Laudo") return row.laudo_tecnico || row.laudo || "—";
-        if (header === "Criado em") return formatarData(row.criado_em || row.data_criacao);
+        if (header === "Número") return String(get<number>("numero") || "—");
+        if (header === "Cliente") { const c = get<{ nome?: string }>("cliente"); return (c && c.nome) || get<string>("cliente") || "—"; }
+        if (header === "Equipamento") return get<string>("veiculo_equipamento") || "—";
+        if (header === "Série/IMEI") return get<string>("equipamento_serial") || "—";
+        if (header === "Status") return get<string>("status") || "—";
+        if (header === "Valor Orçamento") return formatarMoeda(get<number>("valor_orcamento") || get<number>("valor_orcado") || 0);
+        if (header === "Laudo") return get<string>("laudo_tecnico") || get<string>("laudo") || "—";
+        if (header === "Criado em") return formatarData(get<string>("criado_em") || get<string>("data_criacao"));
         break;
       case "obras":
-        if (header === "Obra") return row.nome || "—";
-        if (header === "Cliente") return row.cliente?.nome || row.cliente || "—";
-        if (header === "Orçamento") return formatarMoeda(row.orcamento || 0);
-        if (header === "Status") return row.status || "—";
-        if (header === "Início") return formatarData(row.data_inicio);
-        if (header === "Previsão Fim") return formatarData(row.data_fim_prevista);
+        if (header === "Obra") return get<string>("nome") || "—";
+        if (header === "Cliente") { const c = get<{ nome?: string }>("cliente"); return (c && c.nome) || get<string>("cliente") || "—"; }
+        if (header === "Orçamento") return formatarMoeda(get<number>("orcamento") || 0);
+        if (header === "Status") return get<string>("status") || "—";
+        if (header === "Início") return formatarData(get<string>("data_inicio"));
+        if (header === "Previsão Fim") return formatarData(get<string>("data_fim_prevista"));
         break;
     }
 
@@ -313,7 +314,7 @@ export default function RelatoriosPage() {
     const relatorioNome = REPORT_CONFIG[reportType].label;
     
     if (format === "csv") {
-      const escapeCsv = (value: any) => {
+      const escapeCsv = (value: string | number | boolean | null | undefined) => {
         const str = String(value).replace(/"/g, '""');
         return `"${str}"`;
       };
@@ -589,7 +590,7 @@ export default function RelatoriosPage() {
               </TableRow>
             ) : (
               rows.map((row, index) => (
-                <TableRow key={row.id || index} className="hover:bg-muted/30 border-border">
+                <TableRow key={String(row.id ?? index)} className="hover:bg-muted/30 border-border">
                   {REPORT_HEADERS[reportType].map((header) => (
                     <TableCell key={header} className="text-foreground/80 py-4 font-medium">{renderCellValue(row, header)}</TableCell>
                   ))}

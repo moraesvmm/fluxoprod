@@ -19,8 +19,8 @@ export default function DanfePage() {
 
         const text = await res.text();
         setXml(text);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Erro ao carregar NFe.");
       } finally {
         setLoading(false);
       }

@@ -30,9 +30,12 @@ interface KPIPorMes {
   ticket_medio: number;
 }
 
-interface FechamentoPendente {
+export interface FechamentoPendente {
   mes: string;
   pendente: boolean;
+  faturamento: number;
+  total_vendas: number;
+  ticket_medio: number;
 }
 
 export function useActiveModules() {

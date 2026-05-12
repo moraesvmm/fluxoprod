@@ -20,7 +20,7 @@ import { useOS, useCreateOS, useDeleteOS, useUpdateOS } from "@/lib/hooks/use-os
 import { useClientes } from "@/lib/hooks/use-clientes";
 import { OSKanbanBoard } from "@/components/modules/os/OSKanbanBoard";
 import { OSDetailsModal } from "@/components/modules/os/OSDetailsModal";
-import { OrdemServico } from "@/lib/api";
+import { type OrdemServico, type OrdemServicoUpdate } from "@/lib/api";
 import { useToast, Toast } from "@/components/ui/toast";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
@@ -92,8 +92,8 @@ export default function OSPage() {
         equipamento_serial: "",
         laudo_tecnico: "",
       });
-    } catch (err: any) {
-      toastError("Erro ao criar OS: " + (err.message || "Tente novamente"));
+    } catch (err: unknown) {
+      toastError("Erro ao criar OS: " + (err instanceof Error ? err.message : "Tente novamente"));
     }
   };
 
@@ -102,7 +102,7 @@ export default function OSPage() {
     try {
       await deleteMutation.mutateAsync(deleteId);
       success("OS excluída com sucesso!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastError("Erro ao excluir OS");
     } finally {
       setDeleteId(null);
@@ -110,7 +110,7 @@ export default function OSPage() {
   };
 
 
-  const abrirEdicao = (ordem: any) => {
+  const abrirEdicao = (ordem: OrdemServico) => {
     setEditId(ordem.id);
     setFormData({
       cliente_id: ordem.cliente_id || '',
@@ -129,7 +129,7 @@ export default function OSPage() {
     if (!editId || !formData.veiculo_equipamento || !formData.cliente_id) return;
 
     try {
-      const payload: any = {
+      const payload: OrdemServicoUpdate = {
         cliente_id: formData.cliente_id,
         veiculo_equipamento: formData.veiculo_equipamento,
         descricao_problema: formData.descricao_problema,
@@ -153,8 +153,8 @@ export default function OSPage() {
       setShowEditModal(false);
       setEditId(null);
       success("OS atualizada com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao atualizar OS: " + (err.message || "Tente novamente"));
+    } catch (err: unknown) {
+      toastError("Erro ao atualizar OS: " + (err instanceof Error ? err.message : "Tente novamente"));
     }
   };
 

@@ -19,7 +19,7 @@ import {
   useUploadDocumento,
   useExcluirDocumento,
 } from "@/lib/hooks/use-documentos-rh";
-import { obterUrlDocumento, type Funcionario } from "@/lib/api";
+import { obterUrlDocumento, type Funcionario, type DocumentoFuncionario } from "@/lib/api";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 
 
@@ -110,9 +110,9 @@ export function DocumentosModal({
           arquivo: file,
         });
         onToast("Documento enviado com sucesso!", "success");
-      } catch (err: any) {
+      } catch (err: unknown) {
         onToast(
-          "Erro no upload: " + (err.message || "Tente novamente."),
+          "Erro no upload: " + (err instanceof Error ? err.message : "Tente novamente."),
           "error"
         );
       }
@@ -134,9 +134,9 @@ export function DocumentosModal({
     try {
       const url = await obterUrlDocumento(docId);
       window.open(url, "_blank");
-    } catch (err: any) {
+    } catch (err: unknown) {
       onToast(
-        "Erro ao abrir documento: " + (err.message || "Tente novamente."),
+        "Erro ao abrir documento: " + (err instanceof Error ? err.message : "Tente novamente."),
         "error"
       );
     } finally {
@@ -149,9 +149,9 @@ export function DocumentosModal({
     try {
       await excluirDoc.mutateAsync(deleteDocId);
       onToast("Documento excluído com sucesso!", "success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       onToast(
-        "Erro ao excluir: " + (err.message || "Tente novamente."),
+        "Erro ao excluir: " + (err instanceof Error ? err.message : "Tente novamente."),
         "error"
       );
     } finally {
@@ -287,7 +287,7 @@ export function DocumentosModal({
                 </div>
               ) : (
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {documentos.map((doc: any) => (
+                  {documentos.map((doc: DocumentoFuncionario) => (
                     <div
                       key={doc.id}
                       className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"

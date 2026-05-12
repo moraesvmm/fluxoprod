@@ -27,7 +27,7 @@ import { EtapasTimeline } from "@/components/modules/obras/EtapasTimeline";
 import { FinanceiroDashboard } from "@/components/modules/obras/FinanceiroDashboard";
 import { RecursosTabela } from "@/components/modules/obras/RecursosTabela";
 import { DocumentosGaleria } from "@/components/modules/obras/DocumentosGaleria";
-import type { Obra, ObraEtapaCreate, ObraEtapaUpdate, ObraCusto, ObraCustoCreate, ObraCustoUpdate, ObraRecurso, ObraRecursoCreate, ObraRecursoUpdate, ObraDocumento } from "@/lib/api";
+import type { Obra, ObraUpdate, ObraEtapaCreate, ObraEtapaUpdate, ObraCusto, ObraCustoCreate, ObraCustoUpdate, ObraRecurso, ObraRecursoCreate, ObraRecursoUpdate, ObraDocumento } from "@/lib/api";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 export default function ObrasPage() {
@@ -113,8 +113,8 @@ export default function ObrasPage() {
         descricao: "",
         status: "planejada",
       });
-    } catch (err: any) {
-      toastError("Erro ao criar Obra: " + (err.message || "Tente novamente"));
+    } catch (err: unknown) {
+      toastError("Erro ao criar Obra: " + (err instanceof Error ? err.message : "Tente novamente"));
     }
   };
 
@@ -123,8 +123,8 @@ export default function ObrasPage() {
     try {
       await deleteMutation.mutateAsync(deleteId);
       success("Obra excluída com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao excluir Obra: " + (err.message || "Tente novamente"));
+    } catch (err: unknown) {
+      toastError("Erro ao excluir Obra: " + (err instanceof Error ? err.message : "Tente novamente"));
     } finally {
       setDeleteId(null);
     }
@@ -153,7 +153,7 @@ export default function ObrasPage() {
   const formatarMoeda = (v?: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
 
-  const abrirEdicao = (obra: any) => {
+  const abrirEdicao = (obra: Obra) => {
     setEditId(obra.id);
     setFormData({
       nome: obra.nome || '',
@@ -163,7 +163,7 @@ export default function ObrasPage() {
       data_fim_prevista: obra.data_fim_prevista || '',
       orcamento: obra.orcamento ? String(obra.orcamento) : '',
       descricao: obra.descricao || '',
-      status: obra.status || 'planejada',
+      status: (obra.status as 'planejada' | 'andamento' | 'concluida' | 'suspensa') || 'planejada',
     });
     setShowEditModal(true);
   };
@@ -183,13 +183,13 @@ export default function ObrasPage() {
     if (!editId || !formData.nome) return;
 
     try {
-      const payload: any = {
+      const payload: ObraUpdate = {
         nome: formData.nome,
         cliente_id: formData.cliente_id || undefined,
         endereco: formData.endereco,
         data_inicio: formData.data_inicio || undefined,
         data_fim_prevista: formData.data_fim_prevista || undefined,
-        orcamento: formData.orcamento ? parseFloat(formData.orcamento) : undefined,
+        orcamento_total: formData.orcamento ? parseFloat(formData.orcamento) : undefined,
         descricao: formData.descricao,
         status: formData.status,
       };
@@ -204,8 +204,8 @@ export default function ObrasPage() {
       setShowEditModal(false);
       setEditId(null);
       success("Obra atualizada com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao atualizar obra: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao atualizar obra: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -214,8 +214,8 @@ export default function ObrasPage() {
     try {
       await createEtapaMutation.mutateAsync(etapa);
       success("Etapa criada com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao criar etapa: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao criar etapa: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -224,8 +224,8 @@ export default function ObrasPage() {
     try {
       await updateEtapaMutation.mutateAsync({ etapaId: etapa.id, etapa });
       success("Etapa atualizada com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao atualizar etapa: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao atualizar etapa: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -233,8 +233,8 @@ export default function ObrasPage() {
     try {
       await deleteEtapaMutation.mutateAsync(etapaId);
       success("Etapa excluída com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao excluir etapa: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao excluir etapa: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -259,8 +259,8 @@ export default function ObrasPage() {
       });
       success('Custo adicionado com sucesso!');
       setShowCustoModal(false);
-    } catch (err: any) {
-      toastError('Erro ao adicionar custo: ' + (err.message || 'Tente novamente.'));
+    } catch (err: unknown) {
+      toastError('Erro ao adicionar custo: ' + (err instanceof Error ? err.message : 'Tente novamente.'));
     }
   };
 
@@ -273,8 +273,8 @@ export default function ObrasPage() {
     try {
       await deleteCustoMutation.mutateAsync(custoId);
       success("Custo excluído com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao excluir custo: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao excluir custo: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -300,8 +300,8 @@ export default function ObrasPage() {
       });
       success('Recurso alocado com sucesso!');
       setShowRecursoModal(false);
-    } catch (err: any) {
-      toastError('Erro ao alocar recurso: ' + (err.message || 'Tente novamente.'));
+    } catch (err: unknown) {
+      toastError('Erro ao alocar recurso: ' + (err instanceof Error ? err.message : 'Tente novamente.'));
     }
   };
 
@@ -314,8 +314,8 @@ export default function ObrasPage() {
     try {
       await deleteRecursoMutation.mutateAsync(recursoId);
       success("Recurso excluído com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao excluir recurso: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao excluir recurso: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -325,8 +325,8 @@ export default function ObrasPage() {
     try {
       await uploadDocumentoMutation.mutateAsync({ file, obraId: selectedObra.id, descricao });
       success("Documento enviado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao enviar documento: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao enviar documento: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -334,8 +334,8 @@ export default function ObrasPage() {
     try {
       await deleteDocumentoMutation.mutateAsync(documentoId);
       success("Documento excluído com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao excluir documento: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao excluir documento: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -788,7 +788,7 @@ export default function ObrasPage() {
             <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'planejada' | 'andamento' | 'concluida' | 'suspensa' })}
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="planejada">Planejada</option>
@@ -832,7 +832,7 @@ export default function ObrasPage() {
             </div>
 
             {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="flex-1 flex flex-col">
               <div className="p-4 border-b border-border">
                 <TabsList className="w-full">
                   <TabsTrigger value="detalhes">Detalhes</TabsTrigger>

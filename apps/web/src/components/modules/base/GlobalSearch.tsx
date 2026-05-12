@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, X, User, Briefcase, ShoppingCart, FileText, Building2, Wrench, DollarSign } from "lucide-react";
+import { Search, X, User, Briefcase, ShoppingCart, FileText, Building2, Wrench, DollarSign, type LucideIcon } from "lucide-react";
 
 interface GlobalSearchProps {
   isOpen: boolean;
@@ -13,7 +13,7 @@ interface SearchResult {
   type: 'cliente' | 'funcionario' | 'produto' | 'venda' | 'obra' | 'os' | 'transacao';
   title: string;
   subtitle: string;
-  icon: any;
+  icon: LucideIcon;
   url: string;
 }
 

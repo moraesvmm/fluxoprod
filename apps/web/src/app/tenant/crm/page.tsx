@@ -19,6 +19,7 @@ import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { sendEmail } from "@/lib/hooks/use-email";
 import { enviarCampanhaMassa } from "@/lib/api";
+import { type Cliente } from "@/lib/api";
 import KanbanPipeline from "@/components/crm/kanban-pipeline";
 import DashboardKPIs from "@/components/crm/dashboard-kpis";
 import GerenciarTags from "@/components/crm/gerenciar-tags";
@@ -114,7 +115,7 @@ export default function CRMPage() {
     }
   };
 
-  const abrirEdicao = (cliente: any) => {
+  const abrirEdicao = (cliente: Cliente) => {
     setEditId(cliente.id);
     setFormData({
       nome: cliente.nome || '',
@@ -137,8 +138,8 @@ export default function CRMPage() {
       setShowEditModal(false);
       setEditId(null);
       success("Cliente atualizado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao atualizar cliente: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao atualizar cliente: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -554,7 +555,7 @@ export default function CRMPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  clientes.map((item: any) => (
+                  clientes.map((item: Cliente) => (
                     <TableRow key={item.id} className="hover:bg-muted/30">
                       <TableCell className="font-medium text-foreground">{item.nome}</TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">{item.cpf_cnpj || '-'}</TableCell>

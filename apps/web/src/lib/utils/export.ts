@@ -1,6 +1,6 @@
 export interface ExportData {
   filename: string;
-  data: any[];
+  data: unknown[];
   columns: { key: string; label: string }[];
 }
 
@@ -10,7 +10,8 @@ export function exportToCSV({ filename, data, columns }: ExportData) {
     const header = columns.map(col => col.label).join(',');
     
     // Criar linhas de dados
-    const rows = data.map(row => {
+    const rows = data.map(rawRow => {
+      const row = rawRow as Record<string, unknown>;
       return columns.map(col => {
         const value = row[col.key] ?? '';
         // Escapar valores com vírgulas

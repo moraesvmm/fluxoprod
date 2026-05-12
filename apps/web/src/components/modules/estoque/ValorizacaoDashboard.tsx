@@ -42,8 +42,8 @@ export default function ValorizacaoDashboard() {
         return rest;
       });
       refetch();
-    } catch (err: any) {
-      toastError("Erro ao atualizar custo: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao atualizar custo: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 

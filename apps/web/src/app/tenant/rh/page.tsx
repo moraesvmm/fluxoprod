@@ -19,7 +19,7 @@ import { useFuncionarios, useCreateFuncionario, useDeleteFuncionario, useUpdateF
 import { useRHConfig, useUpdateRHConfig } from "@/lib/hooks/use-rh-config";
 import { exportToCSV } from "@/lib/utils/export";
 import { DocumentosModal } from "@/components/modules/rh/DocumentosModal";
-import { type Funcionario } from "@/lib/api";
+import { type Funcionario, type FuncionarioCreate, type FuncionarioUpdate } from "@/lib/api";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 
@@ -65,7 +65,7 @@ export default function RHPage() {
     if (!formData.nome.trim() || !formData.cargo.trim()) return;
 
     try {
-      const payload: any = {
+      const payload: FuncionarioCreate = {
         nome: formData.nome,
         cargo: formData.cargo,
       };
@@ -79,8 +79,8 @@ export default function RHPage() {
       setFormData({ nome: '', cargo: '', email: '', telefone: '', salario: '', dia_pagamento: '' });
       setShowModal(false);
       success("Colaborador cadastrado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao cadastrar colaborador: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao cadastrar colaborador: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -89,8 +89,8 @@ export default function RHPage() {
     try {
       await deleteFuncionario.mutateAsync(deleteId);
       success("Colaborador removido com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao remover colaborador: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao remover colaborador: " + (err instanceof Error ? err.message : "Tente novamente."));
     } finally {
       setDeleteId(null);
     }
@@ -114,7 +114,7 @@ export default function RHPage() {
     if (!editId || !formData.nome.trim() || !formData.cargo.trim()) return;
 
     try {
-      const payload: any = {
+      const payload: FuncionarioUpdate = {
         nome: formData.nome,
         cargo: formData.cargo,
       };
@@ -129,8 +129,8 @@ export default function RHPage() {
       setShowEditModal(false);
       setEditId(null);
       success("Colaborador atualizado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao atualizar colaborador: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao atualizar colaborador: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -144,8 +144,8 @@ export default function RHPage() {
       await updateConfig.mutateAsync(dia);
       success("Dia de pagamento configurado com sucesso!");
       setShowConfig(false);
-    } catch (err: any) {
-      toastError("Erro ao salvar configuração: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao salvar configuração: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -153,8 +153,8 @@ export default function RHPage() {
     try {
       await pagarFuncionario.mutateAsync({ id, mes: mesAtual });
       success("Pagamento registrado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao registrar pagamento: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao registrar pagamento: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -162,8 +162,8 @@ export default function RHPage() {
     try {
       await pagarTodos.mutateAsync(mesAtual);
       success("Todos os pagamentos foram registrados com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao registrar pagamentos em lote: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao registrar pagamentos em lote: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -196,8 +196,8 @@ export default function RHPage() {
         ]
       });
       success("Funcionários exportados com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao exportar funcionários: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao exportar funcionários: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 

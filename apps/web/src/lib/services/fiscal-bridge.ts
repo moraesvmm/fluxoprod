@@ -30,7 +30,8 @@ export async function solicitarEmissaoNfe({ vendaId, ambiente }: EmitirNfeParams
     .select('*')
     .single(); // No multi-tenant real, buscar pelo ID da empresa logada
 
-  if (!(empresa as any)?.focusnfe_token_homologacao && !process.env.FISCAL_BRIDGE_URL) {
+  const empresaRecord = empresa as (typeof empresa & { focusnfe_token_homologacao?: string }) | null;
+  if (!empresaRecord?.focusnfe_token_homologacao && !process.env.FISCAL_BRIDGE_URL) {
     // Caso ainda não tenha o micro-serviço, apenas logamos o que aconteceria
     console.log('Simulação de envio para Ponte Fiscal:', { venda, ambiente });
     return { success: true, message: 'Simulação concluída (Aguardando Micro-serviço)' };
@@ -65,6 +66,7 @@ export async function solicitarEmissaoNfe({ vendaId, ambiente }: EmitirNfeParams
           nfe_status: 'emitida',
           nfe_chave: result.chave,
           nfe_xml: result.xml_url
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)
         .eq('id', vendaId);
     }

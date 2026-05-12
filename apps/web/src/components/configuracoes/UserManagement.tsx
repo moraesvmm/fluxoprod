@@ -23,7 +23,7 @@ interface InviteForm {
 const MODULOS_DEFAULTS = ['dashboard', 'crm', 'catalogo', 'estoque', 'vendas', 'financeiro', 'rh', 'os', 'obras', 'comissoes', 'relatorios'];
 
 export function UserManagement() {
-  const { data: teamData, isLoading, refetch } = useTeam() as any;
+  const { data: teamData, isLoading, refetch } = useTeam();
   const createMutation = useCreateTeamMember();
   const removeMutation = useRemoveTeamMember();
   const roleMutation = useUpdateTeamMemberRole();
@@ -53,8 +53,8 @@ export function UserManagement() {
 
   if (callerRole !== 'tenant_admin') return null;
 
-  const members: TeamMember[] = Array.isArray(teamData) ? teamData : (teamData?.data ?? []);
-  const meta = teamData?.meta ?? { usuarios_ativos: members.length, limite: 3, pode_criar: true };
+  const members: TeamMember[] = Array.isArray(teamData) ? teamData : [];
+  const meta = { usuarios_ativos: members.length, limite: 3, pode_criar: members.length < 3 };
 
   const toggleModuloInvite = (key: string) => {
     if (key === 'dashboard') return;
@@ -77,8 +77,8 @@ export function UserManagement() {
       setShowInvite(false);
       setForm({ nome: '', email: '', password: '', modulos_permitidos: ['dashboard'] });
       refetch();
-    } catch (err: any) {
-      toastError(err.message);
+    } catch (err: unknown) {
+      toastError(err instanceof Error ? err.message : 'Erro ao convidar usuário.');
     }
   };
 
@@ -88,8 +88,8 @@ export function UserManagement() {
       success(`${member.nome} foi removido da equipe.`);
       setConfirmRemove(null);
       refetch();
-    } catch (err: any) {
-      toastError(err.message);
+    } catch (err: unknown) {
+      toastError(err instanceof Error ? err.message : 'Erro ao remover usuário.');
     }
   };
 
@@ -99,8 +99,8 @@ export function UserManagement() {
       await roleMutation.mutateAsync({ userId: member.user_id, role: newRole });
       success(`${member.nome} agora é ${newRole === 'tenant_admin' ? 'Administrador' : 'Usuário'}.`);
       refetch();
-    } catch (err: any) {
-      toastError(err.message);
+    } catch (err: unknown) {
+      toastError(err instanceof Error ? err.message : 'Erro ao alterar papel.');
     }
   };
 

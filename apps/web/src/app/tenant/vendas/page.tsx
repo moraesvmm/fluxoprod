@@ -19,6 +19,7 @@ import { useToast, Toast } from "@/components/ui/toast";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { FiscalGuide } from "@/components/modules/fiscal/FiscalGuide";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
+import { type Venda } from "@/lib/api";
 
 export default function VendasPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,7 +31,7 @@ export default function VendasPage() {
   const cancelMutation = useCancelVenda();
   const [cancelId, setCancelId] = useState<string | null>(null);
 
-  const imprimirRecibo = (venda: any) => {
+  const imprimirRecibo = (venda: Venda) => {
     const conteudo = `
       FLUXO ERP - RECIBO DE VENDA
       ---------------------------
@@ -210,7 +211,7 @@ export default function VendasPage() {
                     {formatarValor(item.valor)}
                   </TableCell>
                   <TableCell>
-                    <StatusBadge status={item.status as any} />
+                    <StatusBadge status={item.status === 'concluido' ? 'success' : item.status === 'cancelado' ? 'error' : 'warning'} label={item.status} className="capitalize" />
                   </TableCell>
                   <TableCell>
                     <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${

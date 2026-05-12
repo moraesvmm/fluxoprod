@@ -3,12 +3,34 @@
  * Responsavel por gerar o XML da NFe 4.00 baseado nos dados do ERP.
  */
 
+interface VendaItem {
+  produto_id: string
+  quantidade: number
+  preco_unitario: number
+  subtotal?: number | null
+  produtos?: {
+    nome?: string | null
+    ncm?: string | null
+    cfop_padrao?: string | null
+    origem?: number | null
+  }
+}
+
+interface VendaFiscalInput {
+  vendas_itens?: VendaItem[]
+  itens?: VendaItem[]
+  desconto_aplicado?: number | null
+  metodo_pagamento?: string | null
+  metodo?: string | null
+  id?: string
+}
+
 export class NfeXmlBuilder {
   /**
    * Gera o XML completo da NFe (sem assinatura)
    */
   static build(
-    venda: any,
+    venda: VendaFiscalInput,
     emitente: {
       cnpj?: string
       razao_social: string
@@ -36,7 +58,7 @@ export class NfeXmlBuilder {
     const natOp = opts?.natOp || 'Venda de Mercadoria'
     const codigoMunicipio = String(emitente.codigo_municipio_ibge || '').replace(/\D/g, '')
     const nomeMunicipio = emitente.cidade || ''
-    const itens: any[] = Array.isArray(venda?.vendas_itens)
+    const itens: VendaItem[] = Array.isArray(venda?.vendas_itens)
       ? venda.vendas_itens
       : Array.isArray(venda?.itens)
         ? venda.itens
@@ -155,7 +177,7 @@ export class NfeXmlBuilder {
   }
 
   private static gerarChaveAcessoSemDV(
-    venda: any,
+    venda: VendaFiscalInput,
     emitente: {
       cnpj?: string
       uf?: string

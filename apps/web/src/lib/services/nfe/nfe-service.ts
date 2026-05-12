@@ -4,6 +4,7 @@
  */
 
 import { XMLParser } from 'fast-xml-parser'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { CertificateManager } from './certificate-manager'
 import { NfeSigner } from './nfe-signer'
@@ -21,7 +22,8 @@ export interface NfeEmissionResult {
 }
 
 interface NfeEmitirArgs {
-  admin: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: SupabaseClient<any>
   tenantSchema: string
   empresa: {
     id: string
@@ -149,7 +151,7 @@ export class NfeService {
       throw new Error(`Falha ao carregar itens da venda: ${itensError.message}`)
     }
 
-    const produtoIds = Array.from(new Set((itens || []).map((item: any) => item.produto_id).filter(Boolean)))
+    const produtoIds = Array.from(new Set((itens || []).map((item: { produto_id: string }) => item.produto_id).filter(Boolean)))
     const { data: produtos, error: produtosError } = produtoIds.length
       ? await tenant
           .from('produtos')
@@ -161,7 +163,7 @@ export class NfeService {
       throw new Error(`Falha ao carregar produtos da venda: ${produtosError.message}`)
     }
 
-    const produtoMap = new Map((produtos || []).map((produto: any) => [produto.id, produto]))
+    const produtoMap = new Map((produtos || []).map((produto: { id: string; nome: string; ncm?: string | null; cfop_padrao?: string | null; origem?: number | null }) => [produto.id, produto]))
 
     let cliente: VendaFiscal['clientes'] = null
     if (venda.cliente_id) {
@@ -182,7 +184,7 @@ export class NfeService {
       ...venda,
       valor_total: Number(venda.valor_total || 0),
       desconto_aplicado: Number(venda.desconto_aplicado || 0),
-      vendas_itens: (itens || []).map((item: any) => ({
+      vendas_itens: (itens || []).map((item: { produto_id: string; quantidade: number; preco_unitario: number; subtotal?: number | null }) => ({
         ...item,
         quantidade: Number(item.quantidade || 0),
         preco_unitario: Number(item.preco_unitario || 0),
@@ -247,7 +249,7 @@ export class NfeService {
     }
   }
 
-  private static async updateVenda(admin: any, tenantSchema: string, vendaId: string, payload: Record<string, any>) {
+  private static async updateVenda(admin: SupabaseClient<any>, tenantSchema: string, vendaId: string, payload: Record<string, unknown>) {
     const { error } = await admin.schema(tenantSchema).from('vendas').update(payload).eq('id', vendaId)
     if (error) {
       throw new Error(`Falha ao atualizar status fiscal da venda: ${error.message}`)
@@ -353,19 +355,20 @@ export class NfeService {
         xmlUrl: filePath,
         xml: xmlSigned,
       }
-    } catch (error: any) {
-      console.error('Falha na emissão da NFe:', error.message)
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Erro desconhecido na emissão'
+      console.error('Falha na emissão da NFe:', errMsg)
 
       try {
         await this.updateVenda(admin, tenantSchema, vendaId, {
           nfe_status: 'erro',
-          nfe_erro: error.message,
+          nfe_erro: errMsg,
         })
       } catch {}
 
       return {
         success: false,
-        error: error.message,
+        error: errMsg,
       }
     }
   }

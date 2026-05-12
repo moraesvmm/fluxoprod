@@ -28,6 +28,7 @@ interface Transacao {
   categoria?: string;
   status: string;
   criado_em: string;
+  data_vencimento?: string;
 }
 
 export default function FinanceiroPage() {
@@ -80,7 +81,7 @@ export default function FinanceiroPage() {
       });
       setShowForm(false);
       success("Transação criada com sucesso!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro ao criar transação:", err);
       toastError("Erro ao criar transação.");
     }
@@ -91,7 +92,7 @@ export default function FinanceiroPage() {
     try {
       await deleteFinanceiro.mutateAsync(deleteId);
       success("Transação excluída com sucesso!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro ao excluir transação:", err);
       toastError("Erro ao excluir transação.");
     } finally {
@@ -99,7 +100,7 @@ export default function FinanceiroPage() {
     }
   };
 
-  const abrirEdicao = (transacao: any) => {
+  const abrirEdicao = (transacao: Transacao) => {
     setEditId(transacao.id);
     setFormData({
       descricao: transacao.descricao,
@@ -112,7 +113,7 @@ export default function FinanceiroPage() {
     setShowEditModal(true);
   };
 
-  const abrirDetalhes = (transacao: any) => {
+  const abrirDetalhes = (transacao: Transacao) => {
     setSelectedTransacao(transacao);
     setShowDetailModal(true);
   };
@@ -144,7 +145,7 @@ export default function FinanceiroPage() {
       setShowEditModal(false);
       setEditId(null);
       success("Transação atualizada com sucesso!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro ao atualizar transação:", err);
       toastError("Erro ao atualizar transação.");
     }

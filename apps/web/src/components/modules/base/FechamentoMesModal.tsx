@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { CheckCircle, TrendingUp, ShoppingBag, Banknote } from "lucide-react";
 import { useFechamentoPendente } from "@/lib/hooks/use-dashboard";
+import { type FechamentoPendente } from "@/lib/hooks/use-dashboard";
 // import confetti from "canvas-confetti";
 
 export function FechamentoMesModal() {
   const { data, isLoading, marcarVisto, isMarking } = useFechamentoPendente();
   const [isOpen, setIsOpen] = useState(false);
-  const fechamentoData = data as any;
+  const fechamentoData = data as FechamentoPendente | null | undefined;
 
   useEffect(() => {
     if (!isLoading && fechamentoData?.pendente) {

@@ -107,9 +107,9 @@ export default function ConfiguracoesPage() {
           codigo_municipio_ibge: config.codigo_municipio_ibge || "",
           nfe_certificado_senha: "",
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!cancelled) {
-          toastError("Erro ao carregar configuração fiscal: " + err.message);
+          toastError("Erro ao carregar configuração fiscal: " + (err instanceof Error ? err.message : "Tente novamente."));
         }
       } finally {
         if (!cancelled) {
@@ -148,8 +148,8 @@ export default function ConfiguracoesPage() {
         },
       });
       success("Configurações gerais salvas com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao salvar configurações: " + err.message);
+    } catch (err: unknown) {
+      toastError("Erro ao salvar configurações: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -176,8 +176,8 @@ export default function ConfiguracoesPage() {
         nfe_certificado_senha: "",
       }));
       success("Configurações fiscais salvas com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao salvar configurações fiscais: " + err.message);
+    } catch (err: unknown) {
+      toastError("Erro ao salvar configurações fiscais: " + (err instanceof Error ? err.message : "Tente novamente."));
     } finally {
       setFiscalSaving(false);
     }
@@ -205,8 +205,8 @@ export default function ConfiguracoesPage() {
         current ? { ...current, certificado_configurado: true } : current
       );
       success("Certificado enviado com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao enviar certificado: " + err.message);
+    } catch (err: unknown) {
+      toastError("Erro ao enviar certificado: " + (err instanceof Error ? err.message : "Tente novamente."));
     } finally {
       setCertificateUploading(false);
     }

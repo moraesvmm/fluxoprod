@@ -86,8 +86,8 @@ export default function ComissoesPage() {
       setFormData({ colaborador_id: "", tipo_calculo: "percentual", valor: "" });
       setShowModal(false);
       success("Regra de comissão criada com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao criar regra: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao criar regra: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 
@@ -97,8 +97,8 @@ export default function ComissoesPage() {
     try {
       await deleteRegra.mutateAsync(deleteRegraId);
       success("Regra excluída com sucesso!");
-    } catch (err: any) {
-      toastError("Erro ao excluir regra: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao excluir regra: " + (err instanceof Error ? err.message : "Tente novamente."));
     } finally {
       setDeleteRegraId(null);
     }
@@ -114,8 +114,8 @@ export default function ComissoesPage() {
         },
       });
       success("Comissão marcada como paga!");
-    } catch (err: any) {
-      toastError("Erro ao atualizar comissão: " + (err.message || "Tente novamente."));
+    } catch (err: unknown) {
+      toastError("Erro ao atualizar comissão: " + (err instanceof Error ? err.message : "Tente novamente."));
     }
   };
 

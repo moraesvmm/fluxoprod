@@ -49,7 +49,7 @@ export function useUpdateCliente() {
 export function useImportClientes() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (clientes: any[]) => importarClientesLote(clientes),
+    mutationFn: (clientes: ClienteCreate[]) => importarClientesLote(clientes),
     onSuccess: () => qc.invalidateQueries({ queryKey: CLIENTES_KEY }),
   });
 }

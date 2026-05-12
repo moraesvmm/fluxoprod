@@ -35,8 +35,8 @@ export class NfeSigner {
       });
 
       return sig.getSignedXml();
-    } catch (error: any) {
-      console.error('Erro na assinatura XML:', error.message);
+    } catch (error: unknown) {
+      console.error('Erro na assinatura XML:', error instanceof Error ? error.message : error);
       throw new Error('Falha ao assinar digitalmente o XML da NFe.');
     }
   }
