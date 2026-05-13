@@ -2,6 +2,8 @@
 
 > [!IMPORTANT]
 > **Regra obrigatória (banco → tipos):** sempre que o banco de dados PostgreSQL/Supabase for alterado (migrações, SQL Editor, CLI, policies, views, RPCs, colunas, índices ou qualquer outro objeto), é **obrigatório** regenerar `apps/web/src/types/database.types.ts` com o comando oficial `supabase gen types typescript` do projeto (credenciais só em variável de ambiente local). Revisar o diff; se houver mudança de contrato, **commitar** o arquivo atualizado junto da alteração. O comando concreto está na seção **Sincronização de Tipos** abaixo.
+>
+> **Alinhamento SQL completo (`public`):** fluxo operacional (gerador + scripts de verificação no SQL Editor) em [`docs/SQL_ALINHAMENTO_COMPLETO.md`](SQL_ALINHAMENTO_COMPLETO.md).
 
 -- Status: Vistoria 63 Implementada - Gestão de Equipe Multi-Tenant --
 ## ESTADO ATUAL: PRODUCTION-READY (QUALIFICADO)

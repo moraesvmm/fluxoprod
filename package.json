@@ -6,6 +6,7 @@
     "whatsapp-service"
   ],
   "scripts": {
+    "sql:verify-gen": "node scripts/generate-verify-sql-from-types.mjs",
     "build": "npm run build --workspaces --if-present",
     "dev": "npm run dev -w apps/web",
     "start": "npm run start -w apps/web",

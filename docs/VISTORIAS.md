@@ -1,5 +1,7 @@
 > [!IMPORTANT]
 > **Regra global (banco → tipos):** sempre que o banco de dados for alterado (incluindo SQL aplicado no Supabase ou migrações em `apps/api/migrations/`), é **obrigatório** regenerar `apps/web/src/types/database.types.ts` com `supabase gen types typescript` do projeto e tratar o diff conforme [`DOCUMENTACAO_TECNICA.md`](DOCUMENTACAO_TECNICA.md) (regra no topo + seção de sincronização de tipos).
+>
+> **Alinhamento SQL `public` (tabelas/views/RPCs + índices curados):** ver [`SQL_ALINHAMENTO_COMPLETO.md`](SQL_ALINHAMENTO_COMPLETO.md) e `npm run sql:verify-gen` na raiz.
 
 ---
 
@@ -45,10 +47,11 @@ Rodada validada pelo operador: **16/19** com `present_in_db = true`. **Ausentes 
 **Nota (42703):** `public.user_profiles` não tem coluna `id` — o índice parcial deve usar **`user_id`** (corrigido no hotfix e em `add_soft_delete_all_entities.sql`).
 
 ### Checklist SQL mínimo (produção Supabase)
-1. **Verificação (read-only):** rodar `apps/api/migrations/verify_public_indexes_from_migrations.sql` no SQL Editor e confirmar `present_in_db = true` para todas as linhas (compara migrações `public` vs catálogo live).
-2. `apps/api/migrations/fix_indexes_checkout_webhook.sql` (inclui `idx_checkout_vendas_ext_tx`, `idx_webhook_audit_log_ext_tx`, `idx_webhook_audit_log_status`, `idx_webhook_audit_log_ts`).
-3. `apps/api/migrations/rpc_comissoes_regras.sql`.
-4. Demais arquivos em `apps/api/migrations/` já citados em vistorias anteriores (OS assistência, relatórios, etc.) conforme necessidade do tenant.
+1. **Gerador (contrato `public` a partir dos tipos):** na raiz, `npm run sql:verify-gen` — atualiza `verify_public_tables_*`, `verify_public_views_*`, `verify_public_functions_*`.
+2. **Verificação (read-only):** rodar no SQL Editor, em ordem, os arquivos gerados + `verify_public_indexes_from_migrations.sql` — ver [`docs/SQL_ALINHAMENTO_COMPLETO.md`](SQL_ALINHAMENTO_COMPLETO.md); todas as linhas devem estar `present_in_db = true`.
+3. `apps/api/migrations/fix_indexes_checkout_webhook.sql` (inclui `idx_checkout_vendas_ext_tx`, `idx_webhook_audit_log_ext_tx`, `idx_webhook_audit_log_status`, `idx_webhook_audit_log_ts`).
+4. `apps/api/migrations/rpc_comissoes_regras.sql`.
+5. Demais arquivos em `apps/api/migrations/` já citados em vistorias anteriores (OS assistência, relatórios, etc.) conforme necessidade do tenant.
 
 ### Encerramento das entradas “pendente de vistoria” 71–76
 As vistorias **71 a 76** permanecem no arquivo como **registro histórico de alterações**. A validação integrada desta rodada as **substitui como fila ativa**: não é necessário reabrir vistoria separada para cada uma, desde que o checklist SQL e `PENDENCIAS.md` sejam endereçados nas próximas janelas de manutenção.
