@@ -5,16 +5,7 @@ import { Sparkles, MessageCircle, Check, ArrowRight, Clock, ShoppingBag, X } fro
 import { obterSugestoesNurturing, finalizarAlertaNurturing } from '@/lib/api';
 import { useToast, Toast } from '@/components/ui/toast';
 
-interface Sugestao {
-  id: string | null;
-  tipo: 'RECOMPRA' | 'RECUPERACAO' | 'ANIVERSARIO';
-  categoria: 'recompra' | 'recuperacao';
-  produto_servico: string | null;
-  data_alerta: string;
-  mensagem_sugerida: string;
-  cliente_nome: string;
-  cliente_telefone: string;
-}
+import type { NurturingSuggestion as Sugestao } from '@/lib/api';
 
 export function NurturingPanel() {
   const [sugestoes, setSugestoes] = useState<Sugestao[]>([]);

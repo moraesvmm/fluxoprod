@@ -4,6 +4,51 @@ export { createClient as getSupabase };
 
 export const getSupabaseStrict = () => createClient() as import('@supabase/supabase-js').SupabaseClient<Database>;
 
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
+type JsonObject = { [key: string]: JsonValue | undefined };
+type UnknownRecord = Record<string, unknown>;
+type RpcMutationResult = { error?: string | null } & UnknownRecord;
+type UntypedSupabaseClient = ReturnType<typeof createClient>;
+
+function asRecord(value: unknown): UnknownRecord | null {
+  if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    return value as UnknownRecord;
+  }
+
+  return null;
+}
+
+function getStringField(value: unknown, key: string): string | undefined {
+  const record = asRecord(value);
+  const field = record?.[key];
+  return typeof field === 'string' ? field : undefined;
+}
+
+function getNumberField(value: unknown, key: string): number | undefined {
+  const record = asRecord(value);
+  const field = record?.[key];
+  return typeof field === 'number' ? field : undefined;
+}
+
+function getArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
+function assertRpcResult(data: unknown): RpcMutationResult {
+  const record = asRecord(data) as RpcMutationResult | null;
+
+  if (record?.error) {
+    throw new Error(record.error);
+  }
+
+  return record ?? {};
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
+}
+
 // ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Types ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
 export interface Venda {
   id: string;
@@ -97,6 +142,17 @@ export interface ClienteListResult {
   next_cursor?: string | null;
 }
 
+export interface NurturingSuggestion {
+  id: string | null;
+  tipo: 'RECOMPRA' | 'RECUPERACAO' | 'ANIVERSARIO';
+  categoria: 'recompra' | 'recuperacao';
+  produto_servico: string | null;
+  data_alerta: string;
+  mensagem_sugerida: string;
+  cliente_nome: string;
+  cliente_telefone: string;
+}
+
 export interface InteracaoCliente {
   id: string;
   cliente_id: string;
@@ -110,7 +166,7 @@ export interface InteracaoCliente {
     produto_descricao?: string;
     valor?: number;
     ciclo_recompra_dias?: number;
-    [key: string]: any;
+    [key: string]: JsonValue | undefined;
   };
   criado_em: string;
   atualizado_em?: string;
@@ -128,7 +184,7 @@ export interface InteracaoClienteCreate {
     produto_descricao?: string;
     valor?: number;
     ciclo_recompra_dias?: number;
-    [key: string]: any;
+    [key: string]: JsonValue | undefined;
   };
 }
 
@@ -171,6 +227,12 @@ export interface Produto {
   preco_base?: number;
   criado_em: string;
 }
+
+export interface ProdutoLookupError {
+  error: string;
+}
+
+export type ProdutoLookupResult = Produto | ProdutoLookupError | null;
 
 export interface ProdutoCreate {
   nome: string;
@@ -353,7 +415,7 @@ export interface OrdemServico {
   valor_orcamento: number;
   equipamento_serial?: string;
   laudo_tecnico?: string;
-  checklist_entrada?: any;
+  checklist_entrada?: JsonValue;
   tempo_total_minutos?: number;
   timer_iniciado_em?: string;
   criado_em: string;
@@ -377,7 +439,7 @@ export interface OrdemServicoCreate {
   valor_orcamento?: number;
   equipamento_serial?: string;
   laudo_tecnico?: string;
-  checklist_entrada?: any;
+  checklist_entrada?: JsonValue;
 }
 
 export interface OrdemServicoUpdate {
@@ -389,7 +451,7 @@ export interface OrdemServicoUpdate {
   valor_orcamento?: number;
   equipamento_serial?: string;
   laudo_tecnico?: string;
-  checklist_entrada?: any;
+  checklist_entrada?: JsonValue;
 }
 
 export interface Obra {
@@ -558,7 +620,7 @@ export interface DocumentoFuncionario {
   tamanho_bytes: number;
   mime_type: string;
   storage_path: string;
-  dados_extraidos?: Record<string, any>;
+  dados_extraidos?: Record<string, JsonValue | undefined>;
   criado_em: string;
 }
 
@@ -682,18 +744,16 @@ export async function updateVenda(id: string, venda: VendaUpdate): Promise<Venda
   throw new Error('AtualizaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de vendas nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o implementada via RPC');
 }
 
-export async function cancelarVenda(id: string): Promise<any> {
+export async function cancelarVenda(id: string): Promise<unknown> {
   // RPC nÃƒÂ£o mapeada no database.types.ts Ã¢â‚¬â€ usar cliente nÃƒÂ£o-tipado
-  const { data, error } = await createClient()
-    .rpc('tenant_cancelar_venda' as any, { p_venda_id: id });
+  const { data, error } = await _untyped().rpc('tenant_cancelar_venda', { p_venda_id: id });
   if (error) throw new Error(error.message);
   return data;
 }
 
-export async function devolverItem(vendaId: string, itemId: string, quantidade: number): Promise<any> {
+export async function devolverItem(vendaId: string, itemId: string, quantidade: number): Promise<unknown> {
   // RPC nÃƒÂ£o mapeada no database.types.ts Ã¢â‚¬â€ usar cliente nÃƒÂ£o-tipado
-  const { data, error } = await createClient()
-    .rpc('tenant_devolver_item' as any, {
+  const { data, error } = await _untyped().rpc('tenant_devolver_item', {
       p_venda_id: vendaId,
       p_venda_item_id: itemId,
       p_quantidade: quantidade
@@ -722,14 +782,12 @@ export async function fetchClientes(params?: ClienteListParams): Promise<Cliente
   if (error) throw new Error(error.message);
 
   // Extrair next_cursor do ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºltimo item
-  const clientes = (data as any[]) || [];
+  type ClienteCursorRow = Cliente & { next_cursor?: string | null };
+  const clientes = getArray<ClienteCursorRow>(data);
   const next_cursor = clientes.length > 0 ? clientes[clientes.length - 1].next_cursor : null;
 
   // Remover next_cursor dos objetos de cliente
-  const clientesLimpos = clientes.map((c: any) => {
-    const { next_cursor: _, ...rest } = c;
-    return rest;
-  });
+  const clientesLimpos = clientes.map(({ next_cursor: _, ...rest }) => rest);
 
   return { data: clientesLimpos, next_cursor };
 }
@@ -746,24 +804,28 @@ export async function createCliente(cliente: ClienteCreate): Promise<Cliente> {
       p_cpf_cnpj: cliente.cpf_cnpj || undefined
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return { id: (data as any)?.cliente_id, ...cliente, criado_em: new Date().toISOString() } as Cliente;
+  const result = assertRpcResult(data);
+  return {
+    id: getStringField(result, 'cliente_id') ?? '',
+    ...cliente,
+    criado_em: new Date().toISOString(),
+  } as Cliente;
 }
 
-export async function importarClientesLote(clientes: any[]): Promise<{ count: number }> {
+export async function importarClientesLote(clientes: ClienteCreate[]): Promise<{ count: number }> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_importar_clientes_lote', {
-      p_clientes: clientes
+      p_clientes: clientes as unknown as JsonValue
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return { count: (data as any)?.count || 0 };
+  const result = assertRpcResult(data);
+  return { count: getNumberField(result, 'count') ?? 0 };
 }
 
-export async function obterSugestoesNurturing() {
+export async function obterSugestoesNurturing(): Promise<NurturingSuggestion[]> {
   const { data, error } = await getSupabaseStrict().rpc('tenant_obter_sugestoes_nurturing');
   if (error) throw new Error(error.message);
-  return data as any[];
+  return getArray<NurturingSuggestion>(data);
 }
 
 export async function finalizarAlertaNurturing(id: string) {
@@ -791,7 +853,7 @@ export async function updateCliente(id: string, cliente: ClienteUpdate): Promise
       p_endereco: cliente.endereco ?? undefined
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown) as Cliente;
 }
 
@@ -806,14 +868,12 @@ export async function fetchInteracoes(params: InteracaoClienteListParams): Promi
   if (error) throw new Error(error.message);
 
   // Extrair next_cursor do ÃƒÆ’Ã‚Âºltimo item
-  const interacoes = (data as any[]) || [];
+  type InteracaoCursorRow = InteracaoCliente & { next_cursor?: string | null };
+  const interacoes = getArray<InteracaoCursorRow>(data);
   const next_cursor = interacoes.length > 0 ? interacoes[interacoes.length - 1].next_cursor : null;
 
   // Remover next_cursor dos objetos de interaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
-  const interacoesLimpos = interacoes.map((i: any) => {
-    const { next_cursor: _, ...rest } = i;
-    return rest;
-  });
+  const interacoesLimpos = interacoes.map(({ next_cursor: _, ...rest }) => rest);
 
   return { data: interacoesLimpos, next_cursor };
 }
@@ -831,8 +891,12 @@ export async function createInteracao(interacao: InteracaoClienteCreate): Promis
       p_metadata: interacao.metadata || {}
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return { id: (data as any)?.interacao_id, ...interacao, criado_em: new Date().toISOString() } as InteracaoCliente;
+  const result = assertRpcResult(data);
+  return {
+    id: getStringField(result, 'interacao_id') ?? '',
+    ...interacao,
+    criado_em: new Date().toISOString(),
+  } as InteracaoCliente;
 }
 
 export async function deleteInteracao(id: string): Promise<void> {
@@ -902,8 +966,12 @@ export async function createProduto(produto: ProdutoCreate): Promise<Produto> {
       p_estoque_minimo: produto.estoque_minimo || 10
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return { id: (data as any)?.produto_id, ...produto, criado_em: new Date().toISOString() } as Produto;
+  const result = assertRpcResult(data);
+  return {
+    id: getStringField(result, 'produto_id') ?? '',
+    ...produto,
+    criado_em: new Date().toISOString(),
+  } as Produto;
 }
 
 export async function deleteProduto(id: string): Promise<void> {
@@ -933,7 +1001,7 @@ export async function verificarAlertasEstoque(): Promise<{ success: boolean; ale
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_verificar_alertas_estoque');
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown) as { success: boolean; alertas_criados: number };
 }
 
@@ -945,7 +1013,7 @@ export async function fetchAlertasEstoque(status?: string): Promise<AlertaEstoqu
       p_offset: 0
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown as AlertaEstoque[]) || [];
 }
 
@@ -956,7 +1024,7 @@ export async function resolverAlertaEstoque(alertaId: string, status: string): P
       p_status: status
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 // Kits
@@ -966,10 +1034,10 @@ export async function criarKit(kit: KitCreate): Promise<{ kit_id: string }> {
       p_produto_id: kit.produto_id,
       p_nome: kit.nome,
       p_descricao: kit.descricao || '',
-      p_itens: kit.itens as any
+      p_itens: kit.itens as unknown as JsonValue
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown) as { kit_id: string };
 }
 
@@ -977,7 +1045,7 @@ export async function fetchKits(): Promise<Kit[]> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_kits');
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown as Kit[]) || [];
 }
 
@@ -987,7 +1055,7 @@ export async function excluirKit(kitId: string): Promise<void> {
       p_kit_id: kitId
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 export async function venderKit(kitId: string, quantidade: number = 1): Promise<void> {
@@ -997,7 +1065,7 @@ export async function venderKit(kitId: string, quantidade: number = 1): Promise<
       p_quantidade: quantidade
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 // Locais de Estoque
@@ -1008,15 +1076,15 @@ export async function criarLocalEstoque(local: Omit<LocalEstoque, 'id' | 'ativo'
     p_endereco: local.endereco
   });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return (data as any) as { local_id: string };
+  const result = assertRpcResult(data);
+  return result as { local_id: string };
 }
 
 export async function fetchLocaisEstoque(): Promise<LocalEstoque[]> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_locais_estoque');
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown as LocalEstoque[]) || [];
 }
 
@@ -1026,7 +1094,7 @@ export async function desativarLocalEstoque(localId: string): Promise<void> {
       p_local_id: localId
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 // TransferÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªncias de Estoque
@@ -1040,8 +1108,8 @@ export async function criarTransferencia(transferencia: TransferenciaCreate): Pr
     p_criado_por: transferencia.criado_por
   });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return (data as any) as { transferencia_id: string };
+  const result = assertRpcResult(data);
+  return result as { transferencia_id: string };
 }
 
 export async function fetchTransferencias(status?: string): Promise<TransferenciaEstoque[]> {
@@ -1050,7 +1118,7 @@ export async function fetchTransferencias(status?: string): Promise<Transferenci
       p_status: status
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown as TransferenciaEstoque[]) || [];
 }
 
@@ -1060,7 +1128,7 @@ export async function concluirTransferencia(transferenciaId: string): Promise<vo
       p_transferencia_id: transferenciaId
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 export async function cancelarTransferencia(transferenciaId: string): Promise<void> {
@@ -1069,7 +1137,7 @@ export async function cancelarTransferencia(transferenciaId: string): Promise<vo
       p_transferencia_id: transferenciaId
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 // ValoraÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de Estoque
@@ -1079,7 +1147,7 @@ export async function calcularValorEstoque(metodo: string = 'custo_medio'): Prom
       p_metodo: metodo
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown) as ValorizacaoEstoque;
 }
 
@@ -1091,7 +1159,7 @@ export async function atualizarCustoProduto(produtoId: string, custo: number, me
       p_metodo_valoracao: metodo
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 // CÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³digos de Barras/QR
@@ -1101,18 +1169,18 @@ export async function gerarCodigoBarras(produtoId: string): Promise<CodigoBarras
       p_produto_id: produtoId
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown) as CodigoBarrasResponse;
 }
 
-export async function buscarProdutoPorCodigo(codigo: string): Promise<any> {
+export async function buscarProdutoPorCodigo(codigo: string): Promise<ProdutoLookupResult> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_buscar_produto_por_codigo', {
       p_codigo: codigo
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return data;
+  assertRpcResult(data);
+  return (data as ProdutoLookupResult) ?? null;
 }
 
 // PrevisÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de Demanda
@@ -1124,7 +1192,7 @@ export async function gerarPrevisaoDemanda(produtoId: string, diasAnalise: numbe
       p_dias_previsao: diasPrevisao
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown) as PrevisaoResult;
 }
 
@@ -1144,7 +1212,7 @@ export async function atualizarDemandaReal(previsaoId: string, demandaReal: numb
       p_demanda_real: demandaReal
     });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return data as { success: boolean; precisao: number };
 }
 
@@ -1169,8 +1237,13 @@ export async function createOS(os: OrdemServicoCreate): Promise<OrdemServico> {
     p_checklist_entrada: os.checklist_entrada
   });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return { id: (data as any)?.os_id, ...os, valor_orcamento: os.valor_orcamento || 0, criado_em: new Date().toISOString() } as OrdemServico;
+  const result = assertRpcResult(data);
+  return {
+    id: getStringField(result, 'os_id') ?? '',
+    ...os,
+    valor_orcamento: os.valor_orcamento || 0,
+    criado_em: new Date().toISOString(),
+  } as OrdemServico;
 }
 
 export async function deleteOS(id: string): Promise<void> {
@@ -1230,8 +1303,12 @@ export async function createObra(obra: ObraCreate): Promise<Obra> {
     p_orcamento_total: obra.orcamento || 0
   });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return { id: (data as any)?.obra_id, ...obra, criado_em: new Date().toISOString() } as Obra;
+  const result = assertRpcResult(data);
+  return {
+    id: getStringField(result, 'obra_id') ?? '',
+    ...obra,
+    criado_em: new Date().toISOString(),
+  } as Obra;
 }
 
 export async function deleteObra(id: string): Promise<void> {
@@ -1308,8 +1385,12 @@ export async function createFuncionario(funcionario: FuncionarioCreate): Promise
     p_dia_pagamento: funcionario.dia_pagamento
   });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return { id: (data as any)?.funcionario_id, ...funcionario, criado_em: new Date().toISOString() } as Funcionario;
+  const result = assertRpcResult(data);
+  return {
+    id: getStringField(result, 'funcionario_id') ?? '',
+    ...funcionario,
+    criado_em: new Date().toISOString(),
+  } as Funcionario;
 }
 
 export async function deleteFuncionario(id: string): Promise<void> {
@@ -1322,14 +1403,14 @@ export async function registrarPagamentoRH(funcionarioId: string, mes: string): 
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_registrar_pagamento_rh', { p_funcionario_id: funcionarioId, p_mes: mes });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 export async function registrarPagamentoRHTodos(mes: string): Promise<void> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_registrar_pagamento_rh_todos', { p_mes: mes });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 // DOCUMENTOS RH
@@ -1358,7 +1439,7 @@ export async function listarDocumentosRH(funcionarioId: string): Promise<Documen
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_documentos', { p_funcionario_id: funcionarioId });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return (data as unknown as DocumentoFuncionario[]) || [];
 }
 
@@ -1403,7 +1484,7 @@ export async function atualizarDadosPessoais(funcionarioId: string, dados: Dados
     p_data_admissao: dados.data_admissao,
   });
   if (error) throw new Error(error.message);
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 // FINANCEIRO - RPCs com schema distinto do tipo local - usar _untyped()
@@ -1437,7 +1518,11 @@ export async function createFinanceiro(financeiro: FinanceiroCreate): Promise<Fi
     p_categoria: financeiro.categoria
   });
   if (error) throw new Error(error.message);
-  return { id: (data as any)?.financeiro_id, ...financeiro, criado_em: new Date().toISOString() } as Financeiro;
+  return {
+    id: getStringField(data, 'financeiro_id') ?? '',
+    ...financeiro,
+    criado_em: new Date().toISOString(),
+  } as Financeiro;
 }
 
 export async function deleteFinanceiro(id: string): Promise<void> {
@@ -1472,8 +1557,15 @@ export async function createRegraComissao(regra: RegraComissaoCreate): Promise<R
     if (isMissingRpcError(error.message)) throw new Error('A funcao de regras de comissao ainda nao foi publicada neste ambiente.');
     throw new Error(error.message);
   }
-  if ((data as any)?.error) throw new Error((data as any).error);
-  return { id: (data as any)?.regra_id, colaborador_id: regra.colaborador_id, tipo_calculo: regra.tipo_calculo, valor: regra.valor, ativo: regra.ativo ?? true, criado_em: new Date().toISOString() };
+  const result = assertRpcResult(data);
+  return {
+    id: getStringField(result, 'regra_id') ?? '',
+    colaborador_id: regra.colaborador_id,
+    tipo_calculo: regra.tipo_calculo,
+    valor: regra.valor,
+    ativo: regra.ativo ?? true,
+    criado_em: new Date().toISOString(),
+  };
 }
 
 export async function deleteRegraComissao(regraId: string): Promise<void> {
@@ -1482,7 +1574,7 @@ export async function deleteRegraComissao(regraId: string): Promise<void> {
     if (isMissingRpcError(error.message)) throw new Error('A funcao de regras de comissao ainda nao foi publicada neste ambiente.');
     throw new Error(error.message);
   }
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 export async function updateComissao(id: string, comissao: ComissaoUpdate): Promise<Comissao> {
@@ -1591,7 +1683,11 @@ export async function createObraEtapa(etapa: ObraEtapaCreate): Promise<ObraEtapa
     p_status: etapa.status || 'pendente'
   });
   if (error) throw new Error(error.message);
-  return { id: (data as any)?.etapa_id, ...etapa, criado_em: new Date().toISOString() } as ObraEtapa;
+  return {
+    id: getStringField(data, 'etapa_id') ?? '',
+    ...etapa,
+    criado_em: new Date().toISOString(),
+  } as ObraEtapa;
 }
 
 export async function updateObraEtapa(etapaId: string, etapa: ObraEtapaUpdate): Promise<ObraEtapa> {
@@ -1663,7 +1759,7 @@ export interface ObraResumoFinanceiro {
 }
 
 // Usando escape hatch `as any` para RPCs nÃƒÂ£o mapeadas (Gradual Typing Ã¢â‚¬â€ Fase 3 pendente)
-const _untyped = () => createClient() as any;
+const _untyped = () => createClient() as unknown as UntypedSupabaseClient;
 
 export async function fetchObraCustos(obraId: string): Promise<ObraCusto[]> {
   const { data, error } = await _untyped().rpc('tenant_listar_custos_obra', { p_obra_id: obraId });
@@ -1682,7 +1778,11 @@ export async function createObraCusto(custo: ObraCustoCreate): Promise<ObraCusto
     p_fornecedor_id: custo.fornecedor_id
   });
   if (error) throw new Error(error.message);
-  return { id: (data as any)?.custo_id, ...custo, criado_em: new Date().toISOString() } as ObraCusto;
+  return {
+    id: getStringField(data, 'custo_id') ?? '',
+    ...custo,
+    criado_em: new Date().toISOString(),
+  } as ObraCusto;
 }
 
 export async function updateObraCusto(custoId: string, custo: ObraCustoUpdate): Promise<ObraCusto> {
@@ -1731,7 +1831,11 @@ export async function alocarRecursoObra(recurso: ObraRecursoCreate): Promise<Obr
     p_fornecedor_id: recurso.fornecedor_id
   });
   if (error) throw new Error(error.message);
-  return { id: (data as any)?.recurso_id, ...recurso, criado_em: new Date().toISOString() } as ObraRecurso;
+  return {
+    id: getStringField(data, 'recurso_id') ?? '',
+    ...recurso,
+    criado_em: new Date().toISOString(),
+  } as ObraRecurso;
 }
 
 export async function updateObraRecurso(recursoId: string, recurso: ObraRecursoUpdate): Promise<ObraRecurso> {
@@ -1820,7 +1924,7 @@ export async function uploadObraDocumento(file: File, obraId: string, descricao?
   if (rpcError) throw new Error(rpcError.message);
 
   return {
-    id: (rpcData as any)?.documento_id,
+    id: getStringField(rpcData, 'documento_id') ?? '',
     obra_id: obraId,
     nome: file.name,
     tipo: file.type,
@@ -1841,7 +1945,7 @@ export async function deleteObraDocumento(documentoId: string): Promise<void> {
   if (rpcError) throw new Error(rpcError.message);
 
   // Remover do storage
-  const caminho = (rpcData as any)?.caminho_storage;
+  const caminho = getStringField(rpcData, 'caminho_storage');
   if (caminho) {
     const { error: storageError } = await supabase.storage.from('obras-documentos').remove([caminho]);
     if (storageError) {
@@ -1896,7 +2000,7 @@ export async function listarCuponsAdmin(): Promise<Cupom[]> {
   return (data as unknown) as Cupom[];
 }
 
-export async function criarCupomAdmin(cupom: Partial<Cupom>): Promise<any> {
+export async function criarCupomAdmin(cupom: Partial<Cupom>): Promise<unknown> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc("admin_criar_cupom", {
     p_codigo: cupom.codigo || '',

@@ -1,3 +1,10 @@
+## ⚠️ VISTORIA PENDENTE — Blindagem Gradual: API Core, Webhooks e Rotas Fiscais (Vistoria 76)
+**Data:** 13/05/2026
+**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Motivo:** Concluída nova rodada de blindagem de tipagem alinhada ao `RELATORIO_TIPAGEM_GRADUAL.md`, com foco na camada `apps/web/src/lib/api.ts`, nos webhooks/rotas críticas (`register-trial`, `checkout/upgrade`, `webhook/payment`, `tenant/catalogo/fiscal`, `tenant/fiscal-config`) e na página `mestre`. Removidos `any` operacionais, introduzidos helpers de parsing/erro para RPCs, tipados payloads de webhook e retornos de nurturing/código de barras, e ajustados consumidores de estoque/CRM para respeitar os novos contratos. Validação executada com `tsc --noEmit` em `apps/web` concluída com **zero erros**.
+
+---
+
 ## ⚠️ VISTORIA PENDENTE — Blindagem E2E Batch: Dashboard, Configs, Relatórios, CRM, Catálogo, Loja e DANFE (Vistoria 75)
 **Data:** 12/05/2026
 **Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!

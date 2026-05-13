@@ -5,7 +5,7 @@ import { Barcode, X, CheckCircle, AlertCircle } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { buscarProdutoPorCodigo } from "@/lib/api";
 import { useToast, Toast } from "@/components/ui/toast";
-import type { Produto } from "@/lib/api";
+import type { Produto, ProdutoLookupResult } from "@/lib/api";
 
 type BarcodeDetectorConstructor = new (options?: {
   formats?: string[];
@@ -23,6 +23,10 @@ interface BarcodeScannerProps {
   isOpen: boolean;
   onClose: () => void;
   onProdutoEncontrado?: (produto: Produto) => void;
+}
+
+function isLookupError(result: ProdutoLookupResult): result is { error: string } {
+  return typeof result === "object" && result !== null && "error" in result;
 }
 
 export default function BarcodeScanner({
@@ -153,11 +157,13 @@ export default function BarcodeScanner({
   const handleCodigoDetectado = async (codigo: string) => {
     try {
       const produto = await buscarProdutoPorCodigo(codigo);
-      if (produto && !produto.error) {
+      if (produto && !isLookupError(produto)) {
         setProdutoEncontrado(produto);
         success("Produto encontrado: " + produto.nome);
         stopScanner();
         onProdutoEncontrado?.(produto);
+      } else if (isLookupError(produto)) {
+        toastError(produto.error);
       } else {
         toastError("Produto nao encontrado para o codigo: " + codigo);
       }

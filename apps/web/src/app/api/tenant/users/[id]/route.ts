@@ -38,7 +38,7 @@ export async function DELETE(
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+      { cookies: { getAll: () => cookieStore.getAll(), setAll: () => { } } }
     );
 
     const { data: { user: caller } } = await supabase.auth.getUser();
@@ -93,7 +93,7 @@ export async function PATCH(
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+      { cookies: { getAll: () => cookieStore.getAll(), setAll: () => { } } }
     );
 
     const { data: { user: caller } } = await supabase.auth.getUser();

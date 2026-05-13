@@ -26,6 +26,25 @@ type ProvisionResult = {
   schema_name?: string;
 };
 
+type WebhookPaymentMetadata = {
+  checkoutReference?: string;
+  [key: string]: unknown;
+};
+
+type WebhookPayment = {
+  metadata?: WebhookPaymentMetadata;
+  subscription?: string | null;
+  externalReference?: string | null;
+  id?: string | null;
+  [key: string]: unknown;
+};
+
+type WebhookPayload = {
+  event?: string;
+  payment?: WebhookPayment;
+  [key: string]: unknown;
+};
+
 function isDuplicateUserError(message: string) {
   const normalized = message.toLowerCase();
   return (
@@ -83,10 +102,10 @@ export async function POST(request: Request) {
 
   try {
     const payloadBuffer = await request.text();
-    let body: any;
+    let body: WebhookPayload;
 
     try {
-      body = JSON.parse(payloadBuffer);
+      body = JSON.parse(payloadBuffer) as WebhookPayload;
     } catch {
       return NextResponse.json({ error: "Payload invalido" }, { status: 400 });
     }
@@ -105,17 +124,18 @@ export async function POST(request: Request) {
     const overdueEvents = ["PAYMENT_OVERDUE"];
     const deletedEvents = ["PAYMENT_DELETED"];
 
-    const payment = body.payment || {};
-    const metadata = payment.metadata || {};
+    const event = typeof body.event === "string" ? body.event : "";
+    const payment = body.payment ?? {};
+    const metadata = payment.metadata ?? {};
     const subscriptionId = payment.subscription || null;
     
     // 1. Caso de Atraso ou Deleção de Cobrança
-    if (overdueEvents.includes(body.event) || deletedEvents.includes(body.event)) {
+    if (overdueEvents.includes(event) || deletedEvents.includes(event)) {
       if (subscriptionId) {
         await admin
           .from("empresas")
           .update({ 
-            subscription_status: body.event === "PAYMENT_OVERDUE" ? "OVERDUE" : "INACTIVE",
+            subscription_status: event === "PAYMENT_OVERDUE" ? "OVERDUE" : "INACTIVE",
             atualizado_em: new Date().toISOString() 
           })
           .eq("subscription_id", subscriptionId);
@@ -123,7 +143,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Status de pagamento atualizado" }, { status: 200 });
     }
 
-    if (!successEvents.includes(body.event)) {
+    if (!successEvents.includes(event)) {
       return NextResponse.json({ message: "Evento ignorado" }, { status: 200 });
     }
 
@@ -423,14 +443,14 @@ export async function POST(request: Request) {
         auth_user_id: authUserId,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (createdUserId) {
       await admin.auth.admin.deleteUser(createdUserId).catch(() => undefined);
     }
 
     console.error("Erro catastrofico no webhook:", error);
     return NextResponse.json(
-      { error: "Erro interno do webhook", details: error?.message || null },
+      { error: "Erro interno do webhook", details: error instanceof Error ? error.message : null },
       { status: 500 }
     );
   }

@@ -151,9 +151,9 @@ function ProvisioningWizard() {
       }
 
       setTimeout(() => setStep(4), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setProgressStatus("Provisionamento falhou.");
-      setErrorDetail(err?.message || "Erro inesperado.");
+      setErrorDetail(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {
       setLoading(false);
     }

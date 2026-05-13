@@ -149,10 +149,10 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro no upgrade:", error);
     return NextResponse.json(
-      { error: "Erro interno", details: error?.message },
+      { error: "Erro interno", details: error instanceof Error ? error.message : undefined },
       { status: 500 }
     );
   }

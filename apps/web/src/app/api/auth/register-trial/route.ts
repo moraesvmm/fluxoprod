@@ -195,7 +195,7 @@ export async function POST(request: Request) {
       throw new Error(provisionError.message);
     }
 
-    const provisionResult = (provisionData || {}) as any;
+    const provisionResult = (provisionData ?? {}) as Record<string, unknown>;
     if (provisionResult.status && provisionResult.status !== "success") {
       console.error("Falha no provisionamento técnico:", provisionResult.message);
       return NextResponse.json({ 
@@ -288,7 +288,7 @@ export async function POST(request: Request) {
         auth_user_id: authUserId,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (createdUserId) {
       await admin.auth.admin.deleteUser(createdUserId).catch(() => undefined);
     }
@@ -296,8 +296,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { 
         error: "Erro interno no registro", 
-        details: error?.message || "Erro desconhecido durante o provisionamento",
-        stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+        details: error instanceof Error ? error.message : "Erro desconhecido durante o provisionamento",
+        stack: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined
       },
       { status: 500 }
     );

@@ -5,7 +5,11 @@ import { QrCode, Search, Plus, CheckCircle } from "lucide-react";
 import { useProdutos } from "@/lib/hooks/use-produtos";
 import { useGerarCodigoBarras, useBuscarProdutoPorCodigo } from "@/lib/hooks/use-valoracao";
 import { useToast, Toast } from "@/components/ui/toast";
-import type { Produto } from "@/lib/api";
+import type { Produto, ProdutoLookupResult } from "@/lib/api";
+
+function isLookupError(result: ProdutoLookupResult): result is { error: string } {
+  return typeof result === "object" && result !== null && "error" in result;
+}
 
 // Para scanner fÃƒÂ­sico, integrar com biblioteca html5-qrcode ou react-qr-reader na SessÃƒÂ£o 6 (integraÃƒÂ§ÃƒÂ£o final)
 
@@ -32,12 +36,15 @@ export default function CodigosPanel() {
 
     try {
       const result = await buscarProdutoMutation.mutateAsync(codigoBusca);
-      if (result?.error) {
+      if (isLookupError(result)) {
         toastError(result.error);
         setProdutoEncontrado(null);
-      } else {
+      } else if (result) {
         setProdutoEncontrado(result);
         success("Produto encontrado!");
+      } else {
+        toastError("Produto nao encontrado.");
+        setProdutoEncontrado(null);
       }
     } catch (err: unknown) {
       toastError("Erro ao buscar produto: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
