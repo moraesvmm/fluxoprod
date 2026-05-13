@@ -1,68 +1,92 @@
-# DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
+﻿# DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
 -- Status: Vistoria 63 Implementada - Gestão de Equipe Multi-Tenant --
 ## ESTADO ATUAL: PRODUCTION-READY (QUALIFICADO)
-## ÚLTIMA ATUALIZAÇÃO: 05/05/2026 (Auditoria Gestão de Usuários)
-## VERSÃO: 2.6
+## ÚLTIMA ATUALIZAÇÃO: 13/05/2026 (Blindagem E2E)
+## VERSÃO: 2.7 (Estável - Blindagem E2E)
+
+---
+
+## 🛡️ ARQUITETURA DE TIPAGEM: BLINDAGEM E2E (Vistoria 76)
+
+O Fluxo ERP utiliza uma arquitetura de **Blindagem E2E (End-to-End Typing)** para garantir a estabilidade do sistema e eliminar erros de comunicação entre o Banco de Dados e a Interface. 
+
+### Comparação de Paradigmas
+
+| Característica | Arquitetura Antiga (any) | Arquitetura Atual (E2E Strict) |
+| :--- | :--- | :--- |
+| **Detecção de Erros** | Erros em **Runtime** (o sistema quebra no uso). | Erros em **Compilação** (o build falha antes do deploy). |
+| **Contrato de Dados** | Drift entre Schema DB e Frontend (adivinhação). | database.types.ts como Única Fonte da Verdade. |
+| **Segurança (Safety)** | Acesso direto e inseguro a propriedades. | Guardas de tipo (assertRpcResult, getStringField). |
+| **Refatoração** | Perigosa e dependente de testes manuais. | Segura e guiada pelo compilador TypeScript. |
+| **Automação** | Silenciamento via as any. | Verificação via tsc --noEmit (Zero Erros). |
+
+### Padrões Obrigatórios de Implementação
+1. **getSupabaseStrict()**: Sempre injetar o contrato <Database> nas chamadas.
+2. **Tratamento de Erros**: Usar catch (error: unknown) + instanceof Error.
+3. **Parsing de RPC**: Proibido as any. Usar helpers de extração segura em lib/api.ts.
+4. **Geração de Tipos**: Sincronizar database.types.ts a cada alteração de SQL/Supabase.
+
+---
 
 ---
 
 > [!CAUTION]
-> **🛑 BLINDAGEM DO MÓDULO CRM (REGRA DE OURO)**
-> O módulo de CRM (`apps/web/src/app/tenant/crm/page.tsx` e componentes em `@/components/crm/*`) é o núcleo de inteligência e reengajamento do Fluxo ERP. 
-> **PROIBIDO ALTERAR** a estrutura de RPCs (`tenant_obter_sugestoes_nurturing`, `tenant_criar_cliente`), hooks ou o sistema de Modais sem validação em ambiente multi-tenant diversificado. 
-> **RESTRIÇÃO CRÍTICA**: Qualquer modificação em RPCs de CRM deve manter compatibilidade polimórfica (suporte a retornos `JSONB` e `RECORD`) para evitar quebra de produção em tenants legados.
+> **ðŸ›‘ BLINDAGEM DO MÃ“DULO CRM (REGRA DE OURO)**
+> O mÃ³dulo de CRM (`apps/web/src/app/tenant/crm/page.tsx` e componentes em `@/components/crm/*`) Ã© o nÃºcleo de inteligÃªncia e reengajamento do Fluxo ERP. 
+> **PROIBIDO ALTERAR** a estrutura de RPCs (`tenant_obter_sugestoes_nurturing`, `tenant_criar_cliente`), hooks ou o sistema de Modais sem validaÃ§Ã£o em ambiente multi-tenant diversificado. 
+> **RESTRIÃ‡ÃƒO CRÃTICA**: Qualquer modificaÃ§Ã£o em RPCs de CRM deve manter compatibilidade polimÃ³rfica (suporte a retornos `JSONB` e `RECORD`) para evitar quebra de produÃ§Ã£o em tenants legados.
 
 ---
 
-## 🛡️ POLÍTICA DE EVOLUÇÃO E BLINDAGEM GLOBAL
+## ðŸ›¡ï¸ POLÃTICA DE EVOLUÃ‡ÃƒO E BLINDAGEM GLOBAL
 
-Para garantir a integridade do sistema em caso de rollbacks e evitar quebra de produção por agentes ou manutenções:
+Para garantir a integridade do sistema em caso de rollbacks e evitar quebra de produÃ§Ã£o por agentes ou manutenÃ§Ãµes:
 
-1. **Mudanças Aditivas (Não Destrutivas)**: 
-   - Ao adicionar funcionalidades, priorize a **adição** de novas colunas ou tabelas. 
-   - **PROIBIDO** renomear ou excluir colunas existentes sem um plano de migração de dados de duas etapas (dual-run).
-   - O código antigo deve sempre ser capaz de ignorar novas colunas adicionadas ao banco.
+1. **MudanÃ§as Aditivas (NÃ£o Destrutivas)**: 
+   - Ao adicionar funcionalidades, priorize a **adiÃ§Ã£o** de novas colunas ou tabelas. 
+   - **PROIBIDO** renomear ou excluir colunas existentes sem um plano de migraÃ§Ã£o de dados de duas etapas (dual-run).
+   - O cÃ³digo antigo deve sempre ser capaz de ignorar novas colunas adicionadas ao banco.
 
 2. **Versionamento de RPCs (Modo Seguro)**:
-   - Se uma alteração em uma RPC existente puder quebrar o contrato atual (ex: mudar parâmetros ou tipo de retorno), **NÃO ALTERE** a função original.
-   - Crie uma nova versão da função (ex: `tenant_listar_vendas_v2`).
-   - Mantenha a `v1` funcional até que todos os clientes/componentes tenham migrado para a nova versão.
+   - Se uma alteraÃ§Ã£o em uma RPC existente puder quebrar o contrato atual (ex: mudar parÃ¢metros ou tipo de retorno), **NÃƒO ALTERE** a funÃ§Ã£o original.
+   - Crie uma nova versÃ£o da funÃ§Ã£o (ex: `tenant_listar_vendas_v2`).
+   - Mantenha a `v1` funcional atÃ© que todos os clientes/componentes tenham migrado para a nova versÃ£o.
 
-3. **Independência de Rollback**:
-   - O sistema deve ser projetado para que o rollback de um commit do Frontend (Git) não resulte em falha catastrófica devido ao estado "mais novo" do Banco de Dados.
+3. **IndependÃªncia de Rollback**:
+   - O sistema deve ser projetado para que o rollback de um commit do Frontend (Git) nÃ£o resulte em falha catastrÃ³fica devido ao estado "mais novo" do Banco de Dados.
 
-4. **Sincronização de Tipos (Estático)**:
-   - **Histórico e Sincronização**: Sempre que você alterar o banco de dados por migrações ou pelo Editor SQL do Supabase, basta rodar o seguinte comando (já deixei o binário `supabase.exe` na raiz do seu projeto local para facilitar, dispensando o uso de npx/node global):
+4. **SincronizaÃ§Ã£o de Tipos (EstÃ¡tico)**:
+   - **HistÃ³rico e SincronizaÃ§Ã£o**: Sempre que vocÃª alterar o banco de dados por migraÃ§Ãµes ou pelo Editor SQL do Supabase, basta rodar o seguinte comando (jÃ¡ deixei o binÃ¡rio `supabase.exe` na raiz do seu projeto local para facilitar, dispensando o uso de npx/node global):
      ```powershell
      $env:SUPABASE_ACCESS_TOKEN="SEU_TOKEN_DO_SUPABASE"
      .\supabase.exe gen types typescript --project-id wkxtlvxotvutycbupfuh > apps/web/src/types/database.types.ts
      ```
-   - **CONFORMIDADE OBRIGATÓRIA**: Qualquer alteração de schema, nova tabela, view ou RPC exige a execução imediata deste comando de geração e o commit conjunto do arquivo `database.types.ts` atualizado. Todos os inicializadores de cliente do Supabase no projeto usam estritamente o tipo genérico `<Database>`, forçando o compilador Next.js a barrar qualquer deploy que possua falha de comunicação entre frontend e banco.
+   - **CONFORMIDADE OBRIGATÃ“RIA**: Qualquer alteraÃ§Ã£o de schema, nova tabela, view ou RPC exige a execuÃ§Ã£o imediata deste comando de geraÃ§Ã£o e o commit conjunto do arquivo `database.types.ts` atualizado. Todos os inicializadores de cliente do Supabase no projeto usam estritamente o tipo genÃ©rico `<Database>`, forÃ§ando o compilador Next.js a barrar qualquer deploy que possua falha de comunicaÃ§Ã£o entre frontend e banco.
 
-5. **Política de Testes de Regressão (Bug-First Testing)**:
-   - Toda e qualquer correção de bug realizada por agentes ou humanos **deve** ser acompanhada de um caso de teste correspondente no Vitest (`vitest run`). O teste deve reproduzir a falha e validar que a correção se mantém estável, evitando que um agente futuro reverta a solução.
+5. **PolÃ­tica de Testes de RegressÃ£o (Bug-First Testing)**:
+   - Toda e qualquer correÃ§Ã£o de bug realizada por agentes ou humanos **deve** ser acompanhada de um caso de teste correspondente no Vitest (`vitest run`). O teste deve reproduzir a falha e validar que a correÃ§Ã£o se mantÃ©m estÃ¡vel, evitando que um agente futuro reverta a soluÃ§Ã£o.
 
-6. **Mensagens de Commit Semânticas (Rastreabilidade)**:
-   - Commits de alterações de código devem obrigatoriamente seguir as diretrizes do Conventional Commits (ex: `fix(checkout): adjust coupon counter schema validation`). Isso garante rastreabilidade total via `git log` ou `git blame` para identificar qual agente e qual commit ocasionou qualquer regressão.
-
----
-
-## 📂 GOVERNANÇA DE DOCUMENTAÇÃO (BACKLOG)
-
-Para manter a organização do repositório, utilizamos apenas dois arquivos de planejamento:
-
-1. **[PENDENCIAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PENDENCIAS.md)**: Exclusivo para **alterações de código**, dívidas técnicas, refatorações, correções de bugs e riscos de escalabilidade. Se envolve código existente ou estrutura, fica aqui.
-2. **[MELHORIAS_FUTURAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/MELHORIAS_FUTURAS.md)**: Exclusivo para **novas funcionalidades**, melhorias de UX/UI, expansão de módulos e novas integrações. Se é algo que o sistema ainda não faz, fica aqui.
+6. **Mensagens de Commit SemÃ¢nticas (Rastreabilidade)**:
+   - Commits de alteraÃ§Ãµes de cÃ³digo devem obrigatoriamente seguir as diretrizes do Conventional Commits (ex: `fix(checkout): adjust coupon counter schema validation`). Isso garante rastreabilidade total via `git log` ou `git blame` para identificar qual agente e qual commit ocasionou qualquer regressÃ£o.
 
 ---
 
-## 📋 ESTRUTURA DO SISTEMA
+## ðŸ“‚ GOVERNANÃ‡A DE DOCUMENTAÃ‡ÃƒO (BACKLOG)
 
-### Arquitetura Geral (OPÇÃO A - IMPLEMENTADA)
+Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquivos de planejamento:
+
+1. **[PENDENCIAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PENDENCIAS.md)**: Exclusivo para **alteraÃ§Ãµes de cÃ³digo**, dÃ­vidas tÃ©cnicas, refatoraÃ§Ãµes, correÃ§Ãµes de bugs e riscos de escalabilidade. Se envolve cÃ³digo existente ou estrutura, fica aqui.
+2. **[MELHORIAS_FUTURAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/MELHORIAS_FUTURAS.md)**: Exclusivo para **novas funcionalidades**, melhorias de UX/UI, expansÃ£o de mÃ³dulos e novas integraÃ§Ãµes. Se Ã© algo que o sistema ainda nÃ£o faz, fica aqui.
+
+---
+
+## ðŸ“‹ ESTRUTURA DO SISTEMA
+
+### Arquitetura Geral (OPÃ‡ÃƒO A - IMPLEMENTADA)
 - **Backend**: Supabase (PostgreSQL + RPC) - **FONTE DA VERDADE**
 - **Frontend**: Next.js 16.2.2 (apps/web) - **UI E ORQUESTRADOR**
 - **Database**: Supabase PostgreSQL com multi-tenancy por schema
-- **Backend Python**: **NÃO EXISTE** - deve ser ignorado
+- **Backend Python**: **NÃƒO EXISTE** - deve ser ignorado
 - **Provisionamento**: RPC Functions via Supabase
 - **Tecnologias Frontend**: React 19.2.4, TypeScript 5, TailwindCSS 4, @tanstack/react-query 5.96.2
 
@@ -83,94 +107,94 @@ Estado real consolidado pela Vistoria 17 (22/04/2026):
 - Pendencia alta de aderencia arquitetural: modulos `relatorios` e `comissoes` ainda usam acesso direto a tabelas tenant no browser.
 - Pendencia alta de governanca: parte das RPCs consumidas pelo frontend nao esta consolidada no `apps/api/supabase_rpc.sql`.
 
-✅ **O sistema está PRODUCTION-READY** após as correções críticas de 22/04/2026:
-- **Segurança de Checkout**: Senhas não trafegam mais no gateway e são processadas apenas no backend.
-- **Provisionamento Robusto**: Novo fluxo orquestrado via `/api/webhook/payment` utilizando RPCs atômicas.
-- **Saneamento de Código**: Remoção de acessos diretos a tabelas tenant em `relatorios` e `comissoes`.
-- **Build Estável**: Remoção de dependências de fontes remotas e pacotes ausentes, garantindo `next build` com sucesso.
-- **Soft Delete Global**: Implementado em todas as entidades tenant (coluna `deleted_at` + índices parciais).
-- **Escalabilidade**: Mantido o padrão de LIMIT (1000) e roteamento de schema seguro.
+âœ… **O sistema estÃ¡ PRODUCTION-READY** apÃ³s as correÃ§Ãµes crÃ­ticas de 22/04/2026:
+- **SeguranÃ§a de Checkout**: Senhas nÃ£o trafegam mais no gateway e sÃ£o processadas apenas no backend.
+- **Provisionamento Robusto**: Novo fluxo orquestrado via `/api/webhook/payment` utilizando RPCs atÃ´micas.
+- **Saneamento de CÃ³digo**: RemoÃ§Ã£o de acessos diretos a tabelas tenant em `relatorios` e `comissoes`.
+- **Build EstÃ¡vel**: RemoÃ§Ã£o de dependÃªncias de fontes remotas e pacotes ausentes, garantindo `next build` com sucesso.
+- **Soft Delete Global**: Implementado em todas as entidades tenant (coluna `deleted_at` + Ã­ndices parciais).
+- **Escalabilidade**: Mantido o padrÃ£o de LIMIT (1000) e roteamento de schema seguro.
 
 > [!WARNING]
-> **Ressalva Pendente:** A funcionalidade de gestão de regras de comissão depende da aplicação de `apps/api/migrations/rpc_comissoes_regras.sql` no banco live. Até lá, o módulo opera em modo degradado.
+> **Ressalva Pendente:** A funcionalidade de gestÃ£o de regras de comissÃ£o depende da aplicaÃ§Ã£o de `apps/api/migrations/rpc_comissoes_regras.sql` no banco live. AtÃ© lÃ¡, o mÃ³dulo opera em modo degradado.
 
-### Estratégia Multi-Tenant (OPÇÃO A - IMPLEMENTADA)
+### EstratÃ©gia Multi-Tenant (OPÃ‡ÃƒO A - IMPLEMENTADA)
 - **Isolamento**: Um schema PostgreSQL por tenant (ex: `tenant_empresa_xyz`)
 - **Schema Routing**: RPC `set_tenant_schema()` configura `search_path` baseado em `user_profiles`
 - **Middleware**: Injeta schema via RPC em cada request, valida role e feature flags
-- **RLS**: Policies permissivas (`USING (true)`) pois isolamento é por schema routing
-- **RBAC**: Tabela `role_permissions` com roles `tenant_admin` e `tenant_user` padrão
+- **RLS**: Policies permissivas (`USING (true)`) pois isolamento Ã© por schema routing
+- **RBAC**: Tabela `role_permissions` com roles `tenant_admin` e `tenant_user` padrÃ£o
 
-### Módulo Fiscal (NFe Nativa - OPÇÃO CUSTO ZERO)
+### MÃ³dulo Fiscal (NFe Nativa - OPÃ‡ÃƒO CUSTO ZERO)
 - **Motor**: Node.js Nativo (`node-forge` + `xml-crypto` + `axios`)
-- **Escopo Atual**: Emissão nativa liberada somente para empresas do **Simples Nacional**.
+- **Escopo Atual**: EmissÃ£o nativa liberada somente para empresas do **Simples Nacional**.
 - **Certificado (Multi-tenant)**: Armazenamento isolado em Supabase Storage (`fiscal/{empresa_id}/certificado.pfx`).
-- **Gestão**: Cada empresa realiza o upload de seu próprio certificado e senha via painel de Configurações.
-- **Assinatura**: Padrão XMLDSIG (Sha256) executado server-side via API Route (`/api/fiscal/nfe/emitir`).
-- **Transmissão**: mTLS (Mutual TLS) direto para os Web Services da SEFAZ utilizando o certificado do tenant.
+- **GestÃ£o**: Cada empresa realiza o upload de seu prÃ³prio certificado e senha via painel de ConfiguraÃ§Ãµes.
+- **Assinatura**: PadrÃ£o XMLDSIG (Sha256) executado server-side via API Route (`/api/fiscal/nfe/emitir`).
+- **TransmissÃ£o**: mTLS (Mutual TLS) direto para os Web Services da SEFAZ utilizando o certificado do tenant.
 - **UFs Atendidas no Backend**: `RS`, `SP`, `MG` e estados operados pela `SVRS` (`AC`, `AL`, `AP`, `DF`, `PB`, `PI`, `RJ`, `RN`, `RO`, `RR`, `SC`, `SE`, `TO`).
    - Colunas: id, cliente_id, valor_total, metodo, status, vendedor_id, valor_custo_total (CMV), criado_em, atualizado_em, **deleted_at**
-   - Índices: idx_vendas_valor_total, idx_vendas_cliente, idx_vendas_status, idx_vendas_criado_em, idx_tenant_vendas_not_deleted
+   - Ãndices: idx_vendas_valor_total, idx_vendas_cliente, idx_vendas_status, idx_vendas_criado_em, idx_tenant_vendas_not_deleted
 
 5. **vendas_itens** - Itens de venda
    - Colunas: id, venda_id, produto_id, quantidade, preco_unitario, subtotal, **deleted_at**
 
-6. **financeiro** - Transações financeiras
+6. **financeiro** - TransaÃ§Ãµes financeiras
    - Colunas: id, tipo, descricao, valor, data_vencimento, status, categoria, conciliado (boolean), banco_transacao_id, banco_nome, data_conciliacao, criado_em, atualizado_em, **deleted_at**
-   - Índices: idx_financeiro_tipo, idx_financeiro_status, idx_financeiro_criado_em, idx_financeiro_conciliado, idx_tenant_financeiro_not_deleted
+   - Ãndices: idx_financeiro_tipo, idx_financeiro_status, idx_financeiro_criado_em, idx_financeiro_conciliado, idx_tenant_financeiro_not_deleted
 
-7. **funcionarios** - Funcionários/RH
+7. **funcionarios** - FuncionÃ¡rios/RH
    - Colunas: id, nome, cargo, salario, status, criado_em, atualizado_em, **deleted_at**
-   - Índices: idx_funcionarios_cargo, idx_funcionarios_status, idx_tenant_funcionarios_not_deleted
+   - Ãndices: idx_funcionarios_cargo, idx_funcionarios_status, idx_tenant_funcionarios_not_deleted
 
-8. **ordens_servico** - Ordens de Serviço (OS)
+8. **ordens_servico** - Ordens de ServiÃ§o (OS)
    - Colunas: id, numero (BIGSERIAL), cliente_id, veiculo_equipamento, descricao_problema, colaborador_id, status, valor_orcamento, **tempo_total_minutos** (INTEGER), **timer_iniciado_em** (TIMESTAMPTZ), **valor_servico** (NUMERIC), criado_em, atualizado_em, **deleted_at**
-   - Índices: idx_os_numero, idx_os_cliente, idx_os_status, idx_os_criado_em, idx_tenant_os_not_deleted
+   - Ãndices: idx_os_numero, idx_os_cliente, idx_os_status, idx_os_criado_em, idx_tenant_os_not_deleted
 
-9. **ordens_servico_historico** - Histórico de OS
+9. **ordens_servico_historico** - HistÃ³rico de OS
    - Colunas: id, os_id, acao, detalhes, criado_por, criado_em
 
-10. **ordens_servico_itens** - Peças e Serviços da OS
+10. **ordens_servico_itens** - PeÃ§as e ServiÃ§os da OS
     - Colunas: id, ordem_servico_id, produto_id, descricao, quantidade, preco_unitario, **valor_custo**, subtotal (generated), criado_em
-    - Índices: idx_os_itens_os, idx_os_itens_produto
+    - Ãndices: idx_os_itens_os, idx_os_itens_produto
 
 11. **obras** - Obras/Projetos
     - Colunas: id, nome, cliente_id, endereco, data_inicio, data_fim_prevista, orcamento_total, descricao, status, criado_em, atualizado_em, **deleted_at**
-    - Índices: idx_obras_cliente, idx_obras_status, idx_obras_criado_em, idx_tenant_obras_not_deleted
+    - Ãndices: idx_obras_cliente, idx_obras_status, idx_obras_criado_em, idx_tenant_obras_not_deleted
 
-12. **configuracoes** - Configurações do tenant
+12. **configuracoes** - ConfiguraÃ§Ãµes do tenant
     - Colunas: id, chave, valor, descricao, criado_em, atualizado_em, **deleted_at**
-    - Índices: idx_configuracoes_chave
+    - Ãndices: idx_configuracoes_chave
 
-13. **role_permissions** - Permissões por role (RBAC intra-tenant)
+13. **role_permissions** - PermissÃµes por role (RBAC intra-tenant)
     - Colunas: id, role, resource, action, criado_em
-    - Índices: idx_role_permissions_unique (role, resource, action)
+    - Ãndices: idx_role_permissions_unique (role, resource, action)
     - Dados seed: tenant_admin (all), tenant_user (read-only)
 
 14. **schema_migrations** - Versionamento de schema
     - Colunas: id, version, descricao, aplicado_em
-    - Índices: idx_schema_migrations_version
+    - Ãndices: idx_schema_migrations_version
 
-15. **idempotency_control** - Controle de idempotência
+15. **idempotency_control** - Controle de idempotÃªncia
     - Colunas: id, idempotency_key, operation_type, cached_result, criado_em
-    - Índices: idx_idempotency_key (idempotency_key, operation_type), idx_idempotency_created_at
+    - Ãndices: idx_idempotency_key (idempotency_key, operation_type), idx_idempotency_created_at
 
-16. **audit_log** - Log de auditoria de operações de negócio
+16. **audit_log** - Log de auditoria de operaÃ§Ãµes de negÃ³cio
     - Colunas: id, operation_type, resource, resource_id, user_id, details, status, criado_em
-    - Índices: idx_audit_log_operation, idx_audit_log_resource, idx_audit_log_user, idx_audit_log_timestamp, idx_audit_log_status
+    - Ãndices: idx_audit_log_operation, idx_audit_log_resource, idx_audit_log_user, idx_audit_log_timestamp, idx_audit_log_status
 
 17. **fechamentos_mensais** - Resumos de fechamento mensal do dashboard
     - Colunas: id, mes (VARCHAR(7), UNIQUE), faturamento, total_vendas, ticket_medio, visto, visto_em, criado_em
-    - Índices: idx_fechamentos_mes (mes)
+    - Ãndices: idx_fechamentos_mes (mes)
 
 ### RPCs do Schema Public
 
 #### Provisionamento
 - **provisionar_empresa(p_cnpj, p_razao_social, p_porte, p_segmento, p_modulos)** - Cria tenant completo
-- **set_tenant_schema(p_user_id)** - Configura search_path para o schema do usuário
+- **set_tenant_schema(p_user_id)** - Configura search_path para o schema do usuÃ¡rio
 - **upgrade_all_tenants(p_target_version)** - Aplica migrations em todos os schemas tenant
 
-#### Gestão de Equipe (Multi-Tenant)
+#### GestÃ£o de Equipe (Multi-Tenant)
 - **verificar_limite_usuarios(p_empresa_id)** - Valida limite de assentos baseado no plano
 - **criar_usuario_tenant(p_empresa_id, p_email, p_nome, p_role)** - (OBSOLETO, delegada para API route `create/route.ts`)
 - **remover_usuario_tenant(p_empresa_id, p_user_id)** - Executa soft delete (deleted_at) de um membro
@@ -178,35 +202,35 @@ Estado real consolidado pela Vistoria 17 (22/04/2026):
 
 #### Dashboard
 - **tenant_dashboard_kpis()** - Retorna KPIs agregados (faturamento, vendas, clientes, produtos, OS, obras em andamento, estoque baixo, saldo)
-- **tenant_dashboard_kpis_por_mes(p_meses)** - Retorna série temporal JSONB de faturamento dos últimos N meses (faturamento, total_vendas, ticket_medio por mês)
-- **tenant_obter_fechamento_pendente()** - Detecta fechamento mensal pendente e retorna resumo do mês anterior (faturamento, vendas, ticket médio)
-- **tenant_marcar_fechamento_visto(p_mes)** - Marca o fechamento de um mês como visualizado pelo usuário
-- **tenant_obter_sugestoes_nurturing()** - **Modelo Híbrido**: Detecta inatividade via tabela `vendas` OU via interações de tipo `venda` (CRM-only).
+- **tenant_dashboard_kpis_por_mes(p_meses)** - Retorna sÃ©rie temporal JSONB de faturamento dos Ãºltimos N meses (faturamento, total_vendas, ticket_medio por mÃªs)
+- **tenant_obter_fechamento_pendente()** - Detecta fechamento mensal pendente e retorna resumo do mÃªs anterior (faturamento, vendas, ticket mÃ©dio)
+- **tenant_marcar_fechamento_visto(p_mes)** - Marca o fechamento de um mÃªs como visualizado pelo usuÃ¡rio
+- **tenant_obter_sugestoes_nurturing()** - **Modelo HÃ­brido**: Detecta inatividade via tabela `vendas` OU via interaÃ§Ãµes de tipo `venda` (CRM-only).
 - **tenant_obter_dre(p_data_inicio, p_data_fim)** - Motor de DRE que consolida Faturamento, CMV e Despesas Operacionais em tempo real.
 
-### RPCs do Schema Tenant (Dinâmicas)
+### RPCs do Schema Tenant (DinÃ¢micas)
 
-#### Listagem (todas com LIMIT padrão 1000 e SELECT explícito)
+#### Listagem (todas com LIMIT padrÃ£o 1000 e SELECT explÃ­cito)
 - **tenant_listar_clientes(p_limit, p_offset)** - Lista clientes
 - **tenant_listar_produtos(p_limit, p_offset)** - Lista produtos
 - **tenant_listar_estoque(p_limit, p_offset)** - Lista estoque
 - **tenant_listar_vendas(p_limit, p_offset)** - Lista vendas
-- **tenant_listar_financeiro(p_limit, p_offset)** - Lista transações financeiras
-- **tenant_listar_funcionarios(p_limit, p_offset)** - Lista funcionários
+- **tenant_listar_financeiro(p_limit, p_offset)** - Lista transaÃ§Ãµes financeiras
+- **tenant_listar_funcionarios(p_limit, p_offset)** - Lista funcionÃ¡rios
 - **tenant_listar_ordens_servico(p_limit, p_offset)** - Lista OS
 - **tenant_listar_obras(p_limit, p_offset)** - Lista obras
-- **tenant_listar_comissoes(p_limit, p_offset)** - Lista comissões
+- **tenant_listar_comissoes(p_limit, p_offset)** - Lista comissÃµes
 
-#### Criação (todas com idempotência via p_idempotency_key)
+#### CriaÃ§Ã£o (todas com idempotÃªncia via p_idempotency_key)
 - **tenant_criar_cliente(p_nome, p_telefone, p_email, p_endereco, p_funil_fase, p_status, p_idempotency_key)**
 - **tenant_criar_produto(p_nome, p_descricao, p_tipo, p_preco_base, p_sku, p_qtd_inicial, p_qtd_minima, p_idempotency_key)**
 - **tenant_criar_financeiro(p_tipo, p_descricao, p_valor, p_data_vencimento, p_status, p_categoria, p_idempotency_key)**
 - **tenant_criar_os(p_cliente_id, p_colaborador_id, p_veiculo_equipamento, p_descricao_problema, p_status, p_valor_orcamento, p_idempotency_key)**
 - **tenant_criar_obra(p_cliente_id, p_nome, p_descricao, p_endereco, p_data_inicio, p_data_fim_prevista, p_status, p_orcamento_total, p_idempotency_key)**
 - **tenant_criar_interacao(p_cliente_id, p_tipo, p_titulo, p_descricao, p_data_interacao, p_duracao_minutos, p_usuario_id, p_metadata)** - Suporta tipo 'venda' para CRM-only
-- **tenant_processar_venda(p_cliente_id, p_cliente_nome, p_itens, p_vendedor_id, p_metodo_pagamento, p_valor_total, p_desconto, p_emitir_nfe)** - RPC transacional que automatiza criação de CMV e lançamento financeiro de receita.
+- **tenant_processar_venda(p_cliente_id, p_cliente_nome, p_itens, p_vendedor_id, p_metodo_pagamento, p_valor_total, p_desconto, p_emitir_nfe)** - RPC transacional que automatiza criaÃ§Ã£o de CMV e lanÃ§amento financeiro de receita.
 
-#### Exclusão
+#### ExclusÃ£o
 - **tenant_excluir_cliente(p_cliente_id)**
 - **tenant_excluir_produto(p_produto_id)**
 - **tenant_excluir_financeiro(p_financeiro_id)**
@@ -215,30 +239,30 @@ Estado real consolidado pela Vistoria 17 (22/04/2026):
 
 ---
 
-## 🗂️ ESTRUTURA DO FRONTEND (NEXT.JS)
+## ðŸ—‚ï¸ ESTRUTURA DO FRONTEND (NEXT.JS)
 
 ### apps/web/src/utils/supabase/
 - **client.ts** - Browser client Supabase
 - **server.ts** - Server client Supabase SSR
 
 ### apps/web/src/lib/api.ts
-- **Responsabilidade**: API client central para Supabase (usa RPCs - Opção A)
-- **Funções implementadas**:
-  - fetchVendas() → supabase.rpc('tenant_listar_vendas', { p_limit: 100 })
-  - fetchClientes() → supabase.rpc('tenant_listar_clientes')
-  - createCliente() → supabase.rpc('tenant_criar_cliente')
-  - deleteCliente() → supabase.rpc('tenant_excluir_cliente')
-  - fetchProdutos() → supabase.rpc('tenant_listar_produtos')
-  - createProduto() → supabase.rpc('tenant_criar_produto')
-  - deleteProduto() → supabase.rpc('tenant_excluir_produto')
-  - fetchOS() → supabase.rpc('tenant_listar_ordens_servico')
-  - createOS() → supabase.rpc('tenant_criar_os')
-  - deleteOS() → supabase.rpc('tenant_excluir_os')
-  - fetchObras() → supabase.rpc('tenant_listar_obras')
-  - createObra() → supabase.rpc('tenant_criar_obra')
-  - deleteObra() → supabase.rpc('tenant_excluir_obra')
-  - fetchEmpresa() → supabase.from('empresas').select() (tabela public)
-  - updateEmpresa() → supabase.from('empresas').update() (tabela public)
+- **Responsabilidade**: API client central para Supabase (usa RPCs - OpÃ§Ã£o A)
+- **FunÃ§Ãµes implementadas**:
+  - fetchVendas() â†’ supabase.rpc('tenant_listar_vendas', { p_limit: 100 })
+  - fetchClientes() â†’ supabase.rpc('tenant_listar_clientes')
+  - createCliente() â†’ supabase.rpc('tenant_criar_cliente')
+  - deleteCliente() â†’ supabase.rpc('tenant_excluir_cliente')
+  - fetchProdutos() â†’ supabase.rpc('tenant_listar_produtos')
+  - createProduto() â†’ supabase.rpc('tenant_criar_produto')
+  - deleteProduto() â†’ supabase.rpc('tenant_excluir_produto')
+  - fetchOS() â†’ supabase.rpc('tenant_listar_ordens_servico')
+  - createOS() â†’ supabase.rpc('tenant_criar_os')
+  - deleteOS() â†’ supabase.rpc('tenant_excluir_os')
+  - fetchObras() â†’ supabase.rpc('tenant_listar_obras')
+  - createObra() â†’ supabase.rpc('tenant_criar_obra')
+  - deleteObra() â†’ supabase.rpc('tenant_excluir_obra')
+  - fetchEmpresa() â†’ supabase.from('empresas').select() (tabela public)
+  - updateEmpresa() â†’ supabase.from('empresas').update() (tabela public)
 
 ### apps/web/src/lib/hooks/
 - **use-clientes.ts** - React Query hooks para clientes
@@ -249,22 +273,22 @@ Estado real consolidado pela Vistoria 17 (22/04/2026):
 - **use-dashboard.ts** - Hook para dashboard (chama tenant_dashboard_kpis)
 
 ### apps/web/src/middleware.ts
-- **Responsabilidade**: Middleware Next.js para autenticação, schema routing e feature flags
+- **Responsabilidade**: Middleware Next.js para autenticaÃ§Ã£o, schema routing e feature flags
 - **Funcionalidades**:
   1. Verifica env vars Supabase
-  2. Valida autenticação do usuário via Supabase Auth
-  3. Obtém perfil do usuário (role, empresa_id)
-  4. Configurações do tenant via RPC `set_tenant_schema` (Roteamento de Schema)
-  5. White-listing de módulos core (Dashboard, Configurações) para garantir acesso básico
-  6. Valida acesso à rota baseado em role
+  2. Valida autenticaÃ§Ã£o do usuÃ¡rio via Supabase Auth
+  3. ObtÃ©m perfil do usuÃ¡rio (role, empresa_id)
+  4. ConfiguraÃ§Ãµes do tenant via RPC `set_tenant_schema` (Roteamento de Schema)
+  5. White-listing de mÃ³dulos core (Dashboard, ConfiguraÃ§Ãµes) para garantir acesso bÃ¡sico
+  6. Valida acesso Ã  rota baseado em role
   7. Valida feature flags da empresa
-  8. Redireciona conforme necessário
+  8. Redireciona conforme necessÃ¡rio
 
 ---
 
-## 🔄 FLUXO COMPLETO DA REQUISIÇÃO
+## ðŸ”„ FLUXO COMPLETO DA REQUISIÃ‡ÃƒO
 
-### 1. Usuário Acessa Rota (ex: /tenant/crm)
+### 1. UsuÃ¡rio Acessa Rota (ex: /tenant/crm)
 
 ### 2. Middleware Next.js Intercepta
 
@@ -277,15 +301,15 @@ export async function middleware(request: NextRequest) {
   // 2.2 Cria cliente Supabase SSR
   const supabase = createServerClient(...)
   
-  // 2.3 Obtém usuário autenticado
+  // 2.3 ObtÃ©m usuÃ¡rio autenticado
   const { data: { user } } = await supabase.auth.getUser()
   
-  // 2.4 Se não autenticado, redireciona para /login
+  // 2.4 Se nÃ£o autenticado, redireciona para /login
   if (!user && pathname.startsWith('/tenant')) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
   
-  // 2.5 Obtém perfil do usuário
+  // 2.5 ObtÃ©m perfil do usuÃ¡rio
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('role, empresa_id')
@@ -322,8 +346,8 @@ export default function CRMPage() {
   // 3.1 Usa hook personalizado para buscar dados
   const { data: clientes = [], isLoading } = useClientes()
   
-  // 3.2 Hook React Query chama função API
-  // useClientes() → fetchClientes() → supabase.rpc('tenant_listar_clientes')
+  // 3.2 Hook React Query chama funÃ§Ã£o API
+  // useClientes() â†’ fetchClientes() â†’ supabase.rpc('tenant_listar_clientes')
 }
 ```
 
@@ -339,7 +363,7 @@ export function useClientes() {
 }
 ```
 
-### 5. Função API Chama RPC do Supabase
+### 5. FunÃ§Ã£o API Chama RPC do Supabase
 
 ```typescript
 // apps/web/src/lib/api.ts
@@ -369,7 +393,7 @@ DECLARE
   v_tenant_schema TEXT;
   v_result JSONB;
 BEGIN
-  -- 6.1 Obtém schema do tenant do usuário
+  -- 6.1 ObtÃ©m schema do tenant do usuÃ¡rio
   SELECT schema_name INTO v_tenant_schema
   FROM public.user_profiles up
   JOIN public.empresas e ON e.id = up.empresa_id
@@ -417,14 +441,14 @@ $$;
 ```typescript
 // Fluxo de retorno:
 // PostgreSQL (tenant_62a495e1.clientes)
-// → RPC tenant (tenant_listar_clientes)
-// → RPC public (tenant_listar_clientes)
-// → Supabase API
-// → fetchClientes()
-// → React Query cache
-// → useClientes()
-// → Componente React
-// → Renderização na UI
+// â†’ RPC tenant (tenant_listar_clientes)
+// â†’ RPC public (tenant_listar_clientes)
+// â†’ Supabase API
+// â†’ fetchClientes()
+// â†’ React Query cache
+// â†’ useClientes()
+// â†’ Componente React
+// â†’ RenderizaÃ§Ã£o na UI
 ```
 
 ### 9. Componente Renderiza Dados
@@ -446,79 +470,79 @@ return (
 
 ---
 
-## 🏗️ ARQUITETURA DETALHADA
+## ðŸ—ï¸ ARQUITETURA DETALHADA
 
 ### Frontend (Next.js 16.2.2)
 
 **Estrutura de pastas:**
 ```
 apps/web/src/
-├── app/                    # Rotas Next.js (App Router)
-│   ├── auth/              # Rotas de autenticação
-│   ├── admin/             # Dashboard administrativo
-│   ├── mestre/            # Onboarding de tenants
-│   ├── tenant/            # Dashboard do tenant
-│   │   ├── catalogo/      # Módulo Catálogo
-│   │   ├── crm/           # Módulo CRM
-│   │   ├── vendas/        # Módulo Vendas
-│   │   ├── os/            # Módulo Ordens de Serviço
-│   │   ├── obras/         # Módulo Obras
-│   │   ├── financeiro/    # Módulo Financeiro
-│   │   ├── rh/            # Módulo RH
-│   │   ├── estoque/       # Módulo Estoque
-│   │   ├── comissoes/     # Módulo Comissões
-│   │   ├── relatorios/    # Módulo Relatórios
-│   │   └── configuracoes/ # Módulo Configurações
-│   ├── layout.tsx         # Layout raiz
-│   └── page.tsx           # Landing page
-├── components/            # Componentes React
-│   ├── layout/           # Layouts globais
-│   ├── modules/          # Componentes de módulos
-│   │   └── base/         # Componentes reutilizáveis
-│   │       ├── KPICard.tsx
-│   │       ├── StatusBadge.tsx
-│   │       ├── Calculator.tsx
-│   │       ├── Calendar.tsx
-│   │       ├── GlobalSearch.tsx
-│   │       └── ActionCard.tsx
-│   └── ui/               # Componentes shadcn/ui
-│       ├── Modal.tsx
-│       ├── Table.tsx
-│       ├── Toast.tsx
-│       └── ConfirmModal.tsx
-├── lib/                  # Lógica compartilhada
-│   ├── api.ts            # Interfaces TypeScript
-│   ├── hooks/            # Hooks React Query
-│   └── utils/            # Utilitários
-└── utils/                # Utilitários do Supabase
-    ├── client.ts         # Client browser
-    └── server.ts         # Client SSR
+â”œâ”€â”€ app/                    # Rotas Next.js (App Router)
+â”‚   â”œâ”€â”€ auth/              # Rotas de autenticaÃ§Ã£o
+â”‚   â”œâ”€â”€ admin/             # Dashboard administrativo
+â”‚   â”œâ”€â”€ mestre/            # Onboarding de tenants
+â”‚   â”œâ”€â”€ tenant/            # Dashboard do tenant
+â”‚   â”‚   â”œâ”€â”€ catalogo/      # MÃ³dulo CatÃ¡logo
+â”‚   â”‚   â”œâ”€â”€ crm/           # MÃ³dulo CRM
+â”‚   â”‚   â”œâ”€â”€ vendas/        # MÃ³dulo Vendas
+â”‚   â”‚   â”œâ”€â”€ os/            # MÃ³dulo Ordens de ServiÃ§o
+â”‚   â”‚   â”œâ”€â”€ obras/         # MÃ³dulo Obras
+â”‚   â”‚   â”œâ”€â”€ financeiro/    # MÃ³dulo Financeiro
+â”‚   â”‚   â”œâ”€â”€ rh/            # MÃ³dulo RH
+â”‚   â”‚   â”œâ”€â”€ estoque/       # MÃ³dulo Estoque
+â”‚   â”‚   â”œâ”€â”€ comissoes/     # MÃ³dulo ComissÃµes
+â”‚   â”‚   â”œâ”€â”€ relatorios/    # MÃ³dulo RelatÃ³rios
+â”‚   â”‚   â””â”€â”€ configuracoes/ # MÃ³dulo ConfiguraÃ§Ãµes
+â”‚   â”œâ”€â”€ layout.tsx         # Layout raiz
+â”‚   â””â”€â”€ page.tsx           # Landing page
+â”œâ”€â”€ components/            # Componentes React
+â”‚   â”œâ”€â”€ layout/           # Layouts globais
+â”‚   â”œâ”€â”€ modules/          # Componentes de mÃ³dulos
+â”‚   â”‚   â””â”€â”€ base/         # Componentes reutilizÃ¡veis
+â”‚   â”‚       â”œâ”€â”€ KPICard.tsx
+â”‚   â”‚       â”œâ”€â”€ StatusBadge.tsx
+â”‚   â”‚       â”œâ”€â”€ Calculator.tsx
+â”‚   â”‚       â”œâ”€â”€ Calendar.tsx
+â”‚   â”‚       â”œâ”€â”€ GlobalSearch.tsx
+â”‚   â”‚       â””â”€â”€ ActionCard.tsx
+â”‚   â””â”€â”€ ui/               # Componentes shadcn/ui
+â”‚       â”œâ”€â”€ Modal.tsx
+â”‚       â”œâ”€â”€ Table.tsx
+â”‚       â”œâ”€â”€ Toast.tsx
+â”‚       â””â”€â”€ ConfirmModal.tsx
+â”œâ”€â”€ lib/                  # LÃ³gica compartilhada
+â”‚   â”œâ”€â”€ api.ts            # Interfaces TypeScript
+â”‚   â”œâ”€â”€ hooks/            # Hooks React Query
+â”‚   â””â”€â”€ utils/            # UtilitÃ¡rios
+â””â”€â”€ utils/                # UtilitÃ¡rios do Supabase
+    â”œâ”€â”€ client.ts         # Client browser
+    â””â”€â”€ server.ts         # Client SSR
 ```
 
-**Componentização:**
+**ComponentizaÃ§Ã£o:**
 - **KPICard:** Card para exibir KPIs (faturamento, vendas, etc.)
 - **StatusBadge:** Badge colorido para status (aberta, concluida, etc.)
 - **Calculator:** Calculadora flutuante global
-- **Calendar:** Componente de calendário reutilizável
+- **Calendar:** Componente de calendÃ¡rio reutilizÃ¡vel
 - **GlobalSearch:** Busca global em todo o sistema
-- **ActionCard:** Card com ação principal
-- **Modal:** Modal genérico
+- **ActionCard:** Card com aÃ§Ã£o principal
+- **Modal:** Modal genÃ©rico
 - **Table:** Tabela estilizada
-- **Toast:** Notificações toast
-- **ConfirmModal:** Modal de confirmação
+- **Toast:** NotificaÃ§Ãµes toast
+- **ConfirmModal:** Modal de confirmaÃ§Ã£o
 
 **Hooks Personalizados:**
 - **use-clientes:** CRUD de clientes
 - **use-produtos:** CRUD de produtos
 - **use-vendas:** CRUD de vendas
-- **use-os:** CRUD de ordens de serviço
+- **use-os:** CRUD de ordens de serviÃ§o
 - **use-obras:** CRUD de obras
-- **use-funcionarios:** CRUD de funcionários
-- **use-financeiro:** CRUD de transações financeiras
+- **use-funcionarios:** CRUD de funcionÃ¡rios
+- **use-financeiro:** CRUD de transaÃ§Ãµes financeiras
 - **use-dashboard:** KPIs do dashboard
 - **use-email:** Envio de e-mails via Resend
-- **use-team:** Gestão de equipe e módulos permitidos
-- **use-sidebar-data:** Estrutura e filtragem da navegação lateral
+- **use-team:** GestÃ£o de equipe e mÃ³dulos permitidos
+- **use-sidebar-data:** Estrutura e filtragem da navegaÃ§Ã£o lateral
 
 **Interfaces TypeScript:**
 ```typescript
@@ -549,54 +573,54 @@ export interface ClienteUpdate {
 
 ---
 
-## 🗄️ BANCO DE DADOS DETALHADO
+## ðŸ—„ï¸ BANCO DE DADOS DETALHADO
 
 ### Estrutura de Schemas
 
 **Schema `public` (Global):**
 - `empresas` - Empresas/tenants
-- `modulos_catalogo` - Catálogo de módulos
-- `empresa_modulos` - Módulos ativos por empresa
-- `user_profiles` - Perfis de usuários
+- `modulos_catalogo` - CatÃ¡logo de mÃ³dulos
+- `empresa_modulos` - MÃ³dulos ativos por empresa
+- `user_profiles` - Perfis de usuÃ¡rios
 - `logs_provisionamento` - Logs de provisionamento
-- `v_empresa_modulos` - View para módulos ativos
+- `v_empresa_modulos` - View para mÃ³dulos ativos
 
 **Schema `tenant_*` (Por empresa):**
 - `clientes` - Clientes/CRM
 - `produtos` - Produtos/Estoque
-- `estoque` - Movimentação de estoque
+- `estoque` - MovimentaÃ§Ã£o de estoque
 - `vendas` - Vendas
 - `vendas_itens` - Itens de venda
-- `financeiro` - Transações financeiras
-- `funcionarios` - Funcionários/RH
-- `ordens_servico` - Ordens de Serviço
-- `ordens_servico_historico` - Histórico de OS
+- `financeiro` - TransaÃ§Ãµes financeiras
+- `funcionarios` - FuncionÃ¡rios/RH
+- `ordens_servico` - Ordens de ServiÃ§o
+- `ordens_servico_historico` - HistÃ³rico de OS
 - `obras` - Obras/Projetos
-- `configuracoes` - Configurações do tenant
-- `role_permissions` - Permissões por role
+- `configuracoes` - ConfiguraÃ§Ãµes do tenant
+- `role_permissions` - PermissÃµes por role
 - `schema_migrations` - Versionamento de schema
-- `idempotency_control` - Controle de idempotência
+- `idempotency_control` - Controle de idempotÃªncia
 - `audit_log` - Log de auditoria
 
 ### Relacionamentos
 
 **Clientes:**
-- `vendas.cliente_id` → `clientes.id`
-- `ordens_servico.cliente_id` → `clientes.id`
-- `obras.cliente_id` → `clientes.id`
+- `vendas.cliente_id` â†’ `clientes.id`
+- `ordens_servico.cliente_id` â†’ `clientes.id`
+- `obras.cliente_id` â†’ `clientes.id`
 
 **Produtos:**
-- `vendas_itens.produto_id` → `produtos.id`
-- `estoque.produto_id` → `produtos.id`
+- `vendas_itens.produto_id` â†’ `produtos.id`
+- `estoque.produto_id` â†’ `produtos.id`
 
 **Vendas:**
-- `vendas_itens.venda_id` → `vendas.id`
-- `financeiro.venda_id` → `vendas.id` (opcional)
+- `vendas_itens.venda_id` â†’ `vendas.id`
+- `financeiro.venda_id` â†’ `vendas.id` (opcional)
 
-**Funcionários:**
-- `ordens_servico.colaborador_id` → `funcionarios.id`
+**FuncionÃ¡rios:**
+- `ordens_servico.colaborador_id` â†’ `funcionarios.id`
 
-### Índices Principais
+### Ãndices Principais
 
 **Clientes:**
 - `idx_clientes_telefone` (telefone)
@@ -616,25 +640,25 @@ export interface ClienteUpdate {
 
 ---
 
-## 🔐 SEGURANÇA E AUTENTICAÇÃO
+## ðŸ” SEGURANÃ‡A E AUTENTICAÃ‡ÃƒO
 
 ### Supabase Auth
 
-**Configuração:**
+**ConfiguraÃ§Ã£o:**
 - Email/password authentication
-- JWT tokens para sessões
+- JWT tokens para sessÃµes
 - Row Level Security (RLS) implementado
-- Service role para operações administrativas
+- Service role para operaÃ§Ãµes administrativas
 
-**Middleware de Segurança:**
+**Middleware de SeguranÃ§a:**
 ```typescript
 // apps/web/src/middleware.ts
-// 1. Valida autenticação em todas as rotas protegidas
+// 1. Valida autenticaÃ§Ã£o em todas as rotas protegidas
 if (!user && pathname.startsWith('/tenant')) {
   return NextResponse.redirect(new URL('/login', request.url))
 }
 
-// 2. Valida perfil do usuário
+// 2. Valida perfil do usuÃ¡rio
 if (!profile) {
   return NextResponse.redirect(new URL('/login', request.url))
 }
@@ -677,107 +701,107 @@ $$;
 
 ### Row Level Security (RLS)
 
-**Políticas por schema:**
+**PolÃ­ticas por schema:**
 - RLS habilitado em todas as tabelas de tenant
-- Políticas permissivas (`USING (true)`) pois isolamento é por schema routing
-- Schema routing garante que cada requisição acessa apenas o schema correto
+- PolÃ­ticas permissivas (`USING (true)`) pois isolamento Ã© por schema routing
+- Schema routing garante que cada requisiÃ§Ã£o acessa apenas o schema correto
 
-### Roles e Permissões
+### Roles e PermissÃµes
 
 **Roles globais:**
 - `master`: Acesso total ao sistema, pode criar tenants
 - `tenant_admin`: Acesso administrativo do tenant
-- `tenant_user`: Acesso restrito aos módulos habilitados
+- `tenant_user`: Acesso restrito aos mÃ³dulos habilitados
 
 **RBAC intra-tenant:**
-- Tabela `role_permissions` define permissões por role
-- Padrão: `tenant_admin` tem todas as permissões, `tenant_user` tem apenas leitura
+- Tabela `role_permissions` define permissÃµes por role
+- PadrÃ£o: `tenant_admin` tem todas as permissÃµes, `tenant_user` tem apenas leitura
 
 ---
 
-## 📊 RESPONSABILIDADE DE CADA MÓDULO
+## ðŸ“Š RESPONSABILIDADE DE CADA MÃ“DULO
 
 ### Dashboard
-- **Responsabilidade:** Visão geral do negócio
+- **Responsabilidade:** VisÃ£o geral do negÃ³cio
 - **KPIs:** Faturamento, vendas, clientes, produtos, OS pendentes, estoque baixo, saldo
-- **Gráficos:** Vendas por período, receitas vs despesas
-- **Ações:** Acesso rápido a módulos
+- **GrÃ¡ficos:** Vendas por perÃ­odo, receitas vs despesas
+- **AÃ§Ãµes:** Acesso rÃ¡pido a mÃ³dulos
 
 ### CRM (Clientes)
-- **Responsabilidade:** Gestão de clientes e funil de vendas
-- **Funcionalidades:** CRUD clientes, funil de vendas, histórico
-- **Integrações:** Vendas, OS, Obras
+- **Responsabilidade:** GestÃ£o de clientes e funil de vendas
+- **Funcionalidades:** CRUD clientes, funil de vendas, histÃ³rico
+- **IntegraÃ§Ãµes:** Vendas, OS, Obras
 
 ### Vendas
-- **Responsabilidade:** Gestão de vendas e PDV
-- **Funcionalidades:** PDV, gestão de vendas, relatórios
-- **Integrações:** Clientes, Produtos, Financeiro
+- **Responsabilidade:** GestÃ£o de vendas e PDV
+- **Funcionalidades:** PDV, gestÃ£o de vendas, relatÃ³rios
+- **IntegraÃ§Ãµes:** Clientes, Produtos, Financeiro
 
-### Catálogo (Produtos)
-- **Responsabilidade:** Gestão de catálogo de produtos
-- **Funcionalidades:** CRUD produtos, controle de preços
-- **Integrações:** Vendas, Estoque
+### CatÃ¡logo (Produtos)
+- **Responsabilidade:** GestÃ£o de catÃ¡logo de produtos
+- **Funcionalidades:** CRUD produtos, controle de preÃ§os
+- **IntegraÃ§Ãµes:** Vendas, Estoque
 
 ### Estoque
 - **Responsabilidade:** Controle de estoque
-- **Funcionalidades:** Movimentação, alertas de estoque baixo
-- **Integrações:** Produtos, Vendas
+- **Funcionalidades:** MovimentaÃ§Ã£o, alertas de estoque baixo
+- **IntegraÃ§Ãµes:** Produtos, Vendas
 
-### OS (Ordens de Serviço)
-- **Responsabilidade:** Gestão de ordens de serviço
-- **Funcionalidades:** CRUD OS, status, calendário
-- **Integrações:** Clientes, Funcionários, Financeiro
+### OS (Ordens de ServiÃ§o)
+- **Responsabilidade:** GestÃ£o de ordens de serviÃ§o
+- **Funcionalidades:** CRUD OS, status, calendÃ¡rio
+- **IntegraÃ§Ãµes:** Clientes, FuncionÃ¡rios, Financeiro
 
 ### Obras
-- **Responsabilidade:** Gestão de projetos/obras
-- **Funcionalidades:** CRUD obras, status, calendário
-- **Integrações:** Clientes, Financeiro
+- **Responsabilidade:** GestÃ£o de projetos/obras
+- **Funcionalidades:** CRUD obras, status, calendÃ¡rio
+- **IntegraÃ§Ãµes:** Clientes, Financeiro
 
 ### Financeiro
-- **Responsabilidade:** Gestão financeira
-- **Funcionalidades:** Transações, fluxo de caixa, relatórios
-- **Integrações:** Vendas, OS, Obras
+- **Responsabilidade:** GestÃ£o financeira
+- **Funcionalidades:** TransaÃ§Ãµes, fluxo de caixa, relatÃ³rios
+- **IntegraÃ§Ãµes:** Vendas, OS, Obras
 
 ### RH
-- **Responsabilidade:** Gestão de funcionários
-- **Funcionalidades:** CRUD funcionários, gestão de equipe
-- **Integrações:** OS, Obras, Comissões
+- **Responsabilidade:** GestÃ£o de funcionÃ¡rios
+- **Funcionalidades:** CRUD funcionÃ¡rios, gestÃ£o de equipe
+- **IntegraÃ§Ãµes:** OS, Obras, ComissÃµes
 
-### Comissões
-- **Responsabilidade:** Cálculo de comissões
-- **Funcionalidades:** Regras de comissão, cálculo automático
-- **Integrações:** Vendas, RH
+### ComissÃµes
+- **Responsabilidade:** CÃ¡lculo de comissÃµes
+- **Funcionalidades:** Regras de comissÃ£o, cÃ¡lculo automÃ¡tico
+- **IntegraÃ§Ãµes:** Vendas, RH
 
-### Relatórios
-- **Responsabilidade:** Visão analítica avançada sobre a operação do tenant.
-- **Funcionalidades:** Relatórios Analíticos de Vendas, Performance de Equipe e **DRE Real**.
-- **DRE (Demonstrativo de Resultados):** Consolida Faturamento Bruto, CMV (Custo de Mercadoria), Lucro Bruto, Despesas e Lucro Líquido com cálculo de margens automáticas.
-- **Integrações:** Todos os módulos, com foco em Vendas e Financeiro.
+### RelatÃ³rios
+- **Responsabilidade:** VisÃ£o analÃ­tica avanÃ§ada sobre a operaÃ§Ã£o do tenant.
+- **Funcionalidades:** RelatÃ³rios AnalÃ­ticos de Vendas, Performance de Equipe e **DRE Real**.
+- **DRE (Demonstrativo de Resultados):** Consolida Faturamento Bruto, CMV (Custo de Mercadoria), Lucro Bruto, Despesas e Lucro LÃ­quido com cÃ¡lculo de margens automÃ¡ticas.
+- **IntegraÃ§Ãµes:** Todos os mÃ³dulos, com foco em Vendas e Financeiro.
 
-### Conciliação Bancária (Módulo Financeiro)
+### ConciliaÃ§Ã£o BancÃ¡ria (MÃ³dulo Financeiro)
 - **Responsabilidade:** Auditoria e batimento de saldos reais vs sistema.
 - **Engine de Parse:** `ofx-parser.ts` (interpretador nativo para arquivos OFX).
-- **Auto-matching:** Algoritmo que associa transações bancárias a lançamentos financeiros baseado em valor (margem 0.01) e data.
-- **Rastreabilidade:** Gravação de IDs de transação bancária em cada lançamento conciliado.
+- **Auto-matching:** Algoritmo que associa transaÃ§Ãµes bancÃ¡rias a lanÃ§amentos financeiros baseado em valor (margem 0.01) e data.
+- **Rastreabilidade:** GravaÃ§Ã£o de IDs de transaÃ§Ã£o bancÃ¡ria em cada lanÃ§amento conciliado.
 
-### Configurações
-- **Responsabilidade:** Configurações do tenant
-- **Funcionalidades:** Configurações de módulos, empresa
-- **Integrações:** Sistema global
+### ConfiguraÃ§Ãµes
+- **Responsabilidade:** ConfiguraÃ§Ãµes do tenant
+- **Funcionalidades:** ConfiguraÃ§Ãµes de mÃ³dulos, empresa
+- **IntegraÃ§Ãµes:** Sistema global
 
 ---
 
-## 🚀 DEPLOYMENT E CI/CD
+## ðŸš€ DEPLOYMENT E CI/CD
 
 > [!IMPORTANT]
-> Todas as informações de infraestrutura de deploy, histórico de incidentes e protocolos de atualização foram migrados para o documento mestre:
+> Todas as informaÃ§Ãµes de infraestrutura de deploy, histÃ³rico de incidentes e protocolos de atualizaÃ§Ã£o foram migrados para o documento mestre:
 > **[docs/PLANO_PREVENCAO_DEPLOY.md](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PLANO_PREVENCAO_DEPLOY.md)**
 >
-> Siga o walkthrough lá descrito antes de qualquer alteração estrutural no pipeline.
+> Siga o walkthrough lÃ¡ descrito antes de qualquer alteraÃ§Ã£o estrutural no pipeline.
 
 ---
 
-## 🔐 SEGURANÇA E GOVERNANÇA
+## ðŸ” SEGURANÃ‡A E GOVERNANÃ‡A
 
 ### Schema Routing (IMPLEMENTADO)
 - **RPC**: `set_tenant_schema(p_user_id)` no schema public
@@ -786,49 +810,49 @@ $$;
 - **Header**: x-tenant-schema injetado no response
 
 ### RLS (Row Level Security)
-- **Estratégia**: OPÇÃO A - Isolamento por schema routing
-- **Policies**: Permissivas (USING (true)) pois isolamento é por schema
+- **EstratÃ©gia**: OPÃ‡ÃƒO A - Isolamento por schema routing
+- **Policies**: Permissivas (USING (true)) pois isolamento Ã© por schema
 - **Justificativa**: RLS real seria redundante com schema routing
-- **Documentação**: Comentários inline em supabase_rpc.sql explicando a decisão
+- **DocumentaÃ§Ã£o**: ComentÃ¡rios inline em supabase_rpc.sql explicando a decisÃ£o
 
 ### RBAC Intra-Tenant (IMPLEMENTADO)
 - **Tabela**: role_permissions no schema tenant
-- **Roles padrão**:
-  - tenant_admin: todas as permissões (all)
+- **Roles padrÃ£o**:
+  - tenant_admin: todas as permissÃµes (all)
   - tenant_user: apenas leitura (read)
-- **Permissões**: resource (clientes, produtos, vendas, etc) + action (create, read, update, delete)
-- **RLS**: Policies em role_permissions para proteger permissões
+- **PermissÃµes**: resource (clientes, produtos, vendas, etc) + action (create, read, update, delete)
+- **RLS**: Policies em role_permissions para proteger permissÃµes
 
-### Idempotência (IMPLEMENTADA)
+### IdempotÃªncia (IMPLEMENTADA)
 - **Tabela**: idempotency_control no schema tenant
-- **Parâmetro**: p_idempotency_key em todas as RPCs de escrita
-- **Lógica**:
+- **ParÃ¢metro**: p_idempotency_key em todas as RPCs de escrita
+- **LÃ³gica**:
   1. Verifica se idempotency_key existe para operation_type
   2. Se existe, retorna resultado cacheado
-  3. Se não existe, executa operação, cacheia resultado, retorna
-- **Benefício**: Reenvios de formulário não criam duplicatas
+  3. Se nÃ£o existe, executa operaÃ§Ã£o, cacheia resultado, retorna
+- **BenefÃ­cio**: Reenvios de formulÃ¡rio nÃ£o criam duplicatas
 
 ### Versionamento de Schema (IMPLEMENTADO)
 - **Tabela**: schema_migrations no schema tenant
 - **Colunas**: version, descricao, aplicado_em
-- **Função**: upgrade_all_tenants(p_target_version) no schema public
-- **Lógica**: Aplica migrations sequencialmente em todos os schemas tenant
+- **FunÃ§Ã£o**: upgrade_all_tenants(p_target_version) no schema public
+- **LÃ³gica**: Aplica migrations sequencialmente em todos os schemas tenant
 
 ### Audit Log (IMPLEMENTADO)
 - **Tabela**: audit_log no schema tenant
 - **Colunas**: operation_type, resource, resource_id, user_id, details, status, criado_em
-- **Índices**: operation_type, resource, user, timestamp, status
-- **Uso**: Rastrear operações de negócio para compliance e debugging
+- **Ãndices**: operation_type, resource, user, timestamp, status
+- **Uso**: Rastrear operaÃ§Ãµes de negÃ³cio para compliance e debugging
 
 ---
 
-## 🔄 FLUXOS DE DADOS
+## ðŸ”„ FLUXOS DE DADOS
 
 ### Fluxo 1: Login e Schema Routing
-1. Usuário entra email/senha em login/page.tsx
+1. UsuÃ¡rio entra email/senha em login/page.tsx
 2. Supabase Auth autentica via signInWithPassword()
 3. Frontend busca user_profiles.role
-4. Redirect: master → /admin, tenant → /tenant/dashboard
+4. Redirect: master â†’ /admin, tenant â†’ /tenant/dashboard
 5. Middleware intercepta request
 6. Middleware busca user_profiles.role, empresa_id
 7. Middleware chama set_tenant_schema(p_user_id)
@@ -840,34 +864,34 @@ $$;
 1. Wizard mestre/page.tsx coleta dados da empresa
 2. Gera schema_name baseado no CNPJ
 3. Chama RPC provisionar_empresa_master()
-4. RPC cria schema, tabelas, índices, RLS, policies
+4. RPC cria schema, tabelas, Ã­ndices, RLS, policies
 5. RPC insere dados seed (role_permissions, schema_migrations)
-6. RPC ativa módulos em empresa_modulos
+6. RPC ativa mÃ³dulos em empresa_modulos
 7. Log em logs_provisionamento
 
-### Fluxo 3: Criação de Venda (PDV) - TRANSACIONAL
+### Fluxo 3: CriaÃ§Ã£o de Venda (PDV) - TRANSACIONAL
 1. PDV carrega produtos via tenant_listar_estoque()
-2. Usuário adiciona itens ao carrinho
-3. Usuário finaliza pagamento
+2. UsuÃ¡rio adiciona itens ao carrinho
+3. UsuÃ¡rio finaliza pagamento
 4. Frontend chama RPC tenant_processar_venda()
 5. RPC verifica idempotency_key
-6. RPC busca ou cria cliente dentro da transação
+6. RPC busca ou cria cliente dentro da transaÃ§Ã£o
 7. RPC insere venda
 8. RPC insere itens de venda
-9. RPC atualiza estoque (decremento atômico)
-10. RPC calcula comissão se vendedor selecionado
+9. RPC atualiza estoque (decremento atÃ´mico)
+10. RPC calcula comissÃ£o se vendedor selecionado
 11. RPC registra em audit_log
-12. Tudo em uma transação atômica SQL
+12. Tudo em uma transaÃ§Ã£o atÃ´mica SQL
 13. Frontend recebe resultado e atualiza UI
 
-### Fluxo 4: Feature Flags e Navegação
+### Fluxo 4: Feature Flags e NavegaÃ§Ã£o
 1. Sidebar carrega ao montar
-2. Obtém usuário autenticado
+2. ObtÃ©m usuÃ¡rio autenticado
 3. Busca profile com role e empresa_id
 4. Busca nome da empresa
-5. Busca módulos ativos em v_empresa_modulos
-6. Filtra navegação baseado em módulos ativos
-7. Renderiza apenas links de módulos ativos
+5. Busca mÃ³dulos ativos em v_empresa_modulos
+6. Filtra navegaÃ§Ã£o baseado em mÃ³dulos ativos
+7. Renderiza apenas links de mÃ³dulos ativos
 
 ### Fluxo 5: Dashboard
 1. Dashboard chama useDashboardData()
@@ -878,7 +902,7 @@ $$;
 
 ---
 
-## 📊 ÍNDICES IMPLEMENTADOS
+## ðŸ“Š ÃNDICES IMPLEMENTADOS
 
 ### Schema Public
 - idx_empresas_cnpj (cnpj)
@@ -925,70 +949,70 @@ $$;
 
 ---
 
-## ⚠️ PROBLEMAS IDENTIFICADOS NAS AUDITORIAS 9-12
+## âš ï¸ PROBLEMAS IDENTIFICADOS NAS AUDITORIAS 9-12
 
-### Auditoria 9 - Alinhamento Frontend ⇄ Índices SQL
-**Severidade**: MÉDIA
+### Auditoria 9 - Alinhamento Frontend â‡„ Ãndices SQL
+**Severidade**: MÃ‰DIA
 **Problemas**:
-1. ORDER BY criado_em sem índice em múltiplas tabelas (vendas, financeiro, OS, obras)
-2. ORDER BY nome sem índice em produtos e funcionarios
-3. **CRÍTICO**: PDV acessa tabela produtos diretamente em vez de usar RPC tenant_listar_estoque
+1. ORDER BY criado_em sem Ã­ndice em mÃºltiplas tabelas (vendas, financeiro, OS, obras)
+2. ORDER BY nome sem Ã­ndice em produtos e funcionarios
+3. **CRÃTICO**: PDV acessa tabela produtos diretamente em vez de usar RPC tenant_listar_estoque
 
-**Recomendações**:
+**RecomendaÃ§Ãµes**:
 1. IMEDIATO: Corrigir PDV para usar RPC
-2. CURTO PRAZO: Adicionar índices em criado_em para tabelas de alta volumetria
-3. MÉDIO PRAZO: Adicionar índices em nome para produtos e funcionarios
+2. CURTO PRAZO: Adicionar Ã­ndices em criado_em para tabelas de alta volumetria
+3. MÃ‰DIO PRAZO: Adicionar Ã­ndices em nome para produtos e funcionarios
 
 ### Auditoria 10 - Fluxo de Login, Role e Tenant
 **Severidade**: BAIXA
-**Problemas**: NENHUM - fluxo está robusto
-**Status**: Schema routing, feature flags e validação de role estão bem implementados
+**Problemas**: NENHUM - fluxo estÃ¡ robusto
+**Status**: Schema routing, feature flags e validaÃ§Ã£o de role estÃ£o bem implementados
 
-### Auditoria 11 - Módulos, Feature Flags e Navegação
+### Auditoria 11 - MÃ³dulos, Feature Flags e NavegaÃ§Ã£o
 **Severidade**: BAIXA
 **Problemas**:
-1. Módulo "relatorios" não existe em modulos_catalogo mas existe na sidebar
-**Recomendação**: Adicionar "relatorios" em modulos_catalogo ou remover da sidebar
+1. MÃ³dulo "relatorios" nÃ£o existe em modulos_catalogo mas existe na sidebar
+**RecomendaÃ§Ã£o**: Adicionar "relatorios" em modulos_catalogo ou remover da sidebar
 
-### Auditoria 12 - Botões, Ações e Chamadas RPC
-**Severidade**: CRÍTICA
+### Auditoria 12 - BotÃµes, AÃ§Ãµes e Chamadas RPC
+**Severidade**: CRÃTICA
 **Problemas**:
-1. **CRÍTICO**: PDV acessa tabela produtos diretamente (violação Opção A)
-2. **MÉDIA**: OS e PDV acessam tabela funcionarios diretamente
-3. **BAIXA**: Botões de edição sem handler onClick em várias páginas
+1. **CRÃTICO**: PDV acessa tabela produtos diretamente (violaÃ§Ã£o OpÃ§Ã£o A)
+2. **MÃ‰DIA**: OS e PDV acessam tabela funcionarios diretamente
+3. **BAIXA**: BotÃµes de ediÃ§Ã£o sem handler onClick em vÃ¡rias pÃ¡ginas
 
-**Recomendações**:
+**RecomendaÃ§Ãµes**:
 1. IMEDIATO: Corrigir PDV para usar RPCs
 2. CURTO PRAZO: Criar RPC para funcionarios ou usar existente
-3. BAIXA PRIORIDADE: Implementar handlers para botões de edição ou removê-los
+3. BAIXA PRIORIDADE: Implementar handlers para botÃµes de ediÃ§Ã£o ou removÃª-los
 
 ---
 
-## 📋 MELHORIAS FUTURAS OBRIGATÓRIAS
+## ðŸ“‹ MELHORIAS FUTURAS OBRIGATÃ“RIAS
 
 Documento detalhado em MELHORIAS_FUTURAS.md:
 
-1. Modularização da função provisionar_empresa (CURTO PRAZO)
-2. Automação de VACUUM / ANALYZE para schemas tenant (MÉDIO PRAZO)
-3. Versionamento explícito de contratos de RPC (MÉDIO PRAZO)
-4. Métricas e observabilidade avançada de negócio (CURTO PRAZO)
-5. Padronização de paginação avançada (cursor-based) (LONGO PRAZO)
-6. Estratégia de rollout seguro de mudanças estruturais (CURTO PRAZO)
+1. ModularizaÃ§Ã£o da funÃ§Ã£o provisionar_empresa (CURTO PRAZO)
+2. AutomaÃ§Ã£o de VACUUM / ANALYZE para schemas tenant (MÃ‰DIO PRAZO)
+3. Versionamento explÃ­cito de contratos de RPC (MÃ‰DIO PRAZO)
+4. MÃ©tricas e observabilidade avanÃ§ada de negÃ³cio (CURTO PRAZO)
+5. PadronizaÃ§Ã£o de paginaÃ§Ã£o avanÃ§ada (cursor-based) (LONGO PRAZO)
+6. EstratÃ©gia de rollout seguro de mudanÃ§as estruturais (CURTO PRAZO)
 7. Suite de Testes Automatizados (Vitest/Playwright) (PRIORIDADE ALTA)
 8. Rate Limiting no Middleware Next.js (PRIORIDADE ALTA)
 
 ---
 
-## 🚀 BOAS PRÁTICAS DE DEPLOY E BUILD (20/04/2026)
+## ðŸš€ BOAS PRÃTICAS DE DEPLOY E BUILD (20/04/2026)
 
-### Configuração Netlify
+### ConfiguraÃ§Ã£o Netlify
 
-**Arquivo Único de Configuração:**
+**Arquivo Ãšnico de ConfiguraÃ§Ã£o:**
 - Manter apenas UM arquivo `netlify.toml` na raiz do projeto
-- NÃO criar arquivo `netlify.toml` em subdiretórios (ex: `apps/web/`)
-- Conflito de arquivos causa falha no deploy automático
+- NÃƒO criar arquivo `netlify.toml` em subdiretÃ³rios (ex: `apps/web/`)
+- Conflito de arquivos causa falha no deploy automÃ¡tico
 
-**Configuração Correta (raiz/netlify.toml):**
+**ConfiguraÃ§Ã£o Correta (raiz/netlify.toml):**
 ```toml
 [build]
   base = "apps/web"
@@ -1011,157 +1035,157 @@ Documento detalhado em MELHORIAS_FUTURAS.md:
   - `NETLIFY_SITE_ID`
 - Build command: `npm run build` em `apps/web`
 
-### Prevenção de Erros de Build TypeScript
+### PrevenÃ§Ã£o de Erros de Build TypeScript
 
-**Sincronização de Interfaces:**
-- Manter interfaces TypeScript em `apps/web/src/lib/api.ts` sempre sincronizadas com o código de uso
+**SincronizaÃ§Ã£o de Interfaces:**
+- Manter interfaces TypeScript em `apps/web/src/lib/api.ts` sempre sincronizadas com o cÃ³digo de uso
 - Quando adicionar campos em componentes, atualizar interfaces correspondentes
-- Exemplo: `ProdutoUpdate` deve ter todos os campos usados em forms de edição
+- Exemplo: `ProdutoUpdate` deve ter todos os campos usados em forms de ediÃ§Ã£o
 
-**Erros Comuns e Soluções:**
+**Erros Comuns e SoluÃ§Ãµes:**
 
 1. **Campo ausente em interface:**
    - Erro: `Property 'X' does not exist on type 'YUpdate'`
-   - Solução: Adicionar campo à interface em `api.ts`
+   - SoluÃ§Ã£o: Adicionar campo Ã  interface em `api.ts`
 
 2. **Acesso incorreto a tipos compostos:**
    - Erro: `Property 'map' does not exist on type 'ClienteListResult'`
-   - Solução: Usar `clientes?.data?.map()` em vez de `clientes?.map()`
+   - SoluÃ§Ã£o: Usar `clientes?.data?.map()` em vez de `clientes?.map()`
    - `ClienteListResult` has structure `{ data: Cliente[], next_cursor? }`
 
 3. **Nome de campo incorreto:**
    - Erro: `Property 'data_prevista' does not exist on type 'ObraEtapa'`
-   - Solução: Verificar nome correto na interface (ex: `data_fim_prevista`)
+   - SoluÃ§Ã£o: Verificar nome correto na interface (ex: `data_fim_prevista`)
 
-**Checklist Pré-Deploy:**
+**Checklist PrÃ©-Deploy:**
 1. Executar `npm run build` localmente
 2. Corrigir todos os erros de TypeScript
-3. Verificar se há apenas um arquivo `netlify.toml` (na raiz)
-4. Confirmar que secrets do GitHub estão configuradas
+3. Verificar se hÃ¡ apenas um arquivo `netlify.toml` (na raiz)
+4. Confirmar que secrets do GitHub estÃ£o configuradas
 5. Fazer commit e push para branch `main`
 
 ---
 
-## 🚀 IMPLEMENTAÇÕES RECENTES (18/04/2026)
+## ðŸš€ IMPLEMENTAÃ‡Ã•ES RECENTES (18/04/2026)
 
-### Módulo Estoque - Expansão Completa
-- **Alertas de Estoque**: Sistema completo de alertas com verificação automática e resolução
+### MÃ³dulo Estoque - ExpansÃ£o Completa
+- **Alertas de Estoque**: Sistema completo de alertas com verificaÃ§Ã£o automÃ¡tica e resoluÃ§Ã£o
   - RPCs: `tenant_verificar_alertas_estoque`, `tenant_resolver_alerta_estoque`, `tenant_listar_alertas_estoque`
-  - Componente: `AlertasEstoquePanel` com filtros e ações
-  - Wrappers públicos criados para resolver erro 404
+  - Componente: `AlertasEstoquePanel` com filtros e aÃ§Ãµes
+  - Wrappers pÃºblicos criados para resolver erro 404
 
-- **Kits de Produtos**: Gestão de agrupamentos de produtos
+- **Kits de Produtos**: GestÃ£o de agrupamentos de produtos
   - RPCs: `tenant_criar_kit`, `tenant_listar_kits`, `tenant_atualizar_kit`, `tenant_remover_kit`
   - Componente: `KitsManager` com CRUD completo
-  - Integração com movimentação de estoque
+  - IntegraÃ§Ã£o com movimentaÃ§Ã£o de estoque
 
-- **Transferências entre Locais**: Movimentação de estoque
+- **TransferÃªncias entre Locais**: MovimentaÃ§Ã£o de estoque
   - RPCs: `tenant_criar_transferencia`, `tenant_listar_transferencias`, `tenant_concluir_transferencia`
   - Componente: `TransferenciasManager` com status tracking
-  - Validação de disponibilidade e histórico
+  - ValidaÃ§Ã£o de disponibilidade e histÃ³rico
 
-- **Valoração de Estoque**: Múltiplos métodos de cálculo
+- **ValoraÃ§Ã£o de Estoque**: MÃºltiplos mÃ©todos de cÃ¡lculo
   - RPCs: `tenant_calcular_valor_estoque`, `tenant_listar_locais_estoque`
-  - Componente: `ValorizacaoDashboard` com gráficos e métricas
-  - Métodos: FIFO, Médio, Custo
+  - Componente: `ValorizacaoDashboard` com grÃ¡ficos e mÃ©tricas
+  - MÃ©todos: FIFO, MÃ©dio, Custo
 
-- **Previsão de Demanda**: Análise preditiva baseada em histórico
+- **PrevisÃ£o de Demanda**: AnÃ¡lise preditiva baseada em histÃ³rico
   - RPCs: `tenant_gerar_previsao_demanda`, `tenant_listar_previsoes_demanda`, `tenant_atualizar_demanda_real`
-  - Componente: `PrevisaoDemandaPanel` com geração e atualização
-  - Algoritmo baseado em média móvel
+  - Componente: `PrevisaoDemandaPanel` com geraÃ§Ã£o e atualizaÃ§Ã£o
+  - Algoritmo baseado em mÃ©dia mÃ³vel
 
-- **Scanner de Códigos de Barras**: Integração mobile
+- **Scanner de CÃ³digos de Barras**: IntegraÃ§Ã£o mobile
   - Biblioteca: `html5-qrcode` instalada
-  - Componente: `BarcodeScanner` com câmera e QR code
-  - Busca automática de produtos por código
+  - Componente: `BarcodeScanner` com cÃ¢mera e QR code
+  - Busca automÃ¡tica de produtos por cÃ³digo
 
-### Módulo Obras - Gestão Avançada
+### MÃ³dulo Obras - GestÃ£o AvanÃ§ada
 - **Etapas de Obras**: Timeline completo com progresso
   - RPCs: `tenant_obras_etapas`, `tenant_atualizar_etapa`
   - Componente: `EtapasTimeline` com status visual
-  - Cálculo automático de progresso físico
+  - CÃ¡lculo automÃ¡tico de progresso fÃ­sico
 
 - **Financeiro de Obras**: Custos previstos vs realizados
   - RPCs: `tenant_obras_financeiro`, `tenant_adicionar_custo`
-  - Componente: `FinanceiroDashboard" com gráficos comparativos
-  - Métricas de ROI e desvios
+  - Componente: `FinanceiroDashboard" com grÃ¡ficos comparativos
+  - MÃ©tricas de ROI e desvios
 
-- **Recursos de Obras**: Gestão de materiais e mão de obra
+- **Recursos de Obras**: GestÃ£o de materiais e mÃ£o de obra
   - RPCs: `tenant_obras_recursos`, `tenant_alocar_recurso`
-  - Componente: `RecursosTabela` com alocação e consumo
-  - Integração futura com estoque
+  - Componente: `RecursosTabela` com alocaÃ§Ã£o e consumo
+  - IntegraÃ§Ã£o futura com estoque
 
-- **Documentos de Obras**: Gestão de arquivos e anexos
+- **Documentos de Obras**: GestÃ£o de arquivos e anexos
   - RPCs: `tenant_obras_documentos`, `tenant_uploads_documento`
-  - Componente: `DocumentosGaleria` com visualização
-  - Integração com Supabase Storage
+  - Componente: `DocumentosGaleria` com visualizaÃ§Ã£o
+  - IntegraÃ§Ã£o com Supabase Storage
 
-### Correções Críticas Aplicadas
-- **Wrappers Públicos RPC**: Resolvido erro 404 em múltiplas RPCs
-  - Causa: Wrappers iniciais usavam `current_setting('search_path')` inválido
-  - Solução: Novos wrappers chamam `set_tenant_schema()` antes de cada RPC
+### CorreÃ§Ãµes CrÃ­ticas Aplicadas
+- **Wrappers PÃºblicos RPC**: Resolvido erro 404 em mÃºltiplas RPCs
+  - Causa: Wrappers iniciais usavam `current_setting('search_path')` invÃ¡lido
+  - SoluÃ§Ã£o: Novos wrappers chamam `set_tenant_schema()` antes de cada RPC
   - Arquivos: `WRAPPERS_PUBLIC_FIX_SQL.sql`, `WRAPPERS_ALERTAS_SQL.sql`
 
 - **Hydration Error**: Corrigido erro em FloatingParticles
   - Causa: `Math.random()` gerava valores diferentes no servidor vs cliente
-  - Solução: `useState` + `useEffect` para gerar valores apenas no cliente
+  - SoluÃ§Ã£o: `useState` + `useEffect` para gerar valores apenas no cliente
 
-- **TypeScript Safety**: Adicionadas verificações null/undefined
-  - Componente: `PrevisaoDemandaPanel` com `Array.isArray()` e validações
-  - Prevenção de erros de runtime em `.map()` e propriedades opcionais
+- **TypeScript Safety**: Adicionadas verificaÃ§Ãµes null/undefined
+  - Componente: `PrevisaoDemandaPanel` com `Array.isArray()` e validaÃ§Ãµes
+  - PrevenÃ§Ã£o de erros de runtime em `.map()` e propriedades opcionais
 
-## 📧 VALIDAÇÃO E VERIFICAÇÃO DE E-MAIL (27/04/2026)
+## ðŸ“§ VALIDAÃ‡ÃƒO E VERIFICAÃ‡ÃƒO DE E-MAIL (27/04/2026)
 
-### Estratégia de Higienização de Base
-Para garantir que os novos usuários utilizem e-mails reais e operáveis (Gmail, Outlook, domínios corporativos), o sistema agora impõe:
+### EstratÃ©gia de HigienizaÃ§Ã£o de Base
+Para garantir que os novos usuÃ¡rios utilizem e-mails reais e operÃ¡veis (Gmail, Outlook, domÃ­nios corporativos), o sistema agora impÃµe:
 
-1. **Bloqueio de Domínios Fictícios (Client & Server side)**:
-   - Implementado no Checkout (`apps/web/src/app/(auth)/checkout/page.tsx`) e na API de Sessão (`apps/web/src/app/api/checkout/session/route.ts`).
-   - Bloqueio explícito de domínios como `mailinator.com`, `tempmail.com`, `fake.com`, `teste.com`, `ficticio.com`, etc.
-   - Validação de Regex RFC 5322 para garantir integridade sintática.
+1. **Bloqueio de DomÃ­nios FictÃ­cios (Client & Server side)**:
+   - Implementado no Checkout (`apps/web/src/app/(auth)/checkout/page.tsx`) e na API de SessÃ£o (`apps/web/src/app/api/checkout/session/route.ts`).
+   - Bloqueio explÃ­cito de domÃ­nios como `mailinator.com`, `tempmail.com`, `fake.com`, `teste.com`, `ficticio.com`, etc.
+   - ValidaÃ§Ã£o de Regex RFC 5322 para garantir integridade sintÃ¡tica.
 
-2. **Fluxo de Confirmação de E-mail (Supabase Auth)**:
-   - O sistema agora força a confirmação de e-mail ao criar o usuário no webhook de pagamento (`email_confirm: false`).
-   - O Supabase envia automaticamente um link de verificação para o e-mail real fornecido no checkout.
-   - O login na plataforma é bloqueado até que o usuário clique no link de confirmação.
-   - A página de login fornece feedback específico caso o e-mail ainda não tenha sido validado.
+2. **Fluxo de ConfirmaÃ§Ã£o de E-mail (Supabase Auth)**:
+   - O sistema agora forÃ§a a confirmaÃ§Ã£o de e-mail ao criar o usuÃ¡rio no webhook de pagamento (`email_confirm: false`).
+   - O Supabase envia automaticamente um link de verificaÃ§Ã£o para o e-mail real fornecido no checkout.
+   - O login na plataforma Ã© bloqueado atÃ© que o usuÃ¡rio clique no link de confirmaÃ§Ã£o.
+   - A pÃ¡gina de login fornece feedback especÃ­fico caso o e-mail ainda nÃ£o tenha sido validado.
 
 3. **Rastreabilidade**:
-   - Todo e-mail utilizado em tentativas de checkout é registrado em `public.checkout_vendas` para auditoria de comportamento e prevenção de spam.
-   - O webhook realiza uma verificação prévia de duplicidade e higienização de domínios antes de tentar criar a conta.
+   - Todo e-mail utilizado em tentativas de checkout Ã© registrado em `public.checkout_vendas` para auditoria de comportamento e prevenÃ§Ã£o de spam.
+   - O webhook realiza uma verificaÃ§Ã£o prÃ©via de duplicidade e higienizaÃ§Ã£o de domÃ­nios antes de tentar criar a conta.
 
 ---
 
-## 📧 INTEGRAÇÃO RESEND (BOAS-VINDAS)
+## ðŸ“§ INTEGRAÃ‡ÃƒO RESEND (BOAS-VINDAS)
 
 ### Fluxo de Mensageria
 O sistema utiliza o **Resend** para disparar e-mails transacionais de boas-vindas:
 
-1.  **Checkout**: Após a confirmação de pagamento e provisionamento do tenant, o webhook dispara um e-mail para o novo cliente.
-2.  **Painel Master**: Ao provisionar uma empresa manualmente via `/mestre`, o administrador master pode informar o e-mail do cliente para envio automático das boas-vindas.
+1.  **Checkout**: ApÃ³s a confirmaÃ§Ã£o de pagamento e provisionamento do tenant, o webhook dispara um e-mail para o novo cliente.
+2.  **Painel Master**: Ao provisionar uma empresa manualmente via `/mestre`, o administrador master pode informar o e-mail do cliente para envio automÃ¡tico das boas-vindas.
 
-### Implementação Técnica
+### ImplementaÃ§Ã£o TÃ©cnica
 *   **Utility**: `apps/web/src/lib/email.ts` (Utiliza `fetch` nativo para compatibilidade).
 *   **Endpoint**: `/api/mestre/welcome` (Proxy para componentes client).
 *   **Template**: HTML responsivo com branding Fluxoprod.
 
 ---
 
-## 🎯 RESUMO EXECUTIVO
+## ðŸŽ¯ RESUMO EXECUTIVO
 
 ### Estado Atual
-O sistema FLUXO ERP está **PRODUCTION-READY** após implementações completas dos módulos Estoque e Obras. A arquitetura Opção A (Supabase como backend real e fonte da verdade) está totalmente implementada com schema routing, wrappers públicos corrigidos, e funcionalidades avançadas de gestão.
+O sistema FLUXO ERP estÃ¡ **PRODUCTION-READY** apÃ³s implementaÃ§Ãµes completas dos mÃ³dulos Estoque e Obras. A arquitetura OpÃ§Ã£o A (Supabase como backend real e fonte da verdade) estÃ¡ totalmente implementada com schema routing, wrappers pÃºblicos corrigidos, e funcionalidades avanÃ§adas de gestÃ£o.
 
 ### Riscos Principais
-1. **VIOLAÇÃO CRÍTICA em PDV**: Acesso direto à tabela produtos em vez de RPC (Auditoria 12)
-2. **MÉDIA**: ORDER BY criado_em sem índice em tabelas de alta volumetria (Auditoria 9)
-3. **BAIXA**: Módulo "relatorios" inconsistente (Auditoria 11)
+1. **VIOLAÃ‡ÃƒO CRÃTICA em PDV**: Acesso direto Ã  tabela produtos em vez de RPC (Auditoria 12)
+2. **MÃ‰DIA**: ORDER BY criado_em sem Ã­ndice em tabelas de alta volumetria (Auditoria 9)
+3. **BAIXA**: MÃ³dulo "relatorios" inconsistente (Auditoria 11)
 
-### Recomendação
-**DEPLOYAR EM PRODUÇÃO** após correção imediata do PDV (substituir acesso direto por RPC). As demais correções podem ser feitas post-deploy no ritmo correto.
+### RecomendaÃ§Ã£o
+**DEPLOYAR EM PRODUÃ‡ÃƒO** apÃ³s correÃ§Ã£o imediata do PDV (substituir acesso direto por RPC). As demais correÃ§Ãµes podem ser feitas post-deploy no ritmo correto.
 
-### Esforço Estimado
-- Correção imediata (PDV): 1-2 horas
+### EsforÃ§o Estimado
+- CorreÃ§Ã£o imediata (PDV): 1-2 horas
 - Melhorias futuras: 8 semanas (conforme MELHORIAS_FUTURAS.md)
 
 ---
