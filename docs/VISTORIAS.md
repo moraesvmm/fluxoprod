@@ -1,41 +1,101 @@
+> [!IMPORTANT]
+> **Regra global (banco → tipos):** sempre que o banco de dados for alterado (incluindo SQL aplicado no Supabase ou migrações em `apps/api/migrations/`), é **obrigatório** regenerar `apps/web/src/types/database.types.ts` com `supabase gen types typescript` do projeto e tratar o diff conforme [`DOCUMENTACAO_TECNICA.md`](DOCUMENTACAO_TECNICA.md) (regra no topo + seção de sincronização de tipos).
+
+---
+
+## ✅ VISTORIA 77 — Vistoria profunda integrada, mitigações e governança (13/05/2026)
+**Data:** 13/05/2026  
+**Status:** ✅ **CONCLUÍDA** (com **ações operacionais obrigatórias** fora do repositório: SQL no Supabase + rotação de segredos)  
+**Base:** `docs/DOCUMENTACAO_TECNICA.md`, `docs/PENDENCIAS.md`, histórico das vistorias 70–76.
+
+### Escopo e método
+- Releitura da documentação técnica e reconciliação com o código em `apps/web` (webhooks, `webhook_audit_log`, checkout, comissões).
+- Verificação estática: `tsc --noEmit` em `apps/web` **sem erros** (Node do ambiente Cursor + `node_modules/typescript`).
+- **Supabase MCP:** não há servidor MCP do Supabase habilitado em `mcps/` neste workspace; precisão em catálogo de objetos do banco live depende do **SQL Editor / CLI** com credenciais apenas em **variáveis de ambiente locais** (nunca em arquivos versionados ou em chat).
+- **Conectividade (13/05/2026):** a partir deste ambiente Cursor, conexões TCP ao host direto `db.*.supabase.co` (IPv6) e ao **pooler** (porta 6543) falharam (*network unreachable* / *timeout*), compatível com **firewall corporativo** bloqueando PostgreSQL. A comparação live foi materializada como script somente-leitura `apps/api/migrations/verify_public_indexes_from_migrations.sql` para execução no painel Supabase.
+- **Railway / WhatsApp:** token de API não foi utilizado nesta sessão; manter apenas em secrets da Vercel/Railway.
+
+### Mitigações aplicadas no repositório
+| Item | Mitigação |
+|------|-----------|
+| Índices checkout/webhook | Inclusão de `idx_webhook_audit_log_ext_tx` em `apps/api/migrations/fix_indexes_checkout_webhook.sql`, alinhado ao campo usado em todo `insert` do webhook e correlação com `checkout_vendas`. |
+| Documentação contraditória | Atualização da seção **Status Atual** em `docs/DOCUMENTACAO_TECNICA.md` para refletir Vercel, contrato real de `webhook_audit_log` e pendências apenas como **migrações SQL live**. |
+| Registro incorreto Vistoria 70 | Correção da linha BUG-06 na tabela abaixo (colunas reais do audit log). |
+
+### Segurança — ação obrigatória (operador humano)
+Durante esta solicitação, **segredos de produção** (JWT `service_role`, URI PostgreSQL com senha, Management API, token Railway, chave Resend) foram expostos em texto claro. **Mitigação completa exige:** revogar/regenerar no painel Supabase (anon, service_role, senha DB se necessário), Railway e Resend; atualizar variáveis na Vercel; **não** colar novamente em issues, commits ou documentação rastreada.
+
+### Blindagem E2E (vistorias 71–76)
+- Tratadas como **onda única de endurecimento de tipos**; estado atual do repositório compila com TypeScript estrito.
+- Próximos deploys na **Vercel** devem seguir `docs/PLANO_PREVENCAO_DEPLOY.md` quando existir no clone (se ausente, usar checklist interno: env vars, `next build`, migrações SQL pendentes).
+
+### Riscos remanescentes (código / produto)
+| ID | Severidade | Origem | Descrição | Próximo passo |
+|----|------------|--------|-----------|----------------|
+| R-CRM-01 | 🔴 P0 | `docs/PENDENCIAS.md` | Divergência `funil_fase` CRM (CHECK no banco vs valores no frontend). | Migração SQL + alinhamento `use-pipeline.ts` em janela dedicada. |
+| R-COM-01 | 🔴 P0 | `docs/PENDENCIAS.md` | RPCs de regras de comissão podem estar ausentes no live. | Aplicar `apps/api/migrations/rpc_comissoes_regras.sql` no Supabase. |
+| R-SQL-01 | 🟠 P1 | Vistorias 64, 70 | Migrações OS / índices webhook podem não estar aplicadas em todos os ambientes. | Aplicar scripts correspondentes em `apps/api/migrations/` após revisão. |
+
+### Pós-execução `verify_public_indexes_from_migrations` (live)
+Rodada validada pelo operador: **16/19** com `present_in_db = true`. **Ausentes no banco:**
+- `idx_webhook_audit_log_ext_tx` — alinhar com `fix_indexes_checkout_webhook.sql` (lookup por `external_transaction_id`).
+- `idx_user_profiles_not_deleted` e `idx_empresas_not_deleted` — alinhar com `add_soft_delete_all_entities.sql` (parciais em `deleted_at IS NULL`).
+
+**Correção idempotente:** executar `apps/api/migrations/hotfix_public_indexes_verify_gaps.sql` no SQL Editor; em seguida re-rodar o script de verificação até todas as linhas `true`.  
+**Nota (42703):** `public.user_profiles` não tem coluna `id` — o índice parcial deve usar **`user_id`** (corrigido no hotfix e em `add_soft_delete_all_entities.sql`).
+
+### Checklist SQL mínimo (produção Supabase)
+1. **Verificação (read-only):** rodar `apps/api/migrations/verify_public_indexes_from_migrations.sql` no SQL Editor e confirmar `present_in_db = true` para todas as linhas (compara migrações `public` vs catálogo live).
+2. `apps/api/migrations/fix_indexes_checkout_webhook.sql` (inclui `idx_checkout_vendas_ext_tx`, `idx_webhook_audit_log_ext_tx`, `idx_webhook_audit_log_status`, `idx_webhook_audit_log_ts`).
+3. `apps/api/migrations/rpc_comissoes_regras.sql`.
+4. Demais arquivos em `apps/api/migrations/` já citados em vistorias anteriores (OS assistência, relatórios, etc.) conforme necessidade do tenant.
+
+### Encerramento das entradas “pendente de vistoria” 71–76
+As vistorias **71 a 76** permanecem no arquivo como **registro histórico de alterações**. A validação integrada desta rodada as **substitui como fila ativa**: não é necessário reabrir vistoria separada para cada uma, desde que o checklist SQL e `PENDENCIAS.md` sejam endereçados nas próximas janelas de manutenção.
+
+#### Correção documental — Vistoria 70 / BUG-06 (tabela abaixo)
+A descrição original citava colunas genéricas incorretas; o contrato vigente é o de `database.types.ts` e dos `insert` em `apps/web/src/app/api/webhook/payment/route.ts`.
+
+---
+
 ## ⚠️ VISTORIA PENDENTE — Blindagem Gradual: API Core, Webhooks e Rotas Fiscais (Vistoria 76)
 **Data:** 13/05/2026
-**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Status:** ✅ FECHADA — consolidada na **Vistoria 77** (13/05/2026); registro mantido como changelog.
 **Motivo:** Concluída nova rodada de blindagem de tipagem alinhada ao `RELATORIO_TIPAGEM_GRADUAL.md`, com foco na camada `apps/web/src/lib/api.ts`, nos webhooks/rotas críticas (`register-trial`, `checkout/upgrade`, `webhook/payment`, `tenant/catalogo/fiscal`, `tenant/fiscal-config`) e na página `mestre`. Removidos `any` operacionais, introduzidos helpers de parsing/erro para RPCs, tipados payloads de webhook e retornos de nurturing/código de barras, e ajustados consumidores de estoque/CRM para respeitar os novos contratos. Validação executada com `tsc --noEmit` em `apps/web` concluída com **zero erros**.
 
 ---
 
 ## ⚠️ VISTORIA PENDENTE — Blindagem E2E Batch: Dashboard, Configs, Relatórios, CRM, Catálogo, Loja e DANFE (Vistoria 75)
 **Data:** 12/05/2026
-**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Status:** ✅ FECHADA — consolidada na **Vistoria 77** (13/05/2026); registro mantido como changelog.
 **Motivo:** Blindagem em lote de 8 módulos/páginas: Dashboard (iterador `Venda`, StatusBadge sem `as any`, Recharts formatter), Configurações (4 catch blocks), Relatórios (ReportRow → `Record<string, unknown>`, helper `get<T>()`, LucideIcon em KPIs), Comissões (3 catch blocks), Catálogo (FiscalItem interface, ProdutoCreate, 4 catch blocks), CRM (`abrirEdicao` e iterador tipados com `Cliente`), Loja (ICON_MAP → `LucideIcon`) e DANFE (catch block). Build `tsc --noEmit` validado com **zero erros**. Cobertura avançou de ~60% para ~80%.
 
 ---
 
 ## ⚠️ VISTORIA PENDENTE — Blindagem E2E de Tipagem: Módulos RH, OS e Obras (Vistoria 74)
 **Data:** 12/05/2026
-**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Status:** ✅ FECHADA — consolidada na **Vistoria 77** (13/05/2026); registro mantido como changelog.
 **Motivo:** Concluída blindagem E2E dos módulos **RH**, **OS** e **Obras**. Eliminadas 25+ instâncias de `any` nas três páginas e no componente `OSKanbanBoard`. Payloads migrados para contratos estritos (`FuncionarioCreate`, `FuncionarioUpdate`, `OrdemServicoUpdate`, `ObraUpdate`). Corrigido mapeamento de campo `orcamento` → `orcamento_total` na interface `ObraUpdate`. Conflito de tipo Framer Motion / HTML5 DragEvent resolvido sem regressão funcional. Build `tsc --noEmit` validado com **zero erros**. Cobertura de tipagem avançou de ~40% para ~60%.
 
 ---
 
 ## ⚠️ VISTORIA PENDENTE — Blindagem E2E de Tipagem: Módulo CRM (Vistoria 73)
 **Data:** 11/05/2026
-**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Status:** ✅ FECHADA — consolidada na **Vistoria 77** (13/05/2026); registro mantido como changelog.
 **Motivo:** Concluída blindagem E2E do módulo **CRM**. Refatorados hooks de clientes e pipeline para garantir tipagem estrita. Componentes `ImportadorClientesExcel`, `DashboardKPIs` e `TimelineInteracoes` agora utilizam contratos estritos do Supabase. Adicionada RPC tipada `fetchCRMDashboardMetricas` no `api.ts`. Build `tsc --noEmit` validado.
 
 ---
 
 ## ⚠️ VISTORIA PENDENTE — Blindagem E2E de Tipagem Concluída (Vistoria 72)
 **Data:** 11/05/2026
-**Status:** 🚨 PENDENTE — Realizar vistoria o mais rápido possível!
+**Status:** ✅ FECHADA — consolidada na **Vistoria 77** (13/05/2026); registro mantido como changelog.
 **Motivo:** Concluída migração completa do `api.ts` da tipagem `any` para contrato estrito `<Database>` via `getSupabaseStrict()`. RPCs não mapeadas no `database.types.ts` migradas para padrão `_untyped()` (escape hatch documentado). Interfaces perdidas restauradas (`ObraCusto`, `ObraResumoFinanceiro`, `ObraRecurso`, `ObraDocumento`). Build `tsc --noEmit` passou com **zero erros**. Arquivos modificados: `api.ts`, `FinanceiroDashboard.tsx`.
 
 ---
 
 ## ⚠️ VISTORIA PENDENTE — Nova vistoria pendente pós-alterações (Vistoria 71)
 **Data:** 11/05/2026
-**Status:** 🚨 PENDENTE — Deve ser realizada o mais rápido possível!
+**Status:** ✅ FECHADA — consolidada na **Vistoria 77** (13/05/2026); registro mantido como changelog.
 **Motivo:** Realizadas alterações no frontend do checkout (campo segmento), no backend do register-trial (A La Carte vazia, whitelist do dashboard, link magiclink) e adicionada BLINDAGEM de tipos estática gerando o arquivo `database.types.ts` e tipando os clientes do Supabase (`client.ts`, `server.ts` e `admin.ts`).
 
 ---
@@ -53,13 +113,14 @@
 | BUG-03 | 🔴 P0 | `upgrade/route.ts` | `UPDATE empresas` com `valor_mensalidade` e `modulos_ativos_count` (inexistentes) → 400 ignorado | Update removido (colunas não existem no schema) |
 | BUG-04 | 🟠 P1 | `upgrade/route.ts` | Campo `empresa.tamanho_empresa` inexistente → gateway sempre recebe `"1-5"` | Corrigido para `empresa.porte` |
 | BUG-05 | 🟠 P1 | `webhook/payment/route.ts` | `upsert empresa_modulos` com `atualizado_em` (inexistente) → módulos não ativados em upgrades | Coluna removida do upsert |
-| BUG-06 | 🔴 P0 | `webhook/payment/route.ts` | `webhook_audit_log` recebia colunas erradas → tabela 100% vazia, zero rastreio | Corrigido para `gateway`, `evento`, `status_processamento`, `erro` |
+| BUG-06 | 🔴 P0 | `webhook/payment/route.ts` | `webhook_audit_log` recebia colunas inexistentes → inserts falhavam / sem rastreio | Corrigido para o schema real: `external_transaction_id`, `status`, `payload`, `detalhes` (Vistoria 77 — alinhado a `database.types.ts`) |
 | INC-04 | 🟡 P3 | `checkout/page.tsx` | `PLANOS_FALLBACK` continha strings de marketing inválidas (risco de reintroduzir bug 69) | Fallback limpo com apenas chaves técnicas válidas |
 | INC-05 | 🟡 P2 | `upgrade/route.ts` | `createClient()` SSR (com RLS) em rota que manipula `empresa_modulos` | Migrado para `createAdminClient()` (service_role, sem RLS) |
 
 #### ⚠️ AÇÃO PENDENTE OBRIGATÓRIA:
 **Executar `apps/api/migrations/fix_indexes_checkout_webhook.sql` no banco Supabase (SQL Editor).**
 - `idx_checkout_vendas_ext_tx` — índice no campo de lookup do webhook
+- `idx_webhook_audit_log_ext_tx` — índice em `external_transaction_id` (correlação com checkout / auditoria)
 - `idx_webhook_audit_log_status` — índice para filtro por status
 - `idx_webhook_audit_log_ts` — índice para ordenação cronológica
 

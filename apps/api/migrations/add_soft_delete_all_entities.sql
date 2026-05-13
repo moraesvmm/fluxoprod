@@ -123,7 +123,7 @@ CREATE INDEX IF NOT EXISTS idx_ordens_servico_not_deleted ON tenant_62a495e1.ord
 CREATE INDEX IF NOT EXISTS idx_comissoes_not_deleted      ON tenant_62a495e1.comissoes(id)      WHERE deleted_at IS NULL;
 
 -- Índices schema public
-CREATE INDEX IF NOT EXISTS idx_user_profiles_not_deleted ON public.user_profiles(id) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_user_profiles_not_deleted ON public.user_profiles(user_id) WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_empresas_not_deleted      ON public.empresas(id)      WHERE deleted_at IS NULL;
 
 COMMIT;

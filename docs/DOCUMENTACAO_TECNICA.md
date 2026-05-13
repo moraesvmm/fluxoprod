@@ -1,4 +1,8 @@
 ﻿# DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
+
+> [!IMPORTANT]
+> **Regra obrigatória (banco → tipos):** sempre que o banco de dados PostgreSQL/Supabase for alterado (migrações, SQL Editor, CLI, policies, views, RPCs, colunas, índices ou qualquer outro objeto), é **obrigatório** regenerar `apps/web/src/types/database.types.ts` com o comando oficial `supabase gen types typescript` do projeto (credenciais só em variável de ambiente local). Revisar o diff; se houver mudança de contrato, **commitar** o arquivo atualizado junto da alteração. O comando concreto está na seção **Sincronização de Tipos** abaixo.
+
 -- Status: Vistoria 63 Implementada - Gestão de Equipe Multi-Tenant --
 ## ESTADO ATUAL: PRODUCTION-READY (QUALIFICADO)
 ## ÚLTIMA ATUALIZAÇÃO: 13/05/2026 (Blindagem E2E)
@@ -84,7 +88,7 @@ Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquiv
 
 ### Arquitetura Geral (OPÃ‡ÃƒO A - IMPLEMENTADA)
 - **Backend**: Supabase (PostgreSQL + RPC) - **FONTE DA VERDADE**
-- **Frontend**: Next.js 16.2.2 (apps/web) - **UI E ORQUESTRADOR**
+- **Frontend**: Next.js 16.2.2 (apps/web) - **UI E ORQUESTRADOR** — deploy em **Vercel** (ver `apps/web/vercel.json`)
 - **Database**: Supabase PostgreSQL com multi-tenancy por schema
 - **Backend Python**: **NÃƒO EXISTE** - deve ser ignorado
 - **Provisionamento**: RPC Functions via Supabase
@@ -99,13 +103,12 @@ Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquiv
 - Pendencia remanescente: publicar no banco live `apps/api/migrations/rpc_comissoes_regras.sql`.
 - Re-vistoria obrigatoria pendente apos essa publicacao SQL.
 
-### Status Atual
-Estado real consolidado pela Vistoria 17 (22/04/2026):
-- Arquitetura central consistente: multi-tenancy por schema, `set_tenant_schema`, feature flags e RPCs como padrao principal.
-- Banco publico live validado com `service_role`: `modulos_catalogo`, `v_empresa_modulos`, `empresas` e `user_profiles` acessiveis e coerentes.
-- Pendencia critica no fluxo de checkout/provisionamento: senha trafega em metadata do gateway e o SQL ainda insere diretamente em `auth.users`.
-- Pendencia alta de aderencia arquitetural: modulos `relatorios` e `comissoes` ainda usam acesso direto a tabelas tenant no browser.
-- Pendencia alta de governanca: parte das RPCs consumidas pelo frontend nao esta consolidada no `apps/api/supabase_rpc.sql`.
+### Status Atual (consolidado - Vistoria 77, 13/05/2026)
+- **Arquitetura:** multi-tenancy por schema, `set_tenant_schema`, feature flags e RPCs como padrão principal (inalterado).
+- **Checkout / webhook:** provisionamento via `/api/webhook/payment` com auditoria em `webhook_audit_log` usando colunas `external_transaction_id`, `status`, `payload`, `detalhes` (contrato em `database.types.ts`).
+- **Camada de dados no browser:** módulos `relatorios` e `comissoes` consumidos via `@/lib/api` (sem leitura direta de tabelas tenant no cliente, conforme atualização de 22/04/2026).
+- **Validação de tipagem:** manter `tsc --noEmit` sem erros antes de cada deploy (Blindagem E2E).
+- **Pendência operacional de banco (live):** publicar migrações ainda não aplicadas no projeto Supabase; prioridade mínima documentada em `docs/PENDENCIAS.md` e checklist da Vistoria 77 em `docs/VISTORIAS.md` (ex.: `rpc_comissoes_regras.sql`, `fix_indexes_checkout_webhook.sql`).
 
 âœ… **O sistema estÃ¡ PRODUCTION-READY** apÃ³s as correÃ§Ãµes crÃ­ticas de 22/04/2026:
 - **SeguranÃ§a de Checkout**: Senhas nÃ£o trafegam mais no gateway e sÃ£o processadas apenas no backend.
