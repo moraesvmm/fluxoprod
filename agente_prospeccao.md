@@ -1,5 +1,33 @@
 # Agente de Prospecção B2B — Prompt de Execução Diária
 
+Leia 
+
+agente_prospeccao.md
+ para compreender as funcionalidades do sistema.
+ETAPA 1 — Seleção de empresas:
+Selecione 20 empresas de portea pequeno (consultorias de TI, software houses ou similares) que ainda não foram prospectadas e que tenham capacidade de adquirir o sistema como um todo (compra de direitos/repasse de propriedade).
+ETAPA 2 — Validação de e-mails (CRÍTICO):
+Para cada empresa selecionada:
+
+NÃO suponha nem invente e-mails
+Use sua base de conhecimento e fontes da internet para identificar e validar se o e-mail pertence de fato à respectiva empresa
+Utilize apenas e-mails reais e confirmados
+
+ETAPA 3 — Redação do e-mail:
+Escreva um e-mail breve, baseado nos princípios do livro "Como Fazer Amigos e Influenciar Pessoas", que:
+
+Apresente brevemente as funcionalidades do sistema (com base no @contextScopeItemMention)
+Prospecte a aquisição do sistema completo (venda de direitos)
+Deixe implícito que a venda ocorre por ausência de recursos para escalar o SaaS, posicionando o sistema como mais efetivo nas mãos dessas empresas
+Inclua na assinatura a imagem logo-fluxo.png (como logo/assinatura e foto de perfil do e-mail)
+Inclua o número de contato: +55 (11) 96720-3563
+
+ETAPA 4 — Disparo dos e-mails:
+
+Dispare os e-mails diretamente, sem abrir o navegador
+Envie um dos e-mails para: vmm.geral@gmail.com
+Os demais devem ser enviados para os e-mails validados das empresas selecionadas
+
 ## Como usar
 Ao abrir este arquivo, diga à IA (Antigravity):
 > "Leia o agente_prospeccao.md e execute o disparo do dia."

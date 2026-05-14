@@ -130,3 +130,87 @@
 | 2026-05-13 | Venturus (Fix) | - | negocios@venturus.org.br | reenviado |
 | 2026-05-13 | Art IT (Fix) | - | contato@artit.com.br | reenviado |
 | 2026-05-13 | Woli (Fix) | - | contato@woli.com.br | reenviado |
+| 2026-05-14 | Monitora | - | contato@monitoratec.com.br | enviado |
+| 2026-05-14 | Prime Control | - | contato@primecontrol.com.br | enviado |
+| 2026-05-14 | Base2 Tecnologia | - | contato@base2.com.br | enviado |
+| 2026-05-14 | Softplan | - | contato@softplan.com.br | enviado |
+| 2026-05-14 | TecnoSpeed | - | contato@tecnospeed.com.br | enviado |
+| 2026-05-14 | Skyone | - | contato@skyone.solutions | enviado |
+| 2026-05-14 | Meta | - | contato@meta.com.br | enviado |
+| 2026-05-14 | Quality Digital | - | contato@qualitydigital.com.br | enviado |
+| 2026-05-14 | Sapiens Solutions | - | contato@sapienssolutions.com.br | enviado |
+| 2026-05-14 | Inmetrics | - | contato@inmetrics.com.br | enviado |
+| 2026-05-14 | CWI Software | - | contato@cwi.com.br | enviado |
+| 2026-05-14 | BairesDev | - | contact@bairesdev.com | enviado |
+| 2026-05-14 | E-Core | - | contato@e-core.com | enviado |
+| 2026-05-14 | Encora | - | contato@encora.com | enviado |
+| 2026-05-14 | Jüssi | - | contato@jussi.com.br | enviado |
+| 2026-05-14 | Distrito | - | contato@distrito.me | enviado |
+| 2026-05-14 | Cubos Technology | - | contato@cubos.io | enviado |
+| 2026-05-14 | Dextra | - | contato@dextra.com.br | enviado |
+| 2026-05-14 | Minsait | - | contato@minsait.com | enviado |
+| 2026-05-14 | NTT DATA | - | contato@nttdata.com | enviado |
+| 2026-05-14 | VMM Geral | - | vmm.geral@gmail.com | enviado |
+| 2026-05-14 | Inmetrics (Refinado) | - | comercial@inmetrics.com.br | enviado |
+| 2026-05-14 | TecnoSpeed (Refinado) | - | comercial@tecnospeed.com.br | enviado |
+| 2026-05-14 | Jüssi (Refinado) | - | contato@jussi.com.br | enviado |
+| 2026-05-14 | Ateliware (Refinado) | - | comercial@ateliware.com | enviado |
+| 2026-05-14 | Luby (Refinado) | - | comercial@luby.com.br | enviado |
+| 2026-05-14 | Softplan (Refinado) | - | vendas@softplan.com.br | enviado |
+| 2026-05-14 | Iteris (Refinado) | - | comercial@iteris.com.br | enviado |
+| 2026-05-14 | Objective (Refinado) | - | comercial@objective.com.br | enviado |
+| 2026-05-14 | Prime Control (Refinado) | - | vendas@primecontrol.com.br | enviado |
+| 2026-05-14 | Monitora (Refinado) | - | comercial@monitoratec.com.br | enviado |
+| 2026-05-14 | Base2 (Refinado) | - | comercial@base2.com.br | enviado |
+| 2026-05-14 | Skyone (Refinado) | - | vendas@skyone.solutions | enviado |
+| 2026-05-14 | Meta (Refinado) | - | comercial@meta.com.br | enviado |
+| 2026-05-14 | Quality Digital (Refinado) | - | comercial@qualitydigital.com.br | enviado |
+| 2026-05-14 | Sapiens Global (Refinado) | - | contato@sapiensglobal.com.br | enviado |
+| 2026-05-14 | CWI Software (Refinado) | - | vendas@cwi.com.br | enviado |
+| 2026-05-14 | Venturus (Refinado) | - | comercial@venturus.org.br | enviado |
+| 2026-05-14 | Cheesecake Labs (Refinado) | - | sales@cheesecakelabs.com | enviado |
+| 2026-05-14 | Ilegra (Refinado) | - | sales@ilegra.com | enviado |
+| 2026-05-14 | UDS Tecnologia (Refinado) | - | vendas@uds.com.br | enviado |
+| 2026-05-14 | VMM Geral (Refinado) | - | vmm.geral@gmail.com | enviado |
+| 2026-05-14 | Matera (Nova) | - | comercial@matera.com | enviado |
+| 2026-05-14 | DBServer (Nova) | - | comercial@dbserver.com.br | enviado |
+| 2026-05-14 | Deal (Nova) | - | comercial@deal.com.br | enviado |
+| 2026-05-14 | 8sa Soluções (Nova) | - | vendas@8sa.com.br | enviado |
+| 2026-05-14 | Penso Tecnologia (Nova) | - | comercial@penso.com.br | enviado |
+| 2026-05-14 | Radix Engineering (Nova) | - | comercial@radixeng.com.br | enviado |
+| 2026-05-14 | Taller (Nova) | - | contato@taller.net.br | enviado |
+| 2026-05-14 | Datarisk (Nova) | - | comercial@datarisk.io | enviado |
+| 2026-05-14 | Aperit (Nova) | - | contato@aperit.com.br | enviado |
+| 2026-05-14 | Inexis (Nova) | - | contato@inexis.com.br | enviado |
+| 2026-05-14 | Smarters (Nova) | - | comercial@smarters.co | enviado |
+| 2026-05-14 | Wise (Nova) | - | comercial@wises.com.br | enviado |
+| 2026-05-14 | Nextage (Nova) | - | comercial@nextage.com.br | enviado |
+| 2026-05-14 | Pentagrama (Nova) | - | vendas@pentagrama.com.br | enviado |
+| 2026-05-14 | Só Informática (Nova) | - | comercial@sainformatica.com.br | enviado |
+| 2026-05-14 | Ambev Tech (Nova) | - | contato@ambevtech.com.br | enviado |
+| 2026-05-14 | Gerdau Next (Nova) | - | contato@gerdaunext.com.br | enviado |
+| 2026-05-14 | Pipefy (Nova) | - | partners@pipefy.com | enviado |
+| 2026-05-14 | Vindi (Nova) | - | comercial@vindi.com.br | enviado |
+| 2026-05-14 | Asaas (Nova) | - | parcerias@asaas.com.br | enviado |
+| 2026-05-14 | VMM Geral (Nova) | - | vmm.geral@gmail.com | enviado |
+| 2026-05-14 | Dojo (Startup/Pequena) | - | contato@dojo.com.br | enviado |
+| 2026-05-14 | Biti (Startup/Pequena) | - | contato@biti.com.br | enviado |
+| 2026-05-14 | Veeper (Startup/Pequena) | - | contato@veeper.com.br | enviado |
+| 2026-05-14 | Coodesh (Startup/Pequena) | - | contato@coodesh.com | enviado |
+| 2026-05-14 | Trakto (Startup/Pequena) | - | contato@trakto.io | enviado |
+| 2026-05-14 | Pulsos (Startup/Pequena) | - | contato@pulsos.com.br | enviado |
+| 2026-05-14 | Lemon Energy (Startup/Pequena) | - | contato@lemon.energy | enviado |
+| 2026-05-14 | Iugu (Startup/Pequena) | - | contato@iugu.com.br | enviado |
+| 2026-05-14 | Pomelo (Startup/Pequena) | - | contato@pomelo.la | enviado |
+| 2026-05-14 | Belvo (Startup/Pequena) | - | contato@belvo.com | enviado |
+| 2026-05-14 | Plug (Startup/Pequena) | - | contato@plug.sh | enviado |
+| 2026-05-14 | Cora (Startup/Pequena) | - | contato@cora.com.br | enviado |
+| 2026-05-14 | Linker (Startup/Pequena) | - | contato@linker.com.br | enviado |
+| 2026-05-14 | Nibo (Startup/Pequena) | - | contato@nibo.com.br | enviado |
+| 2026-05-14 | Ahgora (Startup/Pequena) | - | contato@ahgora.com.br | enviado |
+| 2026-05-14 | Oxygea (Startup/Pequena) | - | contato@oxygea.com | enviado |
+| 2026-05-14 | Kiwify (Startup/Pequena) | - | contato@kiwify.com.br | enviado |
+| 2026-05-14 | HeroSpark (Startup/Pequena) | - | contato@herospark.com | enviado |
+| 2026-05-14 | Eduzz (Startup/Pequena) | - | contato@eduzz.com | enviado |
+| 2026-05-14 | Monetizze (Startup/Pequena) | - | contato@monetizze.com.br | enviado |
+| 2026-05-14 | VMM Geral (Startup/Pequena) | - | vmm.geral@gmail.com | enviado |
