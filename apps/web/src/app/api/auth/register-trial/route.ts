@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { sendWelcomeEmail } from "@/lib/email";
 
-interface TrialRegistrationPayload {
+export interface TrialRegistrationPayload {
   customerName: string;
   customerEmail: string;
   password: string;

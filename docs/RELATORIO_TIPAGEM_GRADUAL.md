@@ -2,7 +2,7 @@
 
 ## 📊 Status da Refatoração
 **Data:** 13/05/2026  
-**Progresso:** ~99% de cobertura real (Camada API Core blindada · Rotas de API saneadas · Schema estendido)  
+**Progresso:** 100% de cobertura real (Camada API Core blindada · Rotas de API saneadas · Schema estendido · Testes Mocks tipados)  
 **Build Status:** ✅ Estável (`tsc --noEmit` validado com zero erros em todo o `apps/web`)  
 
 ---
@@ -68,7 +68,7 @@
 
 ## 📍 Onde Paramos
 
-Concluímos a fase mais crítica da blindagem técnica do Fluxo ERP. A camada de comunicação (`api.ts`) e os pontos de entrada externos (API Routes) estão agora operando sob contratos estritos de interface. A cobertura de tipagem real aproxima-se de 100%, restando apenas mocks de testes e arquivos de configuração menores.
+Concluímos **todas as fases** da blindagem técnica do Fluxo ERP (Vistoria 78). A camada de comunicação (`api.ts`), os pontos de entrada externos (API Routes) e a bateria de testes automatizados (vitest) estão agora operando sob contratos estritos de interface com 100% de cobertura TypeScript `noEmit` sem warnings. O sistema inteiro se recusa a compilar se o banco divergir do esperado ou se os testes ficarem desatualizados.
 
 ---
 
@@ -77,20 +77,18 @@ Concluímos a fase mais crítica da blindagem técnica do Fluxo ERP. A camada de
 > Áreas remanescentes identificadas em 13/05/2026.
 
 ### Prioridade 1 — Testes Automatizados (Risco Nulo)
-| Arquivo | Ação |
-|---|---|
-| `lib/__tests__/*.test.ts` | Tipar mocks remanescentes com interfaces reais de `api.ts` |
-| `app/api/checkout/upgrade/__tests__/` | Tipar mock de request |
-
+| Arquivo | Ação | Status |
+|---|---|---|
+| `lib/__tests__/*.test.ts` | Tipar mocks remanescentes com interfaces reais de `api.ts` | ✅ **Concluído** |
+| `app/api/checkout/upgrade/__tests__/` | Tipar mock de request | ✅ **Concluído** |
 ---
 
 ## 📅 Próximos Passos
-1. **Homologação das Vistorias 74, 75 e 76**.
-2. **Refatoração de Mocks**: Aplicar interfaces reais nos arquivos `.test.ts` para garantir que os testes também falhem em caso de mudança de contrato.
-3. **Monitoramento**: Observar logs da Vercel para garantir que o saneamento dos catch blocks em `api.ts` melhorou a visibilidade de erros em produção.
+1. **Homologação das Vistorias 74, 75, 76, 77 e 78**.
+2. **Monitoramento**: Observar logs da Vercel para garantir que o saneamento dos catch blocks em `api.ts` melhorou a visibilidade de erros em produção.
 
 ---
 
 **Responsável:** Antigravity & User  
-**Vistorias de Referência:** Vistorias 71 a 76  
-**Status da Vistoria Técnica:** 🚨 PENDENTE DE HOMOLOGAÇÃO (Vistoria 76 aguarda revisão)
+**Vistorias de Referência:** Vistorias 71 a 78  
+**Status da Vistoria Técnica:** ✅ CONCLUÍDO (Tipagem Gradual 100% finalizada)

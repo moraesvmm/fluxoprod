@@ -10,9 +10,12 @@ import {
   gerarCodigoBarras
 } from '../api'
 
+import type { Produto, Kit, TransferenciaEstoque } from '../api'
+
 // Mock Supabase Client
+const mockRpc = vi.fn()
 const mockSupabase: any = {
-  rpc: vi.fn(),
+  rpc: mockRpc,
 }
 
 vi.mock('@/utils/supabase/client', () => ({
@@ -22,24 +25,25 @@ vi.mock('@/utils/supabase/client', () => ({
 describe('Inventory API (api.ts)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockSupabase.rpc.mockResolvedValue({ data: {}, error: null })
+    mockRpc.mockResolvedValue({ data: {}, error: null })
   })
 
   describe('Produtos', () => {
     it('deve listar produtos', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
-        data: [{ id: 'p1', nome: 'Produto 1', estoque_atual: 10 }],
+      const mockData: Partial<Produto>[] = [{ id: 'p1', nome: 'Produto 1', estoque_atual: 10 }]
+      mockRpc.mockResolvedValueOnce({
+        data: mockData,
         error: null,
       })
 
       const result = await fetchProdutos()
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_listar_produtos')
+      expect(mockRpc).toHaveBeenCalledWith('tenant_listar_produtos')
       expect(result).toHaveLength(1)
       expect(result[0].nome).toBe('Produto 1')
     })
 
     it('deve criar um produto', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { produto_id: 'p-new-123' },
         error: null,
       })
@@ -52,7 +56,7 @@ describe('Inventory API (api.ts)', () => {
       }
 
       const result = await createProduto(payload)
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_criar_produto', expect.objectContaining({
+      expect(mockRpc).toHaveBeenCalledWith('tenant_criar_produto', expect.objectContaining({
         p_nome: payload.nome,
         p_sku: payload.sku,
       }))
@@ -62,18 +66,18 @@ describe('Inventory API (api.ts)', () => {
 
   describe('Alertas e Kits', () => {
     it('deve verificar e gerar alertas de estoque', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { success: true, alertas_criados: 3 },
         error: null,
       })
 
       const result = await verificarAlertasEstoque()
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_verificar_alertas_estoque')
+      expect(mockRpc).toHaveBeenCalledWith('tenant_verificar_alertas_estoque')
       expect(result.alertas_criados).toBe(3)
     })
 
     it('deve criar um kit de produtos', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { kit_id: 'kit-123' },
         error: null,
       })
@@ -85,7 +89,7 @@ describe('Inventory API (api.ts)', () => {
       }
 
       const result = await criarKit(payload)
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_criar_kit', expect.objectContaining({
+      expect(mockRpc).toHaveBeenCalledWith('tenant_criar_kit', expect.objectContaining({
         p_nome: payload.nome,
         p_itens: JSON.stringify(payload.itens)
       }))
@@ -95,7 +99,7 @@ describe('Inventory API (api.ts)', () => {
 
   describe('Movimentações e Transferências', () => {
     it('deve criar uma transferência entre locais', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { transferencia_id: 'tr-123' },
         error: null,
       })
@@ -109,7 +113,7 @@ describe('Inventory API (api.ts)', () => {
       }
 
       const result = await criarTransferencia(payload)
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_criar_transferencia', expect.objectContaining({
+      expect(mockRpc).toHaveBeenCalledWith('tenant_criar_transferencia', expect.objectContaining({
         p_quantidade: 10
       }))
       expect(result.transferencia_id).toBe('tr-123')
@@ -117,7 +121,7 @@ describe('Inventory API (api.ts)', () => {
 
     it('deve concluir uma transferência', async () => {
       await concluirTransferencia('tr-123')
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_concluir_transferencia', {
+      expect(mockRpc).toHaveBeenCalledWith('tenant_concluir_transferencia', {
         p_transferencia_id: 'tr-123'
       })
     })
@@ -125,26 +129,26 @@ describe('Inventory API (api.ts)', () => {
 
   describe('Valoração e Códigos', () => {
     it('deve calcular o valor total do estoque', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { valor_total: 15000.50, metodo: 'custo_medio' },
         error: null,
       })
 
       const result = await calcularValorEstoque('custo_medio')
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_calcular_valor_estoque', {
+      expect(mockRpc).toHaveBeenCalledWith('tenant_calcular_valor_estoque', {
         p_metodo: 'custo_medio'
       })
       expect(result.valor_total).toBe(15000.50)
     })
 
     it('deve gerar código de barras para um produto', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { success: true, codigo_barras: '7891234567890' },
         error: null,
       })
 
       const result = await gerarCodigoBarras('p1')
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_gerar_codigo_barras', {
+      expect(mockRpc).toHaveBeenCalledWith('tenant_gerar_codigo_barras', {
         p_produto_id: 'p1'
       })
       expect(result.codigo_barras).toBe('7891234567890')

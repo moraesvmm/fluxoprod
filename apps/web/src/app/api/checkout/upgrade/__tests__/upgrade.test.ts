@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { POST } from '../route'
+import { POST, type UpgradePayload } from '../route'
 import { createClient } from '@/utils/supabase/server'
 import { PaymentGatewayService } from '@/services/PaymentGatewayService'
 
@@ -102,12 +102,14 @@ describe('Upgrade/Checkout API', () => {
       redirectUrl: 'https://asaas.com/p/link-de-pagamento',
     })
 
+    const payloadRequest: UpgradePayload = {
+      empresaId: 'emp-123',
+      modules: ['crm', 'estoque'],
+    }
+
     const request = new Request('http://localhost/api/checkout/upgrade', {
       method: 'POST',
-      body: JSON.stringify({
-        empresaId: 'emp-123',
-        modules: ['crm', 'estoque'],
-      }),
+      body: JSON.stringify(payloadRequest),
     })
 
     const response = await POST(request)

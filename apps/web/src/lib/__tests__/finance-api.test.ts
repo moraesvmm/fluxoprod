@@ -9,8 +9,9 @@ import {
 } from '../api'
 
 // Mock Supabase Client
+const mockRpc = vi.fn()
 const mockSupabase: any = {
-  rpc: vi.fn(),
+  rpc: mockRpc,
 }
 
 vi.mock('@/utils/supabase/client', () => ({
@@ -20,24 +21,24 @@ vi.mock('@/utils/supabase/client', () => ({
 describe('Finance API (api.ts)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockSupabase.rpc.mockResolvedValue({ data: {}, error: null })
+    mockRpc.mockResolvedValue({ data: {}, error: null })
   })
 
   describe('Fluxo de Caixa', () => {
     it('deve listar lançamentos financeiros', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: [{ id: 'f1', tipo: 'receita', valor: 1000, status: 'pago' }],
         error: null,
       })
 
       const result = await fetchFinanceiro()
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_listar_financeiro')
+      expect(mockRpc).toHaveBeenCalledWith('tenant_listar_financeiro')
       expect(result).toHaveLength(1)
       expect(result[0].tipo).toBe('receita')
     })
 
     it('deve criar um lançamento financeiro', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { financeiro_id: 'f-new-123' },
         error: null,
       })
@@ -52,7 +53,7 @@ describe('Finance API (api.ts)', () => {
       }
 
       const result = await createFinanceiro(payload)
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_criar_financeiro', expect.objectContaining({
+      expect(mockRpc).toHaveBeenCalledWith('tenant_criar_financeiro', expect.objectContaining({
         p_descricao: 'Aluguel',
         p_valor: 2500
       }))
@@ -62,24 +63,24 @@ describe('Finance API (api.ts)', () => {
 
   describe('Comissões', () => {
     it('deve listar comissões de colaboradores', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: [{ id: 'c1', colaborador_id: 'u1', valor_comissao: 150 }],
         error: null,
       })
 
       const result = await fetchComissoes()
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_listar_comissoes')
+      expect(mockRpc).toHaveBeenCalledWith('tenant_listar_comissoes')
       expect(result).toHaveLength(1)
     })
 
     it('deve atualizar o status de pagamento de uma comissão', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { id: 'c1', status_pagamento: 'pago' },
         error: null,
       })
 
       const result = await updateComissao('c1', { status_pagamento: 'pago', data_pagamento: '2026-05-06' })
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_atualizar_comissao', expect.objectContaining({
+      expect(mockRpc).toHaveBeenCalledWith('tenant_atualizar_comissao', expect.objectContaining({
         p_comissao_id: 'c1',
         p_status_pagamento: 'pago'
       }))
@@ -89,13 +90,13 @@ describe('Finance API (api.ts)', () => {
 
   describe('Relatórios e DRE', () => {
     it('deve obter dados do DRE por período', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { faturamento: 50000, lucro_liquido: 12000 },
         error: null,
       })
 
       const result = await fetchDRE('2026-01-01', '2026-01-31')
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_obter_dre', {
+      expect(mockRpc).toHaveBeenCalledWith('tenant_obter_dre', {
         p_data_inicio: '2026-01-01',
         p_data_fim: '2026-01-31'
       })
@@ -105,20 +106,20 @@ describe('Finance API (api.ts)', () => {
 
   describe('Cupons e Descontos', () => {
     it('deve validar um cupom de desconto', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { id: 'cp1', codigo: 'PROMO10', tipo: 'percentual', valor: 10 },
         error: null,
       })
 
       const result = await validarCupom('PROMO10')
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('validar_cupom', {
+      expect(mockRpc).toHaveBeenCalledWith('validar_cupom', {
         p_codigo: 'PROMO10'
       })
       expect(result.valor).toBe(10)
     })
 
     it('deve lançar erro para cupom inválido', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { error: 'Cupom expirado' },
         error: null,
       })

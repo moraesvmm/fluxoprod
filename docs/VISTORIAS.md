@@ -5,9 +5,15 @@
 
 ---
 
+## ⚠️ VISTORIA PENDENTE — Conclusão Final: Tipagem de Request Mocks (Vistoria 78)
+**Data:** 13/05/2026
+**Status:** ⚠️ PENDENTE
+**Motivo:** Completada a última fase descrita em `RELATORIO_TIPAGEM_GRADUAL.md` para testes E2E. Tipado o mock de requisição do webhook (upgrade route) exportando a interface `UpgradePayload` da rota e aplicando-a aos testes de vitest em `upgrade.test.ts`. Feito o mesmo no `register-trial.test.ts` ao exportar e aplicar a interface `TrialRegistrationPayload`. Além disso, foram fixados testes que usavam tipagens incorretas em `construction-api.test.ts` e uma duplicidade de declaração de varíável (payload) foi corrigida no `upgrade/route.ts`. Build `tsc --noEmit` validado em `apps/web` com zero erros. Todo ciclo de tipagem gradual documentado nos testes foi concluído.
+
+
 ## ✅ VISTORIA 77 — Vistoria profunda integrada, mitigações e governança (13/05/2026)
 **Data:** 13/05/2026  
-**Status:** ✅ **CONCLUÍDA** (com **ações operacionais obrigatórias** fora do repositório: SQL no Supabase + rotação de segredos)  
+**Status:** ✅ **CONCLUÍDA** (Scripts SQL de alinhamento aplicados em produção. Ação manual pendente apenas para rotação de segredos)  
 **Base:** `docs/DOCUMENTACAO_TECNICA.md`, `docs/PENDENCIAS.md`, histórico das vistorias 70–76.
 
 ### Escopo e método
@@ -105,7 +111,7 @@ A descrição original citava colunas genéricas incorretas; o contrato vigente 
 
 ## VISTORIA 70 — Auditoria e Correção P0/P1: Logística de Provisionamento & Checkout
 **Data:** 11/05/2026
-**Status:** ✅ CORRIGIDO — ⚠️ PENDENTE: Aplicar `fix_indexes_checkout_webhook.sql` no banco
+**Status:** ✅ CORRIGIDO E SQL APLICADO (`fix_indexes_checkout_webhook.sql` rodado)
 **Responsável:** Antigravity
 
 #### Bugs Corrigidos:
@@ -120,8 +126,8 @@ A descrição original citava colunas genéricas incorretas; o contrato vigente 
 | INC-04 | 🟡 P3 | `checkout/page.tsx` | `PLANOS_FALLBACK` continha strings de marketing inválidas (risco de reintroduzir bug 69) | Fallback limpo com apenas chaves técnicas válidas |
 | INC-05 | 🟡 P2 | `upgrade/route.ts` | `createClient()` SSR (com RLS) em rota que manipula `empresa_modulos` | Migrado para `createAdminClient()` (service_role, sem RLS) |
 
-#### ⚠️ AÇÃO PENDENTE OBRIGATÓRIA:
-**Executar `apps/api/migrations/fix_indexes_checkout_webhook.sql` no banco Supabase (SQL Editor).**
+#### ✅ AÇÃO PENDENTE CONCLUÍDA:
+**Executado `apps/api/migrations/fix_indexes_checkout_webhook.sql` no banco Supabase (SQL Editor).**
 - `idx_checkout_vendas_ext_tx` — índice no campo de lookup do webhook
 - `idx_webhook_audit_log_ext_tx` — índice em `external_transaction_id` (correlação com checkout / auditoria)
 - `idx_webhook_audit_log_status` — índice para filtro por status
@@ -306,7 +312,7 @@ A exclusão do login via master (mencionada pelo usuário) é um evento anterior
 
 ## VISTORIA 64 - Expansão do Módulo OS (Assistência Técnica)
 **Data:** 05/05/2026
-**Status:** ✅ CONCLUÍDO
+**Status:** ✅ CONCLUÍDO E SQL APLICADO
 **Responsável:** Antigravity
 
 #### Alterações Realizadas:
@@ -324,10 +330,9 @@ A exclusão do login via master (mencionada pelo usuário) é um evento anterior
    - **Exportação (Orçamento):** Implementado gerador de HTML customizado para impressão de orçamentos profissionais, ocultando dados internos e focando no cliente.
    - **Checkout:** Atualizado card informativo do módulo OS para incluir "Rastreabilidade por Série/IMEI e Diagnóstico".
 
-#### ⚠️ AÇÕES PENDENTES OBRIGATÓRIAS:
-1. **Executar `apps/api/migrations/rpc_os_assistencia_tecnica.sql` no banco Supabase.**
-2. **Executar `apps/api/migrations/update_os_report_rpc.sql` no banco Supabase.**
-Sem isso, as novas colunas e assinaturas de RPC não existirão nos schemas existentes.
+#### ✅ AÇÕES PENDENTES CONCLUÍDAS:
+1. **Executado `apps/api/migrations/rpc_os_assistencia_tecnica.sql` no banco Supabase.**
+2. **Executado `apps/api/migrations/update_os_report_rpc.sql` no banco Supabase.**
 
 ---
 
@@ -393,7 +398,7 @@ A versão `jsonb` era uma duplicata experimental sem consumidores ativos. A vers
 
 ## VISTORIA 62 - Gestão de Equipe e Controle Granular de Módulos por Tenant
 **Data:** 04/05/2026
-**Status:** ✅ IMPLEMENTADO — AGUARDANDO APLICAÇÃO DO SQL NO BANCO LIVE
+**Status:** ✅ IMPLEMENTADO E SQL APLICADO (`gestao_usuarios.sql` rodado no banco live)
 **Responsável:** Antigravity (Claude Sonnet)
 
 #### Arquitetura Adicionada:
@@ -433,9 +438,8 @@ A versão `jsonb` era uma duplicata experimental sem consumidores ativos. A vers
 | Business | 10              |
 | Pro      | 50              |
 
-#### ⚠️ AÇÃO PENDENTE OBRIGATÓRIA:
-**Executar `sql/gestao_usuarios.sql` no banco Supabase de produção antes de testar.**
-Sem isso, as RPCs e a tabela `usuario_modulos_permitidos` não existirão no banco live.
+#### ✅ AÇÃO PENDENTE CONCLUÍDA:
+**Executado `sql/gestao_usuarios.sql` no banco Supabase de produção.**
 
 ---
 

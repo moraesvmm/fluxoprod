@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { POST } from '../route'
+import { POST, type TrialRegistrationPayload } from '../route'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { sendWelcomeEmail } from '@/lib/email'
 
@@ -67,17 +67,21 @@ describe('Register Trial API', () => {
   })
 
   it('deve realizar o fluxo completo de provisionamento com sucesso', async () => {
+    const payloadRequest: TrialRegistrationPayload = {
+      customerName: 'João Silva',
+      customerEmail: 'joao@realcompany.com',
+      password: 'securepassword',
+      companyName: 'Silva Corp',
+      companyDocument: '12.345.678/0001-99',
+      companySize: 'MPE',
+      companySegment: 'Tecnologia',
+      planName: 'Starter',
+      modules: ['crm', 'estoque'],
+    }
+
     const request = new Request('http://localhost/api/auth/register-trial', {
       method: 'POST',
-      body: JSON.stringify({
-        customerName: 'João Silva',
-        customerEmail: 'joao@realcompany.com',
-        password: 'securepassword',
-        companyName: 'Silva Corp',
-        companyDocument: '12.345.678/0001-99',
-        planName: 'Starter',
-        modules: ['crm', 'estoque'],
-      }),
+      body: JSON.stringify(payloadRequest),
     })
 
     const response = await POST(request)

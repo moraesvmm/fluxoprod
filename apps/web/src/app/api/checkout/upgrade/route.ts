@@ -2,9 +2,15 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin"; // FIX INC-05: usar adminClient (service_role, sem RLS)
 import { PaymentGatewayService, PaymentTransactionPayload } from "@/services/PaymentGatewayService";
 
+export interface UpgradePayload {
+  empresaId: string;
+  modules?: string[];
+}
+
 export async function POST(request: Request) {
   try {
-    const { empresaId, modules } = await request.json();
+    const requestPayload = (await request.json()) as UpgradePayload;
+    const { empresaId, modules } = requestPayload;
 
     if (!empresaId) {
       return NextResponse.json({ error: "ID da empresa obrigatório" }, { status: 400 });
@@ -123,7 +129,7 @@ export async function POST(request: Request) {
     }
 
     // 6. Gerar link de pagamento
-    const payload: PaymentTransactionPayload = {
+    const transactionPayload: PaymentTransactionPayload = {
       customerName,
       customerEmail,
       planName: empresa.plan_name || "Plano Personalizado",
@@ -139,7 +145,7 @@ export async function POST(request: Request) {
       },
     };
 
-    const response = await PaymentGatewayService.createTransaction(payload);
+    const response = await PaymentGatewayService.createTransaction(transactionPayload);
 
     if (response.success && response.redirectUrl) {
       return NextResponse.json({ success: true, redirectUrl: response.redirectUrl });

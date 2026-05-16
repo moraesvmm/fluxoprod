@@ -10,9 +10,12 @@ import {
   obterSugestoesNurturing
 } from '../api'
 
+import type { Cliente, ClienteListResult, InteracaoCliente } from '../api'
+
 // Mock Supabase Client
+const mockRpc = vi.fn()
 const mockSupabase: any = {
-  rpc: vi.fn(),
+  rpc: mockRpc,
 }
 
 vi.mock('@/utils/supabase/client', () => ({
@@ -23,12 +26,12 @@ describe('CRM API (api.ts)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Reset rpc mock to resolve successfully by default
-    mockSupabase.rpc.mockResolvedValue({ data: {}, error: null })
+    mockRpc.mockResolvedValue({ data: {}, error: null })
   })
 
   describe('Clientes', () => {
     it('deve criar um cliente com parâmetros corretos', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { cliente_id: 'new-client-123' },
         error: null,
       })
@@ -42,7 +45,7 @@ describe('CRM API (api.ts)', () => {
 
       const result = await createCliente(payload)
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_criar_cliente', expect.objectContaining({
+      expect(mockRpc).toHaveBeenCalledWith('tenant_criar_cliente', expect.objectContaining({
         p_nome: payload.nome,
         p_email: payload.email,
         p_telefone: payload.telefone,
@@ -51,8 +54,9 @@ describe('CRM API (api.ts)', () => {
     })
 
     it('deve atualizar um cliente', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
-        data: { id: 'client-123', nome: 'Novo Nome' },
+      const mockData: Partial<Cliente> = { id: 'client-123', nome: 'Novo Nome' }
+      mockRpc.mockResolvedValueOnce({
+        data: mockData,
         error: null,
       })
 
@@ -61,8 +65,9 @@ describe('CRM API (api.ts)', () => {
     })
 
     it('deve listar clientes e processar cursor', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
-        data: [{ id: '1', nome: 'C1', next_cursor: 'next' }],
+      const mockData: Partial<ClienteListResult> = { data: [{ id: '1', nome: 'C1' } as Cliente], next_cursor: 'next' }
+      mockRpc.mockResolvedValueOnce({
+        data: mockData,
         error: null,
       })
 
@@ -74,7 +79,7 @@ describe('CRM API (api.ts)', () => {
 
   describe('Interações', () => {
     it('deve criar uma interação para o cliente', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { interacao_id: 'int-123' },
         error: null,
       })
@@ -85,7 +90,7 @@ describe('CRM API (api.ts)', () => {
         titulo: 'Teste'
       })
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith('tenant_criar_interacao', expect.objectContaining({
+      expect(mockRpc).toHaveBeenCalledWith('tenant_criar_interacao', expect.objectContaining({
         p_tipo: 'ligacao'
       }))
       expect(result.id).toBe('int-123')
@@ -94,7 +99,7 @@ describe('CRM API (api.ts)', () => {
 
   describe('Tags', () => {
     it('deve adicionar uma tag', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { success: true },
         error: null,
       })
@@ -104,7 +109,7 @@ describe('CRM API (api.ts)', () => {
     })
 
     it('deve listar o catálogo de tags', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: [{ id: '1', nome: 'VIP' }],
         error: null,
       })
@@ -116,7 +121,7 @@ describe('CRM API (api.ts)', () => {
 
   describe('Nurturing e Campanhas', () => {
     it('deve enviar campanha em massa', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: { success: true, enviados: 5 },
         error: null,
       })
@@ -126,7 +131,7 @@ describe('CRM API (api.ts)', () => {
     })
 
     it('deve obter sugestões de nurturing', async () => {
-      mockSupabase.rpc.mockResolvedValueOnce({
+      mockRpc.mockResolvedValueOnce({
         data: [{ id: 'a1' }],
         error: null,
       })
