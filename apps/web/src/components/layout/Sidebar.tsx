@@ -20,6 +20,7 @@ import {
   DollarSign,
   ShieldAlert,
   ShoppingBag,
+  Factory
 } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -31,6 +32,7 @@ const navigation = [
   { key: "crm", name: "Clientes & CRM", href: "/tenant/crm", icon: Users },
   { key: "financeiro", name: "Financeiro", href: "/tenant/financeiro", icon: Wallet },
   { key: "catalogo", name: "Catalogo", href: "/tenant/catalogo", icon: Tags },
+  { key: "producao", name: "Produção (MRP)", href: "/tenant/producao", icon: Factory },
   { key: "rh", name: "RH & Equipe", href: "/tenant/rh", icon: Briefcase },
   { key: "os", name: "Ordem de Servico", href: "/tenant/os", icon: Wrench },
   { key: "obras", name: "Obras", href: "/tenant/obras", icon: Building2 },

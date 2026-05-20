@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
   CheckCircle2,
   AlertCircle,
+  Factory,
   type LucideIcon
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
@@ -51,6 +52,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   obras: Building2,
   comissoes: DollarSign,
   dashboard: LayoutDashboard,
+  producao: Factory,
 };
 
 const COLOR_MAP: Record<string, string> = {
@@ -65,6 +67,7 @@ const COLOR_MAP: Record<string, string> = {
   obras: "#84cc16", // lime
   comissoes: "#f97316", // orange
   dashboard: "#94a3b8", // slate
+  producao: "#eab308", // yellow
 };
 
 export default function LojaPage() {
