@@ -22,10 +22,10 @@ export async function sendWelcomeEmail(to: string, name: string, activationLink?
             <h1 style="margin: 0; font-size: 40px; font-weight: 800; color: #ffffff;">Fluxo</h1>
           </div>
           <div style="padding: 40px; text-align: center;">
-            <h1 style="color: #ffffff; font-size: 28px; margin-bottom: 16px; letter-spacing: -0.02em;">Olá, \${name}! 🚀</h1>
+            <h1 style="color: #ffffff; font-size: 28px; margin-bottom: 16px; letter-spacing: -0.02em;">Olá, ${name}! 🚀</h1>
             <p style="color: #a1a1aa; line-height: 1.6; font-size: 16px; margin-bottom: 32px;">Seu teste gratuito de 7 dias começou. Prepare-se para elevar sua gestão a um novo patamar de eficiência e controle.</p>
             
-            <a href="\${activationLink}" style="display: inline-block; padding: 18px 36px; background-color: #ffffff; color: #000000; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">ATIVAR MINHA CONTA AGORA</a>
+            <a href="${activationLink}" style="display: inline-block; padding: 18px 36px; background-color: #ffffff; color: #000000; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">ATIVAR MINHA CONTA AGORA</a>
 
             <div style="background-color: #1a1a1a; padding: 30px; border-radius: 16px; margin: 30px 0; text-align: left;">
               <div style="color: #ffffff; font-size: 14px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.1em;">O que você vai acessar:</div>
@@ -36,7 +36,7 @@ export async function sendWelcomeEmail(to: string, name: string, activationLink?
 
             <p style="font-size: 13px; color: #71717a;">
               Se o botão não funcionar, copie e cole o link no seu navegador: <br/><br/>
-              <a href="\${activationLink}" style="color: #6366f1; word-break: break-all;">\${activationLink}</a>
+              <a href="${activationLink}" style="color: #6366f1; word-break: break-all;">${activationLink}</a>
             </p>
           </div>
           <div style="padding: 30px; text-align: center; color: #52525b; font-size: 12px; border-top: 1px solid #222222;">
