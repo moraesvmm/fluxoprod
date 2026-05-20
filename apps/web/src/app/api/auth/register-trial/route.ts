@@ -264,6 +264,7 @@ export async function POST(request: Request) {
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'signup',
       email: payload.customerEmail,
+      password: payload.password,
       options: {
         redirectTo: `${origin}/login?confirmed=true`
       }
