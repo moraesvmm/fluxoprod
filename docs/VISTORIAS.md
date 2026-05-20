@@ -5,10 +5,52 @@
 
 ---
 
+## ⚠️ VISTORIA PENDENTE — Correção: E-mail de Confirmação e Botão Reenviar (Vistoria 79)
+**Data:** 20/05/2026
+**Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
+**Responsável:** Antigravity
+
+#### Problema Identificado:
+- E-mail de boas-vindas/ativação não chegava ao usuário após o provisionamento.
+- Botão "clique aqui para reenviar" na tela de sucesso do checkout era decorativo (sem lógica).
+
+#### Causa Raiz:
+1. **`RESEND_API_KEY` ausente nas variáveis de ambiente** (`apps/web/.env.local` e Vercel). Sem a chave, `sendWelcomeEmail` retornava silenciosamente.
+2. **Remetente errado:** `onboarding@resend.dev` (domínio sandbox) estava hardcoded — só entrega para e-mails verificados no painel Resend.
+3. **Botão sem `onClick`:** O `<button>` de reenvio não tinha nenhum handler, estado ou chamada de API.
+
+#### Correções Aplicadas:
+| Arquivo | Alteração |
+|---------|-----------|
+| `apps/web/src/lib/email.ts` | Remetente corrigido para `noreply@seufluxoerp.com.br` (domínio `verified` na conta Resend) |
+| `apps/web/src/app/api/auth/resend-confirmation/route.ts` | **[NOVO]** Endpoint `POST /api/auth/resend-confirmation` — localiza o usuário, verifica se ainda não confirmou, gera novo magic link via Supabase Admin e reenvia via Resend |
+| `apps/web/src/app/(auth)/checkout/page.tsx` | Botão de reenvio agora funcional: estados `resendLoading`, `resendStatus` (`idle`/`sent`/`error`), `resendError`, handler `handleResendEmail` com feedback visual completo |
+| `apps/web/.env.local` | Adicionado `RESEND_API_KEY` |
+
+#### ⚠️ AÇÃO PENDENTE OBRIGATÓRIA (Operador Humano):
+**Adicionar `RESEND_API_KEY` nas variáveis de ambiente da Vercel:**
+1. Acesse: https://vercel.com → Projeto `fluxoprod` → Settings → Environment Variables
+2. Adicione: `RESEND_API_KEY` = `re_JHkrdxZh_AZT4AN4UiZaubqfdcdSjYBYA`
+3. Marque os ambientes: **Production**, **Preview**, **Development**
+4. Faça um **Redeploy** para as variáveis entrarem em vigor.
+
+Sem isso, os e-mails continuarão não sendo enviados em produção.
+
+#### Validação Pendente:
+- [ ] Variável `RESEND_API_KEY` adicionada e redeploy realizado na Vercel
+- [ ] Testar cadastro completo no checkout: confirmar recebimento do e-mail vindo de `noreply@seufluxoerp.com.br`
+- [ ] Testar botão "clique aqui para reenviar": deve exibir loading, depois mensagem de sucesso
+- [ ] Testar com e-mail já confirmado: deve retornar erro adequado
+- [ ] Verificar logs Vercel/Resend para confirmar entrega
+
+---
+
 ## ⚠️ VISTORIA PENDENTE — Conclusão Final: Tipagem de Request Mocks (Vistoria 78)
 **Data:** 13/05/2026
 **Status:** ⚠️ PENDENTE
 **Motivo:** Completada a última fase descrita em `RELATORIO_TIPAGEM_GRADUAL.md` para testes E2E. Tipado o mock de requisição do webhook (upgrade route) exportando a interface `UpgradePayload` da rota e aplicando-a aos testes de vitest em `upgrade.test.ts`. Feito o mesmo no `register-trial.test.ts` ao exportar e aplicar a interface `TrialRegistrationPayload`. Além disso, foram fixados testes que usavam tipagens incorretas em `construction-api.test.ts` e uma duplicidade de declaração de varíável (payload) foi corrigida no `upgrade/route.ts`. Build `tsc --noEmit` validado em `apps/web` com zero erros. Todo ciclo de tipagem gradual documentado nos testes foi concluído.
+
+---
 
 
 ## ✅ VISTORIA 77 — Vistoria profunda integrada, mitigações e governança (13/05/2026)

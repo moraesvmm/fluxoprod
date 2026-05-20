@@ -57,6 +57,9 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [pricingLoaded, setPricingLoaded] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendStatus, setResendStatus] = useState<"idle" | "sent" | "error">("idle");
+  const [resendError, setResendError] = useState<string | null>(null);
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -186,6 +189,31 @@ function CheckoutContent() {
     }
   };
 
+  const handleResendEmail = useCallback(async () => {
+    if (resendLoading || resendStatus === "sent") return;
+    setResendLoading(true);
+    setResendError(null);
+    try {
+      const response = await fetch("/api/auth/resend-confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: customerEmail }),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setResendStatus("sent");
+      } else {
+        setResendError(data.error || "Não foi possível reenviar. Tente novamente.");
+        setResendStatus("error");
+      }
+    } catch {
+      setResendError("Erro de conexão. Tente novamente.");
+      setResendStatus("error");
+    } finally {
+      setResendLoading(false);
+    }
+  }, [customerEmail, resendLoading, resendStatus]);
+
   const handleCheckout = async () => {
     if (!customerName.trim() || !companyName.trim()) {
       alert("Preencha seu nome e os dados da empresa antes de continuar.");
@@ -270,9 +298,32 @@ function CheckoutContent() {
               >
                  Já confirmei, ir para o Login
               </button>
-              <p className="text-xs text-gray-500">
-                Não recebeu? Verifique sua caixa de spam ou <button className="text-indigo-400 hover:underline">clique aqui para reenviar</button>.
-              </p>
+
+              {resendStatus === "sent" ? (
+                <p className="text-xs text-emerald-400 text-center font-medium">
+                  ✓ E-mail reenviado! Verifique sua caixa de entrada e pasta de spam.
+                </p>
+              ) : (
+                <div className="text-center">
+                  <p className="text-xs text-gray-500">
+                    Não recebeu? Verifique sua caixa de spam ou{" "}
+                    <button
+                      onClick={handleResendEmail}
+                      disabled={resendLoading}
+                      className="text-indigo-400 hover:underline disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center gap-1"
+                    >
+                      {resendLoading ? (
+                        <><Loader2 className="w-3 h-3 animate-spin" /> Reenviando...</>
+                      ) : (
+                        "clique aqui para reenviar"
+                      )}
+                    </button>.
+                  </p>
+                  {resendStatus === "error" && resendError && (
+                    <p className="text-xs text-red-400 mt-1">{resendError}</p>
+                  )}
+                </div>
+              )}
             </div>
          </motion.div>
       </div>

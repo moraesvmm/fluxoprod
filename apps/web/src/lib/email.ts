@@ -77,7 +77,7 @@ export async function sendWelcomeEmail(to: string, name: string, activationLink?
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Fluxo <onboarding@resend.dev>",
+        from: "Fluxo ERP <noreply@seufluxoerp.com.br>",
         to: [to],
         subject: "Bem-vindo ao Fluxo! Ative sua conta 🚀",
         html: html,
