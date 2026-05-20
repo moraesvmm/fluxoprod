@@ -1,19 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    const search = window.location.search;
+    
+    if (hash.includes("access_token") && hash.includes("type=signup")) {
+      setSuccess("Sua conta foi ativada com sucesso! Autenticando...");
+      setLoading(true);
+      
+      const checkSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: profile } = await supabase
+            .from("user_profiles")
+            .select("role")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+            
+          router.push(profile?.role === "master" ? "/admin" : "/tenant/dashboard");
+          router.refresh();
+        } else {
+          setSuccess("E-mail verificado! Faça login abaixo.");
+          setLoading(false);
+        }
+      };
+      
+      // O Supabase parseia o hash de forma assíncrona logo no mount
+      setTimeout(checkSession, 1200);
+    } else if (search.includes("confirmed=true")) {
+      setSuccess("E-mail verificado! Faça login com sua senha.");
+    }
+  }, [router, supabase]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +131,12 @@ export default function LoginPage() {
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+          {success && (
+            <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm border border-green-100 flex items-center justify-center gap-2">
+              <CheckCircle2 className="h-5 w-5" />
+              <span>{success}</span>
+            </div>
+          )}
           {error && (
             <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100 text-center">
               {error}

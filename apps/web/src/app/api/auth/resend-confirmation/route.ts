@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     // Gera novo magic link de ativação
     const origin = request.headers.get("origin") || "https://fluxoprod.vercel.app";
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-      type: "magiclink",
+      type: "signup",
       email: email,
       options: {
         redirectTo: `${origin}/login?confirmed=true`,

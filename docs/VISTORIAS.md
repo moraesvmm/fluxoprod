@@ -5,6 +5,31 @@
 
 ---
 
+## ⚠️ VISTORIA PENDENTE — Correção: UX do E-mail e Redirecionamento Pós-Ativação (Vistoria 80)
+**Data:** 20/05/2026
+**Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
+**Responsável:** Antigravity
+
+#### Problema Identificado:
+- **Design do E-mail (Gmail/Outlook):** O e-mail de ativação renderizava quebrado (sem CSS) e visualmente feio na maioria dos provedores porque as tags `<style>` no `<head>` eram ignoradas/removidas.
+- **Falha na Ativação:** O link gerado para confirmar o e-mail estava como `type: 'magiclink'`, o que não processava perfeitamente o status de "e-mail verificado" ou o redirecionamento. Como resultado, ao clicar no link, o usuário caía na tela de login sem feedback visual (não acontecia nada) e o e-mail não era oficialmente confirmado no Supabase, bloqueando o login com erro "email não verificado".
+
+#### Correções Aplicadas:
+| Arquivo | Alteração |
+|---------|-----------|
+| `apps/web/src/lib/email.ts` | **Refatoração Total:** O template HTML foi reescrito para utilizar *inline styles* em todas as tags, garantindo renderização idêntica (fundo escuro, botão com destaque, margens corretas) no Gmail, Outlook e Apple Mail. O botão e os fallbacks de link foram aprimorados. |
+| `apps/web/src/app/api/auth/register-trial/route.ts` | Alterado a geração do link de `type: 'magiclink'` para `type: 'signup'`, que é o tipo correto para confirmação inicial de conta no Supabase. |
+| `apps/web/src/app/api/auth/resend-confirmation/route.ts` | Alterado a geração do link de reenvio de `type: 'magiclink'` para `type: 'signup'`. |
+| `apps/web/src/app/(auth)/login/page.tsx` | **Novo Hook de Sucesso:** Implementado `useEffect` para interceptar a URL pós-confirmação. Se houver `access_token` no hash da URL e `type=signup`, o app agora reconhece a sessão de confirmação, exibe um banner verde "Sua conta foi ativada com sucesso! Autenticando...", e redireciona automaticamente para o dashboard, sem exigir novo login manual. Se não houver sessão ativa mas vier via redirect normal, avisa "E-mail verificado! Faça login com sua senha". |
+
+#### Validação Pendente:
+- [ ] Testar envio do e-mail: confirmar que a renderização no Gmail (cores e botão) está visualmente perfeita e responsiva.
+- [ ] Clicar no botão "Ativar Minha Conta" em nova aba anônima: confirmar que abre a tela de login.
+- [ ] Na tela de login pós-clique, verificar a exibição da barra de sucesso e o redirecionamento automático para `/tenant/dashboard` em aprox. 1.5s.
+- [ ] Caso não redirecione, confirmar que o login manual aceita a senha (confirmação oficial de e-mail efetivada no Supabase).
+
+---
+
 ## ⚠️ VISTORIA PENDENTE — Correção: E-mail de Confirmação e Botão Reenviar (Vistoria 79)
 **Data:** 20/05/2026
 **Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
