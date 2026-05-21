@@ -79,11 +79,11 @@ export function ConfirmModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-background rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-border">
         {/* Close */}
         <button
           onClick={onCancel}
-          className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-md hover:bg-slate-100"
+          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent"
         >
           <X className="h-4 w-4" />
         </button>
@@ -93,15 +93,15 @@ export function ConfirmModal({
           <div className={`w-12 h-12 rounded-full ${config.iconBg} flex items-center justify-center mb-4`}>
             <Icon className={`h-6 w-6 ${config.iconColor}`} />
           </div>
-          <h3 className="text-base font-semibold text-slate-900 mb-1">{title}</h3>
-          <p className="text-sm text-slate-500 leading-relaxed">{message}</p>
+          <h3 className="text-base font-semibold text-foreground mb-1">{title}</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">{message}</p>
         </div>
 
         {/* Actions */}
         <div className="px-6 pb-6 flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300"
+            className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-foreground bg-muted hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
           >
             {cancelText}
           </button>

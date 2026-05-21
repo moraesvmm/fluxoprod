@@ -34,13 +34,13 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-background rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-in fade-in zoom-in duration-200 border border-border">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-slate-50">
-          <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30">
+          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-md hover:bg-slate-200"
+            className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-accent"
           >
             <X className="h-5 w-5" />
           </button>
