@@ -11,7 +11,7 @@ function isLookupError(result: ProdutoLookupResult): result is { error: string }
   return typeof result === "object" && result !== null && "error" in result;
 }
 
-// Para scanner fÃƒÂ­sico, integrar com biblioteca html5-qrcode ou react-qr-reader na SessÃƒÂ£o 6 (integraÃƒÂ§ÃƒÂ£o final)
+// Para scanner físico, integrar com biblioteca html5-qrcode ou react-qr-reader na Sessão 6 (integração final)
 
 export default function CodigosPanel() {
   const { data: produtos = [] } = useProdutos();
@@ -25,9 +25,9 @@ export default function CodigosPanel() {
   const handleGerarCodigo = async (produtoId: string) => {
     try {
       await gerarCodigoMutation.mutateAsync(produtoId);
-      success("CÃƒÂ³digo de barras gerado com sucesso!");
+      success("Código de barras gerado com sucesso!");
     } catch (err: unknown) {
-      toastError("Erro ao gerar cÃƒÂ³digo: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
+      toastError("Erro ao gerar código: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 
@@ -61,11 +61,11 @@ export default function CodigosPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <QrCode className="h-5 w-5 text-indigo-500" />
-          <h3 className="text-lg font-semibold">CÃƒÂ³digos de Barras e QR</h3>
+          <h3 className="text-lg font-semibold">Códigos de Barras e QR</h3>
         </div>
       </div>
 
-      {/* Busca por cÃƒÂ³digo */}
+      {/* Busca por código */}
       <div className="p-4 rounded-lg border border-border bg-card">
         <div className="flex items-center gap-2">
           <Search className="h-5 w-5 text-slate-400" />
@@ -74,7 +74,7 @@ export default function CodigosPanel() {
             value={codigoBusca}
             onChange={(e) => setCodigoBusca(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleBuscarPorCodigo()}
-            placeholder="Digite o cÃƒÂ³digo de barras ou QR..."
+            placeholder="Digite o código de barras ou QR..."
             className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
           <button
@@ -93,10 +93,10 @@ export default function CodigosPanel() {
               <div>
                 <h4 className="font-medium text-green-900">{produtoEncontrado.nome}</h4>
                 <p className="text-sm text-green-700 mt-1">
-                  CÃƒÂ³digo: {produtoEncontrado.codigo_barras || produtoEncontrado.codigo_qr || "-"}
+                  Código: {produtoEncontrado.codigo_barras || produtoEncontrado.codigo_qr || "-"}
                 </p>
                 <p className="text-sm text-green-700">
-                  PreÃƒÂ§o: R$ {produtoEncontrado.preco_base?.toFixed(2) || "0,00"}
+                  Preço: R$ {produtoEncontrado.preco_base?.toFixed(2) || "0,00"}
                 </p>
               </div>
             </div>
@@ -104,19 +104,19 @@ export default function CodigosPanel() {
         )}
       </div>
 
-      {/* Lista de produtos com cÃƒÂ³digos */}
+      {/* Lista de produtos com códigos */}
       <div className="border border-border rounded-lg bg-card overflow-hidden">
         <div className="px-4 py-3 border-b border-border bg-muted">
-          <h4 className="font-medium text-foreground">CÃƒÂ³digos por Produto</h4>
+          <h4 className="font-medium text-foreground">Códigos por Produto</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted">
                 <th className="text-left p-3 font-medium text-foreground">Produto</th>
-                <th className="text-left p-3 font-medium text-foreground">CÃƒÂ³digo de Barras</th>
+                <th className="text-left p-3 font-medium text-foreground">Código de Barras</th>
                 <th className="text-left p-3 font-medium text-foreground">QR Code</th>
-                <th className="text-left p-3 font-medium text-foreground">AÃƒÂ§ÃƒÂµes</th>
+                <th className="text-left p-3 font-medium text-foreground">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -151,10 +151,10 @@ export default function CodigosPanel() {
                         disabled={gerarCodigoMutation.isPending}
                         className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700 h-7 px-2 disabled:opacity-50"
                       >
-                        <Plus className="mr-1 h-3 w-3" /> Gerar CÃƒÂ³digo
+                        <Plus className="mr-1 h-3 w-3" /> Gerar Código
                       </button>
                     ) : (
-                      <span className="text-xs text-muted-foreground">CÃƒÂ³digo gerado</span>
+                      <span className="text-xs text-muted-foreground">Código gerado</span>
                     )}
                   </td>
                 </tr>

@@ -33,10 +33,10 @@ export default function PrevisaoDemandaPanel() {
         diasPrevisao
       });
       setUltimaPrevisao(result);
-      success("PrevisÃ£o gerada com sucesso!");
+      success("Previsão gerada com sucesso!");
       refetch();
     } catch (err: unknown) {
-      toastError("Erro ao gerar previsÃ£o: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
+      toastError("Erro ao gerar previsão: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 
@@ -73,11 +73,11 @@ export default function PrevisaoDemandaPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-teal-500" />
-          <h3 className="text-lg font-semibold">PrevisÃ£o de Demanda</h3>
+          <h3 className="text-lg font-semibold">Previsão de Demanda</h3>
         </div>
       </div>
 
-      {/* Gerador de PrevisÃ£o */}
+      {/* Gerador de Previsão */}
       <div className="p-4 rounded-lg border border-border bg-card">
         <div className="grid gap-4 sm:grid-cols-4">
           <div>
@@ -94,7 +94,7 @@ export default function PrevisaoDemandaPanel() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Dias de AnÃ¡lise</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Dias de Análise</label>
             <input
               type="number"
               value={diasAnalise}
@@ -104,7 +104,7 @@ export default function PrevisaoDemandaPanel() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Dias de PrevisÃ£o</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Dias de Previsão</label>
             <input
               type="number"
               value={diasPrevisao}
@@ -119,7 +119,7 @@ export default function PrevisaoDemandaPanel() {
               disabled={gerarPrevisaoMutation.isPending}
               className="w-full inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-teal-600 text-white hover:bg-teal-700 h-9 disabled:opacity-50"
             >
-              <TrendingUp className="mr-2 h-4 w-4" /> Gerar PrevisÃ£o
+              <TrendingUp className="mr-2 h-4 w-4" /> Gerar Previsão
             </button>
           </div>
         </div>
@@ -133,16 +133,16 @@ export default function PrevisaoDemandaPanel() {
                 <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
               )}
               <div>
-                <h4 className="font-medium text-foreground">PrevisÃ£o Gerada</h4>
+                <h4 className="font-medium text-foreground">Previsão Gerada</h4>
                 <p className="text-sm text-foreground mt-1">
                   Demanda prevista: <strong>{ultimaPrevisao.demanda_prevista}</strong> unidades
                 </p>
                 <p className="text-sm text-foreground">
-                  MÃ©dia diÃ¡ria: <strong>{ultimaPrevisao.media_venda_diaria.toFixed(2)}</strong> unidades/dia
+                  Média diária: <strong>{ultimaPrevisao.media_venda_diaria.toFixed(2)}</strong> unidades/dia
                 </p>
                 {ultimaPrevisao.dias_para_zerar !== null && ultimaPrevisao.dias_para_zerar < diasPrevisao && (
                   <p className="text-sm text-red-700 mt-2 font-medium">
-                    âš ï¸ ReposiÃ§Ã£o urgente necessÃ¡ria (estoque zera em {ultimaPrevisao.dias_para_zerar} dias)
+                    âš ï¸ Reposição urgente necessária (estoque zera em {ultimaPrevisao.dias_para_zerar} dias)
                   </p>
                 )}
               </div>
@@ -151,22 +151,22 @@ export default function PrevisaoDemandaPanel() {
         )}
       </div>
 
-      {/* Tabela de PrevisÃµes */}
+      {/* Tabela de Previsões */}
       <div className="border border-border rounded-lg bg-card overflow-hidden">
         <div className="px-4 py-3 border-b border-border bg-muted">
-          <h4 className="font-medium text-foreground">HistÃ³rico de PrevisÃµes</h4>
+          <h4 className="font-medium text-foreground">Histórico de Previsões</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted">
                 <th className="text-left p-3 font-medium text-foreground">Produto</th>
-                <th className="text-left p-3 font-medium text-foreground">PerÃ­odo</th>
+                <th className="text-left p-3 font-medium text-foreground">Período</th>
                 <th className="text-left p-3 font-medium text-foreground">Previsto</th>
                 <th className="text-left p-3 font-medium text-foreground">Real</th>
-                <th className="text-left p-3 font-medium text-foreground">PrecisÃ£o</th>
+                <th className="text-left p-3 font-medium text-foreground">Precisão</th>
                 <th className="text-left p-3 font-medium text-foreground">Dias p/ Zerar</th>
-                <th className="text-left p-3 font-medium text-foreground">AÃ§Ãµes</th>
+                <th className="text-left p-3 font-medium text-foreground">Ações</th>
               </tr>
             </thead>
             <tbody>

@@ -79,7 +79,7 @@ export default function KitsManager() {
     if (!deleteId) return;
     try {
       await excluirMutation.mutateAsync(deleteId);
-      success("Kit excluÃ­do com sucesso!");
+      success("Kit excluído com sucesso!");
     } catch {
       toastError("Erro ao excluir kit. Tente novamente.");
     } finally {
@@ -148,7 +148,7 @@ export default function KitsManager() {
                     </button>
                     <span className="font-medium text-foreground">{kit.nome}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{kit.descricao || "Sem descriÃ§Ã£o"}</p>
+                  <p className="text-sm text-muted-foreground mb-2">{kit.descricao || "Sem descrição"}</p>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>Produto pai: <strong>{kit.produto_nome}</strong></span>
                     <span>Itens: <strong>{kit.itens.length}</strong></span>
@@ -216,7 +216,7 @@ export default function KitsManager() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">DescriÃ§Ã£o</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Descrição</label>
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
@@ -289,13 +289,13 @@ export default function KitsManager() {
         </form>
       </Modal>
 
-      {/* Modal Confirmar ExclusÃ£o */}
+      {/* Modal Confirmar Exclusão */}
       <ConfirmModal
         isOpen={!!deleteId}
         onCancel={() => setDeleteId(null)}
         onConfirm={handleExcluirKit}
         title="Excluir Kit"
-        message="Tem certeza que deseja excluir este kit? Esta aÃ§Ã£o nÃ£o pode ser desfeita."
+        message="Tem certeza que deseja excluir este kit? Esta ação não pode ser desfeita."
         variant="danger"
       />
 

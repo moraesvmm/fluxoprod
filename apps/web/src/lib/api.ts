@@ -49,7 +49,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
 }
 
-// ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Types ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
+// ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ Types ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬
 export interface Venda {
   id: string;
   cliente: string;
@@ -715,9 +715,9 @@ export interface ComissaoUpdate {
   data_pagamento?: string;
 }
 
-// ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Supabase-backed data functions ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
+// ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ Supabase-backed data functions ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬
 // These replace the old ApiClient that hit localhost:8000
-// NOW ALL OPERATIONS USE RPCs (OpÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o A - Database as Source of Truth)
+// NOW ALL OPERATIONS USE RPCs (OpÃÃ†â€™ÂÂÂ§ÃÃ†â€™ÂÂÂ£o A - Database as Source of Truth)
 
 const getSupabase = () => createClient();
 
@@ -736,25 +736,25 @@ export async function fetchVendas(searchTerm?: string): Promise<Venda[]> {
   return (data as unknown as Venda[]) || [];
 }
 
-// Vendas sÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o criadas via RPC tenant_processar_venda (PDV)
-// createVenda mantida apenas para compatibilidade, mas nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o deve ser usada
+// Vendas sÃÃ†â€™ÂÂÂ£o criadas via RPC tenant_processar_venda (PDV)
+// createVenda mantida apenas para compatibilidade, mas nÃÃ†â€™ÂÂÂ£o deve ser usada
 export async function createVenda(venda: VendaCreate): Promise<Venda> {
   throw new Error('Use RPC tenant_processar_venda para criar vendas');
 }
 
 export async function updateVenda(id: string, venda: VendaUpdate): Promise<Venda> {
-  throw new Error('AtualizaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de vendas nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o implementada via RPC');
+  throw new Error('AtualizaÃÃ†â€™ÂÂÂ§ÃÃ†â€™ÂÂÂ£o de vendas nÃÃ†â€™ÂÂÂ£o implementada via RPC');
 }
 
 export async function cancelarVenda(id: string): Promise<unknown> {
-  // RPC nÃƒÂ£o mapeada no database.types.ts Ã¢â‚¬â€ usar cliente nÃƒÂ£o-tipado
+  // RPC não mapeada no database.types.ts ââ‚¬â€ usar cliente não-tipado
   const { data, error } = await _untyped().rpc('tenant_cancelar_venda', { p_venda_id: id });
   if (error) throw new Error(error.message);
   return data;
 }
 
 export async function devolverItem(vendaId: string, itemId: string, quantidade: number): Promise<unknown> {
-  // RPC nÃƒÂ£o mapeada no database.types.ts Ã¢â‚¬â€ usar cliente nÃƒÂ£o-tipado
+  // RPC não mapeada no database.types.ts ââ‚¬â€ usar cliente não-tipado
   const { data, error } = await _untyped().rpc('tenant_devolver_item', {
       p_venda_id: vendaId,
       p_venda_item_id: itemId,
@@ -765,10 +765,10 @@ export async function devolverItem(vendaId: string, itemId: string, quantidade: 
 }
 
 export async function deleteVenda(id: string): Promise<void> {
-  throw new Error('ExclusÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de vendas nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o implementada via RPC');
+  throw new Error('ExclusÃÃ†â€™ÂÂÂ£o de vendas nÃÃ†â€™ÂÂÂ£o implementada via RPC');
 }
 
-// CLIENTES - Usar RPCs para operaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes CRUD
+// CLIENTES - Usar RPCs para operaÃÃ†â€™ÂÂÂ§ÃÃ†â€™ÂÂÂµes CRUD
 export async function fetchClientes(params?: ClienteListParams): Promise<ClienteListResult> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_clientes', {
@@ -783,7 +783,7 @@ export async function fetchClientes(params?: ClienteListParams): Promise<Cliente
     });
   if (error) throw new Error(error.message);
 
-  // Extrair next_cursor do ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºltimo item
+  // Extrair next_cursor do ÃÃ†â€™ºltimo item
   type ClienteCursorRow = Cliente & { next_cursor?: string | null };
   const clientes = getArray<ClienteCursorRow>(data);
   const next_cursor = clientes.length > 0 ? clientes[clientes.length - 1].next_cursor : null;
@@ -859,7 +859,7 @@ export async function updateCliente(id: string, cliente: ClienteUpdate): Promise
   return (data as unknown) as Cliente;
 }
 
-// INTERAÃƒÆ’Ã¢â‚¬Â¡ÃƒÆ’Ã¢â‚¬Â¢ES DE CLIENTES - Usar RPCs para operaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes CRUD
+// INTERAÃââ‚¬Â¡Ãââ‚¬Â¢ES DE CLIENTES - Usar RPCs para operaÃÂÂ§ÃÂÂµes CRUD
 export async function fetchInteracoes(params: InteracaoClienteListParams): Promise<InteracaoClienteListResult> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_interacoes', {
@@ -869,12 +869,12 @@ export async function fetchInteracoes(params: InteracaoClienteListParams): Promi
     });
   if (error) throw new Error(error.message);
 
-  // Extrair next_cursor do ÃƒÆ’Ã‚Âºltimo item
+  // Extrair next_cursor do último item
   type InteracaoCursorRow = InteracaoCliente & { next_cursor?: string | null };
   const interacoes = getArray<InteracaoCursorRow>(data);
   const next_cursor = interacoes.length > 0 ? interacoes[interacoes.length - 1].next_cursor : null;
 
-  // Remover next_cursor dos objetos de interaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o
+  // Remover next_cursor dos objetos de interaÃÂÂ§ÃÂÂ£o
   const interacoesLimpos = interacoes.map(({ next_cursor: _, ...rest }) => rest);
 
   return { data: interacoesLimpos, next_cursor };
@@ -946,7 +946,7 @@ export async function enviarCampanhaMassa(
   return data as { success: boolean; enviados: number; falhas: number; total: number };
 }
 
-// PRODUTOS - Usar RPCs para operaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes CRUD
+// PRODUTOS - Usar RPCs para operaÃÂÂ§ÃÂÂµes CRUD
 export async function fetchProdutos(): Promise<Produto[]> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_produtos');
@@ -983,7 +983,7 @@ export async function deleteProduto(id: string): Promise<void> {
 }
 
 export async function updateProduto(id: string, produto: ProdutoUpdate): Promise<Produto> {
-  // RPC params sÃ£o required no schema â€” usar _untyped() para params opcionais
+  // RPC params são required no schema â€” usar _untyped() para params opcionais
   const { data, error } = await _untyped().rpc('tenant_atualizar_produto', {
     p_produto_id: id,
     p_nome: produto.nome,
@@ -1099,7 +1099,7 @@ export async function desativarLocalEstoque(localId: string): Promise<void> {
   assertRpcResult(data);
 }
 
-// TransferÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªncias de Estoque
+// TransferÃÃ†â€™ªncias de Estoque
 export async function criarTransferencia(transferencia: TransferenciaCreate): Promise<{ transferencia_id: string }> {
   const { data, error } = await _untyped().rpc('tenant_criar_transferencia', {
     p_produto_id: transferencia.produto_id,
@@ -1142,7 +1142,7 @@ export async function cancelarTransferencia(transferenciaId: string): Promise<vo
   assertRpcResult(data);
 }
 
-// ValoraÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de Estoque
+// ValoraÃÃ†â€™ÂÂÂ§ÃÃ†â€™ÂÂÂ£o de Estoque
 export async function calcularValorEstoque(metodo: string = 'custo_medio'): Promise<ValorizacaoEstoque> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_calcular_valor_estoque', {
@@ -1164,7 +1164,7 @@ export async function atualizarCustoProduto(produtoId: string, custo: number, me
   assertRpcResult(data);
 }
 
-// CÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³digos de Barras/QR
+// CÃÃ†â€™ÂÂÂ³digos de Barras/QR
 export async function gerarCodigoBarras(produtoId: string): Promise<CodigoBarrasResponse> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_gerar_codigo_barras', {
@@ -1185,7 +1185,7 @@ export async function buscarProdutoPorCodigo(codigo: string): Promise<ProdutoLoo
   return (data as ProdutoLookupResult) ?? null;
 }
 
-// PrevisÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de Demanda
+// PrevisÃÃ†â€™ÂÂÂ£o de Demanda
 export async function gerarPrevisaoDemanda(produtoId: string, diasAnalise: number = 30, diasPrevisao: number = 30): Promise<PrevisaoResult> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_gerar_previsao_demanda', {
@@ -1218,7 +1218,7 @@ export async function atualizarDemandaReal(previsaoId: string, demandaReal: numb
   return data as { success: boolean; precisao: number };
 }
 
-// OS - Usar RPCs para operaÃƒÂ§ÃƒÂµes CRUD
+// OS - Usar RPCs para operações CRUD
 export async function fetchOS(): Promise<OrdemServico[]> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_ordens_servico');
@@ -1285,7 +1285,7 @@ export async function gerenciarTimerOS(id: string, acao: 'iniciar' | 'parar'): P
   if (error) throw new Error(error.message);
 }
 
-// OBRAS - Usar RPCs para operaÃƒÂ§ÃƒÂµes CRUD
+// OBRAS - Usar RPCs para operações CRUD
 export async function fetchObras(): Promise<Obra[]> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_obras');
@@ -1335,7 +1335,7 @@ export async function updateObra(id: string, obra: ObraUpdate): Promise<Obra> {
   return (data as unknown) as Obra;
 }
 
-// EMPRESAS - Mantido para uso pÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºblico (nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o tenant)
+// EMPRESAS - Mantido para uso pÃÃ†â€™ºblico (nÃÃ†â€™ÂÂÂ£o tenant)
 export async function fetchEmpresa(): Promise<Empresa | null> {
   const { data, error } = await getSupabaseStrict()
     .from('empresas')
@@ -1353,7 +1353,7 @@ export async function updateEmpresa(id: string, empresa: EmpresaUpdate): Promise
   return (data as unknown) as Empresa;
 }
 
-// FUNCIONARIOS - Usar RPCs para operaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes CRUD
+// FUNCIONARIOS - Usar RPCs para operaÃÃ†â€™ÂÂÂ§ÃÃ†â€™ÂÂÂµes CRUD
 export async function fetchFuncionarios(): Promise<Funcionario[]> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_funcionarios');
@@ -1716,7 +1716,7 @@ export async function fetchObraProgresso(obraId: string): Promise<ObraProgresso>
   if (error) throw new Error(error.message);
   return (data as unknown) as ObraProgresso;
 }
-// NOTA: RPCs de custos/recursos/documentos/progresso ainda nÃƒÂ£o estÃƒÂ£o no database.types.ts
+// NOTA: RPCs de custos/recursos/documentos/progresso ainda não estão no database.types.ts
 // Interfaces de Custos e Resumo Financeiro de Obras (restauradas)
 export interface ObraCusto {
   id: string;
@@ -1760,7 +1760,7 @@ export interface ObraResumoFinanceiro {
   percentual_orcamento_utilizado: number;
 }
 
-// Usando escape hatch `as any` para RPCs nÃƒÂ£o mapeadas (Gradual Typing Ã¢â‚¬â€ Fase 3 pendente)
+// Usando escape hatch `as any` para RPCs não mapeadas (Gradual Typing ââ‚¬â€ Fase 3 pendente)
 const _untyped = () => createClient() as unknown as UntypedSupabaseClient;
 
 export async function fetchObraCustos(obraId: string): Promise<ObraCusto[]> {
@@ -1878,7 +1878,7 @@ export async function uploadObraDocumento(file: File, obraId: string, descricao?
     .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '')
     .single();
 
-  if (!profileData) throw new Error('Perfil nÃƒÂ£o encontrado');
+  if (!profileData) throw new Error('Perfil não encontrado');
 
   const { data: empresaData } = await supabase
     .from('empresas')
@@ -1886,18 +1886,18 @@ export async function uploadObraDocumento(file: File, obraId: string, descricao?
     .eq('id', profileData.empresa_id ?? '')
     .single();
 
-  if (!empresaData) throw new Error('Empresa nÃƒÂ£o encontrada');
+  if (!empresaData) throw new Error('Empresa não encontrada');
 
   const schema = empresaData.schema_name;
 
-  // ValidaÃƒÂ§ÃƒÂµes
+  // Validações
   const maxFileSize = 10 * 1024 * 1024; // 10MB
-  if (file.size > maxFileSize) throw new Error('Arquivo muito grande. MÃƒÂ¡ximo 10MB.');
+  if (file.size > maxFileSize) throw new Error('Arquivo muito grande. Máximo 10MB.');
 
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-  if (!allowedTypes.includes(file.type)) throw new Error('Tipo de arquivo nÃƒÂ£o permitido.');
+  if (!allowedTypes.includes(file.type)) throw new Error('Tipo de arquivo não permitido.');
 
-  // Gerar caminho ÃƒÂºnico
+  // Gerar caminho único
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   const ext = file.name.split('.').pop();
@@ -1907,10 +1907,10 @@ export async function uploadObraDocumento(file: File, obraId: string, descricao?
   const { error: uploadError } = await supabase.storage.from('obras-documentos').upload(caminho, file);
   if (uploadError) throw new Error(uploadError.message);
 
-  // Obter URL pÃƒÂºblica
+  // Obter URL pública
   const { data: { publicUrl } } = supabase.storage.from('obras-documentos').getPublicUrl(caminho);
 
-  // Registrar via RPC (nÃƒÂ£o mapeada no types)
+  // Registrar via RPC (não mapeada no types)
   const userId = (await supabase.auth.getUser()).data.user?.id;
   const { data: rpcData, error: rpcError } = await _untyped().rpc('tenant_upload_documento_obra', {
     p_obra_id: obraId,
@@ -1942,7 +1942,7 @@ export async function uploadObraDocumento(file: File, obraId: string, descricao?
 export async function deleteObraDocumento(documentoId: string): Promise<void> {
   const supabase = getSupabaseStrict();
 
-  // Chamar RPC para obter caminho_storage (nÃƒÂ£o mapeada no types)
+  // Chamar RPC para obter caminho_storage (não mapeada no types)
   const { data: rpcData, error: rpcError } = await _untyped().rpc('tenant_excluir_documento_obra', { p_documento_id: documentoId });
   if (rpcError) throw new Error(rpcError.message);
 
@@ -1952,7 +1952,7 @@ export async function deleteObraDocumento(documentoId: string): Promise<void> {
     const { error: storageError } = await supabase.storage.from('obras-documentos').remove([caminho]);
     if (storageError) {
       console.error('Erro ao remover do storage:', storageError);
-      // NÃƒÂ£o lanÃƒÂ§ar erro se o storage falhar, pois o registro jÃƒÂ¡ foi removido do banco
+      // Não lançar erro se o storage falhar, pois o registro já foi removido do banco
     }
   }
 }

@@ -79,7 +79,7 @@ export default function TransferenciasManager() {
         quantidade: transferenciaFormData.quantidade,
         criado_por: "current_user" // TODO: get from auth
       });
-      success("TransferÃªncia criada com sucesso!");
+      success("Transferência criada com sucesso!");
       setIsTransferenciaModalOpen(false);
       setTransferenciaFormData({
         produto_id: "",
@@ -89,7 +89,7 @@ export default function TransferenciasManager() {
         observacao: ""
       });
     } catch (err: unknown) {
-      toastError("Erro ao criar transferÃªncia: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
+      toastError("Erro ao criar transferência: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     }
   };
 
@@ -97,9 +97,9 @@ export default function TransferenciasManager() {
     if (!concluirTransferenciaId) return;
     try {
       await concluirTransferenciaMutation.mutateAsync(concluirTransferenciaId);
-      success("TransferÃªncia concluÃ­da com sucesso!");
+      success("Transferência concluída com sucesso!");
     } catch (err: unknown) {
-      toastError("Erro ao concluir transferÃªncia: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
+      toastError("Erro ao concluir transferência: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     } finally {
       setConcluirTransferenciaId(null);
     }
@@ -109,9 +109,9 @@ export default function TransferenciasManager() {
     if (!cancelarTransferenciaId) return;
     try {
       await cancelarTransferenciaMutation.mutateAsync(cancelarTransferenciaId);
-      success("TransferÃªncia cancelada com sucesso!");
+      success("Transferência cancelada com sucesso!");
     } catch (err: unknown) {
-      toastError("Erro ao cancelar transferÃªncia: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
+      toastError("Erro ao cancelar transferência: " + (err instanceof Error ? (err instanceof Error ? err.message : String(err)) : "Tente novamente."));
     } finally {
       setCancelarTransferenciaId(null);
     }
@@ -149,7 +149,7 @@ export default function TransferenciasManager() {
         <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
       ))}
 
-      {/* SeÃ§Ã£o de Locais */}
+      {/* Seção de Locais */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -201,12 +201,12 @@ export default function TransferenciasManager() {
         )}
       </div>
 
-      {/* SeÃ§Ã£o de TransferÃªncias */}
+      {/* Seção de Transferências */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ArrowRight className="h-5 w-5 text-green-500" />
-            <h3 className="text-lg font-semibold">TransferÃªncias de Estoque</h3>
+            <h3 className="text-lg font-semibold">Transferências de Estoque</h3>
           </div>
           <div className="flex items-center gap-2">
             <select
@@ -216,25 +216,25 @@ export default function TransferenciasManager() {
             >
               <option value="">Todos os status</option>
               <option value="pendente">Pendente</option>
-              <option value="em_transito">Em TrÃ¢nsito</option>
-              <option value="concluida">ConcluÃ­da</option>
+              <option value="em_transito">Em Trânsito</option>
+              <option value="concluida">Concluída</option>
               <option value="cancelada">Cancelada</option>
             </select>
             <button
               onClick={() => setIsTransferenciaModalOpen(true)}
               className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-green-600 text-white hover:bg-green-700 h-8 px-3"
             >
-              <Plus className="mr-2 h-4 w-4" /> Nova TransferÃªncia
+              <Plus className="mr-2 h-4 w-4" /> Nova Transferência
             </button>
           </div>
         </div>
 
         {loadingTransferencias ? (
-          <div className="text-center py-8 text-muted-foreground">Carregando transferÃªncias...</div>
+          <div className="text-center py-8 text-muted-foreground">Carregando transferências...</div>
         ) : filteredTransferencias.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground bg-muted rounded-lg border border-border">
             <ArrowRight className="h-10 w-10 mx-auto text-slate-300 mb-2" />
-            <p className="text-sm">Nenhuma transferÃªncia encontrada</p>
+            <p className="text-sm">Nenhuma transferência encontrada</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -246,7 +246,7 @@ export default function TransferenciasManager() {
                   <th className="text-left p-3 font-medium text-foreground">Destino</th>
                   <th className="text-left p-3 font-medium text-foreground">Quantidade</th>
                   <th className="text-left p-3 font-medium text-foreground">Status</th>
-                  <th className="text-left p-3 font-medium text-foreground">AÃ§Ãµes</th>
+                  <th className="text-left p-3 font-medium text-foreground">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -312,12 +312,12 @@ export default function TransferenciasManager() {
               required
             >
               <option value="filial">Filial</option>
-              <option value="deposito">DepÃ³sito</option>
+              <option value="deposito">Depósito</option>
               <option value="loja">Loja</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">EndereÃ§o</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Endereço</label>
             <textarea
               value={localFormData.endereco}
               onChange={(e) => setLocalFormData({ ...localFormData, endereco: e.target.value })}
@@ -344,8 +344,8 @@ export default function TransferenciasManager() {
         </form>
       </Modal>
 
-      {/* Modal Nova TransferÃªncia */}
-      <Modal isOpen={isTransferenciaModalOpen} onClose={() => setIsTransferenciaModalOpen(false)} title="Nova TransferÃªncia">
+      {/* Modal Nova Transferência */}
+      <Modal isOpen={isTransferenciaModalOpen} onClose={() => setIsTransferenciaModalOpen(false)} title="Nova Transferência">
         <form onSubmit={handleCriarTransferencia} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Produto</label>
@@ -403,7 +403,7 @@ export default function TransferenciasManager() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">ObservaÃ§Ã£o</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Observação</label>
             <textarea
               value={transferenciaFormData.observacao}
               onChange={(e) => setTransferenciaFormData({ ...transferenciaFormData, observacao: e.target.value })}
@@ -424,29 +424,29 @@ export default function TransferenciasManager() {
               disabled={criarTransferenciaMutation.isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50"
             >
-              {criarTransferenciaMutation.isPending ? "Criando..." : "Criar TransferÃªncia"}
+              {criarTransferenciaMutation.isPending ? "Criando..." : "Criar Transferência"}
             </button>
           </div>
         </form>
       </Modal>
 
-      {/* Modal Confirmar DesativaÃ§Ã£o */}
+      {/* Modal Confirmar Desativação */}
       <ConfirmModal
         isOpen={!!deleteLocalId}
         onCancel={() => setDeleteLocalId(null)}
         onConfirm={handleDesativarLocal}
         title="Desativar Local"
-        message="Tem certeza que deseja desativar este local? Esta aÃ§Ã£o nÃ£o pode ser desfeita."
+        message="Tem certeza que deseja desativar este local? Esta ação não pode ser desfeita."
         variant="danger"
       />
 
-      {/* Modal Confirmar ConclusÃ£o */}
+      {/* Modal Confirmar Conclusão */}
       <ConfirmModal
         isOpen={!!concluirTransferenciaId}
         onCancel={() => setConcluirTransferenciaId(null)}
         onConfirm={handleConcluirTransferencia}
-        title="Concluir TransferÃªncia"
-        message="Tem certeza que deseja concluir esta transferÃªncia? O estoque serÃ¡ adicionado ao destino."
+        title="Concluir Transferência"
+        message="Tem certeza que deseja concluir esta transferência? O estoque será adicionado ao destino."
         variant="default"
       />
 
@@ -455,8 +455,8 @@ export default function TransferenciasManager() {
         isOpen={!!cancelarTransferenciaId}
         onCancel={() => setCancelarTransferenciaId(null)}
         onConfirm={handleCancelarTransferencia}
-        title="Cancelar TransferÃªncia"
-        message="Tem certeza que deseja cancelar esta transferÃªncia? O estoque serÃ¡ devolvido Ã  origem."
+        title="Cancelar Transferência"
+        message="Tem certeza que deseja cancelar esta transferência? O estoque será devolvido Ã  origem."
         variant="danger"
       />
     </div>

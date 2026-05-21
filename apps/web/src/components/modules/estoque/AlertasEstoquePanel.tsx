@@ -86,7 +86,7 @@ export default function AlertasEstoquePanel() {
                   <p className="text-sm text-muted-foreground mb-2">{alerta.mensagem}</p>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>Estoque atual: <strong className={alerta.estoque_atual === 0 ? "text-red-600" : "text-amber-600"}>{alerta.estoque_atual}</strong></span>
-                    <span>MÃ­nimo: <strong>{alerta.estoque_minimo}</strong></span>
+                    <span>Mínimo: <strong>{alerta.estoque_minimo}</strong></span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
