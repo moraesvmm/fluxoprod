@@ -341,6 +341,12 @@ export const TUTORIAL_DATA: Record<string, Tutorial> = {
         icon: Package
       },
       {
+        id: 'prod-pre-req',
+        title: 'Regra de Ouro (Pré-requisito)',
+        description: 'Para criar uma receita (Ficha), você precisa ter cadastrado no Estoque pelo menos 1 Produto Final e 1 Matéria-Prima. Não importa se a quantidade física deles no estoque for zero, o sistema permite criar a receita mesmo assim!',
+        placement: 'center'
+      },
+      {
         id: 'prod-fichas',
         title: 'Fichas Técnicas (BOM)',
         description: 'Crie suas receitas de produção. Defina quais e quantas matérias-primas cada produto final consome.',
