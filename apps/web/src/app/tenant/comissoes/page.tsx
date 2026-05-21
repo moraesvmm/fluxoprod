@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { Calculator, DollarSign, Percent, Plus, Wallet } from "lucide-react";
@@ -203,7 +203,7 @@ export default function ComissoesPage() {
       </div>
 
       {activeTab === "regras" && (
-        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
@@ -257,7 +257,7 @@ export default function ComissoesPage() {
       )}
 
       {activeTab === "historico" && (
-        <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
@@ -317,7 +317,7 @@ export default function ComissoesPage() {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Nova Regra de Comissão">
         <form onSubmit={criarRegra} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Colaborador</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">Colaborador</label>
             <select
               value={formData.colaborador_id}
               onChange={(e) => setFormData((prev) => ({ ...prev, colaborador_id: e.target.value }))}
@@ -333,7 +333,7 @@ export default function ComissoesPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Tipo de Cálculo</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">Tipo de Cálculo</label>
             <select
               value={formData.tipo_calculo}
               onChange={(e) => setFormData((prev) => ({ ...prev, tipo_calculo: e.target.value }))}
@@ -344,7 +344,7 @@ export default function ComissoesPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Valor</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">Valor</label>
             <input
               type="number"
               step="0.01"
@@ -358,7 +358,7 @@ export default function ComissoesPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="rounded-md border px-4 py-2 text-sm font-medium text-slate-700"
+              className="rounded-md border px-4 py-2 text-sm font-medium text-foreground"
             >
               Cancelar
             </button>

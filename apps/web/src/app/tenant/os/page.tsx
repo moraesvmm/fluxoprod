@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -221,14 +221,14 @@ export default function OSPage() {
         <KPICard title="Canceladas" value={canceladas} icon={XCircle} className="border-red-200 bg-red-50/10" />
       </div>
 
-      <div data-tour="os-tabela" className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+      <div data-tour="os-tabela" className="flex-1 rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
               placeholder="Buscar por cliente, veículo ou número..."
-              className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full bg-card text-card-foreground border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <button
@@ -238,7 +238,7 @@ export default function OSPage() {
               else if (viewMode === 'calendar') setViewMode('table');
               else setViewMode('kanban');
             }}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-border rounded-md hover:bg-slate-50 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-card text-card-foreground border border-border rounded-md hover:bg-accent transition-colors"
           >
             {viewMode === 'table' ? (
               <>
@@ -353,7 +353,7 @@ export default function OSPage() {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Nova Ordem de Serviço">
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Cliente *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Cliente *</label>
             <select
               value={formData.cliente_id}
               onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
@@ -365,7 +365,7 @@ export default function OSPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Veículo/Equipamento *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Veículo/Equipamento *</label>
             <input
               type="text"
               value={formData.veiculo_equipamento}
@@ -376,7 +376,7 @@ export default function OSPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Série/IMEI</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Série/IMEI</label>
             <input
               type="text"
               value={formData.equipamento_serial}
@@ -386,7 +386,7 @@ export default function OSPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição do Problema</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Descrição do Problema</label>
             <textarea
               value={formData.descricao_problema}
               onChange={(e) => setFormData({ ...formData, descricao_problema: e.target.value })}
@@ -397,7 +397,7 @@ export default function OSPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Responsável</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Responsável</label>
               <select
                 value={formData.colaborador_id}
                 onChange={(e) => setFormData({ ...formData, colaborador_id: e.target.value })}
@@ -408,7 +408,7 @@ export default function OSPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Valor Estimado</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Valor Estimado</label>
               <input
                 type="number"
                 step="0.01"
@@ -420,7 +420,7 @@ export default function OSPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Laudo Técnico (Diagnóstico)</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Laudo Técnico (Diagnóstico)</label>
             <textarea
               value={formData.laudo_tecnico}
               onChange={(e) => setFormData({ ...formData, laudo_tecnico: e.target.value })}
@@ -440,7 +440,7 @@ export default function OSPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
             </button>
@@ -452,7 +452,7 @@ export default function OSPage() {
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Ordem de Serviço">
         <form onSubmit={editarOS} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Cliente *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Cliente *</label>
             <select
               value={formData.cliente_id}
               onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
@@ -464,7 +464,7 @@ export default function OSPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Veículo/Equipamento *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Veículo/Equipamento *</label>
             <input
               type="text"
               value={formData.veiculo_equipamento}
@@ -475,7 +475,7 @@ export default function OSPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição do Problema</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Descrição do Problema</label>
             <textarea
               value={formData.descricao_problema}
               onChange={(e) => setFormData({ ...formData, descricao_problema: e.target.value })}
@@ -486,7 +486,7 @@ export default function OSPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Responsável</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Responsável</label>
               <select
                 value={formData.colaborador_id}
                 onChange={(e) => setFormData({ ...formData, colaborador_id: e.target.value })}
@@ -497,7 +497,7 @@ export default function OSPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Valor Estimado</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Valor Estimado</label>
               <input
                 type="number"
                 step="0.01"
@@ -509,7 +509,7 @@ export default function OSPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Série/IMEI</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Série/IMEI</label>
             <input
               type="text"
               value={formData.equipamento_serial}
@@ -519,7 +519,7 @@ export default function OSPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Laudo Técnico (Diagnóstico)</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Laudo Técnico (Diagnóstico)</label>
             <textarea
               value={formData.laudo_tecnico}
               onChange={(e) => setFormData({ ...formData, laudo_tecnico: e.target.value })}
@@ -539,7 +539,7 @@ export default function OSPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(false)}
-              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
             </button>

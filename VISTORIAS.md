@@ -10,3 +10,9 @@ PENDENTE VISTORIA (21/05/2026): Correcoes criticas pos-auditoria do modulo de Pr
 - Modal de conclusao de OP agora exibe preview dos insumos que serao descontados em tempo real.
 - Aviso visual quando produto nao tem Ficha Tecnica cadastrada.
 Prioridade: ALTA - vistoriar assim que possivel.
+
+PENDENTE VISTORIA (21/05/2026): Correcoes Visuais Dark Mode:
+- Alterados 6 módulos (estoque, obras, os, financeiro, comissoes, catalogo) substituindo classes fixas bg-white por bg-card/bg-background para resolver problemas de contraste no tema escuro.
+- Adicionado passo no tutorial de boas vindas para ensinar como trocar o tema.
+Prioridade: MEDIA - vistoriar e testar layout no dark mode e light mode.
+

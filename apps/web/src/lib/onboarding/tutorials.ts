@@ -28,6 +28,12 @@ export const TUTORIAL_DATA: Record<string, Tutorial> = {
         icon: LayoutDashboard
       },
       {
+        id: 'dash-theme',
+        title: 'Personalize o Tema',
+        description: 'Prefere um visual mais claro? Clique no ícone de Sol/Lua no topo direito para alternar entre os modos Claro e Escuro a qualquer momento.',
+        placement: 'center'
+      },
+      {
         id: 'dash-refresh',
         title: 'Dados em Tempo Real',
         description: 'Sincronize faturamento e ticket médio em tempo real com um clique.',

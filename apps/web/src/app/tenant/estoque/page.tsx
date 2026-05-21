@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -161,10 +161,10 @@ export default function EstoquePage() {
           <p className="text-muted-foreground">Controle de inventário e alertas de reposição.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setScannerOpen(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-border hover:bg-slate-50 text-slate-700 h-10 px-4 py-2">
+          <button onClick={() => setScannerOpen(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card text-card-foreground border border-border hover:bg-accent text-foreground h-10 px-4 py-2">
             <Barcode className="mr-2 h-4 w-4" /> Scanner
           </button>
-          <button onClick={() => setExportConfirm(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-border hover:bg-slate-50 text-slate-700 h-10 px-4 py-2">
+          <button onClick={() => setExportConfirm(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card text-card-foreground border border-border hover:bg-accent text-foreground h-10 px-4 py-2">
             Importar/Exportar
           </button>
           <button onClick={() => setIsModalOpen(true)} data-tour="estoque-novo" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
@@ -182,16 +182,16 @@ export default function EstoquePage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="inline-flex rounded-lg bg-muted p-1">
-          <TabsTrigger value="produtos" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Produtos</TabsTrigger>
-          <TabsTrigger value="alertas" data-tour="estoque-alertas" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Alertas</TabsTrigger>
-          <TabsTrigger value="kits" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Kits</TabsTrigger>
-          <TabsTrigger value="transferencias" data-tour="estoque-mov" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Transferências</TabsTrigger>
-          <TabsTrigger value="valoracao" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Valoração</TabsTrigger>
-          <TabsTrigger value="previsao" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Previsão</TabsTrigger>
+          <TabsTrigger value="produtos" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Produtos</TabsTrigger>
+          <TabsTrigger value="alertas" data-tour="estoque-alertas" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Alertas</TabsTrigger>
+          <TabsTrigger value="kits" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Kits</TabsTrigger>
+          <TabsTrigger value="transferencias" data-tour="estoque-mov" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Transferências</TabsTrigger>
+          <TabsTrigger value="valoracao" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Valoração</TabsTrigger>
+          <TabsTrigger value="previsao" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Previsão</TabsTrigger>
         </TabsList>
 
         <TabsContent value="produtos" className="mt-4">
-          <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+          <div className="flex-1 rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
             <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -200,11 +200,11 @@ export default function EstoquePage() {
                   placeholder="Buscar SKU ou nome do produto..."
                   value={buscaProduto}
                   onChange={e => setBuscaProduto(e.target.value)}
-                  className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full bg-card text-card-foreground border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="flex gap-2">
-                <button className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-md bg-white">
+                <button className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 border border-border px-3 py-1.5 rounded-md bg-card text-card-foreground">
                   <Filter className="h-4 w-4" /> Filtros
                 </button>
               </div>
@@ -244,7 +244,7 @@ export default function EstoquePage() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-bold text-slate-700">
+                      <TableCell className="text-right font-bold text-foreground">
                         <span className={item.estoque_atual <= item.estoque_minimo ? "text-red-600" : ""}>{item.estoque_atual}</span>
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground">{item.estoque_minimo}</TableCell>
@@ -288,40 +288,40 @@ export default function EstoquePage() {
       <Modal isOpen={isModalOpen} onClose={handleFecharModal} title="Novo Produto">
         <form onSubmit={handleSalvarProduto} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome do produto *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Nome do produto *</label>
             <input type="text" value={formData.nome} onChange={(e) => setFormData({ ...formData, nome: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Ex: Cabo USB-C 100W" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Descrição</label>
             <textarea value={formData.descricao} onChange={(e) => setFormData({ ...formData, descricao: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Descrição detalhada do produto" rows={2} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">SKU</label>
+              <label className="block text-sm font-medium text-foreground mb-1">SKU</label>
               <input type="text" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Ex: USB-C-100W" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Categoria</label>
               <input type="text" value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Ex: Cabos" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Preço de Custo</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Preço de Custo</label>
               <input type="number" step="0.01" value={formData.preco_custo} onChange={(e) => setFormData({ ...formData, preco_custo: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="0,00" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Preço de Venda</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Preço de Venda</label>
               <input type="number" step="0.01" value={formData.preco_venda} onChange={(e) => setFormData({ ...formData, preco_venda: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="0,00" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Quantidade Atual *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Quantidade Atual *</label>
               <input type="number" value={formData.estoque_atual} onChange={(e) => setFormData({ ...formData, estoque_atual: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="0" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Quantidade Mínima *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Quantidade Mínima *</label>
               <input type="number" value={formData.estoque_minimo} onChange={(e) => setFormData({ ...formData, estoque_minimo: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="10" required />
             </div>
           </div>
@@ -329,7 +329,7 @@ export default function EstoquePage() {
             <button type="submit" disabled={createMutation.isPending} className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
               {createMutation.isPending ? "Salvando..." : "Salvar Produto"}
             </button>
-            <button type="button" onClick={handleFecharModal} className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+            <button type="button" onClick={handleFecharModal} className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
               Cancelar
             </button>
           </div>
@@ -339,31 +339,31 @@ export default function EstoquePage() {
       {/* Modal de Edição de Produto */}
       {editProdutoId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+          <div className="bg-card text-card-foreground rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold mb-4">Editar Produto</h3>
             <form onSubmit={handleEditarProduto} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Nome *</label>
                 <input type="text" required value={editFormData.nome}
                   onChange={e => setEditFormData({ ...editFormData, nome: e.target.value })}
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Preço de Venda</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Preço de Venda</label>
                   <input type="number" step="0.01" value={editFormData.preco_venda}
                     onChange={e => setEditFormData({ ...editFormData, preco_venda: e.target.value })}
                     className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="0,00" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Estoque Mínimo</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Estoque Mínimo</label>
                   <input type="number" value={editFormData.estoque_minimo}
                     onChange={e => setEditFormData({ ...editFormData, estoque_minimo: e.target.value })}
                     className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="10" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Categoria</label>
                 <input type="text" value={editFormData.categoria}
                   onChange={e => setEditFormData({ ...editFormData, categoria: e.target.value })}
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Ex: Cabos, Eletrônicos" />
@@ -374,7 +374,7 @@ export default function EstoquePage() {
                   {updateMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
                 <button type="button" onClick={() => setEditProdutoId(null)}
-                  className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  className="flex-1 bg-slate-100 text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
                   Cancelar
                 </button>
               </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -368,14 +368,14 @@ export default function ObrasPage() {
       {/* Modal: Adicionar Custo */}
       {showCustoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+          <div className="bg-card text-card-foreground rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Adicionar Custo</h3>
               <button onClick={() => setShowCustoModal(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
             </div>
             <form onSubmit={handleSubmitCusto} className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Descrição *</label>
                 <input type="text" required value={custoForm.descricao}
                   onChange={e => setCustoForm({ ...custoForm, descricao: e.target.value })}
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
@@ -383,14 +383,14 @@ export default function ObrasPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor (R$) *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Valor (R$) *</label>
                   <input type="number" step="0.01" min="0" required value={custoForm.valor}
                     onChange={e => setCustoForm({ ...custoForm, valor: e.target.value })}
                     className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                     placeholder="0,00" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tipo *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Tipo *</label>
                   <select value={custoForm.tipo} onChange={e => setCustoForm({ ...custoForm, tipo: e.target.value as 'previsto' | 'realizado' })}
                     className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary">
                     <option value="previsto">Previsto</option>
@@ -399,7 +399,7 @@ export default function ObrasPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Data</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Data</label>
                 <input type="date" value={custoForm.data}
                   onChange={e => setCustoForm({ ...custoForm, data: e.target.value })}
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
@@ -410,7 +410,7 @@ export default function ObrasPage() {
                   {createCustoMutation.isPending ? 'Salvando...' : 'Adicionar Custo'}
                 </button>
                 <button type="button" onClick={() => setShowCustoModal(false)}
-                  className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  className="flex-1 bg-slate-100 text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
                   Cancelar
                 </button>
               </div>
@@ -422,14 +422,14 @@ export default function ObrasPage() {
       {/* Modal: Adicionar Recurso */}
       {showRecursoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+          <div className="bg-card text-card-foreground rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Alocar Recurso</h3>
               <button onClick={() => setShowRecursoModal(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
             </div>
             <form onSubmit={handleSubmitRecurso} className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Recurso *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Nome do Recurso *</label>
                 <input type="text" required value={recursoForm.nome}
                   onChange={e => setRecursoForm({ ...recursoForm, nome: e.target.value })}
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
@@ -437,13 +437,13 @@ export default function ObrasPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Quantidade *</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Quantidade *</label>
                   <input type="number" min="1" required value={recursoForm.quantidade}
                     onChange={e => setRecursoForm({ ...recursoForm, quantidade: e.target.value })}
                     className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Unidade</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Unidade</label>
                   <input type="text" value={recursoForm.unidade}
                     onChange={e => setRecursoForm({ ...recursoForm, unidade: e.target.value })}
                     className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
@@ -456,7 +456,7 @@ export default function ObrasPage() {
                   {createRecursoMutation.isPending ? 'Salvando...' : 'Alocar Recurso'}
                 </button>
                 <button type="button" onClick={() => setShowRecursoModal(false)}
-                  className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  className="flex-1 bg-slate-100 text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
                   Cancelar
                 </button>
               </div>
@@ -484,7 +484,7 @@ export default function ObrasPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <KPICard title="Planejadas" value={planejadas} icon={Calendar} className="border-slate-200 bg-slate-50/10" />
+        <KPICard title="Planejadas" value={planejadas} icon={Calendar} className="border-border bg-slate-50/10" />
         <KPICard title="Em Andamento" value={andamento} icon={Building2} className="border-blue-200 bg-blue-50/10" />
         <KPICard title="Concluídas" value={concluidas} icon={Building2} className="border-emerald-200 bg-emerald-50/10" />
         <div data-tour="obras-financeiro">
@@ -492,20 +492,20 @@ export default function ObrasPage() {
         </div>
       </div>
 
-      <div className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+      <div className="flex-1 rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
               placeholder="Buscar por nome, cliente ou endereço..."
-              className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full bg-card text-card-foreground border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <button
             onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
             data-tour="obras-cronograma"
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-white border border-border rounded-md hover:bg-slate-50 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-card text-card-foreground border border-border rounded-md hover:bg-accent transition-colors"
           >
             {viewMode === 'table' ? (
               <>
@@ -556,7 +556,7 @@ export default function ObrasPage() {
                 obras?.map((obra) => (
                   <TableRow 
                     key={obra.id} 
-                    className={selectedObra?.id === obra.id ? "bg-blue-50" : "cursor-pointer hover:bg-slate-50"}
+                    className={selectedObra?.id === obra.id ? "bg-blue-50" : "cursor-pointer hover:bg-accent"}
                     onClick={() => selecionarObra(obra)}
                   >
                     <TableCell className="font-medium text-slate-900">{obra.nome}</TableCell>
@@ -617,7 +617,7 @@ export default function ObrasPage() {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Nova Obra">
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome da Obra *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Nome da Obra *</label>
             <input
               type="text"
               value={formData.nome}
@@ -628,7 +628,7 @@ export default function ObrasPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Cliente</label>
             <select
                value={formData.cliente_id}
                onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
@@ -639,7 +639,7 @@ export default function ObrasPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Endereço</label>
             <input
                type="text"
                value={formData.endereco}
@@ -650,7 +650,7 @@ export default function ObrasPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Data Início</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Data Início</label>
               <input
                 type="date"
                 value={formData.data_inicio}
@@ -659,7 +659,7 @@ export default function ObrasPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Data Fim Prevista</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Data Fim Prevista</label>
               <input
                 type="date"
                 value={formData.data_fim_prevista}
@@ -669,7 +669,7 @@ export default function ObrasPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Orçamento Total</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Orçamento Total</label>
             <input
               type="number"
               step="0.01"
@@ -680,7 +680,7 @@ export default function ObrasPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Descrição</label>
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
@@ -700,7 +700,7 @@ export default function ObrasPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
             </button>
@@ -712,7 +712,7 @@ export default function ObrasPage() {
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Obra">
         <form onSubmit={editarObra} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome da Obra *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Nome da Obra *</label>
             <input
               type="text"
               value={formData.nome}
@@ -723,7 +723,7 @@ export default function ObrasPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Cliente</label>
             <select
                value={formData.cliente_id}
                onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
@@ -734,7 +734,7 @@ export default function ObrasPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Endereço</label>
             <input
                type="text"
                value={formData.endereco}
@@ -745,7 +745,7 @@ export default function ObrasPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Data Início</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Data Início</label>
               <input
                 type="date"
                 value={formData.data_inicio}
@@ -754,7 +754,7 @@ export default function ObrasPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Data Fim Prevista</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Data Fim Prevista</label>
               <input
                 type="date"
                 value={formData.data_fim_prevista}
@@ -764,7 +764,7 @@ export default function ObrasPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Orçamento Total</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Orçamento Total</label>
             <input
               type="number"
               step="0.01"
@@ -775,7 +775,7 @@ export default function ObrasPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Descrição</label>
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
@@ -785,7 +785,7 @@ export default function ObrasPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Status</label>
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as 'planejada' | 'andamento' | 'concluida' | 'suspensa' })}
@@ -808,7 +808,7 @@ export default function ObrasPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(false)}
-              className="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
             </button>
@@ -818,7 +818,7 @@ export default function ObrasPage() {
 
       {/* Painel de Detalhes da Obra Selecionada */}
       {selectedObra && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-white border-l border-border shadow-lg overflow-hidden z-50">
+        <div className="fixed inset-y-0 right-0 w-96 bg-card text-card-foreground border-l border-border shadow-lg overflow-hidden z-50">
           <div className="h-full flex flex-col">
             {/* Header */}
             <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50">
@@ -848,40 +848,40 @@ export default function ObrasPage() {
                 <TabsContent value="detalhes">
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Nome</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Nome</label>
                       <p className="text-sm text-slate-900">{selectedObra.nome}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Cliente</label>
                       <p className="text-sm text-slate-900">{selectedObra.cliente?.nome || '—'}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Endereço</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Endereço</label>
                       <p className="text-sm text-slate-900">{selectedObra.endereco || '—'}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Data Início</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Data Início</label>
                         <p className="text-sm text-slate-900">{formatarData(selectedObra.data_inicio)}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Data Fim Prevista</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Data Fim Prevista</label>
                         <p className="text-sm text-slate-900">{formatarData(selectedObra.data_fim_prevista)}</p>
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Orçamento</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Orçamento</label>
                       <p className="text-sm text-slate-900">{formatarMoeda(selectedObra.orcamento)}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Status</label>
                       <StatusBadge
                         status={selectedObra.status === 'planejada' ? 'warning' : selectedObra.status === 'concluida' ? 'success' : 'info'}
                         label={selectedObra.status === 'planejada' ? 'Planejada' : selectedObra.status === 'concluida' ? 'Concluída' : selectedObra.status === 'andamento' ? 'Em Andamento' : 'Suspensa'}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Descrição</label>
                       <p className="text-sm text-slate-900 whitespace-pre-wrap">{selectedObra.descricao || '—'}</p>
                     </div>
                     <div className="pt-4">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useCallback } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -363,12 +363,12 @@ export default function FinanceiroPage() {
 
       {/* Modal de Edição */}
       {showEditModal && (
-        <div className="bg-white rounded-xl border border-border shadow-sm p-6">
+        <div className="bg-card text-card-foreground rounded-xl border border-border shadow-sm p-6">
           <h3 className="text-lg font-semibold mb-4">Editar Transação</h3>
           <form onSubmit={editarTransacao} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Descrição *</label>
                 <input
                   type="text"
                   value={formData.descricao}
@@ -379,7 +379,7 @@ export default function FinanceiroPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Valor *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Valor *</label>
                 <input
                   type="number"
                   step="0.01"
@@ -391,7 +391,7 @@ export default function FinanceiroPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Data de Vencimento *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Data de Vencimento *</label>
                 <input
                   type="date"
                   value={formData.data_vencimento}
@@ -401,7 +401,7 @@ export default function FinanceiroPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tipo *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Tipo *</label>
                 <select
                   value={formData.tipo}
                   onChange={(e) => setFormData({...formData, tipo: e.target.value})}
@@ -413,7 +413,7 @@ export default function FinanceiroPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Categoria</label>
                 <input
                   type="text"
                   value={formData.categoria}
@@ -423,7 +423,7 @@ export default function FinanceiroPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({...formData, status: e.target.value})}
