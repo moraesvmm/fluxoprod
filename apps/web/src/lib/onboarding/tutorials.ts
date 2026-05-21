@@ -136,6 +136,27 @@ export const TUTORIAL_DATA: Record<string, Tutorial> = {
         icon: Package
       },
       {
+        id: 'estoque-kpi-skus',
+        title: 'Total de SKUs',
+        description: 'Acompanhe a quantidade total de produtos únicos (SKUs) cadastrados no seu catálogo.',
+        targetSelector: '[data-tour="estoque-kpi-skus"]',
+        placement: 'bottom'
+      },
+      {
+        id: 'estoque-kpi-baixo',
+        title: 'Estoque Baixo',
+        description: 'Alerta sobre produtos que atingiram ou estão abaixo da quantidade mínima. Programe compras para não perder vendas!',
+        targetSelector: '[data-tour="estoque-kpi-baixo"]',
+        placement: 'bottom'
+      },
+      {
+        id: 'estoque-kpi-criticos',
+        title: 'Itens Críticos',
+        description: 'Identifica imediatamente os produtos que estão com estoque zerado e precisam de reposição urgente.',
+        targetSelector: '[data-tour="estoque-kpi-criticos"]',
+        placement: 'bottom'
+      },
+      {
         id: 'estoque-novo',
         title: 'Novo Produto',
         description: 'Cadastre SKUs com fotos, códigos e preços base.',

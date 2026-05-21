@@ -175,9 +175,15 @@ export default function EstoquePage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <KPICard title="Total SKUs" value={String(totalSKUs)} icon={Boxes} />
-        <KPICard title="Estoque Baixo" value={String(estoqueBaixo)} icon={AlertTriangle} className="border-amber-200 bg-amber-50/10" />
-        <KPICard title="Itens Críticos" value={String(itensCriticos)} icon={PackageOpen} className="border-red-200 bg-red-50/10" />
+        <div data-tour="estoque-kpi-skus">
+          <KPICard title="Total SKUs" value={String(totalSKUs)} icon={Boxes} />
+        </div>
+        <div data-tour="estoque-kpi-baixo">
+          <KPICard title="Estoque Baixo" value={String(estoqueBaixo)} icon={AlertTriangle} className="border-amber-200 bg-amber-50/10" />
+        </div>
+        <div data-tour="estoque-kpi-criticos">
+          <KPICard title="Itens Críticos" value={String(itensCriticos)} icon={PackageOpen} className="border-red-200 bg-red-50/10" />
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
