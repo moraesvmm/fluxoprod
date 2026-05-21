@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { TrendingUp, AlertTriangle, CheckCircle, Clock } from "lucide-react";
@@ -78,7 +78,7 @@ export default function PrevisaoDemandaPanel() {
       </div>
 
       {/* Gerador de Previsão */}
-      <div className="p-4 rounded-lg border border-border bg-card">
+      <div data-tour="estoque-previsao-gerar" className="p-4 rounded-lg border border-border bg-card">
         <div className="grid gap-4 sm:grid-cols-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Produto</label>
@@ -142,7 +142,7 @@ export default function PrevisaoDemandaPanel() {
                 </p>
                 {ultimaPrevisao.dias_para_zerar !== null && ultimaPrevisao.dias_para_zerar < diasPrevisao && (
                   <p className="text-sm text-red-700 mt-2 font-medium">
-                    âš ï¸ Reposição urgente necessária (estoque zera em {ultimaPrevisao.dias_para_zerar} dias)
+                    ⚠️ Reposição urgente necessária (estoque zera em {ultimaPrevisao.dias_para_zerar} dias)
                   </p>
                 )}
               </div>
@@ -152,7 +152,7 @@ export default function PrevisaoDemandaPanel() {
       </div>
 
       {/* Tabela de Previsões */}
-      <div className="border border-border rounded-lg bg-card overflow-hidden">
+      <div data-tour="estoque-previsao-historico" className="border border-border rounded-lg bg-card overflow-hidden">
         <div className="px-4 py-3 border-b border-border bg-muted">
           <h4 className="font-medium text-foreground">Histórico de Previsões</h4>
         </div>

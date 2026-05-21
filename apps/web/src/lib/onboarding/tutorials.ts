@@ -176,6 +176,20 @@ export const TUTORIAL_DATA: Record<string, Tutorial> = {
         description: 'Garantimos que você nunca fique sem produto para vender.',
         targetSelector: '[data-tour="estoque-alertas"]',
         placement: 'bottom'
+      },
+      {
+        id: 'estoque-previsao-gerar',
+        title: 'Previsão de Demanda',
+        description: 'Utilize a inteligência de dados para analisar o consumo dos últimos dias e prever exatamente quanto você vai vender nos próximos dias. Evite compras desnecessárias e rupturas de estoque.',
+        targetSelector: '[data-tour="estoque-previsao-gerar"]',
+        placement: 'bottom'
+      },
+      {
+        id: 'estoque-previsao-historico',
+        title: 'Histórico de Previsões',
+        description: 'Audite todas as previsões geradas e acompanhe a precisão do algoritmo informando a demanda real que de fato ocorreu naquele período.',
+        targetSelector: '[data-tour="estoque-previsao-historico"]',
+        placement: 'top'
       }
     ]
   },
