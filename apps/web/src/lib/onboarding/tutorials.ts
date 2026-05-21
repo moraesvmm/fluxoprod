@@ -328,6 +328,40 @@ export const TUTORIAL_DATA: Record<string, Tutorial> = {
         placement: 'left'
       }
     ]
+  },
+  producao: {
+    key: 'producao',
+    moduleName: 'Produção (MRP)',
+    steps: [
+      {
+        id: 'prod-welcome',
+        title: 'Bem-vindo à Fábrica',
+        description: 'Esse é o nosso mais novo módulo focado para produção! Transforme matérias-primas em produtos acabados de forma ágil, rastreável e inteligente.',
+        placement: 'center',
+        icon: Package
+      },
+      {
+        id: 'prod-fichas',
+        title: 'Fichas Técnicas (BOM)',
+        description: 'Crie suas receitas de produção. Defina quais e quantas matérias-primas cada produto final consome.',
+        targetSelector: '[data-tour="prod-fichas"]',
+        placement: 'bottom'
+      },
+      {
+        id: 'prod-ops',
+        title: 'Ordens de Produção (OP)',
+        description: 'Gerencie o chão de fábrica controlando o que está em andamento e acompanhando as conclusões.',
+        targetSelector: '[data-tour="prod-ops"]',
+        placement: 'top'
+      },
+      {
+        id: 'prod-concluir',
+        title: 'Conclusão e Baixa',
+        description: 'Ao apontar conclusão, o sistema automaticamente dá baixa nas matérias-primas e credita o produto acabado no seu estoque.',
+        targetSelector: '[data-tour="prod-concluir"]',
+        placement: 'bottom'
+      }
+    ]
   }
 };
 

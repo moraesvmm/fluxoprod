@@ -38,6 +38,7 @@ interface Produto {
   ncm?: string;
   cfop_padrao?: string;
   origem?: number;
+  tipo_item?: string;
 }
 
 export default function CatalogoPage() {
@@ -332,7 +333,14 @@ export default function CatalogoPage() {
                 <TableRow key={p.id} className="hover:bg-muted/30">
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-medium text-foreground">{p.nome}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-foreground">{p.nome}</span>
+                        {p.tipo_item === 'produto_acabado' && (
+                          <span className="inline-flex items-center rounded-sm bg-indigo-500/10 px-1.5 py-0.5 text-[10px] font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wider border border-indigo-500/20">
+                            Produto Acabado
+                          </span>
+                        )}
+                      </div>
                       {p.descricao && <span className="text-xs text-muted-foreground line-clamp-1">{p.descricao}</span>}
                     </div>
                   </TableCell>

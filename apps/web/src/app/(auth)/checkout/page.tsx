@@ -17,7 +17,7 @@ interface ModuloData { id: string; key: string; nome: string; preco: number; pre
 const PLANOS_FALLBACK: PlanoData[] = [
   { id: "starter", key: "starter", nome: "Starter", preco: 249, preco_promocional: null, descricao: "Entrada e Visibilidade", modulos_incluidos: ["dashboard","crm","catalogo","estoque"], ordem_exibicao: 1 },
   { id: "business", key: "business", nome: "Business", preco: 499, preco_promocional: null, descricao: "Operação Central", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh"], ordem_exibicao: 2 },
-  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios"], ordem_exibicao: 3 },
+  { id: "pro", key: "pro", nome: "Pro", preco: 849, preco_promocional: null, descricao: "Vertical Completo", modulos_incluidos: ["dashboard","crm","catalogo","estoque","vendas","financeiro","rh","os","obras","comissoes","relatorios","producao"], ordem_exibicao: 3 },
 ];
 const MODULOS_FALLBACK: ModuloData[] = [
   { id: "vendas", key: "vendas", nome: "Vendas & PDV", preco: 99.90, preco_promocional: null, icone: "🛍️", descricao: "Operação completa de frente de caixa e gestão comercial.", features: ["PDV Ágil com integração financeira automática", "Emissão e Gestão de NFe nativa para Simples Nacional", "Relatórios analíticos de vendas e ticket médio"], ordem_exibicao: 0 },
@@ -36,6 +36,7 @@ const MODULE_LABELS: Record<string, string> = {
   dashboard: "Dashboard", crm: "CRM", catalogo: "Catálogo", estoque: "Estoque",
   vendas: "Vendas / PDV", financeiro: "Financeiro", rh: "RH & Pessoal",
   os: "Ordens de Serviço", obras: "Obras", comissoes: "Comissões", relatorios: "Relatórios",
+  producao: "Produção (MRP)",
   "Inteligência de Vendas": "Inteligência de Vendas (CRM)",
   "email_real": "Autenticação via E-mail Real",
 };

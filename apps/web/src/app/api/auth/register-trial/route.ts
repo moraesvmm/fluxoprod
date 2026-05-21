@@ -146,7 +146,7 @@ export async function POST(request: Request) {
     // Chaves técnicas válidas no modulos_catalogo — usadas como whitelist (dashboard é nativo e não precisa constar aqui)
     const VALID_MODULE_KEYS = new Set([
       "crm", "catalogo", "estoque", "vendas",
-      "financeiro", "rh", "os", "obras", "comissoes", "relatorios"
+      "financeiro", "rh", "os", "obras", "comissoes", "relatorios", "producao"
     ]);
 
     // Resolver módulos: se payload.modules vazio, buscar do plano na tabela planos

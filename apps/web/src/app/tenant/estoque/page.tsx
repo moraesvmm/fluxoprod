@@ -234,7 +234,16 @@ export default function EstoquePage() {
                     <TableRow key={item.id} className="group">
                       <TableCell><StatusBadge status={getStatus(item.estoque_atual, item.estoque_minimo)} /></TableCell>
                       <TableCell className="font-mono text-xs text-slate-500">{item.sku || '-'}</TableCell>
-                      <TableCell className="font-medium text-slate-900">{item.nome}</TableCell>
+                      <TableCell className="font-medium text-slate-900">
+                        <div className="flex items-center gap-2">
+                          {item.nome}
+                          {item.tipo_item === 'produto_acabado' && (
+                            <span className="inline-flex items-center rounded-sm bg-indigo-500/10 px-1.5 py-0.5 text-[10px] font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wider border border-indigo-500/20">
+                              Produto Acabado
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-right font-bold text-slate-700">
                         <span className={item.estoque_atual <= item.estoque_minimo ? "text-red-600" : ""}>{item.estoque_atual}</span>
                       </TableCell>

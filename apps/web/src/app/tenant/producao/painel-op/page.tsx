@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useOrdensProducao, useAbrirOrdemProducao, useConcluirOrdemProducao } from "@/lib/hooks/use-producao";
+import { useOrdensProducao, useAbrirOrdemProducao, useConcluirOrdemProducao, useFichasTecnicas } from "@/lib/hooks/use-producao";
 import { useProdutos } from "@/lib/hooks/use-produtos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
-import { Plus, CheckCircle, Factory } from "lucide-react";
+import { Plus, CheckCircle, Factory, AlertTriangle } from "lucide-react";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 export default function PainelOPPage() {
   const { data: ordens, isLoading } = useOrdensProducao();
   const { data: produtos } = useProdutos();
+  const { data: fichasTecnicas } = useFichasTecnicas();
   const abrirOrdem = useAbrirOrdemProducao();
   const concluirOrdem = useConcluirOrdemProducao();
   const { error, success } = useToast();
@@ -24,10 +26,12 @@ export default function PainelOPPage() {
   const [isConcluirOpen, setIsConcluirOpen] = useState(false);
   const [selectedOp, setSelectedOp] = useState<any>(null);
   const [qtdProduzida, setQtdProduzida] = useState("");
-  // Para simplificar esta primeira versão, vamos enviar o array de insumos com o que foi estimado.
-  // Em uma v2, isso seria detalhado em um array onde o operador digita o consumo real.
 
-  const produtosAcabados = produtos?.filter(p => p.tipo_item !== 'materia_prima' && p.tipo_item !== 'consumo');
+  // Apenas produtos marcados explicitamente como produto_acabado podem ter OP.
+  // Produtos sem tipo_item (legado) também são aceitos para compatibilidade.
+  const produtosAcabados = produtos?.filter(
+    p => p.tipo_item === 'produto_acabado' || !p.tipo_item
+  );
 
   const handleAbrirOP = async () => {
     if (!produtoId || !qtdPlanejada) {
@@ -56,18 +60,37 @@ export default function PainelOPPage() {
 
   const handleConcluirOP = async () => {
     if (!qtdProduzida || !selectedOp) return;
+    const qtd = parseFloat(qtdProduzida);
+    if (isNaN(qtd) || qtd <= 0) {
+      error("Quantidade produzida inválida.");
+      return;
+    }
     try {
-      // Simplificação: vamos buscar a ficha técnica no backend para fazer o desconto se não vier preenchido.
-      // Como a RPC `tenant_concluir_ordem_producao` precisa do jsonb de insumos, e ainda não temos
-      // o apontamento detalhado na UI, passamos vazio e a RPC processaria caso tivéssemos feito essa lógica.
-      // Mas a RPC que criei espera o json. Para fins de demonstração, passamos vazio e 
-      // precisaremos refinar a listagem de insumos da OP depois.
+      // Busca as fichas técnicas do produto acabado e calcula o consumo real de cada insumo.
+      // A RPC precisa do array de insumos para descontar o estoque das matérias-primas.
+      const fichasDoProduto = (fichasTecnicas || []).filter(
+        f => f.produto_acabado_id === selectedOp.produto_id
+      );
+
+      const insumos = fichasDoProduto.map(f => ({
+        insumo_id: f.materia_prima_id,
+        quantidade_consumida: f.quantidade_necessaria * qtd,
+      }));
+
+      if (insumos.length === 0) {
+        // Sem ficha técnica cadastrada: conclui sem desconto de MP, mas avisa.
+        error("Atenção: Este produto não possui Ficha Técnica. Nenhuma matéria-prima foi descontada.");
+      }
+
       await concluirOrdem.mutateAsync({
         ordem_id: selectedOp.id,
-        quantidade_produzida: parseFloat(qtdProduzida),
-        insumos: [] // Idealmente, buscaríamos da ordens_producao_insumos para a tela de conclusão.
+        quantidade_produzida: qtd,
+        insumos,
       });
-      success("Ordem Concluída!");
+      success(insumos.length > 0
+        ? `OP concluída! ${insumos.length} matéria(s)-prima descontada(s) do estoque.`
+        : "OP concluída! Produto acabado creditado no estoque."
+      );
       setIsConcluirOpen(false);
       setSelectedOp(null);
     } catch (err: any) {
@@ -85,13 +108,16 @@ export default function PainelOPPage() {
           <h1 className="text-2xl font-bold">Painel de Ordens de Produção</h1>
           <p className="text-muted-foreground">Controle o chão de fábrica e status das produções.</p>
         </div>
-        <Button onClick={() => setIsNewOpOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nova Ordem
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setIsNewOpOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Ordem
+          </Button>
+          <TutorialHelpButton moduleKey="producao" />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-tour="prod-ops">
         {/* Coluna Em Andamento */}
         <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between mb-4">
@@ -120,7 +146,7 @@ export default function PainelOPPage() {
                 <div className="text-xs text-muted-foreground">
                   Início: {new Date(op.data_inicio!).toLocaleString('pt-BR')}
                 </div>
-                <div className="mt-2 flex justify-end">
+                <div className="mt-2 flex justify-end" data-tour="prod-concluir">
                   <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50" onClick={() => handleOpenConcluir(op)}>
                     <CheckCircle className="w-4 h-4 mr-1" />
                     Apontar Conclusão
@@ -200,8 +226,29 @@ export default function PainelOPPage() {
       <Modal isOpen={isConcluirOpen} onClose={() => setIsConcluirOpen(false)} title={`Concluir OP #${selectedOp?.numero_op}`}>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Informe a quantidade real que foi produzida. O estoque do produto será incrementado neste valor, e as matérias-primas serão descontadas baseadas na Ficha Técnica.
+            Informe a quantidade real produzida. O estoque do produto acabado será incrementado e cada matéria-prima da Ficha Técnica será descontada proporcionalmente.
           </p>
+          {fichasTecnicas && fichasTecnicas.filter(f => f.produto_acabado_id === selectedOp?.produto_id).length === 0 && (
+            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>Este produto não tem Ficha Técnica cadastrada. Nenhuma matéria-prima será descontada ao concluir.</span>
+            </div>
+          )}
+          {fichasTecnicas && fichasTecnicas.filter(f => f.produto_acabado_id === selectedOp?.produto_id).length > 0 && (
+            <div className="rounded-md border border-border bg-muted/30 p-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Insumos que serão consumidos:</p>
+              <ul className="space-y-1">
+                {fichasTecnicas.filter(f => f.produto_acabado_id === selectedOp?.produto_id).map(f => (
+                  <li key={f.id} className="flex justify-between text-sm">
+                    <span>{f.materia_prima_nome}</span>
+                    <span className="font-mono font-medium text-red-600">
+                      -{(f.quantidade_necessaria * parseFloat(qtdProduzida || '0')).toFixed(4)} {f.unidade_medida || 'UN'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div>
             <label className="text-sm font-medium mb-1 block">Quantidade Produzida</label>
             <Input

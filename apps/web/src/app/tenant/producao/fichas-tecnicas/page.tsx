@@ -9,6 +9,7 @@ import { Modal } from "@/components/ui/modal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/toast";
 import { Plus, PackageSearch } from "lucide-react";
+import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 export default function FichasTecnicasPage() {
   const { data: fichas, isLoading } = useFichasTecnicas();
@@ -54,13 +55,16 @@ export default function FichasTecnicasPage() {
           <h1 className="text-2xl font-bold">Fichas Técnicas (BOM)</h1>
           <p className="text-muted-foreground">Gerencie a composição de materiais dos seus produtos acabados.</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nova Ficha
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Ficha
+          </Button>
+          <TutorialHelpButton moduleKey="producao" />
+        </div>
       </div>
 
-      <div className="bg-card rounded-lg border shadow-sm">
+      <div className="bg-card rounded-lg border shadow-sm" data-tour="prod-fichas">
         <Table>
           <TableHeader>
             <TableRow>
