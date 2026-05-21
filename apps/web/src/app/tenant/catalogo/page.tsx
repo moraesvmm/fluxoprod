@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -511,7 +511,7 @@ export default function CatalogoPage() {
               <select
                 value={formData.origem}
                 onChange={(e) => setFormData({ ...formData, origem: e.target.value })}
-                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card text-card-foreground"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card"
               >
                 <option value="0">0 - Nacional</option>
                 <option value="1">1 - Estrangeira (Importação Direta)</option>
@@ -631,7 +631,7 @@ export default function CatalogoPage() {
               <select
                 value={formData.origem}
                 onChange={(e) => setFormData({ ...formData, origem: e.target.value })}
-                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card text-card-foreground"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card"
               >
                 <option value="0">0 - Nacional</option>
                 <option value="1">1 - Estrangeira (Importação Direta)</option>

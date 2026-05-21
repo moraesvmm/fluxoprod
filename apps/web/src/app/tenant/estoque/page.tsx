@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -161,10 +161,10 @@ export default function EstoquePage() {
           <p className="text-muted-foreground">Controle de inventário e alertas de reposição.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setScannerOpen(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card text-card-foreground border border-border hover:bg-accent text-foreground h-10 px-4 py-2">
+          <button onClick={() => setScannerOpen(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border hover:bg-muted text-foreground h-10 px-4 py-2">
             <Barcode className="mr-2 h-4 w-4" /> Scanner
           </button>
-          <button onClick={() => setExportConfirm(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card text-card-foreground border border-border hover:bg-accent text-foreground h-10 px-4 py-2">
+          <button onClick={() => setExportConfirm(true)} className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border hover:bg-muted text-foreground h-10 px-4 py-2">
             Importar/Exportar
           </button>
           <button onClick={() => setIsModalOpen(true)} data-tour="estoque-novo" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
@@ -182,16 +182,16 @@ export default function EstoquePage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="inline-flex rounded-lg bg-muted p-1">
-          <TabsTrigger value="produtos" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Produtos</TabsTrigger>
-          <TabsTrigger value="alertas" data-tour="estoque-alertas" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Alertas</TabsTrigger>
-          <TabsTrigger value="kits" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Kits</TabsTrigger>
-          <TabsTrigger value="transferencias" data-tour="estoque-mov" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Transferências</TabsTrigger>
-          <TabsTrigger value="valoracao" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Valoração</TabsTrigger>
-          <TabsTrigger value="previsao" className="data-[state=active]:bg-card text-card-foreground data-[state=active]:shadow-sm">Previsão</TabsTrigger>
+          <TabsTrigger value="produtos" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Produtos</TabsTrigger>
+          <TabsTrigger value="alertas" data-tour="estoque-alertas" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Alertas</TabsTrigger>
+          <TabsTrigger value="kits" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Kits</TabsTrigger>
+          <TabsTrigger value="transferencias" data-tour="estoque-mov" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Transferências</TabsTrigger>
+          <TabsTrigger value="valoracao" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Valoração</TabsTrigger>
+          <TabsTrigger value="previsao" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Previsão</TabsTrigger>
         </TabsList>
 
         <TabsContent value="produtos" className="mt-4">
-          <div className="flex-1 rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
+          <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
             <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -200,11 +200,11 @@ export default function EstoquePage() {
                   placeholder="Buscar SKU ou nome do produto..."
                   value={buscaProduto}
                   onChange={e => setBuscaProduto(e.target.value)}
-                  className="w-full bg-card text-card-foreground border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full bg-card border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="flex gap-2">
-                <button className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border px-3 py-1.5 rounded-md bg-card text-card-foreground">
+                <button className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border px-3 py-1.5 rounded-md bg-card">
                   <Filter className="h-4 w-4" /> Filtros
                 </button>
               </div>
@@ -339,7 +339,7 @@ export default function EstoquePage() {
       {/* Modal de Edição de Produto */}
       {editProdutoId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-card text-card-foreground rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+          <div className="bg-card rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold mb-4">Editar Produto</h3>
             <form onSubmit={handleEditarProduto} className="space-y-4">
               <div>

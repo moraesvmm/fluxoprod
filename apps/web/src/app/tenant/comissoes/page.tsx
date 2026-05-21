@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import { Calculator, DollarSign, Percent, Plus, Wallet } from "lucide-react";
@@ -203,7 +203,7 @@ export default function ComissoesPage() {
       </div>
 
       {activeTab === "regras" && (
-        <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
@@ -257,7 +257,7 @@ export default function ComissoesPage() {
       )}
 
       {activeTab === "historico" && (
-        <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>

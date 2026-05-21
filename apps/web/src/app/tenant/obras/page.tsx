@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -368,7 +368,7 @@ export default function ObrasPage() {
       {/* Modal: Adicionar Custo */}
       {showCustoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-card text-card-foreground rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+          <div className="bg-card rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Adicionar Custo</h3>
               <button onClick={() => setShowCustoModal(false)} className="text-slate-400 hover:text-muted-foreground"><X className="h-4 w-4" /></button>
@@ -422,7 +422,7 @@ export default function ObrasPage() {
       {/* Modal: Adicionar Recurso */}
       {showRecursoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-card text-card-foreground rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+          <div className="bg-card rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Alocar Recurso</h3>
               <button onClick={() => setShowRecursoModal(false)} className="text-slate-400 hover:text-muted-foreground"><X className="h-4 w-4" /></button>
@@ -492,20 +492,20 @@ export default function ObrasPage() {
         </div>
       </div>
 
-      <div className="flex-1 rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
+      <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
               placeholder="Buscar por nome, cliente ou endereço..."
-              className="w-full bg-card text-card-foreground border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full bg-card border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <button
             onClick={() => setViewMode(viewMode === 'table' ? 'calendar' : 'table')}
             data-tour="obras-cronograma"
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-card text-card-foreground border border-border rounded-md hover:bg-accent transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-card border border-border rounded-md hover:bg-muted transition-colors"
           >
             {viewMode === 'table' ? (
               <>
@@ -556,7 +556,7 @@ export default function ObrasPage() {
                 obras?.map((obra) => (
                   <TableRow 
                     key={obra.id} 
-                    className={selectedObra?.id === obra.id ? "bg-blue-50" : "cursor-pointer hover:bg-accent"}
+                    className={selectedObra?.id === obra.id ? "bg-blue-50" : "cursor-pointer hover:bg-muted"}
                     onClick={() => selecionarObra(obra)}
                   >
                     <TableCell className="font-medium text-foreground">{obra.nome}</TableCell>
@@ -818,7 +818,7 @@ export default function ObrasPage() {
 
       {/* Painel de Detalhes da Obra Selecionada */}
       {selectedObra && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-card text-card-foreground border-l border-border shadow-lg overflow-hidden z-50">
+        <div className="fixed inset-y-0 right-0 w-96 bg-card border-l border-border shadow-lg overflow-hidden z-50">
           <div className="h-full flex flex-col">
             {/* Header */}
             <div className="p-4 border-b border-border flex items-center justify-between bg-muted">

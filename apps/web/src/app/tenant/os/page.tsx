@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -221,14 +221,14 @@ export default function OSPage() {
         <KPICard title="Canceladas" value={canceladas} icon={XCircle} className="border-red-200 bg-red-50/10" />
       </div>
 
-      <div data-tour="os-tabela" className="flex-1 rounded-xl border border-border bg-card text-card-foreground shadow-sm overflow-hidden">
+      <div data-tour="os-tabela" className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
               placeholder="Buscar por cliente, veículo ou número..."
-              className="w-full bg-card text-card-foreground border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full bg-card border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <button
@@ -238,7 +238,7 @@ export default function OSPage() {
               else if (viewMode === 'calendar') setViewMode('table');
               else setViewMode('kanban');
             }}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-card text-card-foreground border border-border rounded-md hover:bg-accent transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium bg-card border border-border rounded-md hover:bg-muted transition-colors"
           >
             {viewMode === 'table' ? (
               <>

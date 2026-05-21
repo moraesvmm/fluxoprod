@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useCallback } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -363,7 +363,7 @@ export default function FinanceiroPage() {
 
       {/* Modal de Edição */}
       {showEditModal && (
-        <div className="bg-card text-card-foreground rounded-xl border border-border shadow-sm p-6">
+        <div className="bg-card rounded-xl border border-border shadow-sm p-6">
           <h3 className="text-lg font-semibold mb-4">Editar Transação</h3>
           <form onSubmit={editarTransacao} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
