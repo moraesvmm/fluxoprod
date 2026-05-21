@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Phone, Mail, Users, FileText, MessageCircle, MapPin, Plus, Trash2, Clock, ChevronDown, ShoppingBag } from "lucide-react";

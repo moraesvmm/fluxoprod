@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { ReactNode } from "react";
 import { requireMaster } from "@/utils/auth/requireMaster";
 import LogoutButton from "@/components/LogoutButton";

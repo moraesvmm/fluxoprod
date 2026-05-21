@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { OrdemServico } from "@/lib/api";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";

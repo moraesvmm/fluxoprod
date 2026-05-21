@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle, TrendingUp, ShoppingBag, Banknote } from "lucide-react";
 import { useFechamentoPendente } from "@/lib/hooks/use-dashboard";
 import { type FechamentoPendente } from "@/lib/hooks/use-dashboard";

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * KPISkeleton - Componente de skeleton para KPI Cards

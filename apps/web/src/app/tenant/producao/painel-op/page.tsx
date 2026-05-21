@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useOrdensProducao, useAbrirOrdemProducao, useConcluirOrdemProducao, useFichasTecnicas } from "@/lib/hooks/use-producao";

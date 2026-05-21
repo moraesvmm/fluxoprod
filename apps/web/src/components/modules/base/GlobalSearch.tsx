@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Search, X, User, Briefcase, ShoppingCart, FileText, Building2, Wrench, DollarSign, type LucideIcon } from "lucide-react";

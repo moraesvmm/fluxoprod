@@ -16,11 +16,3 @@ PENDENTE VISTORIA (21/05/2026): Correcoes Visuais Dark Mode:
 - Adicionado passo no tutorial de boas vindas para ensinar como trocar o tema.
 Prioridade: MEDIA - vistoriar e testar layout no dark mode e light mode.
 
-
-PENDENTE VISTORIA (21/05/2026): Varredura Global de Cores (Dark Mode):
-- Foram varridos e atualizados cerca de 65 arquivos (páginas e subcomponentes da pasta modules).
-- Substituição massiva de bg-white para bg-card.
-- Substituição massiva de text-slate-900/800/700 para text-foreground.
-- Substituição massiva de text-slate-600/500 para text-muted-foreground.
-- Prioridade: ALTA - Garantir que nenhuma quebra visual de ícones brancos em fundos brancos tenha ocorrido no Light Mode. O Dark Mode agora deve estar operando de forma perfeita em todos os módulos (Estoque, CRM, Obras, etc.).
-

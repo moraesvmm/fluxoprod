@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ObraRecurso } from "@/lib/api";
 import { Button } from "@/components/ui/button";

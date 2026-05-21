@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { usePipeline } from "@/lib/hooks/use-pipeline";

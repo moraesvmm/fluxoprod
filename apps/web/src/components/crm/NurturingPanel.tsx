@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Sparkles, MessageCircle, Check, ArrowRight, Clock, ShoppingBag, X } from 'lucide-react';

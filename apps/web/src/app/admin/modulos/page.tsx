@@ -1,4 +1,4 @@
-﻿import { requireMaster } from "@/utils/auth/requireMaster";
+import { requireMaster } from "@/utils/auth/requireMaster";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 

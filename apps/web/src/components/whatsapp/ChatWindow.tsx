@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Mic, Smile, FileText, MapPin, User, Film, Image } from "lucide-react";

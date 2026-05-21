@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { LogOut } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";

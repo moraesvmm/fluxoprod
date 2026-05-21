@@ -1,4 +1,4 @@
-﻿import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import { requireMaster } from "@/utils/auth/requireMaster";
 
 export default async function AdminHome() {

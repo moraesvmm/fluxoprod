@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * CardSkeleton - Componente de skeleton para cards genéricos

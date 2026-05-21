@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEmpresa } from "@/lib/hooks/use-empresas";
 import { CreditCard, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";

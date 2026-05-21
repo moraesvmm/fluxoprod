@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { listarCuponsAdmin, criarCupomAdmin, excluirCupomAdmin, type Cupom } from "@/lib/api";

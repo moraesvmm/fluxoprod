@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * TableSkeleton - Componente de skeleton para tabelas
