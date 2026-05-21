@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
@@ -85,7 +85,7 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
       <div className={`relative rounded-2xl overflow-hidden shadow-2xl border transition-all duration-300 ${
         darkMode 
           ? 'shadow-violet-500/20 border-white/10 bg-[#0a0a0c]' 
-          : 'shadow-slate-200/50 border-slate-200 bg-white'
+          : 'shadow-slate-200/50 border-border bg-card'
       }`}>
         {/* Glow effect */}
         <div className={`absolute inset-0 rounded-2xl blur-3xl opacity-20 -z-10 ${
@@ -167,7 +167,7 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
       </div>
 
       {/* Caption */}
-      <p className={`mt-4 text-center text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+      <p className={`mt-4 text-center text-sm ${darkMode ? 'text-slate-400' : 'text-muted-foreground'}`}>
         Demonstração completa do sistema Fluxo ERP em 2 minutos
       </p>
     </motion.div>

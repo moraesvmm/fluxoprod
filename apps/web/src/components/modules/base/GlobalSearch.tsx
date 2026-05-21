@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Search, X, User, Briefcase, ShoppingCart, FileText, Building2, Wrench, DollarSign, type LucideIcon } from "lucide-react";
@@ -132,7 +132,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center pt-24 z-50" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-card rounded-xl shadow-2xl w-full max-w-2xl mx-4" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center gap-3 p-4 border-b border-border">
           <Search className="h-5 w-5 text-slate-400" />
@@ -146,7 +146,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
           />
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-slate-400 hover:text-muted-foreground transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -155,11 +155,11 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         {/* Results */}
         <div className="max-h-96 overflow-y-auto">
           {query.length < 2 ? (
-            <div className="p-8 text-center text-slate-500 text-sm">
+            <div className="p-8 text-center text-muted-foreground text-sm">
               Digite pelo menos 2 caracteres para buscar
             </div>
           ) : results.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-sm">
+            <div className="p-8 text-center text-muted-foreground text-sm">
               Nenhum resultado encontrado para "{query}"
             </div>
           ) : (
@@ -171,16 +171,16 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                     key={result.id}
                     href={result.url}
                     onClick={onClose}
-                    className="flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-3 p-4 hover:bg-muted transition-colors"
                   >
-                    <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center">
-                      <Icon className="h-5 w-5 text-slate-600" />
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                      <Icon className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-slate-900">{result.title}</div>
-                      <div className="text-sm text-slate-500">{result.subtitle}</div>
+                      <div className="font-medium text-foreground">{result.title}</div>
+                      <div className="text-sm text-muted-foreground">{result.subtitle}</div>
                     </div>
-                    <div className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">
+                    <div className="text-xs text-slate-400 bg-muted px-2 py-1 rounded">
                       {getTypeLabel(result.type)}
                     </div>
                   </a>
@@ -191,9 +191,9 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-border bg-slate-50 text-xs text-slate-500">
+        <div className="p-3 border-t border-border bg-muted text-xs text-muted-foreground">
           <div className="flex items-center justify-between">
-            <span>Pressione <kbd className="px-1.5 py-0.5 bg-white border border-border rounded">ESC</kbd> para fechar</span>
+            <span>Pressione <kbd className="px-1.5 py-0.5 bg-card border border-border rounded">ESC</kbd> para fechar</span>
             <span>Use setas para navegar</span>
           </div>
         </div>

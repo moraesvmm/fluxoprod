@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * CardSkeleton - Componente de skeleton para cards genéricos
@@ -18,10 +18,10 @@ export function CardSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className="grid gap-4 sm:grid-cols-3">
       {[...Array(count)].map((_, i) => (
-        <div key={i} className="rounded-2xl border border-border bg-white p-6 shadow-sm animate-pulse">
+        <div key={i} className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-pulse">
           <div className="h-12 w-12 bg-slate-200 rounded-xl mb-4" />
           <div className="h-6 w-32 bg-slate-200 rounded mb-2" />
-          <div className="h-4 w-full bg-slate-100 rounded mb-4" />
+          <div className="h-4 w-full bg-muted rounded mb-4" />
           <div className="h-4 w-24 bg-slate-200 rounded" />
         </div>
       ))}

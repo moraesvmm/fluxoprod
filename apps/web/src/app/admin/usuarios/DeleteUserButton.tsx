@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Trash2, AlertTriangle } from "lucide-react";
@@ -40,12 +40,12 @@ export default function DeleteUserButton({ userId, isMaster }: { userId: string,
 
       {showConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+          <div className="bg-card rounded-xl p-6 max-w-md w-full mx-4">
             <div className="flex items-center gap-3 text-rose-600 mb-4">
               <AlertTriangle className="h-5 w-5" />
-              <h2 className="text-lg font-semibold text-slate-900">Confirmar Exclusão de Usuário</h2>
+              <h2 className="text-lg font-semibold text-foreground">Confirmar Exclusão de Usuário</h2>
             </div>
-            <p className="text-sm text-slate-700 mb-4">
+            <p className="text-sm text-foreground mb-4">
               Você está prestes a excluir este usuário <strong>definitivamente</strong> do sistema (Auth e Perfil). 
               Esta operação é irreversível.
             </p>
@@ -58,7 +58,7 @@ export default function DeleteUserButton({ userId, isMaster }: { userId: string,
               <button
                 onClick={() => setShowConfirm(false)}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 disabled:opacity-50 text-slate-700"
+                className="flex-1 px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-muted disabled:opacity-50 text-foreground"
               >
                 Cancelar
               </button>

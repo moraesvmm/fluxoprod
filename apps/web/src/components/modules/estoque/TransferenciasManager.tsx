@@ -168,24 +168,24 @@ export default function TransferenciasManager() {
         </div>
 
         {loadingLocais ? (
-          <div className="text-center py-8 text-slate-500">Carregando locais...</div>
+          <div className="text-center py-8 text-muted-foreground">Carregando locais...</div>
         ) : locais.length === 0 ? (
-          <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+          <div className="text-center py-8 text-muted-foreground bg-muted rounded-lg border border-border">
             <Building2 className="h-10 w-10 mx-auto text-slate-300 mb-2" />
             <p className="text-sm">Nenhum local cadastrado</p>
           </div>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {locais.map((local) => (
-              <div key={local.id} className="p-4 rounded-lg border border-slate-200 bg-white">
+              <div key={local.id} className="p-4 rounded-lg border border-border bg-card">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
-                    <span className="inline-block text-xs font-medium text-slate-500 uppercase mb-1">
+                    <span className="inline-block text-xs font-medium text-muted-foreground uppercase mb-1">
                       {local.tipo}
                     </span>
-                    <h4 className="font-medium text-slate-900">{local.nome}</h4>
+                    <h4 className="font-medium text-foreground">{local.nome}</h4>
                     {local.endereco && (
-                      <p className="text-sm text-slate-600 mt-1">{local.endereco}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{local.endereco}</p>
                     )}
                   </div>
                   <button
@@ -212,7 +212,7 @@ export default function TransferenciasManager() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">Todos os status</option>
               <option value="pendente">Pendente</option>
@@ -230,9 +230,9 @@ export default function TransferenciasManager() {
         </div>
 
         {loadingTransferencias ? (
-          <div className="text-center py-8 text-slate-500">Carregando transferÃªncias...</div>
+          <div className="text-center py-8 text-muted-foreground">Carregando transferÃªncias...</div>
         ) : filteredTransferencias.length === 0 ? (
-          <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+          <div className="text-center py-8 text-muted-foreground bg-muted rounded-lg border border-border">
             <ArrowRight className="h-10 w-10 mx-auto text-slate-300 mb-2" />
             <p className="text-sm">Nenhuma transferÃªncia encontrada</p>
           </div>
@@ -240,27 +240,27 @@ export default function TransferenciasManager() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
-                  <th className="text-left p-3 font-medium text-slate-700">Produto</th>
-                  <th className="text-left p-3 font-medium text-slate-700">Origem</th>
-                  <th className="text-left p-3 font-medium text-slate-700">Destino</th>
-                  <th className="text-left p-3 font-medium text-slate-700">Quantidade</th>
-                  <th className="text-left p-3 font-medium text-slate-700">Status</th>
-                  <th className="text-left p-3 font-medium text-slate-700">AÃ§Ãµes</th>
+                <tr className="border-b border-border bg-muted">
+                  <th className="text-left p-3 font-medium text-foreground">Produto</th>
+                  <th className="text-left p-3 font-medium text-foreground">Origem</th>
+                  <th className="text-left p-3 font-medium text-foreground">Destino</th>
+                  <th className="text-left p-3 font-medium text-foreground">Quantidade</th>
+                  <th className="text-left p-3 font-medium text-foreground">Status</th>
+                  <th className="text-left p-3 font-medium text-foreground">AÃ§Ãµes</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredTransferencias.map((t) => (
-                  <tr key={t.id} className="border-b border-slate-100 hover:bg-slate-50">
+                  <tr key={t.id} className="border-b border-slate-100 hover:bg-muted">
                     <td className="p-3">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4 text-slate-400" />
-                        <span className="font-medium text-slate-900">{t.produto_nome}</span>
+                        <span className="font-medium text-foreground">{t.produto_nome}</span>
                       </div>
                     </td>
-                    <td className="p-3 text-slate-600">{t.local_origem_nome}</td>
-                    <td className="p-3 text-slate-600">{t.local_destino_nome}</td>
-                    <td className="p-3 font-medium text-slate-900">{t.quantidade}</td>
+                    <td className="p-3 text-muted-foreground">{t.local_origem_nome}</td>
+                    <td className="p-3 text-muted-foreground">{t.local_destino_nome}</td>
+                    <td className="p-3 font-medium text-foreground">{t.quantidade}</td>
                     <td className="p-3">{getStatusBadge(t.status)}</td>
                     <td className="p-3">
                       <div className="flex items-center gap-2">
@@ -294,21 +294,21 @@ export default function TransferenciasManager() {
       <Modal isOpen={isLocalModalOpen} onClose={() => setIsLocalModalOpen(false)} title="Novo Local de Estoque">
         <form onSubmit={handleSalvarLocal} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Nome</label>
             <input
               type="text"
               value={localFormData.nome}
               onChange={(e) => setLocalFormData({ ...localFormData, nome: e.target.value })}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Tipo</label>
             <select
               value={localFormData.tipo}
               onChange={(e) => setLocalFormData({ ...localFormData, tipo: e.target.value })}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
             >
               <option value="filial">Filial</option>
@@ -317,11 +317,11 @@ export default function TransferenciasManager() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">EndereÃ§o</label>
+            <label className="block text-sm font-medium text-foreground mb-1">EndereÃ§o</label>
             <textarea
               value={localFormData.endereco}
               onChange={(e) => setLocalFormData({ ...localFormData, endereco: e.target.value })}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               rows={2}
             />
           </div>
@@ -329,7 +329,7 @@ export default function TransferenciasManager() {
             <button
               type="button"
               onClick={() => setIsLocalModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-md"
+              className="px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md"
             >
               Cancelar
             </button>
@@ -348,11 +348,11 @@ export default function TransferenciasManager() {
       <Modal isOpen={isTransferenciaModalOpen} onClose={() => setIsTransferenciaModalOpen(false)} title="Nova TransferÃªncia">
         <form onSubmit={handleCriarTransferencia} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Produto</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Produto</label>
             <select
               value={transferenciaFormData.produto_id}
               onChange={(e) => setTransferenciaFormData({ ...transferenciaFormData, produto_id: e.target.value })}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
             >
               <option value="">Selecione um produto</option>
@@ -363,11 +363,11 @@ export default function TransferenciasManager() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Origem</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Origem</label>
               <select
                 value={transferenciaFormData.local_origem_id}
                 onChange={(e) => setTransferenciaFormData({ ...transferenciaFormData, local_origem_id: e.target.value })}
-                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 required
               >
                 <option value="">Selecione</option>
@@ -377,11 +377,11 @@ export default function TransferenciasManager() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Destino</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Destino</label>
               <select
                 value={transferenciaFormData.local_destino_id}
                 onChange={(e) => setTransferenciaFormData({ ...transferenciaFormData, local_destino_id: e.target.value })}
-                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 required
               >
                 <option value="">Selecione</option>
@@ -392,22 +392,22 @@ export default function TransferenciasManager() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Quantidade</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Quantidade</label>
             <input
               type="number"
               min="1"
               value={transferenciaFormData.quantidade}
               onChange={(e) => setTransferenciaFormData({ ...transferenciaFormData, quantidade: parseInt(e.target.value) || 1 })}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">ObservaÃ§Ã£o</label>
+            <label className="block text-sm font-medium text-foreground mb-1">ObservaÃ§Ã£o</label>
             <textarea
               value={transferenciaFormData.observacao}
               onChange={(e) => setTransferenciaFormData({ ...transferenciaFormData, observacao: e.target.value })}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               rows={2}
             />
           </div>
@@ -415,7 +415,7 @@ export default function TransferenciasManager() {
             <button
               type="button"
               onClick={() => setIsTransferenciaModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-md"
+              className="px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md"
             >
               Cancelar
             </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Smartphone, Wifi, WifiOff, QrCode, RefreshCw, Power } from "lucide-react";
@@ -102,14 +102,14 @@ export function WhatsAppConnection() {
 
   if (serviceDown) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
             <WifiOff className="w-5 h-5 text-slate-400" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-800">WhatsApp</h3>
-            <p className="text-xs text-slate-500">Serviço indisponível</p>
+            <h3 className="font-semibold text-foreground">WhatsApp</h3>
+            <p className="text-xs text-muted-foreground">Serviço indisponível</p>
           </div>
         </div>
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
@@ -128,7 +128,7 @@ export function WhatsAppConnection() {
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div
@@ -138,7 +138,7 @@ export function WhatsAppConnection() {
           <Smartphone className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1">
-          <h3 className="font-semibold text-slate-800">Conexão WhatsApp</h3>
+          <h3 className="font-semibold text-foreground">Conexão WhatsApp</h3>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span
               className={`w-2 h-2 rounded-full ${
@@ -149,7 +149,7 @@ export function WhatsAppConnection() {
                   : "bg-slate-400"
               }`}
             />
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-muted-foreground">
               {status === "connected" && "Conectado"}
               {status === "qr_pending" && "Aguardando escaneamento..."}
               {status === "connecting" && "Iniciando conexão..."}
@@ -162,8 +162,8 @@ export function WhatsAppConnection() {
       {/* Conteúdo por estado */}
       {status === "disconnected" && (
         <div className="space-y-4">
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
-            <p className="text-sm text-slate-600">
+          <div className="bg-muted rounded-lg p-4 border border-slate-100">
+            <p className="text-sm text-muted-foreground">
               Conecte seu WhatsApp para enviar e receber mensagens diretamente pelo sistema.
               As campanhas em massa e o chat com clientes ficarão disponíveis.
             </p>
@@ -199,7 +199,7 @@ export function WhatsAppConnection() {
           {/* QR Code */}
           <div className="flex justify-center">
             {qrBase64 ? (
-              <div className="bg-white p-3 rounded-xl border-2 border-slate-200 shadow-inner">
+              <div className="bg-card p-3 rounded-xl border-2 border-border shadow-inner">
                 <img
                   src={qrBase64}
                   alt="QR Code WhatsApp"
@@ -209,10 +209,10 @@ export function WhatsAppConnection() {
                 />
               </div>
             ) : (
-              <div className="w-[260px] h-[260px] bg-slate-100 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-300">
+              <div className="w-[260px] h-[260px] bg-muted rounded-xl flex items-center justify-center border-2 border-dashed border-border">
                 <div className="text-center">
                   <RefreshCw className="w-8 h-8 text-slate-400 mx-auto animate-spin" />
-                  <p className="text-xs text-slate-500 mt-2">Gerando QR Code...</p>
+                  <p className="text-xs text-muted-foreground mt-2">Gerando QR Code...</p>
                   <p className="text-[10px] text-slate-400 mt-1 max-w-[200px]">Isso pode levar até 30 segundos na primeira vez</p>
                 </div>
               </div>
@@ -224,7 +224,7 @@ export function WhatsAppConnection() {
               setStatus("disconnected");
               setQrBase64(null);
             }}
-            className="w-full px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
+            className="w-full px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
           >
             Cancelar
           </button>
@@ -246,7 +246,7 @@ export function WhatsAppConnection() {
           <button
             onClick={handleDisconnect}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors disabled:opacity-50 mt-4 border border-slate-200 shadow-sm"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors disabled:opacity-50 mt-4 border border-border shadow-sm"
           >
             {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Power className="w-4 h-4" />}
             {loading ? "Desconectando..." : "Forçar Desconexão (Gerar novo QR)"}

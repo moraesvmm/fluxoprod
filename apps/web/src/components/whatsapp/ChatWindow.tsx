@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Mic, Smile, FileText, MapPin, User, Film, Image } from "lucide-react";
@@ -144,7 +144,7 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
               <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                 <Mic className="w-4 h-4 text-emerald-600" />
               </div>
-              <span className="text-[12px] text-slate-500 italic">Mensagem de áudio</span>
+              <span className="text-[12px] text-muted-foreground italic">Mensagem de áudio</span>
             </div>
             {msg.hasMedia ? (
               <audio 
@@ -197,10 +197,10 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
                 <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
                   <Image className="w-4 h-4 text-blue-600" />
                 </div>
-                <span className="text-[12px] text-slate-600 italic">Imagem</span>
+                <span className="text-[12px] text-muted-foreground italic">Imagem</span>
               </div>
             )}
-            {msg.text && <p className="text-[13px] text-slate-900">{msg.text}</p>}
+            {msg.text && <p className="text-[13px] text-foreground">{msg.text}</p>}
           </div>
         );
 
@@ -211,8 +211,8 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
               <Film className="w-4 h-4 text-purple-600" />
             </div>
             <div>
-              <span className="text-[12px] text-slate-600 italic">Vídeo</span>
-              {msg.text && <p className="text-[13px] text-slate-900 mt-0.5">{msg.text}</p>}
+              <span className="text-[12px] text-muted-foreground italic">Vídeo</span>
+              {msg.text && <p className="text-[13px] text-foreground mt-0.5">{msg.text}</p>}
             </div>
           </div>
         );
@@ -223,7 +223,7 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
             <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
               <FileText className="w-4 h-4 text-amber-600" />
             </div>
-            <span className="text-[12px] text-slate-600 italic">{msg.text || 'Documento'}</span>
+            <span className="text-[12px] text-muted-foreground italic">{msg.text || 'Documento'}</span>
           </div>
         );
 
@@ -231,9 +231,9 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
         return (
           <div className="flex items-center gap-2 py-1">
             <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
-              <User className="w-4 h-4 text-slate-500" />
+              <User className="w-4 h-4 text-muted-foreground" />
             </div>
-            <span className="text-[12px] text-slate-700">{msg.text}</span>
+            <span className="text-[12px] text-foreground">{msg.text}</span>
           </div>
         );
 
@@ -243,13 +243,13 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
             <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
               <MapPin className="w-4 h-4 text-red-500" />
             </div>
-            <span className="text-[12px] text-slate-600 italic">{msg.text || 'Localização'}</span>
+            <span className="text-[12px] text-muted-foreground italic">{msg.text || 'Localização'}</span>
           </div>
         );
 
       default: // 'text' ou sem type (mensagens antigas)
         return (
-          <p className="text-[13.5px] text-slate-900 whitespace-pre-wrap break-words leading-5">
+          <p className="text-[13.5px] text-foreground whitespace-pre-wrap break-words leading-5">
             {msg.text}
           </p>
         );
@@ -269,7 +269,7 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="bg-white/80 backdrop-blur rounded-lg px-4 py-3 shadow-sm text-center">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Nenhuma mensagem ainda. Envie a primeira mensagem para <strong>{contactName}</strong>.
               </p>
             </div>
@@ -279,7 +279,7 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
             <div key={gi}>
               {/* Divisor de data */}
               <div className="flex justify-center my-3">
-                <span className="bg-white/90 backdrop-blur text-slate-600 text-xs px-3 py-1 rounded-lg shadow-sm font-medium">
+                <span className="bg-white/90 backdrop-blur text-muted-foreground text-xs px-3 py-1 rounded-lg shadow-sm font-medium">
                   {group.date}
                 </span>
               </div>
@@ -294,12 +294,12 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
                     className={`max-w-[80%] rounded-lg px-3 py-1.5 shadow-sm relative ${
                       msg.fromMe
                         ? "bg-[#DCF8C6] rounded-tr-none"
-                        : "bg-white rounded-tl-none"
+                        : "bg-card rounded-tl-none"
                     }`}
                   >
                     {renderMessageContent(msg)}
                     <div className="flex justify-end items-center gap-1 mt-0.5">
-                      <span className="text-[10px] text-slate-500">
+                      <span className="text-[10px] text-muted-foreground">
                         {formatTime(msg.timestamp)}
                       </span>
                       {msg.fromMe && (
@@ -321,7 +321,7 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
       </div>
 
       {/* Input de mensagem */}
-      <div className="bg-slate-100 px-3 py-2 border-t border-slate-200 flex items-center gap-2">
+      <div className="bg-muted px-3 py-2 border-t border-border flex items-center gap-2">
         <div className="flex-1 relative">
           <input
             ref={inputRef}
@@ -330,7 +330,7 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 pr-10"
+            className="w-full px-4 py-2.5 bg-card border border-border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 pr-10"
             disabled={sending}
           />
         </div>

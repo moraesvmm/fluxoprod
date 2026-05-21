@@ -58,7 +58,7 @@ export default function PrevisaoDemandaPanel() {
   };
 
   const getPrecisaoColor = (precisao?: number) => {
-    if (!precisao) return "text-slate-500";
+    if (!precisao) return "text-muted-foreground";
     if (precisao >= 80) return "text-green-600";
     if (precisao >= 60) return "text-amber-600";
     return "text-red-600";
@@ -78,14 +78,14 @@ export default function PrevisaoDemandaPanel() {
       </div>
 
       {/* Gerador de PrevisÃ£o */}
-      <div className="p-4 rounded-lg border border-slate-200 bg-white">
+      <div className="p-4 rounded-lg border border-border bg-card">
         <div className="grid gap-4 sm:grid-cols-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Produto</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Produto</label>
             <select
               value={produtoSelecionado}
               onChange={(e) => setProdutoSelecionado(e.target.value)}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
             >
               <option value="">Selecione...</option>
               {produtos.map((p) => (
@@ -94,23 +94,23 @@ export default function PrevisaoDemandaPanel() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Dias de AnÃ¡lise</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Dias de AnÃ¡lise</label>
             <input
               type="number"
               value={diasAnalise}
               onChange={(e) => setDiasAnalise(parseInt(e.target.value) || 30)}
               min="1"
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Dias de PrevisÃ£o</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Dias de PrevisÃ£o</label>
             <input
               type="number"
               value={diasPrevisao}
               onChange={(e) => setDiasPrevisao(parseInt(e.target.value) || 30)}
               min="1"
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
             />
           </div>
           <div className="flex items-end">
@@ -133,11 +133,11 @@ export default function PrevisaoDemandaPanel() {
                 <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
               )}
               <div>
-                <h4 className="font-medium text-slate-900">PrevisÃ£o Gerada</h4>
-                <p className="text-sm text-slate-700 mt-1">
+                <h4 className="font-medium text-foreground">PrevisÃ£o Gerada</h4>
+                <p className="text-sm text-foreground mt-1">
                   Demanda prevista: <strong>{ultimaPrevisao.demanda_prevista}</strong> unidades
                 </p>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-foreground">
                   MÃ©dia diÃ¡ria: <strong>{ultimaPrevisao.media_venda_diaria.toFixed(2)}</strong> unidades/dia
                 </p>
                 {ultimaPrevisao.dias_para_zerar !== null && ultimaPrevisao.dias_para_zerar < diasPrevisao && (
@@ -152,41 +152,41 @@ export default function PrevisaoDemandaPanel() {
       </div>
 
       {/* Tabela de PrevisÃµes */}
-      <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
-        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-          <h4 className="font-medium text-slate-900">HistÃ³rico de PrevisÃµes</h4>
+      <div className="border border-border rounded-lg bg-card overflow-hidden">
+        <div className="px-4 py-3 border-b border-border bg-muted">
+          <h4 className="font-medium text-foreground">HistÃ³rico de PrevisÃµes</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="text-left p-3 font-medium text-slate-700">Produto</th>
-                <th className="text-left p-3 font-medium text-slate-700">PerÃ­odo</th>
-                <th className="text-left p-3 font-medium text-slate-700">Previsto</th>
-                <th className="text-left p-3 font-medium text-slate-700">Real</th>
-                <th className="text-left p-3 font-medium text-slate-700">PrecisÃ£o</th>
-                <th className="text-left p-3 font-medium text-slate-700">Dias p/ Zerar</th>
-                <th className="text-left p-3 font-medium text-slate-700">AÃ§Ãµes</th>
+              <tr className="border-b border-border bg-muted">
+                <th className="text-left p-3 font-medium text-foreground">Produto</th>
+                <th className="text-left p-3 font-medium text-foreground">PerÃ­odo</th>
+                <th className="text-left p-3 font-medium text-foreground">Previsto</th>
+                <th className="text-left p-3 font-medium text-foreground">Real</th>
+                <th className="text-left p-3 font-medium text-foreground">PrecisÃ£o</th>
+                <th className="text-left p-3 font-medium text-foreground">Dias p/ Zerar</th>
+                <th className="text-left p-3 font-medium text-foreground">AÃ§Ãµes</th>
               </tr>
             </thead>
             <tbody>
               {Array.isArray(previsoes) && previsoes.map((previsao) => (
-                <tr key={previsao.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="p-3 font-medium text-slate-900">{previsao.produto_nome}</td>
-                  <td className="p-3 text-slate-600">
+                <tr key={previsao.id} className="border-b border-slate-100 hover:bg-muted">
+                  <td className="p-3 font-medium text-foreground">{previsao.produto_nome}</td>
+                  <td className="p-3 text-muted-foreground">
                     {new Date(previsao.periodo_inicio).toLocaleDateString('pt-BR')} - {new Date(previsao.periodo_fim).toLocaleDateString('pt-BR')}
                   </td>
-                  <td className="p-3 text-slate-900 font-medium">{previsao.demanda_prevista}</td>
+                  <td className="p-3 text-foreground font-medium">{previsao.demanda_prevista}</td>
                   <td className="p-3">
                     {editandoDemandaReal[previsao.id] !== undefined ? (
                       <input
                         type="number"
                         value={editandoDemandaReal[previsao.id]}
                         onChange={(e) => setEditandoDemandaReal(prev => ({ ...prev, [previsao.id]: parseInt(e.target.value) || 0 }))}
-                        className="w-20 border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        className="w-20 border border-border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
                       />
                     ) : (
-                      <span className={previsao.demanda_real ? "text-slate-900" : "text-slate-400"}>
+                      <span className={previsao.demanda_real ? "text-foreground" : "text-slate-400"}>
                         {previsao.demanda_real ?? "-"}
                       </span>
                     )}
@@ -198,7 +198,7 @@ export default function PrevisaoDemandaPanel() {
                       </span>
                     ) : '-'}
                   </td>
-                  <td className={`p-3 font-medium ${previsao.dias_para_zerar !== null && previsao.dias_para_zerar !== undefined && previsao.dias_para_zerar < 30 ? "text-red-600" : "text-slate-700"}`}>
+                  <td className={`p-3 font-medium ${previsao.dias_para_zerar !== null && previsao.dias_para_zerar !== undefined && previsao.dias_para_zerar < 30 ? "text-red-600" : "text-foreground"}`}>
                     {previsao.dias_para_zerar !== null && previsao.dias_para_zerar !== undefined ? previsao.dias_para_zerar : '-'}
                   </td>
                   <td className="p-3">
@@ -213,7 +213,7 @@ export default function PrevisaoDemandaPanel() {
                     ) : (
                       <button
                         onClick={() => setEditandoDemandaReal(prev => ({ ...prev, [previsao.id]: previsao.demanda_real || 0 }))}
-                        className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-slate-100 text-slate-700 hover:bg-slate-200 h-7 px-2"
+                        className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-muted text-foreground hover:bg-slate-200 h-7 px-2"
                       >
                         Editar
                       </button>

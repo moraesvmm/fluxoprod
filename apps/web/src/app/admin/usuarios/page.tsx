@@ -1,4 +1,4 @@
-import { requireMaster } from "@/utils/auth/requireMaster";
+﻿import { requireMaster } from "@/utils/auth/requireMaster";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
@@ -101,20 +101,20 @@ export default async function AdminUsuariosPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Usuários</h1>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-muted-foreground">
           Criação e vínculo de usuários por empresa (somente governança central).
         </p>
       </div>
 
-      <div className="rounded-xl border bg-white p-6">
+      <div className="rounded-xl border bg-card p-6">
         <h2 className="text-lg font-semibold">Criar usuário de empresa</h2>
         <form action={createTenantUser} className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-slate-700">Email</label>
+            <label className="text-sm font-medium text-foreground">Email</label>
             <input name="email" type="email" required className="mt-1 w-full rounded-md border px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700">Senha (dev)</label>
+            <label className="text-sm font-medium text-foreground">Senha (dev)</label>
             <input
               name="password"
               type="password"
@@ -124,7 +124,7 @@ export default async function AdminUsuariosPage() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700">Empresa</label>
+            <label className="text-sm font-medium text-foreground">Empresa</label>
             <select name="empresa_id" required className="mt-1 w-full rounded-md border px-3 py-2 text-sm">
               <option value="">Selecione…</option>
               {(empresas || []).map((e) => (
@@ -135,7 +135,7 @@ export default async function AdminUsuariosPage() {
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700">Papel</label>
+            <label className="text-sm font-medium text-foreground">Papel</label>
             <select name="role" required className="mt-1 w-full rounded-md border px-3 py-2 text-sm">
               <option value="tenant_admin">Admin da empresa</option>
               <option value="tenant_user">Usuário comum</option>
@@ -152,10 +152,10 @@ export default async function AdminUsuariosPage() {
         </form>
       </div>
 
-      <div className="overflow-hidden rounded-xl border bg-white">
-        <div className="border-b bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">Perfis (últimos 50)</div>
+      <div className="overflow-hidden rounded-xl border bg-card">
+        <div className="border-b bg-muted px-4 py-3 text-sm font-semibold text-foreground">Perfis (últimos 50)</div>
         <table className="w-full text-sm">
-          <thead className="text-slate-600">
+          <thead className="text-muted-foreground">
             <tr>
               <th className="px-4 py-3 text-left font-semibold">User ID</th>
               <th className="px-4 py-3 text-left font-semibold">Empresa</th>
@@ -166,9 +166,9 @@ export default async function AdminUsuariosPage() {
           <tbody>
             {(perfis || []).map((p) => (
               <tr key={p.user_id} className="border-t">
-                <td className="px-4 py-3 font-mono text-xs text-slate-700">{p.user_id}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-700">{p.empresa_id ?? "-"}</td>
-                <td className="px-4 py-3 text-slate-800">{p.role}</td>
+                <td className="px-4 py-3 font-mono text-xs text-foreground">{p.user_id}</td>
+                <td className="px-4 py-3 font-mono text-xs text-foreground">{p.empresa_id ?? "-"}</td>
+                <td className="px-4 py-3 text-foreground">{p.role}</td>
                 <td className="px-4 py-3">
                   <DeleteUserButton userId={p.user_id} isMaster={p.role === "master"} />
                 </td>
@@ -176,7 +176,7 @@ export default async function AdminUsuariosPage() {
             ))}
             {(!perfis || perfis.length === 0) && (
               <tr>
-                <td className="px-4 py-6 text-slate-500" colSpan={4}>
+                <td className="px-4 py-6 text-muted-foreground" colSpan={4}>
                   Nenhum perfil encontrado.
                 </td>
               </tr>

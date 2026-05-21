@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -207,7 +207,7 @@ export default function LojaPage() {
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white leading-tight"
+            className="text-4xl lg:text-5xl font-black text-foreground dark:text-white leading-tight"
           >
             Expanda seu negócio <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">sob demanda.</span>
@@ -216,7 +216,7 @@ export default function LojaPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-slate-600 dark:text-gray-400 text-lg leading-relaxed font-medium"
+            className="text-muted-foreground dark:text-gray-400 text-lg leading-relaxed font-medium"
           >
             Adicione funcionalidades específicas para sua operação sem trocar de plano. 
             Módulos a la carte com ativação instantânea após o pagamento.
@@ -227,7 +227,7 @@ export default function LojaPage() {
       {/* Filter & Search Bar */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-96 group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-indigo-400 transition-colors" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-indigo-400 transition-colors" />
           <Input 
             placeholder="Buscar módulo ou funcionalidade..." 
             className="pl-10 bg-white/5 border-white/10 focus:border-indigo-500/50 transition-all rounded-xl h-12"
@@ -235,7 +235,7 @@ export default function LojaPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           <span>{activeKeys.length} Módulos Integrados</span>
         </div>
@@ -264,10 +264,10 @@ export default function LojaPage() {
       {filteredCatalog.length === 0 && (
         <div className="py-20 text-center space-y-4">
           <div className="inline-flex p-4 rounded-full bg-white/5 border border-white/10">
-            <Search className="w-8 h-8 text-gray-600" />
+            <Search className="w-8 h-8 text-muted-foreground" />
           </div>
           <h3 className="text-xl font-bold text-white">Nenhum módulo encontrado</h3>
-          <p className="text-gray-500">Tente buscar por termos mais genéricos como "vendas" ou "financeiro".</p>
+          <p className="text-muted-foreground">Tente buscar por termos mais genéricos como "vendas" ou "financeiro".</p>
           <Button variant="ghost" onClick={() => setSearchTerm("")} className="text-indigo-400 hover:text-indigo-300">
             Limpar busca
           </Button>
@@ -282,7 +282,7 @@ export default function LojaPage() {
           </div>
           <div>
             <h4 className="text-lg font-bold text-white">Precisa de um módulo personalizado?</h4>
-            <p className="text-sm text-gray-500">Nossa equipe de engenharia pode desenvolver soluções sob medida para sua empresa.</p>
+            <p className="text-sm text-muted-foreground">Nossa equipe de engenharia pode desenvolver soluções sob medida para sua empresa.</p>
           </div>
         </div>
         <Button className="bg-white/10 hover:bg-white/20 text-white border-white/10 rounded-xl">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -74,7 +74,7 @@ export default function LandingPageClient() {
   const d = resolvedTheme === "dark"; // shorthand
 
   return (
-    <div className={`relative min-h-screen overflow-x-hidden transition-colors duration-500 ${d ? "bg-[#060611] text-slate-100" : "bg-[#fafafe] text-slate-900"}`}>
+    <div className={`relative min-h-screen overflow-x-hidden transition-colors duration-500 ${d ? "bg-[#060611] text-slate-100" : "bg-[#fafafe] text-foreground"}`}>
 
       {/* ═══ HEADER ═══ */}
       <motion.header
@@ -106,12 +106,12 @@ export default function LandingPageClient() {
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-8">
               {navLinks.map((l) => (
-                <a key={l.href} href={l.href} className={`text-sm font-medium transition-colors relative group ${d ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-900"}`}>
+                <a key={l.href} href={l.href} className={`text-sm font-medium transition-colors relative group ${d ? "text-slate-400 hover:text-white" : "text-muted-foreground hover:text-foreground"}`}>
                   {l.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500 transition-all duration-300 group-hover:w-full rounded-full" />
                 </a>
               ))}
-              <button onClick={toggleDark} className={`p-2 rounded-xl transition-colors ${d ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"}`} aria-label="Alternar modo escuro">
+              <button onClick={toggleDark} className={`p-2 rounded-xl transition-colors ${d ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`} aria-label="Alternar modo escuro">
                 {d ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
               <Link href="/login" className="ml-1 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-violet-500 hover:to-indigo-500 shadow-lg shadow-violet-500/20 hover:shadow-xl hover:shadow-violet-500/30 transition-all duration-300 hover:scale-[1.03]">
@@ -121,7 +121,7 @@ export default function LandingPageClient() {
 
             {/* Mobile Toggle */}
             <div className="flex items-center gap-2 md:hidden">
-              <button onClick={toggleDark} className={`p-2 rounded-xl ${d ? "text-slate-400" : "text-slate-500"}`} aria-label="Modo escuro">
+              <button onClick={toggleDark} className={`p-2 rounded-xl ${d ? "text-slate-400" : "text-muted-foreground"}`} aria-label="Modo escuro">
                 {d ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2" aria-label="Menu principal">
@@ -136,7 +136,7 @@ export default function LandingPageClient() {
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className={`md:hidden border-t ${d ? "bg-[#0a0a18]/95 backdrop-blur-2xl border-white/5" : "bg-white/95 backdrop-blur-2xl border-slate-200/50"}`}>
               <div className="px-5 py-6 space-y-4">
                 {navLinks.map((l) => (
-                  <a key={l.href} href={l.href} onClick={() => setMobileMenuOpen(false)} className={`block text-base font-medium ${d ? "text-slate-300" : "text-slate-700"}`}>{l.label}</a>
+                  <a key={l.href} href={l.href} onClick={() => setMobileMenuOpen(false)} className={`block text-base font-medium ${d ? "text-slate-300" : "text-foreground"}`}>{l.label}</a>
                 ))}
                 <Link href="/login" className="block w-full text-center px-5 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold rounded-xl shadow-md">Acessar Plataforma</Link>
               </div>
@@ -164,13 +164,13 @@ export default function LandingPageClient() {
               </motion.div>
 
               <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }} className="mt-8 text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.06]">
-                <span className={d ? "text-white" : "text-slate-900"}>Gestão empresarial</span>
+                <span className={d ? "text-white" : "text-foreground"}>Gestão empresarial</span>
                 <br />
                 <GradientText>inteligente e unificada.</GradientText>
               </motion.h1>
 
-              <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className={`mt-7 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed ${d ? "text-slate-400" : "text-slate-600"}`}>
-                <strong className={d ? "text-white" : "text-slate-800"}>Fluxo ERP</strong> centraliza finanças, estoque, CRM e vendas em uma única plataforma segura — para que você foque no que realmente importa: <GradientText className="font-semibold">crescer seu negócio.</GradientText>
+              <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className={`mt-7 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed ${d ? "text-slate-400" : "text-muted-foreground"}`}>
+                <strong className={d ? "text-white" : "text-foreground"}>Fluxo ERP</strong> centraliza finanças, estoque, CRM e vendas em uma única plataforma segura — para que você foque no que realmente importa: <GradientText className="font-semibold">crescer seu negócio.</GradientText>
               </motion.p>
 
               {/* CTAs */}
@@ -178,13 +178,13 @@ export default function LandingPageClient() {
                 <Link href="/login" className="group inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-base rounded-2xl shadow-xl shadow-violet-500/25 hover:shadow-2xl hover:shadow-violet-500/40 transition-all duration-300 hover:scale-[1.03]">
                   Começar Teste Grátis <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Link>
-                <a href="#funcionalidades" className={`inline-flex items-center gap-2 px-8 py-4 font-semibold text-base rounded-2xl border transition-all duration-300 ${d ? "bg-white/[0.03] text-slate-300 border-white/10 hover:border-violet-500/40 hover:bg-white/[0.06]" : "bg-white text-slate-700 border-slate-200 hover:border-violet-300 hover:text-violet-700 shadow-sm"}`}>
+                <a href="#funcionalidades" className={`inline-flex items-center gap-2 px-8 py-4 font-semibold text-base rounded-2xl border transition-all duration-300 ${d ? "bg-white/[0.03] text-slate-300 border-white/10 hover:border-violet-500/40 hover:bg-white/[0.06]" : "bg-card text-foreground border-border hover:border-violet-300 hover:text-violet-700 shadow-sm"}`}>
                   Explorar Recursos ERP
                 </a>
               </motion.div>
 
               {/* Trust row */}
-              <div className={`mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs font-medium ${d ? "text-slate-500" : "text-slate-400"}`}>
+              <div className={`mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs font-medium ${d ? "text-muted-foreground" : "text-slate-400"}`}>
                 {[
                   { icon: ShieldCheck, text: "Dados Protegidos (LGPD)" },
                   { icon: Globe, text: "ERP 100% Cloud" },
@@ -206,7 +206,7 @@ export default function LandingPageClient() {
 
         {/* ═══ STATS ═══ */}
         <AnimatedSection className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
-          <div className={`rounded-2xl border p-7 sm:p-10 ${d ? "bg-white/[0.02] border-white/[0.06] shadow-2xl shadow-violet-500/5 backdrop-blur-sm" : "bg-white border-slate-200/80 shadow-xl shadow-slate-200/40"}`}>
+          <div className={`rounded-2xl border p-7 sm:p-10 ${d ? "bg-white/[0.02] border-white/[0.06] shadow-2xl shadow-violet-500/5 backdrop-blur-sm" : "bg-card border-slate-200/80 shadow-xl shadow-slate-200/40"}`}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
               {stats.map((s, i) => (
                 <motion.div 
@@ -221,7 +221,7 @@ export default function LandingPageClient() {
                     <s.icon className="w-5 h-5 text-violet-500" />
                   </div>
                   <div className="text-2xl sm:text-3xl font-extrabold"><GradientText>{s.value}</GradientText></div>
-                  <div className={`mt-1 text-xs sm:text-sm font-medium ${d ? "text-slate-500" : "text-slate-400"}`}>{s.label}</div>
+                  <div className={`mt-1 text-xs sm:text-sm font-medium ${d ? "text-muted-foreground" : "text-slate-400"}`}>{s.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -233,10 +233,10 @@ export default function LandingPageClient() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <AnimatedSection className="text-center mb-16 sm:mb-20">
               <SectionBadge icon={Layers} label="Módulos do Sistema" dark={d} />
-              <h2 className={`mt-5 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight ${d ? "text-white" : "text-slate-900"}`}>
+              <h2 className={`mt-5 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight ${d ? "text-white" : "text-foreground"}`}>
                 Tudo que seu negócio precisa, <GradientText>em um só lugar.</GradientText>
               </h2>
-              <p className={`mt-4 text-lg max-w-2xl mx-auto ${d ? "text-slate-400" : "text-slate-500"}`}>Módulos independentes de gestão que trabalham juntos. Ative sob demanda, escale seu ERP sem limites.</p>
+              <p className={`mt-4 text-lg max-w-2xl mx-auto ${d ? "text-slate-400" : "text-muted-foreground"}`}>Módulos independentes de gestão que trabalham juntos. Ative sob demanda, escale seu ERP sem limites.</p>
             </AnimatedSection>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -245,15 +245,15 @@ export default function LandingPageClient() {
                   <motion.div 
                     whileHover={{ y: -6 }}
                     transition={{ duration: 0.3 }}
-                    className={`group relative h-full p-7 rounded-2xl border transition-all duration-300 ${d ? "bg-white/[0.02] border-white/[0.06] hover:border-violet-500/30 hover:bg-white/[0.04]" : "bg-white border-slate-200/80 hover:border-violet-300/60 shadow-sm hover:shadow-xl hover:shadow-violet-500/5"}`}
+                    className={`group relative h-full p-7 rounded-2xl border transition-all duration-300 ${d ? "bg-white/[0.02] border-white/[0.06] hover:border-violet-500/30 hover:bg-white/[0.04]" : "bg-card border-slate-200/80 hover:border-violet-300/60 shadow-sm hover:shadow-xl hover:shadow-violet-500/5"}`}
                   >
                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/[0.04] to-indigo-500/[0.04] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="relative">
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mb-5 shadow-lg shadow-violet-500/20 group-hover:shadow-violet-500/35 transition-shadow">
                         <f.icon className="w-6 h-6 text-white" />
                       </div>
-                      <h3 className={`text-lg font-bold mb-2 ${d ? "text-white" : "text-slate-900"}`}>{f.title}</h3>
-                      <p className={`text-sm leading-relaxed ${d ? "text-slate-400" : "text-slate-500"}`}>{f.description}</p>
+                      <h3 className={`text-lg font-bold mb-2 ${d ? "text-white" : "text-foreground"}`}>{f.title}</h3>
+                      <p className={`text-sm leading-relaxed ${d ? "text-slate-400" : "text-muted-foreground"}`}>{f.description}</p>
                     </div>
                   </motion.div>
                 </AnimatedSection>
@@ -273,15 +273,15 @@ export default function LandingPageClient() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <AnimatedSection>
                 <SectionBadge icon={Star} label="Diferenciais" dark={d} />
-                <h2 className={`mt-5 text-3xl sm:text-4xl font-extrabold tracking-tight mb-6 ${d ? "text-white" : "text-slate-900"}`}>
+                <h2 className={`mt-5 text-3xl sm:text-4xl font-extrabold tracking-tight mb-6 ${d ? "text-white" : "text-foreground"}`}>
                   Por que empresas escolhem o <GradientText>Fluxo ERP?</GradientText>
                 </h2>
-                <p className={`text-lg mb-8 leading-relaxed ${d ? "text-slate-400" : "text-slate-500"}`}>
+                <p className={`text-lg mb-8 leading-relaxed ${d ? "text-slate-400" : "text-muted-foreground"}`}>
                   Desenvolvido com tecnologia de ponta para negócios que levam gestão a sério. Sem complexidade desnecessária, sem custos ocultos na implantação do seu sistema.
                 </p>
                 <ul className="space-y-4">
                   {benefits.map((b, i) => (
-                    <li key={b} className={`flex items-center gap-3 ${d ? "text-slate-300" : "text-slate-700"}`}>
+                    <li key={b} className={`flex items-center gap-3 ${d ? "text-slate-300" : "text-foreground"}`}>
                       <CheckCircle2 className="w-5 h-5 text-violet-500 flex-shrink-0" />
                       <span className="text-sm sm:text-base font-medium">{b}</span>
                     </li>
@@ -299,7 +299,7 @@ export default function LandingPageClient() {
                     </div>
                     <h3 className="text-2xl sm:text-3xl font-extrabold mb-4 leading-tight">Infraestrutura que escala com seu negócio.</h3>
                     <p className="text-violet-100 text-sm sm:text-base leading-relaxed mb-8">Banco de dados isolado por empresa, cache inteligente, APIs RESTful e deploy contínuo. Tudo em tempo real, sem downtime para sua gestão.</p>
-                    <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-violet-700 font-bold text-sm rounded-xl hover:bg-violet-50 shadow-lg transition-all duration-300 hover:scale-105">
+                    <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 bg-card text-violet-700 font-bold text-sm rounded-xl hover:bg-violet-50 shadow-lg transition-all duration-300 hover:scale-105">
                       Experimentar ERP Grátis <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
@@ -323,7 +323,7 @@ export default function LandingPageClient() {
                 <span className="underline decoration-white/30 decoration-4 underline-offset-4">sua gestão?</span>
               </h2>
               <p className="text-lg sm:text-xl text-violet-100 max-w-2xl mx-auto mb-10 leading-relaxed">Comece agora mesmo sua jornada com o Fluxo ERP e descubra por que somos a escolha de empresas que buscam eficiência real.</p>
-              <Link href="/login" className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-violet-700 font-bold text-lg rounded-2xl shadow-2xl shadow-black/20 transition-all duration-300 hover:scale-105">
+              <Link href="/login" className="group inline-flex items-center gap-3 px-10 py-5 bg-card text-violet-700 font-bold text-lg rounded-2xl shadow-2xl shadow-black/20 transition-all duration-300 hover:scale-105">
                 Começar Teste Grátis <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1.5" />
               </Link>
             </AnimatedSection>
@@ -345,7 +345,7 @@ export default function LandingPageClient() {
               />
               <span className="text-sm font-semibold bg-gradient-to-r from-violet-500 to-indigo-400 bg-clip-text text-transparent">Fluxo ERP</span>
             </div>
-            <p className={`text-xs ${d ? "text-slate-600" : "text-slate-400"}`}>
+            <p className={`text-xs ${d ? "text-muted-foreground" : "text-slate-400"}`}>
               © 2026 Fluxo ERP. Sistema de Gestão Empresarial. Desenvolvido por{" "}
               <a href="https://www.linkedin.com/in/vitor-moraes" target="_blank" rel="noopener noreferrer" className="text-violet-500 hover:text-violet-400 hover:underline transition-colors">Vitor Moraes</a>.
             </p>

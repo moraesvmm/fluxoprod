@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect, Suspense, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -306,7 +306,7 @@ function CheckoutContent() {
                 </p>
               ) : (
                 <div className="text-center">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Não recebeu? Verifique sua caixa de spam ou{" "}
                     <button
                       onClick={handleResendEmail}
@@ -339,7 +339,7 @@ function CheckoutContent() {
 
              {/* Esquerda - Link para Login */}
              <div className="flex-1 hidden sm:block">
-               <a href="/login" className="text-xs font-medium text-gray-500 hover:text-white transition-colors">
+               <a href="/login" className="text-xs font-medium text-muted-foreground hover:text-white transition-colors">
                  Já tem conta? Entrar
                </a>
              </div>
@@ -393,9 +393,9 @@ function CheckoutContent() {
                      <h3 className="text-xl font-bold mb-1">A La Carte</h3>
                      <p className="text-gray-400 text-sm mb-6">Monte seu próprio ecossistema</p>
                      <div className="flex items-baseline gap-1 mb-8">
-                       <span className="text-sm text-gray-500">R$</span>
+                       <span className="text-sm text-muted-foreground">R$</span>
                        <span className="text-4xl font-black tracking-tight">0,00</span>
-                       <span className="text-sm text-gray-500">/base</span>
+                       <span className="text-sm text-muted-foreground">/base</span>
                      </div>
                      <div className="space-y-3">
                         <div className="flex items-start gap-2">
@@ -430,13 +430,13 @@ function CheckoutContent() {
                        <h3 className="text-xl font-bold mb-1">{p.nome}</h3>
                        <p className="text-gray-400 text-sm mb-6">{p.descricao}</p>
                        <div className="flex items-baseline gap-1 mb-8">
-                         <span className="text-sm text-gray-500">R$</span>
+                         <span className="text-sm text-muted-foreground">R$</span>
                          {p.preco_promocional ? (
-                           <><span className="text-lg text-gray-500 line-through mr-1">{p.preco}</span><span className="text-4xl font-black tracking-tight text-emerald-400">{p.preco_promocional}</span></>
+                           <><span className="text-lg text-muted-foreground line-through mr-1">{p.preco}</span><span className="text-4xl font-black tracking-tight text-emerald-400">{p.preco_promocional}</span></>
                          ) : (
                            <span className="text-4xl font-black tracking-tight">{p.preco}</span>
                          )}
-                         <span className="text-sm text-gray-500">/mês</span>
+                         <span className="text-sm text-muted-foreground">/mês</span>
                        </div>
                        <div className="space-y-3">
                          {p.modulos_incluidos.map((f, i) => (
@@ -471,7 +471,7 @@ function CheckoutContent() {
                          <div className="text-xs font-mono">
                             {selectedModules.includes(m.key) ? "Incluso" : (
                               m.preco_promocional
-                                ? <><span className="line-through text-gray-600 mr-1">R$ {m.preco.toFixed(2)}</span><span className="text-emerald-400">R$ {m.preco_promocional.toFixed(2)}</span>/mês</>
+                                ? <><span className="line-through text-muted-foreground mr-1">R$ {m.preco.toFixed(2)}</span><span className="text-emerald-400">R$ {m.preco_promocional.toFixed(2)}</span>/mês</>
                                 : `+R$ ${m.preco.toFixed(2)}/mês`
                             )}
                          </div>
@@ -484,7 +484,7 @@ function CheckoutContent() {
                   <button 
                     onClick={() => setStep(2)} 
                     disabled={selectedPlan === null && selectedModules.length === 0}
-                    className="bg-white text-black disabled:opacity-50 hover:bg-gray-200 font-medium py-4 px-8 rounded-xl flex items-center gap-2 group transition-all"
+                    className="bg-card text-black disabled:opacity-50 hover:bg-gray-200 font-medium py-4 px-8 rounded-xl flex items-center gap-2 group transition-all"
                   >
                      Continuar para Cadastro <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform"/>
                   </button>
@@ -510,7 +510,7 @@ function CheckoutContent() {
                      <div className="md:col-span-2">
                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">Definir Senha do ERP</label>
                        <input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-indigo-500 outline-none hover:border-white/20 transition-colors" placeholder="••••••••" />
-                       <p className="mt-2 text-xs text-gray-500">Minimo de 8 caracteres. A senha nao e enviada ao gateway de pagamento.</p>
+                       <p className="mt-2 text-xs text-muted-foreground">Minimo de 8 caracteres. A senha nao e enviada ao gateway de pagamento.</p>
                      </div>
                    </div>
 
@@ -557,7 +557,7 @@ function CheckoutContent() {
                    <button 
                       onClick={() => setStep(3)} 
                        disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11}
-                      className="bg-white text-black disabled:opacity-50 hover:bg-gray-200 font-medium py-3 px-8 rounded-xl flex items-center gap-2 group transition-all"
+                      className="bg-card text-black disabled:opacity-50 hover:bg-gray-200 font-medium py-3 px-8 rounded-xl flex items-center gap-2 group transition-all"
                    >
                      Começar Teste Grátis <ArrowRight className="w-4 h-4" />
                    </button>
@@ -590,10 +590,10 @@ function CheckoutContent() {
 
                      {/* Campo de Cupom */}
                      <div className="mb-6">
-                       <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Cupom de Desconto</label>
+                       <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block">Cupom de Desconto</label>
                        <div className="flex gap-2">
                          <div className="relative flex-1">
-                           <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                           <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                            <input 
                              value={couponCode}
                              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
@@ -620,7 +620,7 @@ function CheckoutContent() {
                            <span className="text-xs text-emerald-400">
                              -{appliedCoupon.tipo === 'percentual' ? `${appliedCoupon.valor}%` : `R$ ${appliedCoupon.valor}`}
                            </span>
-                           <button onClick={() => setAppliedCoupon(null)} className="text-gray-500 hover:text-white p-1">
+                           <button onClick={() => setAppliedCoupon(null)} className="text-muted-foreground hover:text-white p-1">
                              <X className="w-3 h-3" />
                            </button>
                          </div>
@@ -646,7 +646,7 @@ function CheckoutContent() {
                </div>
                
                <div className="text-center">
-                 <button onClick={() => setStep(2)} className="text-gray-500 hover:text-white transition-colors text-sm font-medium">Cancelar e Voltar</button>
+                 <button onClick={() => setStep(2)} className="text-muted-foreground hover:text-white transition-colors text-sm font-medium">Cancelar e Voltar</button>
                </div>
             </motion.div>
           )}
@@ -672,7 +672,7 @@ function CheckoutContent() {
                    </div>
                    <div className="flex items-baseline gap-2">
                      <span className="text-white text-3xl font-black font-mono">R$ {totalValue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                     <span className="text-gray-500 text-sm">/mês • Recorrente</span>
+                     <span className="text-muted-foreground text-sm">/mês • Recorrente</span>
                    </div>
                  </div>
                  
@@ -680,7 +680,7 @@ function CheckoutContent() {
                    <button 
                      onClick={() => setStep(2)} 
                      disabled={selectedPlan === null && selectedModules.length === 0}
-                     className="w-full sm:w-auto bg-white disabled:opacity-50 text-black hover:bg-gray-200 font-bold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                     className="w-full sm:w-auto bg-card disabled:opacity-50 text-black hover:bg-gray-200 font-bold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-colors"
                    >
                      Ir para Cadastro <ArrowRight className="w-4 h-4"/>
                    </button>
@@ -764,13 +764,13 @@ function CheckoutContent() {
                        {/* Footer do Modal */}
                        <div className="p-6 border-t border-white/5 bg-[#0a0a0c] flex flex-col sm:flex-row items-center gap-4 justify-between shrink-0">
                           <div className="flex items-baseline gap-1 w-full sm:w-auto justify-center sm:justify-start">
-                            <span className="text-sm text-gray-500">R$</span>
+                            <span className="text-sm text-muted-foreground">R$</span>
                             {mod.preco_promocional ? (
-                              <><span className="text-lg text-gray-500 line-through mr-1">{mod.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span><span className="text-2xl font-bold text-emerald-400 mb-2 sm:mb-0">{mod.preco_promocional.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span></>
+                              <><span className="text-lg text-muted-foreground line-through mr-1">{mod.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span><span className="text-2xl font-bold text-emerald-400 mb-2 sm:mb-0">{mod.preco_promocional.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span></>
                             ) : (
                               <span className="text-2xl font-bold text-white mb-2 sm:mb-0">{mod.preco.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
                             )}
-                            <span className="text-xs text-gray-500">/mês</span>
+                            <span className="text-xs text-muted-foreground">/mês</span>
                           </div>
                           
                           <div className="flex items-center gap-3 w-full sm:w-auto">

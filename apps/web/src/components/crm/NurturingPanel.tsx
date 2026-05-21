@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Sparkles, MessageCircle, Check, ArrowRight, Clock, ShoppingBag, X } from 'lucide-react';
@@ -106,7 +106,7 @@ export function NurturingPanel() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-32 bg-slate-100 animate-pulse rounded-xl" />
+          <div key={i} className="h-32 bg-muted animate-pulse rounded-xl" />
         ))}
       </div>
     );
@@ -118,7 +118,7 @@ export function NurturingPanel() {
     <div className="mb-10">
       <div className="flex items-center gap-2 mb-4">
         <Sparkles className="h-5 w-5 text-indigo-600" />
-        <h2 className="text-lg font-semibold text-slate-800">Sugestões de Reengajamento</h2>
+        <h2 className="text-lg font-semibold text-foreground">Sugestões de Reengajamento</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -127,7 +127,7 @@ export function NurturingPanel() {
           return (
             <div 
               key={item.id || idx}
-              className={`relative overflow-hidden group p-4 rounded-xl border bg-white shadow-sm transition-all hover:shadow-md ${
+              className={`relative overflow-hidden group p-4 rounded-xl border bg-card shadow-sm transition-all hover:shadow-md ${
                 item.categoria === 'recompra' ? 'border-emerald-100' : 'border-amber-100'
               }`}
             >
@@ -150,7 +150,7 @@ export function NurturingPanel() {
                       e.stopPropagation();
                       handleFinalizar(item.id, item.cliente_nome);
                     }}
-                    className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
+                    className="p-1 text-slate-400 hover:text-muted-foreground hover:bg-muted rounded-full transition-all"
                     title="Descartar"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -159,13 +159,13 @@ export function NurturingPanel() {
               </div>
 
               <div className="mb-4">
-                <h3 className="font-bold text-slate-900 truncate" title={item.cliente_nome}>
+                <h3 className="font-bold text-foreground truncate" title={item.cliente_nome}>
                   {item.cliente_nome || 'Cliente sem nome'}
                 </h3>
                 {item.cliente_telefone && (
                   <p className="text-[11px] text-slate-400 font-mono mt-0.5">{item.cliente_telefone}</p>
                 )}
-                <p className="text-xs text-slate-500 mt-1.5 line-clamp-2">
+                <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
                   {getDescricaoContextual(item)}
                 </p>
               </div>

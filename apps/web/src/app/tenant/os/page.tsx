@@ -291,7 +291,7 @@ export default function OSPage() {
           <TableBody>
             {loadingOS ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-slate-500">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   Carregando ordens de serviço...
                 </TableCell>
               </TableRow>
@@ -300,7 +300,7 @@ export default function OSPage() {
                 <TableCell colSpan={8} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
                     <Wrench className="h-10 w-10 text-slate-200" />
-                    <p className="text-slate-500 text-sm">Nenhuma ordem de serviço encontrada</p>
+                    <p className="text-muted-foreground text-sm">Nenhuma ordem de serviço encontrada</p>
                     <p className="text-slate-400 text-xs">Clique em &quot;Nova OS&quot; para criar a primeira.</p>
                   </div>
                 </TableCell>
@@ -308,10 +308,10 @@ export default function OSPage() {
             ) : (
               ordens?.map((os) => (
                 <TableRow key={os.id}>
-                  <TableCell className="font-mono text-slate-500">#{os.numero}</TableCell>
+                  <TableCell className="font-mono text-muted-foreground">#{os.numero}</TableCell>
                   <TableCell className="font-medium">{os.cliente?.nome || "—"}</TableCell>
                   <TableCell>{os.veiculo_equipamento}</TableCell>
-                  <TableCell className="text-xs text-slate-500 max-w-[200px] truncate">{os.descricao_problema || "—"}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{os.descricao_problema || "—"}</TableCell>
                   <TableCell>
                     <StatusBadge
                       status={os.status === 'aberta' ? 'warning' : os.status === 'concluida' ? 'success' : os.status === 'cancelada' ? 'error' : 'info'}
@@ -319,7 +319,7 @@ export default function OSPage() {
                     />
                   </TableCell>
                   <TableCell className="font-medium text-emerald-700">{formatarMoeda(os.valor_orcamento)}</TableCell>
-                  <TableCell className="text-sm text-slate-500">{formatarData(os.criado_em)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{formatarData(os.criado_em)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <button onClick={() => abrirEdicao(os)} className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
@@ -357,7 +357,7 @@ export default function OSPage() {
             <select
               value={formData.cliente_id}
               onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               required
             >
               <option value="">Selecione...</option>
@@ -370,7 +370,7 @@ export default function OSPage() {
               type="text"
               value={formData.veiculo_equipamento}
               onChange={(e) => setFormData({ ...formData, veiculo_equipamento: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="Ex: Honda Civic 2020"
               required
             />
@@ -381,7 +381,7 @@ export default function OSPage() {
               type="text"
               value={formData.equipamento_serial}
               onChange={(e) => setFormData({ ...formData, equipamento_serial: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="Número de série ou IMEI do aparelho"
             />
           </div>
@@ -390,7 +390,7 @@ export default function OSPage() {
             <textarea
               value={formData.descricao_problema}
               onChange={(e) => setFormData({ ...formData, descricao_problema: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               rows={3}
               placeholder="Descreva o problema..."
             />
@@ -401,7 +401,7 @@ export default function OSPage() {
               <select
                 value={formData.colaborador_id}
                 onChange={(e) => setFormData({ ...formData, colaborador_id: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="">Selecione...</option>
                 {funcionarios.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
@@ -414,7 +414,7 @@ export default function OSPage() {
                 step="0.01"
                 value={formData.valor_orcamento}
                 onChange={(e) => setFormData({ ...formData, valor_orcamento: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="0.00"
               />
             </div>
@@ -424,7 +424,7 @@ export default function OSPage() {
             <textarea
               value={formData.laudo_tecnico}
               onChange={(e) => setFormData({ ...formData, laudo_tecnico: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               rows={3}
               placeholder="Relatório técnico do diagnóstico realizado..."
             />
@@ -440,7 +440,7 @@ export default function OSPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
             </button>
@@ -456,7 +456,7 @@ export default function OSPage() {
             <select
               value={formData.cliente_id}
               onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               required
             >
               <option value="">Selecione...</option>
@@ -469,7 +469,7 @@ export default function OSPage() {
               type="text"
               value={formData.veiculo_equipamento}
               onChange={(e) => setFormData({ ...formData, veiculo_equipamento: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="Ex: Honda Civic 2020"
               required
             />
@@ -479,7 +479,7 @@ export default function OSPage() {
             <textarea
               value={formData.descricao_problema}
               onChange={(e) => setFormData({ ...formData, descricao_problema: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               rows={3}
               placeholder="Descreva o problema..."
             />
@@ -490,7 +490,7 @@ export default function OSPage() {
               <select
                 value={formData.colaborador_id}
                 onChange={(e) => setFormData({ ...formData, colaborador_id: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="">Selecione...</option>
                 {funcionarios.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
@@ -503,7 +503,7 @@ export default function OSPage() {
                 step="0.01"
                 value={formData.valor_orcamento}
                 onChange={(e) => setFormData({ ...formData, valor_orcamento: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="0.00"
               />
             </div>
@@ -514,7 +514,7 @@ export default function OSPage() {
               type="text"
               value={formData.equipamento_serial}
               onChange={(e) => setFormData({ ...formData, equipamento_serial: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="Número de série ou IMEI do aparelho"
             />
           </div>
@@ -523,7 +523,7 @@ export default function OSPage() {
             <textarea
               value={formData.laudo_tecnico}
               onChange={(e) => setFormData({ ...formData, laudo_tecnico: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               rows={3}
               placeholder="Relatório técnico do diagnóstico realizado..."
             />
@@ -539,7 +539,7 @@ export default function OSPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(false)}
-              className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
             </button>

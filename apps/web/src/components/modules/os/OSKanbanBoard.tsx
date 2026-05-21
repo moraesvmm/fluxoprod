@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { OrdemServico } from "@/lib/api";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
@@ -44,16 +44,16 @@ export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardP
             key={col.id}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, col.id)}
-            className={`flex flex-col rounded-xl border border-slate-200 ${col.bg}/30 p-4 transition-colors`}
+            className={`flex flex-col rounded-xl border border-border ${col.bg}/30 p-4 transition-colors`}
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className={`p-2 rounded-lg ${col.bg} ${col.color}`}>
                   <Icon className="w-4 h-4" />
                 </div>
-                <h3 className="font-semibold text-slate-700">{col.title}</h3>
+                <h3 className="font-semibold text-foreground">{col.title}</h3>
               </div>
-              <span className="text-xs font-bold text-slate-400 bg-white px-2 py-1 rounded-full border border-slate-100 shadow-sm">
+              <span className="text-xs font-bold text-slate-400 bg-card px-2 py-1 rounded-full border border-slate-100 shadow-sm">
                 {colOrdens.length}
               </span>
             </div>
@@ -65,7 +65,7 @@ export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardP
                   layoutId={os.id}
                   draggable
                   onDragStartCapture={(e) => handleDragStart(e as unknown as React.DragEvent, os.id)}
-                  className="group bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-violet-200 transition-all cursor-grab active:cursor-grabbing"
+                  className="group bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md hover:border-violet-200 transition-all cursor-grab active:cursor-grabbing"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">#{os.numero}</span>
@@ -77,8 +77,8 @@ export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardP
                     </button>
                   </div>
                   
-                  <h4 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2">{os.veiculo_equipamento}</h4>
-                  <p className="text-xs text-slate-500 mb-3 line-clamp-2">{os.cliente?.nome || "Cliente não informado"}</p>
+                  <h4 className="font-medium text-foreground text-sm mb-1 line-clamp-2">{os.veiculo_equipamento}</h4>
+                  <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{os.cliente?.nome || "Cliente não informado"}</p>
                   
                   <div className="flex items-center justify-between pt-3 border-t border-slate-50">
                     <div className="flex items-center gap-1.5 text-emerald-600">

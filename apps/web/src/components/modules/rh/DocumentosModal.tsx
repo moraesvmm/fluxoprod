@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, useRef } from "react";
 import {
@@ -214,7 +214,7 @@ export function DocumentosModal({
                 <select
                   value={tipoUpload}
                   onChange={(e) => setTipoUpload(e.target.value)}
-                  className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   {TIPOS_DOCUMENTO.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -254,7 +254,7 @@ export function DocumentosModal({
                 className={`rounded-xl border-2 border-dashed p-6 text-center transition-all ${
                   isDragging
                     ? "border-primary bg-primary/5 scale-[1.02]"
-                    : "border-slate-200 hover:border-slate-300"
+                    : "border-border hover:border-border"
                 }`}
               >
                 <Upload
@@ -262,7 +262,7 @@ export function DocumentosModal({
                     isDragging ? "text-primary" : "text-slate-300"
                   }`}
                 />
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   {isDragging
                     ? "Solte o arquivo aqui..."
                     : "Arraste e solte um arquivo aqui, ou clique no botão acima"}
@@ -274,14 +274,14 @@ export function DocumentosModal({
 
               {/* Lista de documentos */}
               {isLoading ? (
-                <div className="py-8 text-center text-sm text-slate-500">
+                <div className="py-8 text-center text-sm text-muted-foreground">
                   <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
                   Carregando documentos...
                 </div>
               ) : documentos.length === 0 ? (
                 <div className="py-8 text-center">
                   <FolderOpen className="h-10 w-10 text-slate-200 mx-auto mb-2" />
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-muted-foreground">
                     Nenhum documento cadastrado
                   </p>
                 </div>
@@ -290,12 +290,12 @@ export function DocumentosModal({
                   {documentos.map((doc: DocumentoFuncionario) => (
                     <div
                       key={doc.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-muted transition-colors"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {getIconeDocumento(doc.mime_type)}
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-slate-800 truncate max-w-[200px]">
+                          <p className="text-sm font-medium text-foreground truncate max-w-[200px]">
                             {doc.nome_arquivo}
                           </p>
                           <p className="text-xs text-slate-400">

@@ -66,7 +66,7 @@ export default function CodigosPanel() {
       </div>
 
       {/* Busca por cÃƒÂ³digo */}
-      <div className="p-4 rounded-lg border border-slate-200 bg-white">
+      <div className="p-4 rounded-lg border border-border bg-card">
         <div className="flex items-center gap-2">
           <Search className="h-5 w-5 text-slate-400" />
           <input
@@ -75,7 +75,7 @@ export default function CodigosPanel() {
             onChange={(e) => setCodigoBusca(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleBuscarPorCodigo()}
             placeholder="Digite o cÃƒÂ³digo de barras ou QR..."
-            className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
           <button
             onClick={handleBuscarPorCodigo}
@@ -105,27 +105,27 @@ export default function CodigosPanel() {
       </div>
 
       {/* Lista de produtos com cÃƒÂ³digos */}
-      <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
-        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-          <h4 className="font-medium text-slate-900">CÃƒÂ³digos por Produto</h4>
+      <div className="border border-border rounded-lg bg-card overflow-hidden">
+        <div className="px-4 py-3 border-b border-border bg-muted">
+          <h4 className="font-medium text-foreground">CÃƒÂ³digos por Produto</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="text-left p-3 font-medium text-slate-700">Produto</th>
-                <th className="text-left p-3 font-medium text-slate-700">CÃƒÂ³digo de Barras</th>
-                <th className="text-left p-3 font-medium text-slate-700">QR Code</th>
-                <th className="text-left p-3 font-medium text-slate-700">AÃƒÂ§ÃƒÂµes</th>
+              <tr className="border-b border-border bg-muted">
+                <th className="text-left p-3 font-medium text-foreground">Produto</th>
+                <th className="text-left p-3 font-medium text-foreground">CÃƒÂ³digo de Barras</th>
+                <th className="text-left p-3 font-medium text-foreground">QR Code</th>
+                <th className="text-left p-3 font-medium text-foreground">AÃƒÂ§ÃƒÂµes</th>
               </tr>
             </thead>
             <tbody>
               {produtos.map((produto) => (
-                <tr key={produto.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="p-3 font-medium text-slate-900">{produto.nome}</td>
+                <tr key={produto.id} className="border-b border-slate-100 hover:bg-muted">
+                  <td className="p-3 font-medium text-foreground">{produto.nome}</td>
                   <td className="p-3">
                     {produto.codigo_barras ? (
-                      <code className="bg-slate-100 px-2 py-1 rounded text-xs font-mono">
+                      <code className="bg-muted px-2 py-1 rounded text-xs font-mono">
                         {produto.codigo_barras}
                       </code>
                     ) : (
@@ -136,7 +136,7 @@ export default function CodigosPanel() {
                     {produto.codigo_qr ? (
                       <div className="flex items-center gap-2">
                         <QrCode className="h-4 w-4 text-indigo-500" />
-                        <code className="bg-slate-100 px-2 py-1 rounded text-xs font-mono">
+                        <code className="bg-muted px-2 py-1 rounded text-xs font-mono">
                           {produto.codigo_qr}
                         </code>
                       </div>
@@ -154,7 +154,7 @@ export default function CodigosPanel() {
                         <Plus className="mr-1 h-3 w-3" /> Gerar CÃƒÂ³digo
                       </button>
                     ) : (
-                      <span className="text-xs text-slate-500">CÃƒÂ³digo gerado</span>
+                      <span className="text-xs text-muted-foreground">CÃƒÂ³digo gerado</span>
                     )}
                   </td>
                 </tr>

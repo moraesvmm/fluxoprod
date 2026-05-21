@@ -309,7 +309,7 @@ export default function CatalogoPage() {
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
-                  <div className="text-slate-500">Carregando produtos...</div>
+                  <div className="text-muted-foreground">Carregando produtos...</div>
                 </TableCell>
               </TableRow>
             ) : error ? (
@@ -511,7 +511,7 @@ export default function CatalogoPage() {
               <select
                 value={formData.origem}
                 onChange={(e) => setFormData({ ...formData, origem: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card text-card-foreground"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card text-card-foreground"
               >
                 <option value="0">0 - Nacional</option>
                 <option value="1">1 - Estrangeira (Importação Direta)</option>
@@ -583,7 +583,7 @@ export default function CatalogoPage() {
                 type="text"
                 value={formData.categoria}
                 onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="Ex: Acessórios"
               />
             </div>
@@ -595,7 +595,7 @@ export default function CatalogoPage() {
               step="0.01"
               value={formData.preco_custo}
               onChange={(e) => setFormData({ ...formData, preco_custo: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="R$ 0,00"
             />
           </div>
@@ -610,7 +610,7 @@ export default function CatalogoPage() {
                   maxLength={8}
                   value={formData.ncm}
                   onChange={(e) => setFormData({ ...formData, ncm: e.target.value })}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="Ex: 85444200"
                 />
               </div>
@@ -621,7 +621,7 @@ export default function CatalogoPage() {
                   maxLength={4}
                   value={formData.cfop_padrao}
                   onChange={(e) => setFormData({ ...formData, cfop_padrao: e.target.value })}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="Ex: 5102"
                 />
               </div>
@@ -631,7 +631,7 @@ export default function CatalogoPage() {
               <select
                 value={formData.origem}
                 onChange={(e) => setFormData({ ...formData, origem: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card text-card-foreground"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card text-card-foreground"
               >
                 <option value="0">0 - Nacional</option>
                 <option value="1">1 - Estrangeira (Importação Direta)</option>
@@ -655,7 +655,7 @@ export default function CatalogoPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(false)}
-              className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
             </button>

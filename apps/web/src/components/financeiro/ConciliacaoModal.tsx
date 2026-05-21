@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { 
@@ -94,25 +94,25 @@ export function ConciliacaoModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="flex h-[80vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-2xl">
+      <div className="flex h-[80vh] w-full max-w-4xl flex-col rounded-2xl bg-card shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b p-6">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Conciliação Bancária</h2>
-            <p className="text-sm text-slate-500">Importe seu extrato OFX e vincule aos lançamentos.</p>
+            <h2 className="text-xl font-bold text-foreground">Conciliação Bancária</h2>
+            <p className="text-sm text-muted-foreground">Importe seu extrato OFX e vincule aos lançamentos.</p>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 hover:bg-slate-100">
-            <X className="h-5 w-5 text-slate-500" />
+          <button onClick={onClose} className="rounded-full p-2 hover:bg-muted">
+            <X className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-auto p-6">
           {!file ? (
-            <div className="flex h-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-12">
+            <div className="flex h-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted p-12">
               <Upload className="mb-4 h-12 w-12 text-slate-300" />
-              <p className="mb-2 font-medium text-slate-900">Arraste seu arquivo OFX aqui</p>
-              <p className="mb-6 text-sm text-slate-500">Ou clique para selecionar do seu computador</p>
+              <p className="mb-2 font-medium text-foreground">Arraste seu arquivo OFX aqui</p>
+              <p className="mb-6 text-sm text-muted-foreground">Ou clique para selecionar do seu computador</p>
               <input 
                 type="file" 
                 accept=".ofx" 
@@ -130,12 +130,12 @@ export function ConciliacaoModal({
           ) : loading ? (
             <div className="flex h-full flex-col items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="mt-4 text-slate-500">Processando extrato...</p>
+              <p className="mt-4 text-muted-foreground">Processando extrato...</p>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-slate-700">
+                <span className="text-sm font-medium text-foreground">
                   {bankTransactions.length} transações encontradas no arquivo
                 </span>
                 <span className="text-sm font-medium text-indigo-600">
@@ -143,9 +143,9 @@ export function ConciliacaoModal({
                 </span>
               </div>
 
-              <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <div className="rounded-xl border border-border overflow-hidden">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 text-slate-500">
+                  <thead className="bg-muted text-muted-foreground">
                     <tr>
                       <th className="px-4 py-3 font-medium">Extrato Bancário</th>
                       <th className="px-4 py-3 text-center">Status</th>
@@ -157,8 +157,8 @@ export function ConciliacaoModal({
                       <tr key={bt.id} className="hover:bg-slate-50/50">
                         <td className="px-4 py-4">
                           <div className="flex flex-col">
-                            <span className="font-medium text-slate-900">{bt.descricao}</span>
-                            <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                            <span className="font-medium text-foreground">{bt.descricao}</span>
+                            <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                               <span>{new Date(bt.data).toLocaleDateString()}</span>
                               <span className={bt.tipo === 'CREDIT' ? 'text-emerald-600' : 'text-rose-600'}>
                                 {bt.tipo === 'CREDIT' ? '+' : '-'} {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(bt.valor)}
@@ -197,7 +197,7 @@ export function ConciliacaoModal({
                             </div>
                           ) : (
                             <select 
-                              className="w-full rounded-lg border-slate-200 bg-transparent py-1.5 text-xs focus:ring-primary"
+                              className="w-full rounded-lg border-border bg-transparent py-1.5 text-xs focus:ring-primary"
                               onChange={(e) => setMatches({ ...matches, [bt.id]: e.target.value })}
                               value=""
                             >
@@ -226,7 +226,7 @@ export function ConciliacaoModal({
         <div className="flex items-center justify-end gap-3 border-t p-6">
           <button 
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
           >
             Cancelar
           </button>

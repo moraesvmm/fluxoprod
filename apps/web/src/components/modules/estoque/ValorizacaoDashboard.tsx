@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Calculator, DollarSign, AlertTriangle } from "lucide-react";
@@ -62,7 +62,7 @@ export default function ValorizacaoDashboard() {
           <select
             value={metodo}
             onChange={(e) => setMetodo(e.target.value)}
-            className="border border-slate-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+            className="border border-border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
           >
             <option value="custo_medio">Custo Médio</option>
             <option value="fifo">FIFO</option>
@@ -78,25 +78,25 @@ export default function ValorizacaoDashboard() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-slate-500">Calculando valoração...</div>
+        <div className="text-center py-8 text-muted-foreground">Calculando valoração...</div>
       ) : valorizacao ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="p-4 rounded-lg border border-slate-200 bg-white">
+            <div className="p-4 rounded-lg border border-border bg-card">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-green-500" />
-                <span className="text-sm text-slate-600">Valor Total do Estoque</span>
+                <span className="text-sm text-muted-foreground">Valor Total do Estoque</span>
               </div>
-              <p className="text-2xl font-bold text-slate-900 mt-2">
+              <p className="text-2xl font-bold text-foreground mt-2">
                 R$ {valorizacao.valor_total?.toFixed(2) || "0,00"}
               </p>
             </div>
-            <div className="p-4 rounded-lg border border-slate-200 bg-white">
+            <div className="p-4 rounded-lg border border-border bg-card">
               <div className="flex items-center gap-2">
                 <Calculator className="h-5 w-5 text-blue-500" />
-                <span className="text-sm text-slate-600">Método de Valoração</span>
+                <span className="text-sm text-muted-foreground">Método de Valoração</span>
               </div>
-              <p className="text-2xl font-bold text-slate-900 mt-2 capitalize">
+              <p className="text-2xl font-bold text-foreground mt-2 capitalize">
                 {valorizacao.metodo?.replace("_", " ") || "custo médio"}
               </p>
             </div>
@@ -113,26 +113,26 @@ export default function ValorizacaoDashboard() {
             )}
           </div>
 
-          <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-              <h4 className="font-medium text-slate-900">Custo Unitário por Produto</h4>
+          <div className="border border-border rounded-lg bg-card overflow-hidden">
+            <div className="px-4 py-3 border-b border-border bg-muted">
+              <h4 className="font-medium text-foreground">Custo Unitário por Produto</h4>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="text-left p-3 font-medium text-slate-700">Produto</th>
-                    <th className="text-left p-3 font-medium text-slate-700">Categoria</th>
-                    <th className="text-left p-3 font-medium text-slate-700">Custo Unitário</th>
-                    <th className="text-left p-3 font-medium text-slate-700">Método</th>
-                    <th className="text-left p-3 font-medium text-slate-700">Ações</th>
+                  <tr className="border-b border-border bg-muted">
+                    <th className="text-left p-3 font-medium text-foreground">Produto</th>
+                    <th className="text-left p-3 font-medium text-foreground">Categoria</th>
+                    <th className="text-left p-3 font-medium text-foreground">Custo Unitário</th>
+                    <th className="text-left p-3 font-medium text-foreground">Método</th>
+                    <th className="text-left p-3 font-medium text-foreground">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {produtos.map((produto) => (
-                    <tr key={produto.id} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="p-3 font-medium text-slate-900">{produto.nome}</td>
-                      <td className="p-3 text-slate-600">{produto.categoria || "-"}</td>
+                    <tr key={produto.id} className="border-b border-slate-100 hover:bg-muted">
+                      <td className="p-3 font-medium text-foreground">{produto.nome}</td>
+                      <td className="p-3 text-muted-foreground">{produto.categoria || "-"}</td>
                       <td className="p-3">
                         {editingCusto[produto.id] !== undefined ? (
                           <input
@@ -141,15 +141,15 @@ export default function ValorizacaoDashboard() {
                             min="0"
                             value={editingCusto[produto.id]}
                             onChange={(e) => handleCustoChange(produto.id, e.target.value)}
-                            className="w-24 border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                            className="w-24 border border-border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
                           />
                         ) : (
-                          <span className={produto.custo_unitario === null ? "text-red-500" : "text-slate-900"}>
+                          <span className={produto.custo_unitario === null ? "text-red-500" : "text-foreground"}>
                             R$ {produto.custo_unitario?.toFixed(2) || "0,00"}
                           </span>
                         )}
                       </td>
-                      <td className="p-3 text-slate-600 capitalize">{produto.metodo_valoracao?.replace("_", " ") || "custo médio"}</td>
+                      <td className="p-3 text-muted-foreground capitalize">{produto.metodo_valoracao?.replace("_", " ") || "custo médio"}</td>
                       <td className="p-3">
                         {editingCusto[produto.id] !== undefined ? (
                           <button
@@ -162,7 +162,7 @@ export default function ValorizacaoDashboard() {
                         ) : (
                           <button
                             onClick={() => setEditingCusto(prev => ({ ...prev, [produto.id]: produto.custo_unitario || 0 }))}
-                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-slate-100 text-slate-700 hover:bg-slate-200 h-7 px-2"
+                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-muted text-foreground hover:bg-slate-200 h-7 px-2"
                           >
                             Editar
                           </button>
@@ -176,7 +176,7 @@ export default function ValorizacaoDashboard() {
           </div>
         </>
       ) : (
-        <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-center py-8 text-muted-foreground bg-muted rounded-lg border border-border">
           <Calculator className="h-10 w-10 mx-auto text-slate-300 mb-2" />
           <p className="text-sm">Clique em "Calcular" para ver a valoração do estoque</p>
         </div>

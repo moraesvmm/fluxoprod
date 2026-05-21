@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -51,7 +51,7 @@ export default function MestrePage() {
               className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-all relative ${
                 activeTab === tab.id
                   ? "text-white"
-                  : "text-gray-500 hover:text-gray-300"
+                  : "text-muted-foreground hover:text-gray-300"
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -253,7 +253,7 @@ function ProvisioningWizard() {
     <>
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight text-white mb-1">Setup Master</h1>
-        <p className="text-sm text-gray-500">Provisionamento dinâmico SaaS Nível 2</p>
+        <p className="text-sm text-muted-foreground">Provisionamento dinâmico SaaS Nível 2</p>
       </div>
       {/* Progress */}
       <div className="h-1 w-full bg-white/5 rounded-full mb-6 overflow-hidden">

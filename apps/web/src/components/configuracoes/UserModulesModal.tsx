@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { X, Settings, Check, Loader2 } from 'lucide-react';
@@ -111,7 +111,7 @@ export function UserModulesModal({ userId, userName, onClose, onSuccess }: Props
                               {isOn ? 'Ativado' : 'Desativado'}
                             </span>
                             <div className={`w-10 h-5 rounded-full transition-colors flex items-center px-0.5 ${isOn ? 'bg-primary' : 'bg-muted'}`}>
-                              <div className={`w-4 h-4 rounded-full bg-white transition-transform shadow-sm ${isOn ? 'translate-x-5' : 'translate-x-0'}`} />
+                              <div className={`w-4 h-4 rounded-full bg-card transition-transform shadow-sm ${isOn ? 'translate-x-5' : 'translate-x-0'}`} />
                             </div>
                           </>
                         )}

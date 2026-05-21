@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useQuery } from "@tanstack/react-query";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -80,7 +80,7 @@ export default function DashboardKPIs() {
         />
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+      <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <BarChart3 className="w-5 h-5" />
           Funil de Vendas
@@ -90,10 +90,10 @@ export default function DashboardKPIs() {
           {Object.entries(funilCounts).map(([fase, count]) => (
             <div key={fase} className="space-y-1">
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium capitalize text-slate-700">{fase}</span>
-                <span className="text-slate-500">{count}</span>
+                <span className="font-medium capitalize text-foreground">{fase}</span>
+                <span className="text-muted-foreground">{count}</span>
               </div>
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div
                   className="h-full bg-violet-600 rounded-full transition-all duration-500"
                   style={{ width: `${barWidth(count)}%` }}
@@ -104,33 +104,33 @@ export default function DashboardKPIs() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+      <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5" />
           Taxa de Conversão
         </h3>
         
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <div className="text-sm text-slate-600 mb-1">Lead → Qualificado</div>
+          <div className="p-4 bg-muted rounded-lg">
+            <div className="text-sm text-muted-foreground mb-1">Lead → Qualificado</div>
             <div className="text-2xl font-bold text-violet-600">
               {formatPercent(m.taxa_conversao?.lead_to_qualificado)}
             </div>
           </div>
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <div className="text-sm text-slate-600 mb-1">Qualificado → Proposta</div>
+          <div className="p-4 bg-muted rounded-lg">
+            <div className="text-sm text-muted-foreground mb-1">Qualificado → Proposta</div>
             <div className="text-2xl font-bold text-violet-600">
               {formatPercent(m.taxa_conversao?.qualificado_to_proposta)}
             </div>
           </div>
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <div className="text-sm text-slate-600 mb-1">Proposta → Negociação</div>
+          <div className="p-4 bg-muted rounded-lg">
+            <div className="text-sm text-muted-foreground mb-1">Proposta → Negociação</div>
             <div className="text-2xl font-bold text-violet-600">
               {formatPercent(m.taxa_conversao?.proposta_to_negociacao)}
             </div>
           </div>
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <div className="text-sm text-slate-600 mb-1">Negociação → Fechado</div>
+          <div className="p-4 bg-muted rounded-lg">
+            <div className="text-sm text-muted-foreground mb-1">Negociação → Fechado</div>
             <div className="text-2xl font-bold text-violet-600">
               {formatPercent(m.taxa_conversao?.negociacao_to_fechado)}
             </div>

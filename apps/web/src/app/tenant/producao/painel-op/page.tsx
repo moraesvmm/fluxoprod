@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useOrdensProducao, useAbrirOrdemProducao, useConcluirOrdemProducao, useFichasTecnicas } from "@/lib/hooks/use-producao";
@@ -119,7 +119,7 @@ export default function PainelOPPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-tour="prod-ops">
         {/* Coluna Em Andamento */}
-        <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+        <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-border dark:border-slate-800">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-lg flex items-center">
               <Factory className="w-5 h-5 mr-2 text-blue-500" /> Em Produção
@@ -158,7 +158,7 @@ export default function PainelOPPage() {
         </div>
 
         {/* Coluna Concluídas (Recentes) */}
-        <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+        <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-border dark:border-slate-800">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-lg flex items-center">
               <CheckCircle className="w-5 h-5 mr-2 text-green-500" /> Concluídas

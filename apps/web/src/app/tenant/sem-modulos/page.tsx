@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 
 export default function SemModulosPage() {
   return (
-    <div className="rounded-xl border border-border bg-white p-8 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
       <h2 className="text-2xl font-bold tracking-tight">Acesso indisponível</h2>
       <p className="mt-2 text-muted-foreground">
         Nenhum módulo está ativo para esta empresa (ou você tentou acessar um módulo desativado).

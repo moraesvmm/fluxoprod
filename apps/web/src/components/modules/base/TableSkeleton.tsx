@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * TableSkeleton - Componente de skeleton para tabelas
@@ -19,7 +19,7 @@ export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; column
   return (
     <div className="space-y-3">
       {[...Array(rows)].map((_, rowIndex) => (
-        <div key={rowIndex} className="flex gap-4 items-center p-4 border border-border rounded-lg bg-white animate-pulse">
+        <div key={rowIndex} className="flex gap-4 items-center p-4 border border-border rounded-lg bg-card animate-pulse">
           {[...Array(columns)].map((_, colIndex) => (
             <div key={colIndex} className="h-4 bg-slate-200 rounded flex-1" />
           ))}

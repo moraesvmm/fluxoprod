@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useSegmentacao } from "@/lib/hooks/use-segmentacao";
@@ -44,10 +44,10 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 px-3 py-1.5 border border-slate-300 rounded-md text-sm hover:bg-slate-50 transition-colors"
+        className="inline-flex items-center gap-2 px-3 py-1.5 border border-border rounded-md text-sm hover:bg-muted transition-colors"
       >
-        <Filter className="w-4 h-4 text-slate-500" />
-        <span className="text-slate-700">Filtrar por Tags</span>
+        <Filter className="w-4 h-4 text-muted-foreground" />
+        <span className="text-foreground">Filtrar por Tags</span>
         {selectedCount > 0 && (
           <span className="bg-violet-600 text-white text-xs px-1.5 py-0.5 rounded-full">
             {selectedCount}
@@ -56,26 +56,26 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-2 w-80 bg-white border border-slate-200 rounded-lg shadow-lg p-4">
+        <div className="absolute z-10 mt-2 w-80 bg-card border border-border rounded-lg shadow-lg p-4">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="font-medium text-slate-900">Filtrar por Tags</h4>
+            <h4 className="font-medium text-foreground">Filtrar por Tags</h4>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-slate-600"
+              className="text-slate-400 hover:text-muted-foreground"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           <div className="mb-3">
-            <label className="block text-sm font-medium text-slate-700 mb-2">Operador</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Operador</label>
             <div className="flex gap-2">
               <button
                 onClick={() => setOperador('all')}
                 className={`flex-1 px-3 py-1.5 text-sm rounded-md transition-colors ${
                   operador === 'all'
                     ? 'bg-violet-600 text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    : 'bg-muted text-foreground hover:bg-slate-200'
                 }`}
               >
                 Tem todas
@@ -85,7 +85,7 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
                 className={`flex-1 px-3 py-1.5 text-sm rounded-md transition-colors ${
                   operador === 'any'
                     ? 'bg-violet-600 text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    : 'bg-muted text-foreground hover:bg-slate-200'
                 }`}
               >
                 Tem qualquer
@@ -94,7 +94,7 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
           </div>
 
           <div className="mb-3">
-            <label className="block text-sm font-medium text-slate-700 mb-2">Tags</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Tags</label>
             <div className="max-h-48 overflow-auto space-y-1">
               {catalogTags.length === 0 ? (
                 <p className="text-sm text-slate-400">Nenhuma tag disponível</p>
@@ -103,13 +103,13 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
                   <button
                     key={tag.id}
                     onClick={() => handleToggleTag(tag.nome)}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-slate-50 transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
                   >
                     <div
                       className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
                         selectedTags.includes(tag.nome)
                           ? 'bg-violet-600 border-violet-600'
-                          : 'border-slate-300'
+                          : 'border-border'
                       }`}
                     >
                       {selectedTags.includes(tag.nome) && (
@@ -120,7 +120,7 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: tag.cor }}
                     />
-                    <span className="flex-1 text-left text-slate-700">{tag.nome}</span>
+                    <span className="flex-1 text-left text-foreground">{tag.nome}</span>
                     <span className="text-xs text-slate-400">{tag.uso_count}</span>
                   </button>
                 ))
@@ -128,10 +128,10 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
             </div>
           </div>
 
-          <div className="flex gap-2 pt-3 border-t border-slate-200">
+          <div className="flex gap-2 pt-3 border-t border-border">
             <button
               onClick={handleLimpar}
-              className="flex-1 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+              className="flex-1 px-3 py-1.5 text-sm text-foreground hover:bg-muted rounded-md transition-colors"
             >
               Limpar
             </button>

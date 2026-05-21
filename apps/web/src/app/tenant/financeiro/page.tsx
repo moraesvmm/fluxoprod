@@ -486,7 +486,7 @@ export default function FinanceiroPage() {
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-6">
-                  <div className="text-slate-500">Carregando transações...</div>
+                  <div className="text-muted-foreground">Carregando transações...</div>
                 </TableCell>
               </TableRow>
             ) : error ? (
@@ -498,7 +498,7 @@ export default function FinanceiroPage() {
             ) : !transacoes || transacoes.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-6">
-                  <div className="text-slate-500">Nenhuma transação encontrada</div>
+                  <div className="text-muted-foreground">Nenhuma transação encontrada</div>
                 </TableCell>
               </TableRow>
             ) : (

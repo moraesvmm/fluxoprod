@@ -54,11 +54,11 @@ export default function AlertasEstoquePanel() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-slate-500">Carregando alertas...</div>
+        <div className="text-center py-8 text-muted-foreground">Carregando alertas...</div>
       ) : error ? (
         <div className="text-center py-8 text-red-500">Erro ao carregar alertas</div>
       ) : alertasPendentes.length === 0 ? (
-        <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-center py-8 text-muted-foreground bg-muted rounded-lg border border-border">
           <AlertTriangle className="h-10 w-10 mx-auto text-slate-300 mb-2" />
           <p className="text-sm">Nenhum alerta pendente</p>
         </div>
@@ -81,10 +81,10 @@ export default function AlertasEstoquePanel() {
                     ) : (
                       <AlertTriangle className="h-4 w-4 text-amber-600" />
                     )}
-                    <span className="font-medium text-slate-900">{alerta.produto_nome}</span>
+                    <span className="font-medium text-foreground">{alerta.produto_nome}</span>
                   </div>
-                  <p className="text-sm text-slate-600 mb-2">{alerta.mensagem}</p>
-                  <div className="flex items-center gap-4 text-xs text-slate-500">
+                  <p className="text-sm text-muted-foreground mb-2">{alerta.mensagem}</p>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>Estoque atual: <strong className={alerta.estoque_atual === 0 ? "text-red-600" : "text-amber-600"}>{alerta.estoque_atual}</strong></span>
                     <span>MÃ­nimo: <strong>{alerta.estoque_minimo}</strong></span>
                   </div>
@@ -92,7 +92,7 @@ export default function AlertasEstoquePanel() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleResolver(alerta.id, "visualizado")}
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 h-8 px-3"
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border hover:bg-muted text-foreground h-8 px-3"
                     title="Marcar como visualizado"
                   >
                     <Eye className="h-4 w-4 mr-1" />

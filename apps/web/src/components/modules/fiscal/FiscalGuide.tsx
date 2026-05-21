@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { FileText, X, AlertCircle, ExternalLink, HelpCircle, ShieldCheck, Zap } from "lucide-react";
@@ -35,7 +35,7 @@ export function FiscalGuide() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200"
+              className="w-full max-w-lg bg-card rounded-2xl shadow-2xl overflow-hidden border border-border"
             >
               {/* Header */}
               <div className="bg-primary p-6 text-white relative">
@@ -59,43 +59,43 @@ export function FiscalGuide() {
               {/* Content */}
               <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                 <div className="space-y-4">
-                  <div className="flex gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
+                  <div className="flex gap-4 p-4 rounded-xl bg-muted border border-slate-100">
                     <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
                       <Zap className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900 mb-1">Por que o Fluxo pede Certificado A1?</h4>
-                      <p className="text-xs text-slate-500 leading-relaxed">
+                      <h4 className="text-sm font-bold text-foreground mb-1">Por que o Fluxo pede Certificado A1?</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
                         Diferente de portais manuais do governo, o Fluxo é um ERP de alta performance. O Certificado A1 é o "combustível" que permite ao sistema assinar e emitir notas sem você precisar sair da tela de venda.
                       </p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4">
-                    <div className="p-4 rounded-xl border border-slate-200 hover:border-primary/30 transition-colors">
+                    <div className="p-4 rounded-xl border border-border hover:border-primary/30 transition-colors">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="h-2 w-2 rounded-full bg-primary" />
-                        <span className="text-sm font-bold text-slate-800">Passo 1: O Certificado Digital</span>
+                        <span className="text-sm font-bold text-foreground">Passo 1: O Certificado Digital</span>
                       </div>
-                      <p className="text-xs text-slate-500 mb-3">
+                      <p className="text-xs text-muted-foreground mb-3">
                         Você precisa do modelo **A1 (arquivo .pfx)**. Ele tem validade de 1 ano e é o único que permite automação total.
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        <a href="https://www.serasa.com.br/certificados-digitais/" target="_blank" className="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded flex items-center gap-1 font-medium text-slate-600">
+                        <a href="https://www.serasa.com.br/certificados-digitais/" target="_blank" className="text-[10px] bg-muted hover:bg-slate-200 px-2 py-1 rounded flex items-center gap-1 font-medium text-muted-foreground">
                           Serasa <ExternalLink className="h-2 w-2" />
                         </a>
-                        <a href="https://www.certisign.com.br/" target="_blank" className="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded flex items-center gap-1 font-medium text-slate-600">
+                        <a href="https://www.certisign.com.br/" target="_blank" className="text-[10px] bg-muted hover:bg-slate-200 px-2 py-1 rounded flex items-center gap-1 font-medium text-muted-foreground">
                           Certisign <ExternalLink className="h-2 w-2" />
                         </a>
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl border border-slate-200 hover:border-primary/30 transition-colors">
+                    <div className="p-4 rounded-xl border border-border hover:border-primary/30 transition-colors">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="h-2 w-2 rounded-full bg-primary" />
-                        <span className="text-sm font-bold text-slate-800">Passo 2: Credenciamento SEFAZ</span>
+                        <span className="text-sm font-bold text-foreground">Passo 2: Credenciamento SEFAZ</span>
                       </div>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         Peça ao seu contador para habilitar o seu CNPJ para **"Emissão via Software de Terceiros"**. Sem isso, a SEFAZ recusará as notas do sistema.
                       </p>
                     </div>
@@ -114,7 +114,7 @@ export function FiscalGuide() {
               </div>
 
               {/* Footer */}
-              <div className="p-6 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <div className="p-6 bg-muted border-t border-border flex justify-end">
                 <button
                   onClick={() => setIsOpen(false)}
                   className="px-6 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"

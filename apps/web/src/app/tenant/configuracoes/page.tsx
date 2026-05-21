@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -394,7 +394,7 @@ export default function ConfiguracoesPage() {
             </p>
 
             {fiscalLoading ? (
-              <div className="flex items-center justify-center py-10 text-slate-500">
+              <div className="flex items-center justify-center py-10 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin mr-2" />
                 Carregando configurações fiscais...
               </div>
@@ -504,7 +504,7 @@ export default function ConfiguracoesPage() {
                             />
                           </div>
                           <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
-                            <span className={`inline-flex items-center rounded-full px-2 py-1 ${fiscalMeta?.certificado_configurado ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}`}>
+                            <span className={`inline-flex items-center rounded-full px-2 py-1 ${fiscalMeta?.certificado_configurado ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
                               <ShieldCheck className="h-3 w-3 mr-1" />
                               {fiscalMeta?.certificado_configurado ? "Certificado configurado" : "Certificado pendente"}
                             </span>

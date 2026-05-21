@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
@@ -68,7 +68,7 @@ const LazyAreaChart = dynamic(
     ssr: false,
     loading: () => (
       <div className="h-[300px] flex items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-primary" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-primary" />
       </div>
     ),
   }
@@ -78,7 +78,7 @@ function ChartSkeleton() {
   return (
     <div className="h-[300px] flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-primary" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-primary" />
         <p className="text-xs text-slate-400">Carregando gráfico...</p>
       </div>
     </div>
@@ -125,7 +125,7 @@ export default function DashboardPage() {
             onClick={handleRefresh}
             disabled={dashboard.isLoading}
             data-tour="dash-refresh"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <RefreshCw className={`h-4 w-4 ${dashboard.isLoading ? "animate-spin" : ""}`} />
             Atualizar
@@ -250,7 +250,7 @@ export default function DashboardPage() {
               <div className="flex flex-col items-center gap-3 text-center">
                 <TrendingUp className="h-12 w-12 text-slate-200" />
                 <div>
-                  <p className="text-sm text-slate-500 font-medium">Nenhum dado de faturamento</p>
+                  <p className="text-sm text-muted-foreground font-medium">Nenhum dado de faturamento</p>
                   <p className="text-xs text-slate-400 mt-0.5">Os dados aparecerão aqui conforme as vendas forem registradas.</p>
                 </div>
               </div>
@@ -299,7 +299,7 @@ export default function DashboardPage() {
               <div className="flex-1 flex items-center justify-center py-8">
                 <div className="text-center">
                   <ShoppingBag className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                  <p className="text-sm text-slate-500">Nenhuma venda registrada</p>
+                  <p className="text-sm text-muted-foreground">Nenhuma venda registrada</p>
                   <p className="text-xs text-slate-400 mt-0.5">As vendas aparecerão aqui automaticamente.</p>
                 </div>
               </div>

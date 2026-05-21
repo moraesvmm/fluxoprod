@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
@@ -149,7 +149,7 @@ export default function VendasPage() {
         <KPICard title="Método Favorito" value="-" icon={CreditCard} />
       </div>
 
-      <div data-tour="vendas-historico" className="flex-1 rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+      <div data-tour="vendas-historico" className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -158,10 +158,10 @@ export default function VendasPage() {
               placeholder="Buscar recibo ou cliente..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full bg-card border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
-          <button className="text-sm font-medium text-slate-600 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-md bg-white">
+          <button className="text-sm font-medium text-muted-foreground hover:text-foreground border border-border px-3 py-1.5 rounded-md bg-card">
             Filtrar
           </button>
         </div>
@@ -182,8 +182,8 @@ export default function VendasPage() {
             {loading ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-6">
-                  <div className="flex items-center justify-center gap-2 text-slate-500">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-primary" />
+                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-primary" />
                     Carregando vendas...
                   </div>
                 </TableCell>
@@ -197,7 +197,7 @@ export default function VendasPage() {
             ) : vendas.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-6">
-                  <div className="text-slate-500">Nenhuma venda encontrada</div>
+                  <div className="text-muted-foreground">Nenhuma venda encontrada</div>
                 </TableCell>
               </TableRow>
             ) : (
@@ -207,7 +207,7 @@ export default function VendasPage() {
                   <TableCell className={item.status === 'cancelado' ? 'line-through' : ''}>{item.cliente}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{item.metodo}</TableCell>
-                  <TableCell className={`font-medium ${item.status === 'cancelado' ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
+                  <TableCell className={`font-medium ${item.status === 'cancelado' ? 'text-slate-400 line-through' : 'text-foreground'}`}>
                     {formatarValor(item.valor)}
                   </TableCell>
                   <TableCell>
@@ -218,7 +218,7 @@ export default function VendasPage() {
                       item.nfe_status === 'emitida' ? 'bg-green-100 text-green-700' :
                       item.nfe_status === 'erro' ? 'bg-red-100 text-red-700' :
                       item.nfe_status === 'pendente' ? 'bg-amber-100 text-amber-700 animate-pulse' :
-                      'bg-slate-100 text-slate-500'
+                      'bg-muted text-muted-foreground'
                     }`}>
                       {item.nfe_status?.replace('_', ' ') || 'Não Emitida'}
                     </span>

@@ -371,7 +371,7 @@ export default function ObrasPage() {
           <div className="bg-card text-card-foreground rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Adicionar Custo</h3>
-              <button onClick={() => setShowCustoModal(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
+              <button onClick={() => setShowCustoModal(false)} className="text-slate-400 hover:text-muted-foreground"><X className="h-4 w-4" /></button>
             </div>
             <form onSubmit={handleSubmitCusto} className="space-y-3">
               <div>
@@ -410,7 +410,7 @@ export default function ObrasPage() {
                   {createCustoMutation.isPending ? 'Salvando...' : 'Adicionar Custo'}
                 </button>
                 <button type="button" onClick={() => setShowCustoModal(false)}
-                  className="flex-1 bg-slate-100 text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
                   Cancelar
                 </button>
               </div>
@@ -425,7 +425,7 @@ export default function ObrasPage() {
           <div className="bg-card text-card-foreground rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Alocar Recurso</h3>
-              <button onClick={() => setShowRecursoModal(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
+              <button onClick={() => setShowRecursoModal(false)} className="text-slate-400 hover:text-muted-foreground"><X className="h-4 w-4" /></button>
             </div>
             <form onSubmit={handleSubmitRecurso} className="space-y-3">
               <div>
@@ -456,7 +456,7 @@ export default function ObrasPage() {
                   {createRecursoMutation.isPending ? 'Salvando...' : 'Alocar Recurso'}
                 </button>
                 <button type="button" onClick={() => setShowRecursoModal(false)}
-                  className="flex-1 bg-slate-100 text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
                   Cancelar
                 </button>
               </div>
@@ -538,7 +538,7 @@ export default function ObrasPage() {
           <TableBody>
              {loadingObras ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-slate-500">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   Carregando obras...
                 </TableCell>
               </TableRow>
@@ -547,7 +547,7 @@ export default function ObrasPage() {
                 <TableCell colSpan={8} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
                     <Building2 className="h-10 w-10 text-slate-200" />
-                    <p className="text-slate-500 text-sm">Nenhuma obra encontrada</p>
+                    <p className="text-muted-foreground text-sm">Nenhuma obra encontrada</p>
                     <p className="text-slate-400 text-xs">Clique em &quot;Nova Obra&quot; para criar a primeira.</p>
                   </div>
                 </TableCell>
@@ -559,16 +559,16 @@ export default function ObrasPage() {
                     className={selectedObra?.id === obra.id ? "bg-blue-50" : "cursor-pointer hover:bg-accent"}
                     onClick={() => selecionarObra(obra)}
                   >
-                    <TableCell className="font-medium text-slate-900">{obra.nome}</TableCell>
+                    <TableCell className="font-medium text-foreground">{obra.nome}</TableCell>
                     <TableCell>{obra.cliente?.nome || "—"}</TableCell>
                     <TableCell>
-                      <div className="flex items-center text-slate-500 text-sm">
+                      <div className="flex items-center text-muted-foreground text-sm">
                          <MapPin className="h-3 w-3 mr-1"/>
                          <span className="truncate max-w-[150px]">{obra.endereco || "—"}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs text-slate-500">{formatarData(obra.data_inicio)}</TableCell>
-                    <TableCell className="text-xs text-slate-500">{formatarData(obra.data_fim_prevista)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{formatarData(obra.data_inicio)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{formatarData(obra.data_fim_prevista)}</TableCell>
                     <TableCell>
                       <StatusBadge
                         status={obra.status === 'planejada' ? 'warning' : obra.status === 'concluida' ? 'success' : 'info'}
@@ -622,7 +622,7 @@ export default function ObrasPage() {
               type="text"
               value={formData.nome}
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="Ex: Reforma Residencial Silva"
               required
             />
@@ -632,7 +632,7 @@ export default function ObrasPage() {
             <select
                value={formData.cliente_id}
                onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
-               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+               className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">Selecione...</option>
               {clientes?.data?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
@@ -644,7 +644,7 @@ export default function ObrasPage() {
                type="text"
                value={formData.endereco}
                onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
-               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+               className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                placeholder="Ex: Rua A, 123 - Centro"
             />
           </div>
@@ -655,7 +655,7 @@ export default function ObrasPage() {
                 type="date"
                 value={formData.data_inicio}
                 onChange={(e) => setFormData({ ...formData, data_inicio: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <div>
@@ -664,7 +664,7 @@ export default function ObrasPage() {
                 type="date"
                 value={formData.data_fim_prevista}
                 onChange={(e) => setFormData({ ...formData, data_fim_prevista: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
           </div>
@@ -675,7 +675,7 @@ export default function ObrasPage() {
               step="0.01"
               value={formData.orcamento}
               onChange={(e) => setFormData({ ...formData, orcamento: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="0.00"
             />
           </div>
@@ -684,7 +684,7 @@ export default function ObrasPage() {
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               rows={3}
               placeholder="Descrição detalhada da obra..."
             />
@@ -700,7 +700,7 @@ export default function ObrasPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
             </button>
@@ -717,7 +717,7 @@ export default function ObrasPage() {
               type="text"
               value={formData.nome}
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="Ex: Reforma Residencial Silva"
               required
             />
@@ -727,7 +727,7 @@ export default function ObrasPage() {
             <select
                value={formData.cliente_id}
                onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
-               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+               className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">Selecione...</option>
               {clientes?.data?.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
@@ -739,7 +739,7 @@ export default function ObrasPage() {
                type="text"
                value={formData.endereco}
                onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
-               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+               className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                placeholder="Ex: Rua A, 123 - Centro"
             />
           </div>
@@ -750,7 +750,7 @@ export default function ObrasPage() {
                 type="date"
                 value={formData.data_inicio}
                 onChange={(e) => setFormData({ ...formData, data_inicio: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <div>
@@ -759,7 +759,7 @@ export default function ObrasPage() {
                 type="date"
                 value={formData.data_fim_prevista}
                 onChange={(e) => setFormData({ ...formData, data_fim_prevista: e.target.value })}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
           </div>
@@ -770,7 +770,7 @@ export default function ObrasPage() {
               step="0.01"
               value={formData.orcamento}
               onChange={(e) => setFormData({ ...formData, orcamento: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder="0.00"
             />
           </div>
@@ -779,7 +779,7 @@ export default function ObrasPage() {
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               rows={3}
               placeholder="Descrição detalhada da obra..."
             />
@@ -789,7 +789,7 @@ export default function ObrasPage() {
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as 'planejada' | 'andamento' | 'concluida' | 'suspensa' })}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="planejada">Planejada</option>
               <option value="andamento">Em Andamento</option>
@@ -808,7 +808,7 @@ export default function ObrasPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(false)}
-              className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
             >
               Cancelar
             </button>
@@ -821,7 +821,7 @@ export default function ObrasPage() {
         <div className="fixed inset-y-0 right-0 w-96 bg-card text-card-foreground border-l border-border shadow-lg overflow-hidden z-50">
           <div className="h-full flex flex-col">
             {/* Header */}
-            <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50">
+            <div className="p-4 border-b border-border flex items-center justify-between bg-muted">
               <h3 className="font-semibold text-lg">{selectedObra.nome}</h3>
               <button
                 onClick={fecharDetalhes}
@@ -849,29 +849,29 @@ export default function ObrasPage() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">Nome</label>
-                      <p className="text-sm text-slate-900">{selectedObra.nome}</p>
+                      <p className="text-sm text-foreground">{selectedObra.nome}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">Cliente</label>
-                      <p className="text-sm text-slate-900">{selectedObra.cliente?.nome || '—'}</p>
+                      <p className="text-sm text-foreground">{selectedObra.cliente?.nome || '—'}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">Endereço</label>
-                      <p className="text-sm text-slate-900">{selectedObra.endereco || '—'}</p>
+                      <p className="text-sm text-foreground">{selectedObra.endereco || '—'}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-foreground mb-1">Data Início</label>
-                        <p className="text-sm text-slate-900">{formatarData(selectedObra.data_inicio)}</p>
+                        <p className="text-sm text-foreground">{formatarData(selectedObra.data_inicio)}</p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-foreground mb-1">Data Fim Prevista</label>
-                        <p className="text-sm text-slate-900">{formatarData(selectedObra.data_fim_prevista)}</p>
+                        <p className="text-sm text-foreground">{formatarData(selectedObra.data_fim_prevista)}</p>
                       </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">Orçamento</label>
-                      <p className="text-sm text-slate-900">{formatarMoeda(selectedObra.orcamento)}</p>
+                      <p className="text-sm text-foreground">{formatarMoeda(selectedObra.orcamento)}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">Status</label>
@@ -882,7 +882,7 @@ export default function ObrasPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">Descrição</label>
-                      <p className="text-sm text-slate-900 whitespace-pre-wrap">{selectedObra.descricao || '—'}</p>
+                      <p className="text-sm text-foreground whitespace-pre-wrap">{selectedObra.descricao || '—'}</p>
                     </div>
                     <div className="pt-4">
                       <button

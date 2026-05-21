@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -99,15 +99,15 @@ export default function AdminEmpresasPage() {
 
   if (loading) {
     return (
-      <div className="rounded-xl border bg-white p-6">
-        <p className="text-sm text-slate-600">Carregando...</p>
+      <div className="rounded-xl border bg-card p-6">
+        <p className="text-sm text-muted-foreground">Carregando...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-xl border bg-white p-6">
+      <div className="rounded-xl border bg-card p-6">
         <h1 className="text-xl font-bold">Empresas</h1>
         <p className="mt-2 text-sm text-rose-600">Erro ao carregar: {error}</p>
         <button onClick={loadEmpresas} className="mt-4 text-sm text-blue-600 hover:underline">
@@ -121,12 +121,12 @@ export default function AdminEmpresasPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Empresas</h1>
-        <p className="text-sm text-slate-600">Cadastro central e schemas provisionados.</p>
+        <p className="text-sm text-muted-foreground">Cadastro central e schemas provisionados.</p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border bg-white">
+      <div className="overflow-hidden rounded-xl border bg-card">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-slate-600">
+          <thead className="bg-muted text-muted-foreground">
             <tr>
               <th className="px-4 py-3 text-left font-semibold">Razão social</th>
               <th className="px-4 py-3 text-left font-semibold">CNPJ</th>
@@ -138,10 +138,10 @@ export default function AdminEmpresasPage() {
           <tbody>
             {empresas.map((e) => (
               <tr key={e.id} className="border-t">
-                <td className="px-4 py-3 font-medium text-slate-900">{e.razao_social}</td>
-                <td className="px-4 py-3 text-slate-700">{e.cnpj}</td>
-                <td className="px-4 py-3 font-mono text-xs text-slate-700">{e.schema_name}</td>
-                <td className="px-4 py-3 text-slate-700">{e.status}</td>
+                <td className="px-4 py-3 font-medium text-foreground">{e.razao_social}</td>
+                <td className="px-4 py-3 text-foreground">{e.cnpj}</td>
+                <td className="px-4 py-3 font-mono text-xs text-foreground">{e.schema_name}</td>
+                <td className="px-4 py-3 text-foreground">{e.status}</td>
                 <td className="px-4 py-3">
                   {!isMaster(e) && (
                     <div className="flex gap-2">
@@ -171,7 +171,7 @@ export default function AdminEmpresasPage() {
             ))}
             {empresas.length === 0 && (
               <tr>
-                <td className="px-4 py-6 text-slate-500" colSpan={5}>
+                <td className="px-4 py-6 text-muted-foreground" colSpan={5}>
                   Nenhuma empresa cadastrada ainda.
                 </td>
               </tr>
@@ -183,18 +183,18 @@ export default function AdminEmpresasPage() {
       {/* Modal de Confirmação */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+          <div className="bg-card rounded-xl p-6 max-w-md w-full mx-4">
             <div className="flex items-center gap-3 text-rose-600 mb-4">
               <AlertTriangle className="h-5 w-5" />
               <h2 className="text-lg font-semibold">Confirmar Exclusão Definitiva</h2>
             </div>
-            <p className="text-sm text-slate-700 mb-6">
+            <p className="text-sm text-foreground mb-6">
               Esta ação irá excluir completamente a empresa, <span className="font-bold">deletar todos os seus usuários do sistema de autenticação (Auth)</span>, e excluir o schema do banco de dados. Esta operação é irreversível.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirm(null)}
-                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50"
+                className="flex-1 px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-muted"
               >
                 Cancelar
               </button>
@@ -212,9 +212,9 @@ export default function AdminEmpresasPage() {
       {/* Modal de Prorrogação de Trial */}
       {showTrialModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+          <div className="bg-card rounded-xl p-6 max-w-md w-full mx-4">
             <h2 className="text-lg font-semibold mb-4">Prorrogar Trial</h2>
-            <p className="text-sm text-slate-600 mb-2">Empresa: <span className="font-bold">{showTrialModal.razao_social}</span></p>
+            <p className="text-sm text-muted-foreground mb-2">Empresa: <span className="font-bold">{showTrialModal.razao_social}</span></p>
             {showTrialModal.subscription_status === 'ACTIVE' && (
               <div className="mb-4 p-3 bg-amber-50 text-amber-800 rounded text-sm flex gap-2 items-start border border-amber-200">
                 <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -222,7 +222,7 @@ export default function AdminEmpresasPage() {
               </div>
             )}
             <div className="mb-6 mt-4">
-              <label className="text-sm font-medium text-slate-700 block mb-2">Novo Período de Trial</label>
+              <label className="text-sm font-medium text-foreground block mb-2">Novo Período de Trial</label>
               <select 
                 value={trialDays} 
                 onChange={(e) => setTrialDays(Number(e.target.value))}
@@ -237,7 +237,7 @@ export default function AdminEmpresasPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowTrialModal(null)}
-                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50"
+                className="flex-1 px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-muted"
               >
                 Cancelar
               </button>

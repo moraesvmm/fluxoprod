@@ -204,7 +204,7 @@ export default function EstoquePage() {
                 />
               </div>
               <div className="flex gap-2">
-                <button className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 border border-border px-3 py-1.5 rounded-md bg-card text-card-foreground">
+                <button className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border px-3 py-1.5 rounded-md bg-card text-card-foreground">
                   <Filter className="h-4 w-4" /> Filtros
                 </button>
               </div>
@@ -220,21 +220,21 @@ export default function EstoquePage() {
               <TableBody>
                 {loading ? (
                   <TableRow><TableCell colSpan={7} className="text-center py-6">
-                    <div className="flex items-center justify-center gap-2 text-slate-500">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-primary" />
+                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-primary" />
                       Carregando produtos...
                     </div>
                   </TableCell></TableRow>
                 ) : error ? (
                   <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-red-500">{error}</div></TableCell></TableRow>
                 ) : produtosFiltrados.length === 0 ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-slate-500">{buscaProduto ? 'Nenhum produto encontrado para a busca.' : 'Nenhum produto encontrado'}</div></TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="text-center py-6"><div className="text-muted-foreground">{buscaProduto ? 'Nenhum produto encontrado para a busca.' : 'Nenhum produto encontrado'}</div></TableCell></TableRow>
                 ) : (
                   produtosFiltrados.map((item) => (
                     <TableRow key={item.id} className="group">
                       <TableCell><StatusBadge status={getStatus(item.estoque_atual, item.estoque_minimo)} /></TableCell>
-                      <TableCell className="font-mono text-xs text-slate-500">{item.sku || '-'}</TableCell>
-                      <TableCell className="font-medium text-slate-900">
+                      <TableCell className="font-mono text-xs text-muted-foreground">{item.sku || '-'}</TableCell>
+                      <TableCell className="font-medium text-foreground">
                         <div className="flex items-center gap-2">
                           {item.nome}
                           {item.tipo_item === 'produto_acabado' && (
@@ -329,7 +329,7 @@ export default function EstoquePage() {
             <button type="submit" disabled={createMutation.isPending} className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
               {createMutation.isPending ? "Salvando..." : "Salvar Produto"}
             </button>
-            <button type="button" onClick={handleFecharModal} className="flex-1 bg-slate-100 text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+            <button type="button" onClick={handleFecharModal} className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
               Cancelar
             </button>
           </div>
@@ -374,7 +374,7 @@ export default function EstoquePage() {
                   {updateMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
                 <button type="button" onClick={() => setEditProdutoId(null)}
-                  className="flex-1 bg-slate-100 text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
                   Cancelar
                 </button>
               </div>

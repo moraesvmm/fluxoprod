@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEmpresa } from "@/lib/hooks/use-empresas";
 import { CreditCard, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
@@ -89,7 +89,7 @@ export default function AssinaturaPage() {
                   {empresa.subscription_status === 'ACTIVE' ? 'ATIVO' : empresa.subscription_status === 'TRIAL' ? 'EM TESTE' : 'PENDENTE'}
                 </span>
                 {empresa.trial_ends_at && empresa.subscription_status === 'TRIAL' && (
-                  <span className="text-xs text-gray-500">Expira em: {new Date(empresa.trial_ends_at).toLocaleDateString('pt-BR')}</span>
+                  <span className="text-xs text-muted-foreground">Expira em: {new Date(empresa.trial_ends_at).toLocaleDateString('pt-BR')}</span>
                 )}
               </div>
             </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Calculator, X } from "lucide-react";
@@ -161,7 +161,7 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
         top: position.y !== -24 ? 0 : 'auto',
       }}
     >
-      <div className="bg-white rounded-xl shadow-2xl border border-border w-80 overflow-hidden">
+      <div className="bg-card rounded-xl shadow-2xl border border-border w-80 overflow-hidden">
         {/* Header */}
         <div 
           className="bg-primary text-white px-4 py-3 flex items-center justify-between cursor-move"
@@ -182,12 +182,12 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
         </div>
 
         {/* Display */}
-        <div className="bg-slate-50 px-4 py-4 border-b border-border">
-          <div className="text-right text-3xl font-mono font-semibold text-slate-800">
+        <div className="bg-muted px-4 py-4 border-b border-border">
+          <div className="text-right text-3xl font-mono font-semibold text-foreground">
             {formatDisplay(display)}
           </div>
           {operation && previousValue !== null && (
-            <div className="text-right text-sm text-slate-500 mt-1">
+            <div className="text-right text-sm text-muted-foreground mt-1">
               {formatDisplay(String(previousValue))} {operation}
             </div>
           )}
@@ -203,88 +203,88 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
           </button>
           <button
             onClick={handlePercent}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             %
           </button>
           <button
             onClick={() => handleOperation("÷")}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             ÷
           </button>
           <button
             onClick={() => handleOperation("×")}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             ×
           </button>
 
           <button
             onClick={() => handleNumber("7")}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             7
           </button>
           <button
             onClick={() => handleNumber("8")}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             8
           </button>
           <button
             onClick={() => handleNumber("9")}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             9
           </button>
           <button
             onClick={() => handleOperation("-")}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             -
           </button>
 
           <button
             onClick={() => handleNumber("4")}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             4
           </button>
           <button
             onClick={() => handleNumber("5")}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             5
           </button>
           <button
             onClick={() => handleNumber("6")}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             6
           </button>
           <button
             onClick={() => handleOperation("+")}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             +
           </button>
 
           <button
             onClick={() => handleNumber("1")}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             1
           </button>
           <button
             onClick={() => handleNumber("2")}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             2
           </button>
           <button
             onClick={() => handleNumber("3")}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             3
           </button>
@@ -297,13 +297,13 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
 
           <button
             onClick={() => handleNumber("0")}
-            className="col-span-2 bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="col-span-2 bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             0
           </button>
           <button
             onClick={handleDecimal}
-            className="bg-white hover:bg-slate-50 text-slate-800 font-semibold rounded-md p-3 border border-border transition-colors"
+            className="bg-card hover:bg-muted text-foreground font-semibold rounded-md p-3 border border-border transition-colors"
           >
             ,
           </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -28,13 +28,13 @@ export default function DanfePage() {
     loadNfe();
   }, [id]);
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Carregando DANFE...</div>;
+  if (loading) return <div className="p-8 text-center text-muted-foreground">Carregando DANFE...</div>;
   if (error) return <div className="p-8 text-center text-red-500">Erro: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-slate-100 p-4 sm:p-8 no-print">
+    <div className="min-h-screen bg-muted p-4 sm:p-8 no-print">
       <div className="max-w-4xl mx-auto mb-6 flex justify-between items-center">
-        <Link href="/tenant/vendas" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
+        <Link href="/tenant/vendas" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
         <div className="flex gap-3">
@@ -47,7 +47,7 @@ export default function DanfePage() {
         </div>
       </div>
 
-      <div className="bg-white shadow-2xl mx-auto p-8 border border-slate-200 print:shadow-none print:border-none print:p-0" id="danfe-content">
+      <div className="bg-card shadow-2xl mx-auto p-8 border border-border print:shadow-none print:border-none print:p-0" id="danfe-content">
         <div className="border-2 border-black p-2 mb-4">
           <div className="flex justify-between items-start">
             <div className="w-1/2 border-r-2 border-black pr-2">
@@ -68,10 +68,10 @@ export default function DanfePage() {
           </div>
         </div>
 
-        <div className="text-center py-20 border-2 border-dashed border-slate-300 rounded-lg text-slate-400">
+        <div className="text-center py-20 border-2 border-dashed border-border rounded-lg text-slate-400">
           <p className="font-medium">Visualizador de DANFE Premium</p>
           <p className="text-sm mt-2">Os dados serão extraídos automaticamente do XML {id?.toString().substring(0, 8)}</p>
-          {xml && <p className="text-xs mt-3 text-slate-500">XML fiscal carregado com sucesso para esta venda.</p>}
+          {xml && <p className="text-xs mt-3 text-muted-foreground">XML fiscal carregado com sucesso para esta venda.</p>}
         </div>
 
         <div className="mt-8 text-[9px] text-slate-400">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -85,7 +85,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 relative isolate overflow-hidden h-screen">
+    <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted relative isolate overflow-hidden h-screen">
       <style>{`
         @keyframes flow {
           0% { background-position: 0% 50%; opacity: 0.15; transform: scale(1); }
@@ -105,7 +105,7 @@ export default function LoginPage() {
         <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#c084fc] via-[#818cf8] to-[#4f46e5] opacity-20 animate-flow sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
       </div>
       
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl shadow-indigo-500/10 border border-slate-100 z-10 transition-all">
+      <div className="max-w-md w-full space-y-8 bg-card p-10 rounded-2xl shadow-xl shadow-indigo-500/10 border border-slate-100 z-10 transition-all">
         <div>
           <div className="mx-auto w-20 h-20 flex items-center justify-center">
             <Image
@@ -125,7 +125,7 @@ export default function LoginPage() {
               Fluxo
             </span>
           </h2>
-          <p className="mt-2 text-center text-xs font-medium text-slate-500">
+          <p className="mt-2 text-center text-xs font-medium text-muted-foreground">
             Entre para gerenciar seu negócio
           </p>
         </div>
@@ -155,7 +155,7 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full pl-10 pr-3 py-3 border border-slate-300 placeholder-slate-400 text-slate-900 rounded-t-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm transition-all shadow-sm focus:shadow-md focus:shadow-violet-500/20"
+                className="appearance-none rounded-none relative block w-full pl-10 pr-3 py-3 border border-border placeholder-slate-400 text-foreground rounded-t-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm transition-all shadow-sm focus:shadow-md focus:shadow-violet-500/20"
                 placeholder="Seu email corporativo"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -172,7 +172,7 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full pl-10 pr-3 py-3 border border-slate-300 placeholder-slate-400 text-slate-900 rounded-b-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm transition-all shadow-sm focus:shadow-md focus:shadow-violet-500/20"
+                className="appearance-none rounded-none relative block w-full pl-10 pr-3 py-3 border border-border placeholder-slate-400 text-foreground rounded-b-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 focus:z-10 sm:text-sm transition-all shadow-sm focus:shadow-md focus:shadow-violet-500/20"
                 placeholder="Senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -204,7 +204,7 @@ export default function LoginPage() {
               </a>
             </div>
             <div className="text-center">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 Ainda não tem conta?{" "}
                 <a href="/checkout" className="text-xs font-medium text-violet-600 hover:text-violet-500 transition-colors">
                   Assine agora

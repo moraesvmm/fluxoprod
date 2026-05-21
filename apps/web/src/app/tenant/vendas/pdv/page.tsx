@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Search, ShoppingCart, Trash2, ArrowLeft, CreditCard, Banknote, QrCode, Check, AlertCircle, User, FileText } from "lucide-react";
@@ -280,9 +280,9 @@ export default function PDVPage() {
 
       {/* Esquerda: Catálogo */}
       <div className="flex-1 flex flex-col bg-slate-50/50 rounded-xl border border-border shadow-sm overflow-hidden">
-        <div className="p-4 bg-white border-b border-border flex items-center justify-between">
+        <div className="p-4 bg-card border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/tenant/vendas" className="text-slate-400 hover:text-slate-900 transition-colors">
+            <Link href="/tenant/vendas" className="text-slate-400 hover:text-foreground transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <h2 className="text-lg font-bold">Frente de Caixa (PDV)</h2>
@@ -343,13 +343,13 @@ export default function PDVPage() {
                     clsx(
                       "flex flex-col text-left p-4 rounded-xl border transition-all group",
                       semEstoque
-                        ? "border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed"
-                        : "border-border bg-white hover:border-primary/50 hover:shadow-md"
+                        ? "border-border bg-muted opacity-50 cursor-not-allowed"
+                        : "border-border bg-card hover:border-primary/50 hover:shadow-md"
                     )
                   )}
                 >
-                  <span className="font-medium text-slate-800 line-clamp-2">{item.nome}</span>
-                  <div className="mt-2 text-xs text-slate-500 font-mono">{item.sku || "—"}</div>
+                  <span className="font-medium text-foreground line-clamp-2">{item.nome}</span>
+                  <div className="mt-2 text-xs text-muted-foreground font-mono">{item.sku || "—"}</div>
                   <div className="mt-4 flex items-center justify-between w-full">
                     <span className="text-primary font-bold">
                       {item.preco_venda
@@ -363,7 +363,7 @@ export default function PDVPage() {
                           ? "bg-red-100 text-red-600"
                           : estoqueBaixo
                           ? "bg-amber-100 text-amber-600"
-                          : "bg-slate-100 text-slate-500"
+                          : "bg-muted text-muted-foreground"
                       )
                     )}>
                       {semEstoque ? "Esgotado" : `${disponivel} un`}
@@ -383,7 +383,7 @@ export default function PDVPage() {
       </div>
 
       {/* Direita: Carrinho */}
-      <div className="w-96 flex flex-col bg-white rounded-xl border border-border shadow-lg">
+      <div className="w-96 flex flex-col bg-card rounded-xl border border-border shadow-lg">
         <div className="p-4 border-b border-border bg-slate-900 text-white rounded-t-xl flex justify-between items-center">
           <div className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
@@ -401,9 +401,9 @@ export default function PDVPage() {
           ) : (
             <div className="space-y-3">
               {cart.map(item => (
-                <div key={item.id} className="flex gap-3 justify-between items-center group bg-slate-50 p-2 rounded-lg border border-slate-100">
+                <div key={item.id} className="flex gap-3 justify-between items-center group bg-muted p-2 rounded-lg border border-slate-100">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">{item.nome}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{item.nome}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <input 
                         type="number" 
@@ -411,14 +411,14 @@ export default function PDVPage() {
                         max={item.estoque_disponivel}
                         value={item.qtd || ""} 
                         onChange={(e) => updateCartQtd(item.id, e.target.value)}
-                        className="w-16 px-2 py-1 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
+                        className="w-16 px-2 py-1 text-xs border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary text-center"
                       />
-                      <span className="text-xs text-slate-500">x R$ {item.preco.toFixed(2)}</span>
+                      <span className="text-xs text-muted-foreground">x R$ {item.preco.toFixed(2)}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">Disp: {item.estoque_disponivel}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-slate-900">R$ {(item.preco * item.qtd).toFixed(2)}</p>
+                    <p className="text-sm font-bold text-foreground">R$ {(item.preco * item.qtd).toFixed(2)}</p>
                   </div>
                   <button onClick={() => removeFromCart(item.id)} className="text-slate-300 hover:text-red-500 p-1 transition-colors">
                     <Trash2 className="h-4 w-4" />
@@ -429,9 +429,9 @@ export default function PDVPage() {
           )}
         </div>
 
-        <div className="p-4 border-t border-border bg-slate-50 rounded-b-xl">
+        <div className="p-4 border-t border-border bg-muted rounded-b-xl">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-700 mb-2">Cliente</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Cliente</label>
             <input
               type="text"
               value={cliente}
@@ -442,7 +442,7 @@ export default function PDVPage() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" /> Vendedor</span>
             </label>
             <select
@@ -461,12 +461,12 @@ export default function PDVPage() {
           </div>
 
           <div className="flex justify-between items-center mb-2">
-            <span className="text-slate-500 text-sm">Subtotal</span>
-            <span className="text-slate-700 font-medium text-sm">R$ {subtotal.toFixed(2)}</span>
+            <span className="text-muted-foreground text-sm">Subtotal</span>
+            <span className="text-foreground font-medium text-sm">R$ {subtotal.toFixed(2)}</span>
           </div>
           
           <div className="flex justify-between items-center mb-4 pb-4 border-b border-border/50">
-            <span className="text-slate-500 text-sm">Desconto (R$)</span>
+            <span className="text-muted-foreground text-sm">Desconto (R$)</span>
             <input
               type="number"
               min="0"
@@ -479,7 +479,7 @@ export default function PDVPage() {
           </div>
 
           <div className="flex justify-between items-center mb-4 pb-4 border-b border-border/50">
-            <span className="text-slate-500 text-sm">Lembrar em (dias)</span>
+            <span className="text-muted-foreground text-sm">Lembrar em (dias)</span>
             <input
               type="number"
               min="0"
@@ -491,12 +491,12 @@ export default function PDVPage() {
           </div>
 
           <div className="flex justify-between items-end mb-4">
-            <span className="text-slate-500 font-medium">Total</span>
-            <span className="text-3xl font-black text-slate-900">R$ {total.toFixed(2)}</span>
+            <span className="text-muted-foreground font-medium">Total</span>
+            <span className="text-3xl font-black text-foreground">R$ {total.toFixed(2)}</span>
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-700 mb-2">Método de Pagamento</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Método de Pagamento</label>
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setMetodoPagamento('pix')}
@@ -504,7 +504,7 @@ export default function PDVPage() {
                   "flex flex-col items-center p-2 rounded border transition-colors",
                   metodoPagamento === 'pix'
                     ? "border-primary bg-indigo-50 text-primary"
-                    : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
+                    : "border-border bg-card hover:border-primary hover:text-primary text-muted-foreground"
                 ))}
               >
                 <QrCode className="h-5 w-5 mb-1" />
@@ -517,7 +517,7 @@ export default function PDVPage() {
                   "flex flex-col items-center p-2 rounded border transition-colors",
                   metodoPagamento === 'cartao_credito'
                     ? "border-primary bg-indigo-50 text-primary"
-                    : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
+                    : "border-border bg-card hover:border-primary hover:text-primary text-muted-foreground"
                 ))}
               >
                 <CreditCard className="h-5 w-5 mb-1" />
@@ -530,7 +530,7 @@ export default function PDVPage() {
                   "flex flex-col items-center p-2 rounded border transition-colors",
                   metodoPagamento === 'dinheiro'
                     ? "border-primary bg-indigo-50 text-primary"
-                    : "border-border bg-white hover:border-primary hover:text-primary text-slate-600"
+                    : "border-border bg-card hover:border-primary hover:text-primary text-muted-foreground"
                 ))}
               >
                 <Banknote className="h-5 w-5 mb-1" />
@@ -543,7 +543,7 @@ export default function PDVPage() {
           <div className="mb-4 flex items-center justify-between bg-indigo-50/50 p-2 rounded-md border border-indigo-100">
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-slate-700">Emitir NFe automaticamente</span>
+              <span className="text-sm font-medium text-foreground">Emitir NFe automaticamente</span>
             </div>
             <button
               onClick={() => setEmitirNfe(!emitirNfe)}
@@ -554,7 +554,7 @@ export default function PDVPage() {
             >
               <span
                 className={twMerge(clsx(
-                  "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                  "inline-block h-4 w-4 transform rounded-full bg-card transition-transform",
                   emitirNfe ? "translate-x-4" : "translate-x-1"
                 ))}
               />

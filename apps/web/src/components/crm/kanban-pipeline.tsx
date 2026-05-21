@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { usePipeline } from "@/lib/hooks/use-pipeline";
@@ -60,7 +60,7 @@ export default function KanbanPipeline({ onClienteClick }: KanbanPipelineProps) 
       </div>
 
       {loading ? (
-        <div className="text-center py-8 text-slate-500">Carregando pipeline...</div>
+        <div className="text-center py-8 text-muted-foreground">Carregando pipeline...</div>
       ) : (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {colunas.map((coluna) => {
@@ -75,16 +75,16 @@ export default function KanbanPipeline({ onClienteClick }: KanbanPipelineProps) 
                 onDrop={(e) => handleDrop(e, coluna.fase)}
                 className={`
                   flex-shrink-0 w-72 rounded-xl border-2 transition-all duration-200
-                  ${isHighlighted ? 'border-violet-500 bg-violet-50' : 'border-slate-200 bg-white'}
+                  ${isHighlighted ? 'border-violet-500 bg-violet-50' : 'border-border bg-card'}
                 `}
               >
                 {/* Header da coluna */}
-                <div className={`p-3 border-b ${isHighlighted ? 'border-violet-300' : 'border-slate-200'}`}>
+                <div className={`p-3 border-b ${isHighlighted ? 'border-violet-300' : 'border-border'}`}>
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-xs font-semibold uppercase tracking-wide ${coluna.cor}`}>
                       {coluna.label}
                     </span>
-                    <span className="text-xs text-slate-500 font-medium">
+                    <span className="text-xs text-muted-foreground font-medium">
                       {coluna.clientes.length}
                     </span>
                   </div>
@@ -105,37 +105,37 @@ export default function KanbanPipeline({ onClienteClick }: KanbanPipelineProps) 
                       onDragEnd={handleDragEnd}
                       onClick={() => onClienteClick?.(cliente)}
                       className={`
-                        bg-white rounded-lg border p-3 cursor-move hover:shadow-md
+                        bg-card rounded-lg border p-3 cursor-move hover:shadow-md
                         transition-shadow duration-200
                         ${isMoving && draggedCliente?.id === cliente.id ? 'opacity-50' : ''}
-                        border-slate-200
+                        border-border
                       `}
                     >
                       <div className="flex items-start gap-2 mb-2">
                         <GripVertical className="w-4 h-4 text-slate-300 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-slate-900 text-sm truncate">
+                          <h4 className="font-medium text-foreground text-sm truncate">
                             {cliente.nome}
                           </h4>
                           {cliente.email && (
-                            <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                               <Mail className="w-3 h-3" />
                               <span className="truncate">{cliente.email}</span>
                             </div>
                           )}
                           {cliente.telefone && (
-                            <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                               <Phone className="w-3 h-3" />
                               <span>{cliente.telefone}</span>
                             </div>
                           )}
                         </div>
-                        <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded">
+                        <button className="p-1 text-slate-400 hover:text-muted-foreground hover:bg-muted rounded">
                           <MoreHorizontal className="w-4 h-4" />
                         </button>
                       </div>
                       {cliente.status && (
-                        <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600 mt-2">
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-muted text-muted-foreground mt-2">
                           {cliente.status}
                         </span>
                       )}

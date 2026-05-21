@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -455,21 +455,21 @@ export default function CRMPage() {
           <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome *</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Nome *</label>
                 <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="Nome completo" required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Telefone</label>
                   <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="(00) 00000-0000" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">CPF/CNPJ</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">CPF/CNPJ</label>
                   <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="000.000.000-00" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Email</label>
                 <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="email@exemplo.com" />
               </div>
             </div>
@@ -551,7 +551,7 @@ export default function CRMPage() {
                 ) : clientes.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-6">
-                      <div className="text-slate-500">Nenhum cliente encontrado</div>
+                      <div className="text-muted-foreground">Nenhum cliente encontrado</div>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -565,7 +565,7 @@ export default function CRMPage() {
                             <span className="text-xs text-muted-foreground">{item.email || '-'}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-slate-500">{formatarData(item.criado_em)}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatarData(item.criado_em)}</TableCell>
                         <TableCell>
                           <StatusBadge status="success" label="ativo" className="capitalize" />
                         </TableCell>

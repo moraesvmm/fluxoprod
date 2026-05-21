@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ObraRecurso } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -143,7 +143,7 @@ export function RecursosTabela({ recursos, onAdd, onEdit, onDelete }: RecursosTa
                       <span
                         className={cn(
                           "text-xs px-2 py-1 rounded-full font-medium",
-                          recurso.status === 'alocado' && "bg-gray-200 text-gray-700",
+                          recurso.status === 'alocado' && "bg-gray-200 text-foreground",
                           recurso.status === 'em_uso' && "bg-blue-100 text-blue-700",
                           recurso.status === 'liberado' && "bg-green-100 text-green-700"
                         )}

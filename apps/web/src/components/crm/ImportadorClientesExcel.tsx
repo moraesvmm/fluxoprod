@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
 import * as XLSX from "xlsx";
@@ -152,14 +152,14 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
         {step === 'upload' ? (
           <div 
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-slate-300 rounded-xl p-12 flex flex-col items-center justify-center gap-4 hover:border-violet-500 hover:bg-violet-50/50 transition-all cursor-pointer group"
+            className="border-2 border-dashed border-border rounded-xl p-12 flex flex-col items-center justify-center gap-4 hover:border-violet-500 hover:bg-violet-50/50 transition-all cursor-pointer group"
           >
             <div className="p-4 bg-violet-100 text-violet-600 rounded-full group-hover:scale-110 transition-transform">
               <Upload className="h-8 w-8" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-slate-900 text-lg">Clique ou arraste o arquivo</p>
-              <p className="text-slate-500 text-sm">Suporta .xlsx, .xls e .csv</p>
+              <p className="font-semibold text-foreground text-lg">Clique ou arraste o arquivo</p>
+              <p className="text-muted-foreground text-sm">Suporta .xlsx, .xls e .csv</p>
             </div>
             <input 
               type="file" 
@@ -171,36 +171,36 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border">
               <div className="flex items-center gap-3">
                 <FileSpreadsheet className="h-6 w-6 text-emerald-600" />
                 <div>
-                  <p className="text-sm font-medium text-slate-900 truncate max-w-[200px]">{file?.name}</p>
-                  <p className="text-xs text-slate-500">{data.length} registros prontos para importar</p>
+                  <p className="text-sm font-medium text-foreground truncate max-w-[200px]">{file?.name}</p>
+                  <p className="text-xs text-muted-foreground">{data.length} registros prontos para importar</p>
                 </div>
               </div>
-              <button onClick={reset} className="p-1 hover:bg-slate-200 rounded-md text-slate-500">
+              <button onClick={reset} className="p-1 hover:bg-slate-200 rounded-md text-muted-foreground">
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="max-h-60 overflow-auto border border-slate-200 rounded-lg">
+            <div className="max-h-60 overflow-auto border border-border rounded-lg">
               <table className="w-full text-left text-sm border-collapse">
-                <thead className="bg-slate-50 sticky top-0 border-b border-slate-200 shadow-sm">
+                <thead className="bg-muted sticky top-0 border-b border-border shadow-sm">
                   <tr>
-                    <th className="px-3 py-2 font-semibold text-slate-700">Nome</th>
-                    <th className="px-3 py-2 font-semibold text-slate-700">CPF/CNPJ</th>
-                    <th className="px-3 py-2 font-semibold text-slate-700">Email</th>
-                    <th className="px-3 py-2 font-semibold text-slate-700">Endereço</th>
+                    <th className="px-3 py-2 font-semibold text-foreground">Nome</th>
+                    <th className="px-3 py-2 font-semibold text-foreground">CPF/CNPJ</th>
+                    <th className="px-3 py-2 font-semibold text-foreground">Email</th>
+                    <th className="px-3 py-2 font-semibold text-foreground">Endereço</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
+                <tbody className="divide-y divide-slate-100 bg-card">
                   {data.slice(0, 10).map((p, i) => (
                     <tr key={i} className="hover:bg-slate-50/50">
-                      <td className="px-3 py-2 font-medium text-slate-900">{p.nome}</td>
-                      <td className="px-3 py-2 text-slate-600 font-mono text-xs">{p.cpf_cnpj || '-'}</td>
-                      <td className="px-3 py-2 text-slate-500">{p.email || '-'}</td>
-                      <td className="px-3 py-2 text-slate-500 italic truncate max-w-[200px]" title={p.endereco}>
+                      <td className="px-3 py-2 font-medium text-foreground">{p.nome}</td>
+                      <td className="px-3 py-2 text-muted-foreground font-mono text-xs">{p.cpf_cnpj || '-'}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{p.email || '-'}</td>
+                      <td className="px-3 py-2 text-muted-foreground italic truncate max-w-[200px]" title={p.endereco}>
                         {p.endereco || '-'}
                       </td>
                     </tr>
@@ -234,7 +234,7 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
               <button
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 bg-white border border-slate-200 text-slate-700 py-2.5 rounded-lg font-semibold hover:bg-slate-50 transition-colors shadow-sm"
+                className="flex-1 bg-card border border-border text-foreground py-2.5 rounded-lg font-semibold hover:bg-muted transition-colors shadow-sm"
               >
                 Cancelar
               </button>

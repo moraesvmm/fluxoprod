@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -34,7 +34,7 @@ const statusConfig: Record<StatusType, { bg: string; text: string; dot: string; 
   critico: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", defaultLabel: "Crítico" },
   
   info: { bg: "bg-indigo-50", text: "text-indigo-700", dot: "bg-indigo-500", defaultLabel: "Info" },
-  default: { bg: "bg-slate-100", text: "text-slate-700", dot: "bg-slate-400", defaultLabel: "Status" },
+  default: { bg: "bg-muted", text: "text-foreground", dot: "bg-slate-400", defaultLabel: "Status" },
 };
 
 export function StatusBadge({ status, label, className }: StatusBadgeProps) {

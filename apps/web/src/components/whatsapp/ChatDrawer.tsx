@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
@@ -102,7 +102,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: "spring", damping: 30, stiffness: 300 }}
-      className="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-white shadow-2xl z-[10000] flex flex-col overflow-hidden border-l border-slate-200"
+      className="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] bg-card shadow-2xl z-[10000] flex flex-col overflow-hidden border-l border-border"
     >
       {/* Header */}
       <div
@@ -148,11 +148,11 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
       {status === "disconnected" ? (
         /* Estado Desconectado */
         <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-4">
-          <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
             <WifiOff className="w-10 h-10 text-slate-400" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-800">WhatsApp Desconectado</h3>
-          <p className="text-sm text-slate-500">
+          <h3 className="text-lg font-semibold text-foreground">WhatsApp Desconectado</h3>
+          <p className="text-sm text-muted-foreground">
             Para enviar e receber mensagens, conecte seu WhatsApp nas Configurações do sistema.
           </p>
           <a
@@ -184,7 +184,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
             </div>
           )}
           {/* Busca */}
-          <div className="px-3 py-2 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
+          <div className="px-3 py-2 bg-muted border-b border-slate-100 flex items-center gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
@@ -192,12 +192,12 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
                 placeholder="Buscar conversa..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                className="w-full pl-9 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
               />
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+              className="p-2 text-slate-400 hover:text-muted-foreground hover:bg-slate-200 rounded-lg transition-colors"
               title="Fechar chat"
             >
               <X className="w-5 h-5" />
@@ -212,10 +212,10 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
               </div>
             ) : filteredConversations.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-8">
-                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3">
                   <Send className="w-8 h-8 text-slate-300" />
                 </div>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   {searchTerm
                     ? "Nenhuma conversa encontrada."
                     : "Nenhuma conversa ainda. As mensagens recebidas aparecerão aqui."}
@@ -226,7 +226,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
                 <button
                   key={convo.phone}
                   onClick={() => setSelectedPhone(convo.phone)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-100 text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors border-b border-slate-100 text-left"
                 >
                   {/* Avatar */}
                   <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-sm border border-primary/20">
@@ -236,7 +236,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-slate-900 truncate text-sm">
+                      <span className="font-medium text-foreground truncate text-sm">
                         {convo.name}
                       </span>
                       <span className={`text-xs flex-shrink-0 ml-2 ${convo.unreadCount > 0 ? "text-emerald-600 font-medium" : "text-slate-400"}`}>
@@ -244,7 +244,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-0.5">
-                      <span className="text-xs text-slate-500 truncate">
+                      <span className="text-xs text-muted-foreground truncate">
                         {convo.lastMessage}
                       </span>
                       {convo.unreadCount > 0 && (

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { listarCuponsAdmin, criarCupomAdmin, excluirCupomAdmin, type Cupom } from "@/lib/api";
@@ -69,7 +69,7 @@ export default function AdminCuponsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Gestão de Cupons</h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">
             Crie códigos promocionais para novos assinantes do Fluxo ERP.
           </p>
         </div>
@@ -87,23 +87,23 @@ export default function AdminCuponsPage() {
           <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-muted border-b border-border">
               <tr>
-                <th className="px-6 py-3 font-semibold text-slate-700">Código</th>
-                <th className="px-6 py-3 font-semibold text-slate-700">Tipo</th>
-                <th className="px-6 py-3 font-semibold text-slate-700">Valor</th>
-                <th className="px-6 py-3 font-semibold text-slate-700">Usos</th>
-                <th className="px-6 py-3 font-semibold text-slate-700">Expiração</th>
-                <th className="px-6 py-3 font-semibold text-slate-700">Status</th>
-                <th className="px-6 py-3 font-semibold text-slate-700 text-right">Ações</th>
+                <th className="px-6 py-3 font-semibold text-foreground">Código</th>
+                <th className="px-6 py-3 font-semibold text-foreground">Tipo</th>
+                <th className="px-6 py-3 font-semibold text-foreground">Valor</th>
+                <th className="px-6 py-3 font-semibold text-foreground">Usos</th>
+                <th className="px-6 py-3 font-semibold text-foreground">Expiração</th>
+                <th className="px-6 py-3 font-semibold text-foreground">Status</th>
+                <th className="px-6 py-3 font-semibold text-foreground text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {cupons.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
                     Nenhum cupom cadastrado.
                   </td>
                 </tr>
@@ -126,11 +126,11 @@ export default function AdminCuponsPage() {
                       {c.tipo === "percentual" ? `${c.valor}%` : `R$ ${c.valor}`}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-slate-600">
+                      <span className="text-muted-foreground">
                         {c.usos_atuais} / {c.limite_usos || "∞"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-500">
+                    <td className="px-6 py-4 text-muted-foreground">
                       {c.data_expiracao ? new Date(c.data_expiracao).toLocaleDateString("pt-BR") : "—"}
                     </td>
                     <td className="px-6 py-4">
@@ -166,67 +166,67 @@ export default function AdminCuponsPage() {
       {/* Modal de Criação */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+          <div className="w-full max-w-md rounded-2xl bg-card p-8 shadow-2xl">
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
               <Ticket className="h-5 w-5 text-indigo-500" />
               Criar Novo Cupom
             </h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Código</label>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Código</label>
                 <input
                   required
                   value={formData.codigo}
                   onChange={(e) => setFormData({ ...formData, codigo: e.target.value.toUpperCase() })}
-                  className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 uppercase font-mono"
+                  className="w-full rounded-lg border border-border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 uppercase font-mono"
                   placeholder="EX: BEMVINDO10"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Tipo</label>
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Tipo</label>
                   <select
                     value={formData.tipo}
                     onChange={(e) => setFormData({ ...formData, tipo: e.target.value as any })}
-                    className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full rounded-lg border border-border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   >
                     <option value="percentual">Percentual (%)</option>
                     <option value="fixo">Valor Fixo (R$)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Valor</label>
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Valor</label>
                   <input
                     required
                     type="number"
                     step="0.01"
                     value={formData.valor}
                     onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full rounded-lg border border-border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                     placeholder={formData.tipo === "percentual" ? "10" : "50.00"}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Limite Usos</label>
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Limite Usos</label>
                   <input
                     type="number"
                     value={formData.limite_usos}
                     onChange={(e) => setFormData({ ...formData, limite_usos: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full rounded-lg border border-border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                     placeholder="Livre"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1">
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Expiração
                   </label>
                   <input
                     type="date"
                     value={formData.data_expiracao}
                     onChange={(e) => setFormData({ ...formData, data_expiracao: e.target.value })}
-                    className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    className="w-full rounded-lg border border-border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -234,7 +234,7 @@ export default function AdminCuponsPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors"
                 >
                   Cancelar
                 </button>

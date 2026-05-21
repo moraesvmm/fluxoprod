@@ -219,7 +219,7 @@ export default function BarcodeScanner({
         )}
 
         {scanning && !error && (
-          <p className="text-center text-sm text-slate-600">Aponte o codigo de barras para a camera...</p>
+          <p className="text-center text-sm text-muted-foreground">Aponte o codigo de barras para a camera...</p>
         )}
 
         {produtoEncontrado && (
@@ -249,7 +249,7 @@ export default function BarcodeScanner({
         {!produtoEncontrado && (
           <button
             onClick={handleFechar}
-            className="inline-flex h-9 w-full items-center justify-center rounded-md bg-slate-100 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+            className="inline-flex h-9 w-full items-center justify-center rounded-md bg-muted text-sm font-medium text-foreground transition-colors hover:bg-slate-200"
           >
             <X className="mr-2 h-4 w-4" /> Cancelar
           </button>

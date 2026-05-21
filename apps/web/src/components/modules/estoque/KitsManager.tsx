@@ -123,33 +123,33 @@ export default function KitsManager() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-slate-500">Carregando kits...</div>
+        <div className="text-center py-8 text-muted-foreground">Carregando kits...</div>
       ) : kits.length === 0 ? (
-        <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="text-center py-8 text-muted-foreground bg-muted rounded-lg border border-border">
           <Package className="h-10 w-10 mx-auto text-slate-300 mb-2" />
           <p className="text-sm">Nenhum kit cadastrado</p>
         </div>
       ) : (
         <div className="space-y-2">
           {kits.map((kit) => (
-            <div key={kit.id} className="p-4 rounded-lg border border-slate-200 bg-white">
+            <div key={kit.id} className="p-4 rounded-lg border border-border bg-card">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <button
                       onClick={() => toggleExpand(kit.id)}
-                      className="p-1 hover:bg-slate-100 rounded"
+                      className="p-1 hover:bg-muted rounded"
                     >
                       {expandedKits.has(kit.id) ? (
-                        <ChevronUp className="h-4 w-4 text-slate-500" />
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 text-slate-500" />
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
-                    <span className="font-medium text-slate-900">{kit.nome}</span>
+                    <span className="font-medium text-foreground">{kit.nome}</span>
                   </div>
-                  <p className="text-sm text-slate-600 mb-2">{kit.descricao || "Sem descriÃ§Ã£o"}</p>
-                  <div className="flex items-center gap-4 text-xs text-slate-500">
+                  <p className="text-sm text-muted-foreground mb-2">{kit.descricao || "Sem descriÃ§Ã£o"}</p>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>Produto pai: <strong>{kit.produto_nome}</strong></span>
                     <span>Itens: <strong>{kit.itens.length}</strong></span>
                   </div>
@@ -172,12 +172,12 @@ export default function KitsManager() {
 
               {expandedKits.has(kit.id) && (
                 <div className="mt-4 pt-4 border-t border-slate-100">
-                  <h4 className="text-sm font-medium text-slate-700 mb-2">Itens do Kit</h4>
+                  <h4 className="text-sm font-medium text-foreground mb-2">Itens do Kit</h4>
                   <div className="space-y-1">
                     {kit.itens.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between text-sm bg-slate-50 p-2 rounded">
-                        <span className="text-slate-700">{item.produto_nome}</span>
-                        <span className="font-medium text-slate-900">Qtd: {item.quantidade}</span>
+                      <div key={item.id} className="flex items-center justify-between text-sm bg-muted p-2 rounded">
+                        <span className="text-foreground">{item.produto_nome}</span>
+                        <span className="font-medium text-foreground">Qtd: {item.quantidade}</span>
                       </div>
                     ))}
                   </div>
@@ -192,11 +192,11 @@ export default function KitsManager() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Novo Kit">
         <form onSubmit={handleSalvarKit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Produto Pai</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Produto Pai</label>
             <select
               value={formData.produto_id}
               onChange={(e) => setFormData({ ...formData, produto_id: e.target.value })}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
             >
               <option value="">Selecione um produto</option>
@@ -206,26 +206,26 @@ export default function KitsManager() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Kit</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Nome do Kit</label>
             <input
               type="text"
               value={formData.nome}
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">DescriÃ§Ã£o</label>
+            <label className="block text-sm font-medium text-foreground mb-1">DescriÃ§Ã£o</label>
             <textarea
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               rows={2}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Itens do Kit</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Itens do Kit</label>
             {formData.itens.map((item, index) => (
               <div key={index} className="flex gap-2 mb-2">
                 <select
@@ -235,7 +235,7 @@ export default function KitsManager() {
                     novosItens[index].produto_id = e.target.value;
                     setFormData({ ...formData, itens: novosItens });
                   }}
-                  className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="">Selecione um produto</option>
                   {produtos.map((p) => (
@@ -251,7 +251,7 @@ export default function KitsManager() {
                     novosItens[index].quantidade = parseInt(e.target.value) || 1;
                     setFormData({ ...formData, itens: novosItens });
                   }}
-                  className="w-24 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-24 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
                 <button
                   type="button"
@@ -274,7 +274,7 @@ export default function KitsManager() {
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-md"
+              className="px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md"
             >
               Cancelar
             </button>
@@ -303,19 +303,19 @@ export default function KitsManager() {
       <Modal isOpen={!!venderId} onClose={() => setVenderId(null)} title="Vender Kit">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Quantidade</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Quantidade</label>
             <input
               type="number"
               min="1"
               value={venderQuantidade}
               onChange={(e) => setVenderQuantidade(parseInt(e.target.value) || 1)}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <button
               onClick={() => setVenderId(null)}
-              className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-md"
+              className="px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md"
             >
               Cancelar
             </button>

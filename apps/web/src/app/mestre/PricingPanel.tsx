@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
@@ -142,7 +142,7 @@ export default function PricingPanel() {
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h3 className="text-white font-bold text-base">{p.nome}</h3>
-                    <p className="text-gray-500 text-xs">{p.descricao}</p>
+                    <p className="text-muted-foreground text-xs">{p.descricao}</p>
                   </div>
                   {p.preco_promocional && !isEditing && (
                     <span className="flex items-center gap-1 text-xs font-semibold bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full">
@@ -175,13 +175,13 @@ export default function PricingPanel() {
                     <div className="flex items-baseline gap-2">
                       {p.preco_promocional ? (
                         <>
-                          <span className="text-gray-500 line-through text-sm">R$ {p.preco.toFixed(2)}</span>
+                          <span className="text-muted-foreground line-through text-sm">R$ {p.preco.toFixed(2)}</span>
                           <span className="text-2xl font-black text-emerald-400">R$ {p.preco_promocional.toFixed(2)}</span>
                         </>
                       ) : (
                         <span className="text-2xl font-black text-white">R$ {p.preco.toFixed(2)}</span>
                       )}
-                      <span className="text-gray-500 text-sm">/mês</span>
+                      <span className="text-muted-foreground text-sm">/mês</span>
                     </div>
                     <button onClick={() => startEditing(p.id, p.preco, p.preco_promocional)} className="px-4 py-2 text-xs border border-white/10 text-gray-400 hover:text-white hover:border-indigo-500/50 rounded-lg transition-all">
                       Editar Preço
@@ -218,7 +218,7 @@ export default function PricingPanel() {
                     <div className="flex items-baseline gap-1.5 mt-0.5">
                       {m.preco_promocional ? (
                         <>
-                          <span className="text-gray-500 line-through text-xs">R$ {m.preco.toFixed(2)}</span>
+                          <span className="text-muted-foreground line-through text-xs">R$ {m.preco.toFixed(2)}</span>
                           <span className="text-emerald-400 font-bold text-sm">R$ {m.preco_promocional.toFixed(2)}</span>
                         </>
                       ) : (
@@ -252,7 +252,7 @@ export default function PricingPanel() {
           <h2 className="text-lg font-semibold text-white">Histórico de Alterações</h2>
         </div>
         {historico.length === 0 ? (
-          <p className="text-gray-500 text-sm text-center py-6">Nenhuma alteração registrada ainda.</p>
+          <p className="text-muted-foreground text-sm text-center py-6">Nenhuma alteração registrada ainda.</p>
         ) : (
           <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
             {historico.map(h => (
@@ -265,9 +265,9 @@ export default function PricingPanel() {
                 </div>
                 <div className="flex items-center gap-3 text-gray-400">
                   <span>R$ {Number(h.preco_anterior).toFixed(2)}</span>
-                  <span className="text-gray-600">→</span>
+                  <span className="text-muted-foreground">→</span>
                   <span className="text-emerald-400 font-semibold">R$ {Number(h.preco_novo).toFixed(2)}</span>
-                  <span className="text-gray-600 hidden sm:inline">{new Date(h.criado_em).toLocaleDateString("pt-BR")}</span>
+                  <span className="text-muted-foreground hidden sm:inline">{new Date(h.criado_em).toLocaleDateString("pt-BR")}</span>
                 </div>
               </div>
             ))}
