@@ -2,7 +2,7 @@
 -- VERIFICAÇÃO (somente leitura): funções public esperadas em database.types.ts
 -- GERADO POR: node scripts/generate-verify-sql-from-types.mjs
 -- NÃO EDITAR À MÃO — regenere após atualizar database.types.ts
--- Total: 149 nomes
+-- Total: 157 nomes
 -- Executar: Supabase → SQL Editor
 -- =============================================================================
 
@@ -61,6 +61,7 @@ WITH expected(name) AS (
     ('relatorio_financeiro_tenant'),
     ('relatorio_vendas_tenant'),
     ('set_tenant_schema'),
+    ('tenant_abrir_ordem_producao'),
     ('tenant_adicionar_tag'),
     ('tenant_atualizar_cliente'),
     ('tenant_atualizar_comissao'),
@@ -79,9 +80,11 @@ WITH expected(name) AS (
     ('tenant_buscar_produto_por_codigo'),
     ('tenant_calcular_valor_estoque'),
     ('tenant_cancelar_transferencia'),
+    ('tenant_concluir_ordem_producao'),
     ('tenant_concluir_transferencia'),
     ('tenant_criar_alerta_nurturing'),
     ('tenant_criar_cliente'),
+    ('tenant_criar_ficha_tecnica'),
     ('tenant_criar_financeiro'),
     ('tenant_criar_funcionario'),
     ('tenant_criar_interacao'),
@@ -90,6 +93,7 @@ WITH expected(name) AS (
     ('tenant_criar_obra'),
     ('tenant_criar_os'),
     ('tenant_criar_produto'),
+    ('tenant_criar_regra_comissao'),
     ('tenant_criar_transferencia'),
     ('tenant_dashboard_kpis'),
     ('tenant_dashboard_kpis_por_mes'),
@@ -105,6 +109,7 @@ WITH expected(name) AS (
     ('tenant_excluir_obra'),
     ('tenant_excluir_os'),
     ('tenant_excluir_produto'),
+    ('tenant_excluir_regra_comissao'),
     ('tenant_excluir_venda'),
     ('tenant_finalizar_alerta_nurturing'),
     ('tenant_gerar_codigo_barras'),
@@ -118,6 +123,7 @@ WITH expected(name) AS (
     ('tenant_listar_documentos'),
     ('tenant_listar_equipes'),
     ('tenant_listar_estoque'),
+    ('tenant_listar_fichas_tecnicas'),
     ('tenant_listar_financeiro'),
     ('tenant_listar_funcionarios'),
     ('tenant_listar_interacoes'),
@@ -126,10 +132,12 @@ WITH expected(name) AS (
     ('tenant_listar_modulos_usuario'),
     ('tenant_listar_movimentacao_estoque'),
     ('tenant_listar_obras'),
+    ('tenant_listar_ordens_producao'),
     ('tenant_listar_ordens_servico'),
     ('tenant_listar_previsoes_demanda'),
     ('tenant_listar_produtos'),
     ('tenant_listar_produtos_fiscal'),
+    ('tenant_listar_regras_comissao'),
     ('tenant_listar_tags_catalog'),
     ('tenant_listar_transferencias'),
     ('tenant_listar_usuarios'),

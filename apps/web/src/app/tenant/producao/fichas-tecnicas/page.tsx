@@ -14,7 +14,7 @@ export default function FichasTecnicasPage() {
   const { data: fichas, isLoading } = useFichasTecnicas();
   const { data: produtos } = useProdutos();
   const createFicha = useCreateFichaTecnica();
-  const { toast } = useToast();
+  const { error, success } = useToast();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [produtoAcabadoId, setProdutoAcabadoId] = useState("");
@@ -28,7 +28,7 @@ export default function FichasTecnicasPage() {
 
   const handleCreate = async () => {
     if (!produtoAcabadoId || !materiaPrimaId || !quantidade) {
-      toast({ title: "Preencha todos os campos", variant: "destructive" });
+      error("Preencha todos os campos");
       return;
     }
     try {
@@ -37,13 +37,13 @@ export default function FichasTecnicasPage() {
         materia_prima_id: materiaPrimaId,
         quantidade_necessaria: parseFloat(quantidade)
       });
-      toast({ title: "Ficha Técnica criada com sucesso", variant: "success" });
+      success("Ficha Técnica criada com sucesso");
       setIsModalOpen(false);
       setProdutoAcabadoId("");
       setMateriaPrimaId("");
       setQuantidade("");
     } catch (err: any) {
-      toast({ title: "Erro ao criar ficha", description: err.message, variant: "destructive" });
+      error(`Erro ao criar ficha: ${err.message}`);
     }
   };
 

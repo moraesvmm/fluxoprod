@@ -15,7 +15,7 @@ export default function PainelOPPage() {
   const { data: produtos } = useProdutos();
   const abrirOrdem = useAbrirOrdemProducao();
   const concluirOrdem = useConcluirOrdemProducao();
-  const { toast } = useToast();
+  const { error, success } = useToast();
 
   const [isNewOpOpen, setIsNewOpOpen] = useState(false);
   const [produtoId, setProdutoId] = useState("");
@@ -31,7 +31,7 @@ export default function PainelOPPage() {
 
   const handleAbrirOP = async () => {
     if (!produtoId || !qtdPlanejada) {
-      toast({ title: "Preencha todos os campos", variant: "destructive" });
+      error("Preencha todos os campos");
       return;
     }
     try {
@@ -39,12 +39,12 @@ export default function PainelOPPage() {
         produto_id: produtoId,
         quantidade_planejada: parseFloat(qtdPlanejada)
       });
-      toast({ title: "Ordem de Produção aberta!", variant: "success" });
+      success("Ordem de Produção aberta!");
       setIsNewOpOpen(false);
       setProdutoId("");
       setQtdPlanejada("");
     } catch (err: any) {
-      toast({ title: "Erro ao abrir OP", description: err.message, variant: "destructive" });
+      error(`Erro ao abrir OP: ${err.message}`);
     }
   };
 
@@ -67,11 +67,11 @@ export default function PainelOPPage() {
         quantidade_produzida: parseFloat(qtdProduzida),
         insumos: [] // Idealmente, buscaríamos da ordens_producao_insumos para a tela de conclusão.
       });
-      toast({ title: "Ordem Concluída!", variant: "success" });
+      success("Ordem Concluída!");
       setIsConcluirOpen(false);
       setSelectedOp(null);
     } catch (err: any) {
-      toast({ title: "Erro ao concluir", description: err.message, variant: "destructive" });
+      error(`Erro ao concluir: ${err.message}`);
     }
   };
 

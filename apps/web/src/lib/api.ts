@@ -226,6 +226,8 @@ export interface Produto {
   codigo_qr?: string;
   preco_base?: number;
   criado_em: string;
+  tipo_item?: string;
+  unidade_medida?: string;
 }
 
 export interface ProdutoLookupError {

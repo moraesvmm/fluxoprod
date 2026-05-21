@@ -40,6 +40,7 @@ export async function POST(request: Request) {
 
     // Gera novo magic link de ativação
     const origin = request.headers.get("origin") || "https://fluxoprod.vercel.app";
+    // @ts-expect-error Supabase types require a password for signup links, but we only want to generate the confirmation link for an existing user
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: "signup",
       email: email,

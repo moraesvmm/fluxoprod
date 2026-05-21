@@ -491,6 +491,48 @@ export type Database = {
         }
         Relationships: []
       }
+      fichas_tecnicas: {
+        Row: {
+          criado_em: string | null
+          deleted_at: string | null
+          id: string
+          materia_prima_id: string
+          produto_acabado_id: string
+          quantidade_necessaria: number
+        }
+        Insert: {
+          criado_em?: string | null
+          deleted_at?: string | null
+          id?: string
+          materia_prima_id: string
+          produto_acabado_id: string
+          quantidade_necessaria: number
+        }
+        Update: {
+          criado_em?: string | null
+          deleted_at?: string | null
+          id?: string
+          materia_prima_id?: string
+          produto_acabado_id?: string
+          quantidade_necessaria?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fichas_tecnicas_materia_prima_id_fkey"
+            columns: ["materia_prima_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fichas_tecnicas_produto_acabado_id_fkey"
+            columns: ["produto_acabado_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fiscal_series: {
         Row: {
           ambiente: string
@@ -780,6 +822,104 @@ export type Database = {
           },
         ]
       }
+      ordens_producao: {
+        Row: {
+          atualizado_em: string | null
+          criado_em: string | null
+          custo_total_materiais: number | null
+          data_fim: string | null
+          data_inicio: string | null
+          deleted_at: string | null
+          id: string
+          numero_op: number
+          produto_id: string
+          quantidade_planejada: number
+          quantidade_produzida: number | null
+          status: string | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          custo_total_materiais?: number | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          deleted_at?: string | null
+          id?: string
+          numero_op?: number
+          produto_id: string
+          quantidade_planejada: number
+          quantidade_produzida?: number | null
+          status?: string | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          custo_total_materiais?: number | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          deleted_at?: string | null
+          id?: string
+          numero_op?: number
+          produto_id?: string
+          quantidade_planejada?: number
+          quantidade_produzida?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordens_producao_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ordens_producao_insumos: {
+        Row: {
+          criado_em: string | null
+          custo_unitario_real: number | null
+          id: string
+          insumo_id: string
+          ordem_id: string
+          quantidade_consumida: number | null
+          quantidade_prevista: number
+        }
+        Insert: {
+          criado_em?: string | null
+          custo_unitario_real?: number | null
+          id?: string
+          insumo_id: string
+          ordem_id: string
+          quantidade_consumida?: number | null
+          quantidade_prevista: number
+        }
+        Update: {
+          criado_em?: string | null
+          custo_unitario_real?: number | null
+          id?: string
+          insumo_id?: string
+          ordem_id?: string
+          quantidade_consumida?: number | null
+          quantidade_prevista?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordens_producao_insumos_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordens_producao_insumos_ordem_id_fkey"
+            columns: ["ordem_id"]
+            isOneToOne: false
+            referencedRelation: "ordens_producao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ordens_servico: {
         Row: {
           atualizado_em: string | null
@@ -893,6 +1033,8 @@ export type Database = {
           preco_custo: number | null
           preco_venda: number | null
           sku: string | null
+          tipo_item: string | null
+          unidade_medida: string | null
         }
         Insert: {
           atualizado_em?: string | null
@@ -907,6 +1049,8 @@ export type Database = {
           preco_custo?: number | null
           preco_venda?: number | null
           sku?: string | null
+          tipo_item?: string | null
+          unidade_medida?: string | null
         }
         Update: {
           atualizado_em?: string | null
@@ -921,6 +1065,8 @@ export type Database = {
           preco_custo?: number | null
           preco_venda?: number | null
           sku?: string | null
+          tipo_item?: string | null
+          unidade_medida?: string | null
         }
         Relationships: []
       }
@@ -1493,6 +1639,10 @@ export type Database = {
         }[]
       }
       set_tenant_schema: { Args: { p_user_id: string }; Returns: string }
+      tenant_abrir_ordem_producao: {
+        Args: { p_produto_id: string; p_quantidade_planejada: number }
+        Returns: Json
+      }
       tenant_adicionar_tag: {
         Args: { p_cliente_id: string; p_tag: string }
         Returns: Json
@@ -1676,6 +1826,10 @@ export type Database = {
         Args: { p_idempotency_key?: string; p_transferencia_id: string }
         Returns: Json
       }
+      tenant_concluir_ordem_producao: {
+        Args: { p_insumos: Json; p_ordem_id: string; p_qtd_produzida: number }
+        Returns: Json
+      }
       tenant_concluir_transferencia: {
         Args: { p_idempotency_key?: string; p_transferencia_id: string }
         Returns: Json
@@ -1699,6 +1853,14 @@ export type Database = {
           p_nome: string
           p_status?: string
           p_telefone?: string
+        }
+        Returns: Json
+      }
+      tenant_criar_ficha_tecnica: {
+        Args: {
+          p_materia_prima_id: string
+          p_produto_acabado_id: string
+          p_quantidade_necessaria: number
         }
         Returns: Json
       }
@@ -1959,6 +2121,10 @@ export type Database = {
         Args: { p_limit?: number; p_offset?: number }
         Returns: Json
       }
+      tenant_listar_fichas_tecnicas: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: Json
+      }
       tenant_listar_financeiro: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -2026,6 +2192,10 @@ export type Database = {
         }[]
       }
       tenant_listar_obras: { Args: never; Returns: Json }
+      tenant_listar_ordens_producao: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: Json
+      }
       tenant_listar_ordens_servico: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -2325,4 +2495,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

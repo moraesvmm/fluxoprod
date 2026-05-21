@@ -2,7 +2,7 @@
 -- VERIFICAÇÃO (somente leitura): tabelas public esperadas em database.types.ts
 -- GERADO POR: node scripts/generate-verify-sql-from-types.mjs
 -- NÃO EDITAR À MÃO — regenere após atualizar database.types.ts
--- Total: 31 nomes
+-- Total: 34 nomes
 -- Executar: Supabase → SQL Editor
 -- =============================================================================
 
@@ -19,6 +19,7 @@ WITH expected(name) AS (
     ('edge_function_logs'),
     ('empresa_modulos'),
     ('empresas'),
+    ('fichas_tecnicas'),
     ('fiscal_series'),
     ('funcionarios'),
     ('historico_precos'),
@@ -27,6 +28,8 @@ WITH expected(name) AS (
     ('modulos_avulsos'),
     ('modulos_catalogo'),
     ('obras'),
+    ('ordens_producao'),
+    ('ordens_producao_insumos'),
     ('ordens_servico'),
     ('planos'),
     ('produtos'),
