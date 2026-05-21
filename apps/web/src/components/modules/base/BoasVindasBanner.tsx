@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
 
 interface BoasVindasBannerProps {
   nome: string;
@@ -12,9 +13,24 @@ interface BoasVindasBannerProps {
 export default function BoasVindasBanner({ nome, userId, onDismiss }: BoasVindasBannerProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [fraseDia, setFraseDia] = useState<{frase: string, autor: string} | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const fetchFrase = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.rpc('get_frase_do_dia');
+        if (data && !error) {
+          setFraseDia(data as {frase: string, autor: string});
+        }
+      } catch (e) {
+        console.error("Erro ao buscar frase do dia", e);
+      }
+    };
+    
+    fetchFrase();
 
     const storageKey = `boas_vindas_${userId}`;
     const lastViewed = localStorage.getItem(storageKey);
@@ -60,18 +76,24 @@ export default function BoasVindasBanner({ nome, userId, onDismiss }: BoasVindas
   return (
     <div className="mb-8 animate-page-enter">
       <div className="bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl px-4 sm:px-6 py-4 shadow-lg">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex-1">
-            <h2 className="text-white text-xl font-semibold mb-1">
+            <h2 className="text-white text-xl font-semibold mb-2">
               {saudacao}, {nome}! 👋
             </h2>
-            <p className="text-white/90 text-sm">
-              Aqui está um resumo das movimentações da sua empresa hoje.
-            </p>
+            <div className="text-white/90 text-sm">
+              {fraseDia ? (
+                <p className="italic">
+                  "{fraseDia.frase}" <span className="font-semibold not-italic">— {fraseDia.autor}</span>
+                </p>
+              ) : (
+                <p>Aqui está um resumo das movimentações da sua empresa hoje.</p>
+              )}
+            </div>
           </div>
           <button
             onClick={handleDismiss}
-            className="ml-4 p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+            className="self-start sm:self-center p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors shrink-0"
             aria-label="Fechar"
           >
             <X className="w-4 h-4 text-white" />
