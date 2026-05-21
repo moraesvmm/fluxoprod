@@ -109,7 +109,7 @@ export default function PainelOPPage() {
           <p className="text-muted-foreground">Controle o chão de fábrica e status das produções.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={() => setIsNewOpOpen(true)}>
+          <Button onClick={() => setIsNewOpOpen(true)} data-tour="prod-nova-op">
             <Plus className="w-4 h-4 mr-2" />
             Nova Ordem
           </Button>

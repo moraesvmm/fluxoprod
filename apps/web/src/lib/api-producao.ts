@@ -103,8 +103,8 @@ export async function concluirOrdemProducao(payload: {
   const { data, error } = await supabase.rpc('tenant_concluir_ordem_producao', {
     p_ordem_id: payload.ordem_id,
     p_qtd_produzida: payload.quantidade_produzida,
-    // A RPC aceita Json — passamos o array tipado como unknown para satisfazer o contrato
-    p_insumos: payload.insumos as unknown as import("@supabase/supabase-js").Json
+    // A RPC aceita Json — passamos o array tipado como any para satisfazer o contrato do Supabase
+    p_insumos: payload.insumos as any
   });
   if (error) throw error;
   const result = data as unknown as { success: boolean; error?: string; insumos_consumidos?: number };

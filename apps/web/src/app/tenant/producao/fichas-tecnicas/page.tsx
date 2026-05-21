@@ -56,7 +56,7 @@ export default function FichasTecnicasPage() {
           <p className="text-muted-foreground">Gerencie a composição de materiais dos seus produtos acabados.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={() => setIsModalOpen(true)}>
+          <Button onClick={() => setIsModalOpen(true)} data-tour="prod-nova-ficha">
             <Plus className="w-4 h-4 mr-2" />
             Nova Ficha
           </Button>

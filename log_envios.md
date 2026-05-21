@@ -214,3 +214,22 @@
 | 2026-05-14 | Eduzz (Startup/Pequena) | - | contato@eduzz.com | enviado |
 | 2026-05-14 | Monetizze (Startup/Pequena) | - | contato@monetizze.com.br | enviado |
 | 2026-05-14 | VMM Geral (Startup/Pequena) | - | vmm.geral@gmail.com | enviado |
+| 2026-05-21 | DB1 Global Software | - | comercial@db1.com.br | enviado |
+| 2026-05-21 | Programmers | - | comercial@programmers.com.br | enviado |
+| 2026-05-21 | BHS | - | comercial@bhs.com.br | enviado |
+| 2026-05-21 | Invillia | - | hello@invillia.com | enviado |
+| 2026-05-21 | Supero | - | comercial@supero.com.br | enviado |
+| 2026-05-21 | Zup Innovation | - | contato@zup.com.br | enviado |
+| 2026-05-21 | HBSIS | - | comercial@hbsis.com.br | enviado |
+| 2026-05-21 | Matera | - | comercial@matera.com | enviado |
+| 2026-05-21 | NDD Tech | - | comercial@ndd.tech | enviado |
+| 2026-05-21 | BRQ Digital Solutions | - | comercial@brq.com | enviado |
+| 2026-05-21 | Vetta Digital | - | contato@vetta.digital | enviado |
+| 2026-05-21 | Dattos | - | contato@dattos.com.br | enviado |
+| 2026-05-21 | Foursys | - | contato@foursys.com.br | enviado |
+| 2026-05-21 | Nityo Infotech | - | sales@nityo.com | enviado |
+| 2026-05-21 | BRITech | - | comercial@britech.global | enviado |
+| 2026-05-21 | Sensedia | - | comercial@sensedia.com | enviado |
+| 2026-05-21 | Sinqia | - | comercial@sinqia.com.br | enviado |
+| 2026-05-21 | Senior Sistemas | - | comercial@senior.com.br | enviado |
+| 2026-05-21 | VMM Geral | - | vmm.geral@gmail.com | enviado |
