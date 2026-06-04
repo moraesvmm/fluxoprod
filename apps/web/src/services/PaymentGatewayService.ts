@@ -28,7 +28,8 @@ export class PaymentGatewayService {
     payload: PaymentTransactionPayload
   ): Promise<PaymentGatewayResponse> {
     try {
-      const checkoutResponse = await fetch("/api/checkout/session", {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://fluxoprod.vercel.app");
+      const checkoutResponse = await fetch(`${appUrl}/api/checkout/session`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
