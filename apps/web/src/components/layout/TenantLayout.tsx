@@ -15,6 +15,7 @@ import { WhatsAppFloatingButton } from "@/components/whatsapp/WhatsAppFloatingBu
 
 export function TenantLayout({ children }: { children: ReactNode }) {
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: empresa } = useEmpresa();
   const router = useRouter();
   const pathname = usePathname();
@@ -29,13 +30,40 @@ export function TenantLayout({ children }: { children: ReactNode }) {
     }
   }, [empresa, router, pathname]);
 
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <OnboardingProvider>
       <div className="flex h-screen bg-background">
-        <Sidebar />
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:flex h-full">
+          <Sidebar />
+        </div>
+
+        {/* Mobile Sidebar Offcanvas */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 flex lg:hidden">
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" 
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            {/* Sidebar content */}
+            <div className="relative z-50 flex w-64 max-w-xs flex-col bg-sidebar shadow-2xl h-full transform transition-transform duration-300">
+              <Sidebar />
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
           <SubscriptionBanner />
-          <Header onSearchClick={() => setShowGlobalSearch(true)} />
+          <Header 
+            onSearchClick={() => setShowGlobalSearch(true)} 
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+          />
           <main className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
               <PageTransition>

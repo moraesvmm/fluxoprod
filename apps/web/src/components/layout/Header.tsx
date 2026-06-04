@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, LogOut } from "lucide-react";
+import { Bell, Search, LogOut, Menu } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -9,9 +9,10 @@ import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
   onSearchClick?: () => void;
+  onMenuClick?: () => void;
 }
 
-export function Header({ onSearchClick }: HeaderProps) {
+export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
   const supabase = createClient();
   const router = useRouter();
 
@@ -36,17 +37,25 @@ export function Header({ onSearchClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border/60 bg-background/90 backdrop-blur-lg px-4 sm:gap-x-6 sm:px-6 lg:px-8 shadow-sm transition-colors duration-300">
       <div className="flex items-center gap-2 lg:hidden">
+        <button
+          type="button"
+          onClick={onMenuClick}
+          className="-m-2 p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
+        >
+          <span className="sr-only">Abrir menu principal</span>
+          <Menu className="h-6 w-6" aria-hidden="true" />
+        </button>
         <Image 
           src="/logo-fluxo.png" 
           alt="Fluxo Logo" 
           width={32}
           height={32}
           priority
-          className="object-contain drop-shadow-[0_0_10px_rgba(124,58,237,0.4)]"
+          className="object-contain drop-shadow-[0_0_10px_rgba(124,58,237,0.4)] hidden sm:block"
           style={{ width: "auto", height: "auto" }}
         />
         <span 
-          className="text-xl font-bold tracking-tight text-foreground"
+          className="text-xl font-bold tracking-tight text-foreground ml-1"
           style={{ fontFamily: "var(--font-brand)" }}
         >
           Fluxo
