@@ -119,7 +119,7 @@ export async function POST(request: Request) {
         config_payload: {
           customer_name: payload.customerName,
           customer_email: payload.customerEmail,
-          encrypted_password: encryptCheckoutSecret(payload.password),
+          encrypted_password: payload.password ? encryptCheckoutSecret(payload.password) : null,
           plan_name: payload.planName,
           modules: payload.modules,
           company_name: payload.companyName,
