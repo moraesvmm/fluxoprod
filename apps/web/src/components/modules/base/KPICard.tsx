@@ -66,8 +66,11 @@ export function KPICard({ title, value, icon: Icon, trend, className, disabled, 
           {disabled ? <Lock className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
         </div>
       </div>
-      <div className="mt-4 flex items-baseline gap-x-2">
-        <h3 className="text-3xl font-bold tracking-tight text-foreground">
+      <div className="mt-4 flex items-baseline gap-x-2 min-w-0 w-full">
+        <h3 
+          className="text-2xl 2xl:text-3xl font-bold tracking-tight text-foreground truncate w-full" 
+          title={disabled ? undefined : String(value)}
+        >
           {disabled ? "—" : value}
         </h3>
       </div>
