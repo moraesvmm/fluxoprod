@@ -185,10 +185,25 @@ export async function POST(request: Request) {
       );
     }
 
+    let invoiceUrl = paymentData.invoiceUrl;
+    if (!invoiceUrl && paymentData.id) {
+      try {
+        const paymentsResponse = await fetch(`https://${mode}.asaas.com/v3/subscriptions/${paymentData.id}/payments`, {
+          headers: { access_token: apiKey }
+        });
+        const paymentsData = await paymentsResponse.json();
+        if (paymentsData?.data && paymentsData.data.length > 0) {
+          invoiceUrl = paymentsData.data[0].invoiceUrl;
+        }
+      } catch (err) {
+        console.error("Erro ao buscar link de pagamento da assinatura", err);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       transactionId: paymentData.id,
-      redirectUrl: paymentData.invoiceUrl || `https://${mode}.asaas.com/v3/subscriptions/${paymentData.id}/payments`,
+      redirectUrl: invoiceUrl || `https://${mode}.asaas.com/v3/subscriptions/${paymentData.id}/payments`,
       checkoutReference,
     });
   } catch (error: any) {
