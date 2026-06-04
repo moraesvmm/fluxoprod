@@ -1,11 +1,93 @@
-﻿# DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
+# DOCUMENTAÇÃO TÉCNICA - FLUXO ERP
 
 > [!IMPORTANT]
 > **Regra obrigatória (banco → tipos):** sempre que o banco de dados PostgreSQL/Supabase for alterado (migrações, SQL Editor, CLI, policies, views, RPCs, colunas, índices ou qualquer outro objeto), é **obrigatório** regenerar `apps/web/src/types/database.types.ts` com o comando oficial `supabase gen types typescript` do projeto (credenciais só em variável de ambiente local). Revisar o diff; se houver mudança de contrato, **commitar** o arquivo atualizado junto da alteração. O comando concreto está na seção **Sincronização de Tipos** abaixo.
 >
 > **Alinhamento SQL completo (`public`):** fluxo operacional (gerador + scripts de verificação no SQL Editor) em [`docs/SQL_ALINHAMENTO_COMPLETO.md`](SQL_ALINHAMENTO_COMPLETO.md).
 
+---
+
+## 📱 MÓDULO MOBILE — EXPO REACT NATIVE (Iniciado em 04/06/2026)
+
+### Status: EM DESENVOLVIMENTO (Fase 1 — Base Concluída)
+
+O Fluxo ERP agora possui um aplicativo móvel nativo construído com **Expo SDK 56 + React Native**, localizado em `apps/mobile/`. O app consume o mesmo Supabase e RPCs do `apps/web`.
+
+### Stack Tecnológica Mobile
+
+| Camada | Tecnologia | Versão |
+|--------|-----------|--------|
+| **Framework** | Expo + React Native | SDK 56 |
+| **Navegação** | expo-router (file-based, igual ao Next.js) | ~4.0 |
+| **Auth Nativa** | @supabase/supabase-js + expo-secure-store (Keychain/Android KeyStore) | ~2.49 |
+| **Estado Servidor** | @tanstack/react-query | ^5.79 |
+| **Animações** | react-native-reanimated + gesture-handler | ~3.17 |
+| **Segurança** | expo-local-authentication (FaceID / TouchID) | ~16.0 |
+| **CI/CD Lojas** | EAS (Expo Application Services) | ≥13.0 |
+| **Publicação iOS** | App Store Connect (pendente conta Apple Developer Program) | — |
+| **Publicação Android** | Google Play Console (pendente conta dev) | — |
+
+### Estrutura de Pastas (`apps/mobile/`)
+
+```
+apps/mobile/
+├── app/
+│   ├── _layout.tsx              ← Root layout (GestureHandler + QueryClient + AuthProvider)
+│   ├── index.tsx                ← Redirect inteligente (auth → login, logado → dashboard)
+│   ├── (auth)/
+│   │   ├── _layout.tsx
+│   │   └── login.tsx            ← Tela de login premium dark
+│   └── (tenant)/
+│       ├── _layout.tsx          ← Bottom Tab Navigator
+│       ├── dashboard.tsx        ← KPIs via RPC tenant_dashboard_kpis
+│       ├── vendas/index.tsx     ← Lista de vendas com status coloridos
+│       ├── clientes/index.tsx   ← Lista de clientes com avatar
+│       └── estoque/index.tsx    ← Produtos com semáforo de estoque
+├── lib/
+│   ├── supabase.ts              ← Cliente Supabase com ExpoSecureStoreAdapter
+│   └── AuthProvider.tsx         ← Context de sessão com Keychain persistido
+├── app.json                     ← Config: bundle ID br.com.seufluxoerp.app
+├── eas.json                     ← Build profiles: development / preview / production
+└── .env.local                   ← Variáveis EXPO_PUBLIC_SUPABASE_*
+```
+
+### Segurança Mobile: Keychain vs. localStorage
+
+A autenticação mobile usa `expo-secure-store` que armazena o token no **Keychain do iOS** e no **Android KeyStore**, ambos criptografados pelo hardware do dispositivo. Isso é significativamente mais seguro que cookies de navegador.
+
+### Comandos de Desenvolvimento
+
+```bash
+# Iniciar em modo desenvolvimento (QR code para Expo Go)
+cd apps/mobile && npx expo start
+
+# Iniciar no simulador iOS
+cd apps/mobile && npx expo start --ios
+
+# Iniciar no simulador Android
+cd apps/mobile && npx expo start --android
+
+# Build de Preview (distribuição interna via QR)
+cd apps/mobile && eas build --profile preview --platform all
+
+# Build de Produção (para submissão às lojas)
+cd apps/mobile && eas build --profile production --platform all
+
+# Submeter para App Store / Play Store
+cd apps/mobile && eas submit --profile production
+```
+
+### Próximas Fases Mobile
+
+- **Fase 2** (Próxima): Login Biométrico (FaceID/TouchID) via `expo-local-authentication`
+- **Fase 3**: Push Notifications via `expo-notifications` (APNs + FCM)
+- **Fase 4**: Telas de detalhes (Venda detalhada, Perfil do Cliente, Editar Produto)
+- **Fase 5**: Submissão às lojas (requer Apple Developer Program $99/ano + Google Play $25)
+
+---
+
 -- Status: Vistoria 63 Implementada - Gestão de Equipe Multi-Tenant --
+
 ## ESTADO ATUAL: PRODUCTION-READY (QUALIFICADO)
 ## ÚLTIMA ATUALIZAÇÃO: 13/05/2026 (Blindagem E2E)
 ## VERSÃO: 2.7 (Estável - Blindagem E2E)

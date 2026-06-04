@@ -1,0 +1,48 @@
+{
+  "cli": {
+    "version": ">= 13.0.0",
+    "promptToConfigurePushNotifications": false
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://wkxtlvxotvutycbupfuh.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndreHRsdnhvdHZ1dHljYnVwZnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTEyNjAsImV4cCI6MjA5MTA2NzI2MH0.XUEkBM2dCEvHNbh00W969QjZ-gIwJ0yA5T-KLO3PtIw"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://wkxtlvxotvutycbupfuh.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndreHRsdnhvdHZ1dHljYnVwZnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTEyNjAsImV4cCI6MjA5MTA2NzI2MH0.XUEkBM2dCEvHNbh00W969QjZ-gIwJ0yA5T-KLO3PtIw"
+      }
+    },
+    "production": {
+      "ios": {
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://wkxtlvxotvutycbupfuh.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndreHRsdnhvdHZ1dHljYnVwZnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTEyNjAsImV4cCI6MjA5MTA2NzI2MH0.XUEkBM2dCEvHNbh00W969QjZ-gIwJ0yA5T-KLO3PtIw"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "SEU_APPLE_ID",
+        "ascAppId": "SEU_APP_STORE_CONNECT_APP_ID",
+        "appleTeamId": "SEU_TEAM_ID"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      }
+    }
+  }
+}
