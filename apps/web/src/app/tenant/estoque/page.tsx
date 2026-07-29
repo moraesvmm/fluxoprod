@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
 import {
@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PackageOpen, AlertTriangle, Boxes, Plus, Search, Filter, Edit, Trash2, Barcode } from "lucide-react";
+import { PackageOpen, AlertTriangle, Boxes, Plus, Search, Filter, Edit, Trash2, Barcode, MoreVertical, Eye } from "lucide-react";
 import { useProdutos, useCreateProduto, useDeleteProduto, useUpdateProduto } from "@/lib/hooks/use-produtos";
 import { type Produto } from "@/lib/api";
 import { useToast, Toast } from "@/components/ui/toast";
@@ -35,6 +35,20 @@ export default function EstoquePage() {
   const [exportConfirm, setExportConfirm] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [buscaProduto, setBuscaProduto] = useState('');
+  const [actionMenuId, setActionMenuId] = useState<string | null>(null);
+  const [detailProduto, setDetailProduto] = useState<Produto | null>(null);
+  const actionMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (actionMenuRef.current && !actionMenuRef.current.contains(e.target as Node)) {
+        setActionMenuId(null);
+      }
+    };
+    if (actionMenuId) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [actionMenuId]);
   const [editProdutoId, setEditProdutoId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState({ nome: '', preco_venda: '', estoque_minimo: '', categoria: '' });
   const [formData, setFormData] = useState({
@@ -256,9 +270,37 @@ export default function EstoquePage() {
                       <TableCell className="text-right text-muted-foreground">{item.estoque_minimo}</TableCell>
                       <TableCell className="text-right text-emerald-600 font-medium">{formatarPreco(item.preco_venda)}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => abrirEdicaoProduto(item)} className="text-slate-400 hover:text-blue-600 p-1" title="Editar"><Edit className="h-4 w-4" /></button>
-                          <button onClick={() => setDeleteId(item.id)} className="text-slate-400 hover:text-red-600 p-1" title="Excluir"><Trash2 className="h-4 w-4" /></button>
+                        <div className="relative" ref={actionMenuId === item.id ? actionMenuRef : undefined}>
+                          <button
+                            onClick={() => setActionMenuId(actionMenuId === item.id ? null : item.id)}
+                            className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                            title="Ações"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                          {actionMenuId === item.id && (
+                            <div className="absolute right-0 top-full mt-1 w-44 bg-card rounded-lg border border-border shadow-lg z-50 py-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                              <button
+                                onClick={() => { setDetailProduto(item); setActionMenuId(null); }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                              >
+                                <Eye className="h-4 w-4 text-blue-500" /> Ver Detalhes
+                              </button>
+                              <button
+                                onClick={() => { abrirEdicaoProduto(item); setActionMenuId(null); }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                              >
+                                <Edit className="h-4 w-4 text-amber-500" /> Editar
+                              </button>
+                              <div className="border-t border-border my-1" />
+                              <button
+                                onClick={() => { setDeleteId(item.id); setActionMenuId(null); }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" /> Excluir
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -385,6 +427,98 @@ export default function EstoquePage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Detalhes do Produto */}
+      {detailProduto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setDetailProduto(null)}>
+          <div className="bg-card rounded-xl shadow-xl p-6 w-full max-w-lg mx-4 animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-semibold">Detalhes do Produto</h3>
+              <button onClick={() => setDetailProduto(null)} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 pb-4 border-b border-border">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Boxes className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">{detailProduto.nome}</p>
+                  <p className="text-sm text-muted-foreground">SKU: {detailProduto.sku || 'Não definido'}</p>
+                </div>
+              </div>
+
+              {detailProduto.descricao && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Descrição</p>
+                  <p className="text-sm text-foreground">{detailProduto.descricao}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Categoria</p>
+                  <p className="text-sm font-semibold text-foreground">{detailProduto.categoria || '-'}</p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Tipo</p>
+                  <p className="text-sm font-semibold text-foreground capitalize">{detailProduto.tipo || 'produto'}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Estoque</p>
+                  <p className={`text-xl font-bold ${detailProduto.estoque_atual <= detailProduto.estoque_minimo ? 'text-red-600' : 'text-foreground'}`}>
+                    {detailProduto.estoque_atual}
+                  </p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Mínimo</p>
+                  <p className="text-xl font-bold text-foreground">{detailProduto.estoque_minimo}</p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Preço</p>
+                  <p className="text-xl font-bold text-emerald-600">{formatarPreco(detailProduto.preco_venda)}</p>
+                </div>
+              </div>
+
+              {detailProduto.preco_custo != null && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Custo Unitário</p>
+                    <p className="text-sm font-semibold text-foreground">{formatarPreco(detailProduto.preco_custo)}</p>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Margem</p>
+                    <p className="text-sm font-semibold text-emerald-600">
+                      {detailProduto.preco_venda && detailProduto.preco_custo
+                        ? `${(((detailProduto.preco_venda - detailProduto.preco_custo) / detailProduto.preco_venda) * 100).toFixed(1)}%`
+                        : '-'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-5 mt-2 border-t border-border">
+              <button
+                onClick={() => { abrirEdicaoProduto(detailProduto); setDetailProduto(null); }}
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-primary text-white py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Edit className="h-4 w-4" /> Editar Produto
+              </button>
+              <button onClick={() => setDetailProduto(null)}
+                className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}

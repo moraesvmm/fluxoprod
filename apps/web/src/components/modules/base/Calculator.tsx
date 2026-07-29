@@ -124,16 +124,19 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
     return num.toLocaleString("pt-BR");
   };
 
+  const isDefaultPosition = position.x === -24 && position.y === -24;
+
   if (!isOpen) {
     return (
       <div 
         className="fixed z-50"
-        style={{ 
+        style={isDefaultPosition ? {
+          right: 24,
+          bottom: 24,
+        } : {
           transform: `translate(${position.x}px, ${position.y}px)`,
-          right: position.x === -24 ? 24 : 'auto', 
-          bottom: position.y === -24 ? 24 : 'auto',
-          left: position.x !== -24 ? 0 : 'auto',
-          top: position.y !== -24 ? 0 : 'auto',
+          left: 0,
+          top: 0,
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -153,12 +156,13 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
   return (
     <div 
       className="fixed z-50"
-      style={{ 
+      style={isDefaultPosition ? {
+        right: 24,
+        bottom: 24,
+      } : {
         transform: `translate(${position.x}px, ${position.y}px)`,
-        right: position.x === -24 ? 24 : 'auto', 
-        bottom: position.y === -24 ? 24 : 'auto',
-        left: position.x !== -24 ? 0 : 'auto',
-        top: position.y !== -24 ? 0 : 'auto',
+        left: 0,
+        top: 0,
       }}
     >
       <div className="bg-card rounded-xl shadow-2xl border border-border w-80 overflow-hidden">
