@@ -7,7 +7,6 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "fluxoerp",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -15,10 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "br.com.seufluxoerp.app",
-      "infoPlist": {
-        "NSFaceIDUsageDescription": "Use Face ID para entrar na sua conta com segurança."
-      }
+      "bundleIdentifier": "br.com.seufluxoerp.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,19 +24,11 @@
       "package": "br.com.seufluxoerp.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
-      "expo-router",
-      "expo-secure-store",
-      [
-        "expo-local-authentication",
-        {
-          "faceIDPermission": "Use Face ID para entrar na sua conta com segurança."
-        }
-      ],
-      "expo-font",
-      "expo-status-bar"
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true

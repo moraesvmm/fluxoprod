@@ -1,52 +1,16 @@
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: '.env.local' });
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-const admin = createClient(supabaseUrl, supabaseServiceRole);
+const supabase = createClient('https://wkxtlvxotvutycbupfuh.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndreHRsdnhvdHZ1dHljYnVwZnVoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTQ5MTI2MCwiZXhwIjoyMDkxMDY3MjYwfQ.U_FguLhWFCaZ7tUFut9fWoRp0vsFJW7E8ZNOwdUCjVU');
 
 async function run() {
-  const email = 'test_generate_link_' + Date.now() + '@example.com';
-  console.log('Creating user:', email);
-  
-  const { data: user, error: createErr } = await admin.auth.admin.createUser({
-    email,
+  const { data, error } = await supabase.auth.admin.generateLink({
+    type: 'signup',
+    email: 'teste@teste.com',
     password: 'password123',
-    email_confirm: false
+    options: {
+      redirectTo: 'https://seufluxoerp.com.br/login?confirmed=true'
+    }
   });
-  
-  if (createErr) {
-    console.error('Create error:', createErr);
-    return;
-  }
-  
-  console.log('User created:', user.user.id);
-  
-  console.log('Generating signup link...');
-  const { data: link1, error: linkErr1 } = await admin.auth.admin.generateLink({
-    type: 'signup',
-    email: email,
-    password: 'password123'
-  });
-  console.log('Signup link result:', { link1, linkErr1 });
-  
-  console.log('Generating signup link without password...');
-  const { data: link2, error: linkErr2 } = await admin.auth.admin.generateLink({
-    type: 'signup',
-    email: email,
-  });
-  console.log('Signup link no-pass result:', { link2, linkErr2 });
-
-  console.log('Generating magic link...');
-  const { data: link3, error: linkErr3 } = await admin.auth.admin.generateLink({
-    type: 'magiclink',
-    email: email,
-  });
-  console.log('Magic link result:', { link3, linkErr3 });
-  
-  await admin.auth.admin.deleteUser(user.user.id);
-  console.log('Cleaned up');
+  console.log("Error:", error);
+  console.log("Action Link:", data?.properties?.action_link);
 }
-
 run();

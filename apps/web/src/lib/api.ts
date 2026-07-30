@@ -228,6 +228,7 @@ export interface Produto {
   criado_em: string;
   tipo_item?: string;
   unidade_medida?: string;
+  image_urls?: string[];
 }
 
 export interface ProdutoLookupError {
@@ -246,6 +247,7 @@ export interface ProdutoCreate {
   estoque_minimo?: number;
   categoria?: string;
   tipo?: string;
+  image_urls?: string[];
 }
 
 export interface ProdutoUpdate {
@@ -258,6 +260,7 @@ export interface ProdutoUpdate {
   preco_venda?: number;
   estoque_minimo?: number;
   categoria?: string;
+  image_urls?: string[];
 }
 
 export interface AlertaEstoque {
@@ -965,7 +968,8 @@ export async function createProduto(produto: ProdutoCreate): Promise<Produto> {
       p_preco_custo: produto.preco_custo || 0,
       p_categoria: produto.categoria || 'geral',
       p_estoque_atual: produto.estoque_atual || 0,
-      p_estoque_minimo: produto.estoque_minimo || 10
+      p_estoque_minimo: produto.estoque_minimo || 10,
+      p_image_urls: produto.image_urls
     });
   if (error) throw new Error(error.message);
   const result = assertRpcResult(data);
@@ -992,10 +996,134 @@ export async function updateProduto(id: string, produto: ProdutoUpdate): Promise
     p_preco_base: produto.preco_base,
     p_sku: produto.sku,
     p_preco_custo: produto.preco_custo,
-    p_categoria: produto.categoria
+    p_categoria: produto.categoria,
+    p_image_urls: produto.image_urls
   });
   if (error) throw new Error(error.message);
   return (data as unknown) as Produto;
+}
+
+// --------------------------------------------------------------------------------
+// Canais de Venda
+// --------------------------------------------------------------------------------
+
+export interface CanalVenda {
+  id: string;
+  nome: string;
+  ativo: boolean;
+  criado_em: string;
+  atualizado_em?: string;
+}
+
+export async function fetchCanaisVenda(): Promise<CanalVenda[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('tenant_listar_canais_venda');
+  if (error) {
+    console.error('Erro ao buscar canais de venda:', error);
+    throw error;
+  }
+  return (data as CanalVenda[]) || [];
+}
+
+export async function createCanalVenda(nome: string, ativo: boolean = true): Promise<CanalVenda> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('tenant_criar_canal_venda', {
+    p_nome: nome,
+    p_ativo: ativo,
+  });
+  if (error) {
+    console.error('Erro ao criar canal de venda:', error);
+    throw error;
+  }
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return data as CanalVenda;
+}
+
+export async function updateCanalVenda(id: string, nome: string, ativo: boolean): Promise<CanalVenda> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('tenant_atualizar_canal_venda', {
+    p_id: id,
+    p_nome: nome,
+    p_ativo: ativo,
+  });
+  if (error) {
+    console.error('Erro ao atualizar canal de venda:', error);
+    throw error;
+  }
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return data as CanalVenda;
+}
+
+export async function deleteCanalVenda(id: string): Promise<void> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('tenant_deletar_canal_venda', {
+    p_id: id,
+  });
+  if (error) {
+    console.error('Erro ao deletar canal de venda:', error);
+    throw error;
+  }
+  if ((data as any)?.error) throw new Error((data as any).error);
+}
+
+// --------------------------------------------------------------------------------
+// Notas Fiscais (Controle Documental)
+// --------------------------------------------------------------------------------
+
+export interface NotaFiscal {
+  id: string;
+  tipo: 'entrada' | 'saida';
+  numero?: string;
+  serie?: string;
+  chave_acesso?: string;
+  emitente_nome?: string;
+  emitente_cnpj?: string;
+  destinatario_nome?: string;
+  destinatario_cnpj?: string;
+  valor_total: number;
+  data_emissao: string;
+  data_entrada_saida?: string;
+  status: 'ativa' | 'cancelada' | 'inutilizada';
+  venda_id?: string;
+  xml_url?: string;
+  pdf_url?: string;
+  observacoes?: string;
+  criado_em: string;
+}
+
+export async function uploadProductImage(file: File, produtoId: string): Promise<string> {
+  const supabase = createClient();
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${produtoId}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+  
+  // Get tenant schema using RPC to properly namespace the storage
+  const { data: schemaData } = await supabase.rpc('get_tenant_schema');
+  let schema = 'public';
+  if (typeof schemaData === 'string' && schemaData !== 'public') {
+    schema = schemaData;
+  } else if (schemaData && typeof schemaData === 'object' && 'schema' in schemaData) {
+    schema = (schemaData as any).schema;
+  }
+
+  const filePath = `${schema}/${fileName}`;
+
+  const { error: uploadError, data } = await supabase.storage
+    .from('product-images')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (uploadError) {
+    console.error('Erro ao fazer upload da imagem:', uploadError);
+    throw uploadError;
+  }
+
+  const { data: urlData } = supabase.storage
+    .from('product-images')
+    .getPublicUrl(filePath);
+
+  return urlData.publicUrl;
 }
 
 // Alertas de Estoque

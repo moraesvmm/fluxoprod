@@ -54,6 +54,7 @@ BEGIN
   -- 5. Atualizar empresa
   UPDATE public.empresas
   SET data_vencimento = v_nova_data_vencimento,
+      trial_ends_at = v_nova_data_vencimento,
       status = 'ativo',
       subscription_status = 'TRIAL'
   WHERE id = p_empresa_id;
