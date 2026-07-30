@@ -467,7 +467,7 @@ export default function EstoquePage() {
                 </div>
                 <div className="bg-muted/50 rounded-lg p-3">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Tipo</p>
-                  <p className="text-sm font-semibold text-foreground capitalize">{detailProduto.tipo || 'produto'}</p>
+                  <p className="text-sm font-semibold text-foreground capitalize">{detailProduto.tipo_item || 'produto'}</p>
                 </div>
               </div>
 
