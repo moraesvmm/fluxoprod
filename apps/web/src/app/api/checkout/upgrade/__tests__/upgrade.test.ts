@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { POST, type UpgradePayload } from '../route'
-import { createClient } from '@/utils/supabase/server'
 import { PaymentGatewayService } from '@/services/PaymentGatewayService'
+
+vi.mock('server-only', () => ({}))
 
 // Mock de uma cadeia de banco de dados (QueryBuilder)
 const mockDbChain: any = {
@@ -10,6 +11,7 @@ const mockDbChain: any = {
   upsert: vi.fn().mockReturnThis(),
   insert: vi.fn().mockReturnThis(),
   eq: vi.fn().mockReturnThis(),
+  is: vi.fn().mockReturnThis(),
   in: vi.fn().mockReturnThis(),
   ilike: vi.fn().mockReturnThis(),
   single: vi.fn().mockImplementation(() => Promise.resolve({ data: {}, error: null })),
@@ -19,14 +21,16 @@ const mockDbChain: any = {
 
 const mockSupabase: any = {
   auth: {
-    getUser: vi.fn(),
+    admin: {
+      getUserById: vi.fn(),
+    },
   },
   from: vi.fn().mockReturnValue(mockDbChain),
 }
 
 // Mocking dependencies
-vi.mock('@/utils/supabase/server', () => ({
-  createClient: vi.fn().mockImplementation(() => Promise.resolve(mockSupabase)),
+vi.mock('@/utils/supabase/admin', () => ({
+  createAdminClient: vi.fn(() => mockSupabase),
 }))
 
 vi.mock('@/services/PaymentGatewayService', () => ({
@@ -40,8 +44,8 @@ describe('Upgrade/Checkout API', () => {
     vi.clearAllMocks()
     
     // Default success mocks
-    mockSupabase.auth.getUser.mockResolvedValue({ 
-      data: { user: { email: 'admin@teste.com', user_metadata: { nome: 'Admin' } } } 
+    mockSupabase.auth.admin.getUserById.mockResolvedValue({
+      data: { user: { email: 'admin@teste.com' } }
     })
 
     // Mock genérico para .then() que sempre resolve para um array vazio em 'data'
@@ -57,13 +61,14 @@ describe('Upgrade/Checkout API', () => {
     })
 
     // 2. Mock a sequência de chamadas 'maybeSingle'
-    // Chamada 1: loop(crm)
-    mockDbChain.maybeSingle.mockResolvedValueOnce({ data: null, error: null })
-    // Chamada 2: loop(estoque)
-    mockDbChain.maybeSingle.mockResolvedValueOnce({ data: null, error: null })
-    // Chamada 3: planoInfo (Line 45)
+    // Chamada 1: planoInfo
     mockDbChain.maybeSingle.mockResolvedValueOnce({
       data: { preco: 299.90, preco_promocional: 249.00, modulos_incluidos: ['crm'] },
+      error: null,
+    })
+    // Chamada 2: perfil do administrador da empresa
+    mockDbChain.maybeSingle.mockResolvedValueOnce({
+      data: { user_id: 'user-123', nome: 'Admin' },
       error: null,
     })
 
@@ -87,10 +92,6 @@ describe('Upgrade/Checkout API', () => {
           data: [{ key: 'estoque', preco: 50.00 }],
           error: null,
         })
-      }
-
-      if (thenCall === 6) { // Await 6: update(empresas) - valor_mensalidade
-        return resolve({ data: {}, error: null });
       }
 
       return resolve({ data: [], error: null })

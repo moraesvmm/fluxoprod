@@ -14,17 +14,16 @@ export default function LoginPage() {
   const [success, setSuccess] = useState<string | null>(null);
   
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     const hash = window.location.hash;
     const search = window.location.search;
     
     if (hash.includes("access_token") && hash.includes("type=signup")) {
-      setSuccess("Sua conta foi ativada com sucesso! Autenticando...");
-      setLoading(true);
-      
       const checkSession = async () => {
+        setSuccess("Sua conta foi ativada com sucesso! Autenticando...");
+        setLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           const { data: profile } = await supabase
@@ -44,7 +43,7 @@ export default function LoginPage() {
       // O Supabase parseia o hash de forma assíncrona logo no mount
       setTimeout(checkSession, 1200);
     } else if (search.includes("confirmed=true")) {
-      setSuccess("E-mail verificado! Faça login com sua senha.");
+      setTimeout(() => setSuccess("E-mail verificado! Faça login com sua senha."), 0);
     }
   }, [router, supabase]);
 

@@ -4,7 +4,7 @@ import { Bell, Search, LogOut, Menu } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
@@ -13,27 +13,21 @@ interface HeaderProps {
 }
 
 export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const router = useRouter();
 
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [currentDate] = useState(() => new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }));
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
   };
-  const currentDate = new Date().toLocaleDateString("pt-BR", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
   return (
     <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border/60 bg-background/90 backdrop-blur-lg px-4 sm:gap-x-6 sm:px-6 lg:px-8 shadow-sm transition-colors duration-300">
       <div className="flex items-center gap-2 lg:hidden">
@@ -75,7 +69,7 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
         </button>
         <div className="flex items-center gap-x-4 lg:gap-x-6">
           <div className="hidden lg:block text-sm text-muted-foreground/70 capitalize font-medium min-w-[200px] text-right">
-            {mounted ? currentDate : ""}
+            {currentDate}
           </div>
           
           <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-border/60" aria-hidden="true" />

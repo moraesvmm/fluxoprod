@@ -1,7 +1,12 @@
 "use client";
 
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+
+function seededUnit(seed: number) {
+  const value = Math.sin(seed * 12.9898) * 43758.5453;
+  return value - Math.floor(value);
+}
 
 /* ── Animated Section ── */
 export function AnimatedSection({
@@ -31,23 +36,15 @@ export function AnimatedSection({
 
 /* ── Floating Particles ── */
 export function FloatingParticles({ count = 5 }: { count?: number }) {
-  const [mounted, setMounted] = useState(false);
-  const particles = useMemo(
-    () =>
-      [...Array(count)].map((_, i) => ({
-        id: i,
-        size: Math.random() * 3 + 2,
-        opacity: Math.random() * 0.25 + 0.08,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        duration: Math.random() * 5 + 5,
-        delay: Math.random() * 3,
-      })),
-    [count]
-  );
-
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return <div className="absolute inset-0 overflow-hidden pointer-events-none" />;
+  const particles = Array.from({ length: count }, (_, index) => ({
+    id: index,
+    size: seededUnit(index * 6 + 1) * 3 + 2,
+    opacity: seededUnit(index * 6 + 2) * 0.25 + 0.08,
+    left: seededUnit(index * 6 + 3) * 100,
+    top: seededUnit(index * 6 + 4) * 100,
+    duration: seededUnit(index * 6 + 5) * 5 + 5,
+    delay: seededUnit(index * 6 + 6) * 3,
+  }));
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">

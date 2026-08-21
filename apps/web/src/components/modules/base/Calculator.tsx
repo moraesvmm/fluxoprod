@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Calculator, X } from "lucide-react";
 
 interface FloatingCalculatorProps {
@@ -13,18 +13,20 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
   const [previousValue, setPreviousValue] = useState<number | null>(null);
   const [operation, setOperation] = useState<string | null>(null);
   const [newNumber, setNewNumber] = useState(true);
-  const [position, setPosition] = useState({ x: -24, y: -24 }); // bottom-6 right-6 equivalent relative to screen bottom-right
+  const [position, setPosition] = useState(() => {
+    if (typeof window === "undefined") return { x: -24, y: -24 };
+
+    const saved = localStorage.getItem("calculatorPosition");
+    if (!saved) return { x: -24, y: -24 };
+
+    try {
+      return JSON.parse(saved) as { x: number; y: number };
+    } catch {
+      return { x: -24, y: -24 };
+    }
+  }); // bottom-6 right-6 equivalent relative to screen bottom-right
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const saved = localStorage.getItem('calculatorPosition');
-    if (saved) {
-      try {
-        setPosition(JSON.parse(saved));
-      } catch (e) {}
-    }
-  }, []);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     setIsDragging(true);

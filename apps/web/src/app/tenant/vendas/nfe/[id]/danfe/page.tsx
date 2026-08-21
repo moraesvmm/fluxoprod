@@ -79,7 +79,7 @@ export default function DanfePage() {
         </div>
       </div>
 
-      <style jsx global>{`
+      <style>{`
         @media print {
           .no-print { display: none !important; }
           body { background: white !important; }

@@ -3,22 +3,15 @@
 import { AlertTriangle, ExternalLink, X, Clock } from "lucide-react";
 import { useEmpresa } from "@/lib/hooks/use-empresas";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export function SubscriptionBanner() {
   const { data: empresa } = useEmpresa();
   const [isVisible, setIsVisible] = useState(true);
-  const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (empresa?.subscription_status === 'TRIAL' && empresa.trial_ends_at) {
-      const endsAt = new Date(empresa.trial_ends_at);
-      const now = new Date();
-      const diffTime = endsAt.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setDaysRemaining(diffDays > 0 ? diffDays : 0);
-    }
-  }, [empresa]);
+  const [now] = useState(() => Date.now());
+  const daysRemaining = empresa?.subscription_status === 'TRIAL' && empresa.trial_ends_at
+    ? Math.max(0, Math.ceil((new Date(empresa.trial_ends_at).getTime() - now) / (1000 * 60 * 60 * 24)))
+    : null;
 
   if (!empresa || !isVisible) return null;
 

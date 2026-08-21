@@ -21,27 +21,30 @@ export function ThemeProvider({
   defaultTheme?: Theme;
   storageKey?: string;
 }) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem(storageKey) as Theme | null;
-    if (savedTheme) {
-      setThemeState(savedTheme);
-    }
-  }, [storageKey]);
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") return defaultTheme;
+    return (localStorage.getItem(storageKey) as Theme | null) ?? defaultTheme;
+  });
+  const [systemTheme, setSystemTheme] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") return "light";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+  const resolvedTheme = theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
+    root.classList.add(resolvedTheme);
+  }, [resolvedTheme]);
 
-    let effectiveTheme: "light" | "dark" = theme === "system" 
-      ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-      : theme;
-
-    root.classList.add(effectiveTheme);
-    setResolvedTheme(effectiveTheme);
-  }, [theme]);
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (event: MediaQueryListEvent) => {
+      setSystemTheme(event.matches ? "dark" : "light");
+    };
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   const setTheme = (theme: Theme) => {
     localStorage.setItem(storageKey, theme);

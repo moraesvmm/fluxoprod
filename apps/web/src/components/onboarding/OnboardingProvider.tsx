@@ -22,16 +22,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [activeTutorial, setActiveTutorial] = useState<Tutorial | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [userSettings, setUserSettings] = useState<Record<string, any>>({});
+  const [userSettings, setUserSettings] = useState<Record<string, unknown>>({});
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const pathname = usePathname();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     const loadSettings = async () => {
       const { data, error } = await supabase.rpc('get_user_settings');
-      if (!error && data) {
-        setUserSettings(data);
+      if (!error && data && typeof data === 'object' && !Array.isArray(data)) {
+        setUserSettings(data as Record<string, unknown>);
       }
       setSettingsLoaded(true);
     };
@@ -45,10 +45,17 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const moduleMatch = pathname.match(/\/tenant\/([^/]+)/);
     if (moduleMatch) {
       const moduleKey = moduleMatch[1];
-      if (TUTORIAL_DATA[moduleKey] && !isStepCompleted(moduleKey)) {
+      const settingKey = `tutorial_completed_${moduleKey}`;
+      const completedInSettings = userSettings[settingKey] === true;
+      const completedLocally = localStorage.getItem(settingKey) === 'true';
+      const tutorial = TUTORIAL_DATA[moduleKey];
+
+      if (tutorial && !completedInSettings && !completedLocally) {
         // Delay pequeno para garantir que a página carregou
         const timer = setTimeout(() => {
-          startTutorial(moduleKey);
+          setActiveTutorial(tutorial);
+          setCurrentStepIndex(0);
+          setIsVisible(true);
         }, 1500);
         return () => clearTimeout(timer);
       }

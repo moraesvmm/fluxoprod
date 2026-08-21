@@ -65,7 +65,7 @@ describe('CRM API (api.ts)', () => {
     })
 
     it('deve listar clientes e processar cursor', async () => {
-      const mockData: Partial<ClienteListResult> = { data: [{ id: '1', nome: 'C1' } as Cliente], next_cursor: 'next' }
+      const mockData = [{ id: '1', nome: 'C1', next_cursor: 'next' }]
       mockRpc.mockResolvedValueOnce({
         data: mockData,
         error: null,

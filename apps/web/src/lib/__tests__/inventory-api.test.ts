@@ -91,7 +91,7 @@ describe('Inventory API (api.ts)', () => {
       const result = await criarKit(payload)
       expect(mockRpc).toHaveBeenCalledWith('tenant_criar_kit', expect.objectContaining({
         p_nome: payload.nome,
-        p_itens: JSON.stringify(payload.itens)
+        p_itens: payload.itens
       }))
       expect(result.kit_id).toBe('kit-123')
     })

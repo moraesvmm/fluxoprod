@@ -3,6 +3,7 @@ import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://fluxoerp.com.br"),
   title: "Fluxo ERP | Gestão Empresarial Inteligente",
   description: "Plataforma ERP multi-tenant que centraliza finanças, estoque, CRM e vendas em um único lugar. Seguro, escalável e 100% cloud.",
   keywords: ["ERP", "gestão empresarial", "software de gestão", "CRM", "estoque", "financeiro", "multi-tenant"],

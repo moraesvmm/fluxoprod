@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import * as XLSX from "xlsx";
+import readXlsxFile from "read-excel-file/browser";
 import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, X, Loader2 } from "lucide-react";
 import { useImportClientes } from "@/lib/hooks/use-clientes";
 import { useToast } from "@/components/ui/toast";
@@ -14,6 +14,62 @@ interface ImportadorProps {
   onSuccess?: () => void;
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_ROWS = 10_000;
+
+function parseCsv(csv: string): Record<string, unknown>[] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let value = "";
+  let quoted = false;
+
+  for (let index = 0; index < csv.length; index += 1) {
+    const character = csv[index];
+    const nextCharacter = csv[index + 1];
+
+    if (character === '"' && quoted && nextCharacter === '"') {
+      value += '"';
+      index += 1;
+    } else if (character === '"') {
+      quoted = !quoted;
+    } else if (character === "," && !quoted) {
+      row.push(value);
+      value = "";
+    } else if ((character === "\n" || character === "\r") && !quoted) {
+      if (character === "\r" && nextCharacter === "\n") index += 1;
+      row.push(value);
+      rows.push(row);
+      row = [];
+      value = "";
+    } else {
+      value += character;
+    }
+  }
+
+  if (value || row.length > 0) {
+    row.push(value);
+    rows.push(row);
+  }
+
+  const headers = rows.shift()?.map((header) => header.trim()) ?? [];
+  return rows.slice(0, MAX_ROWS).map((values) =>
+    headers.reduce<Record<string, unknown>>((record, header, index) => {
+      if (header) record[header] = values[index] ?? "";
+      return record;
+    }, {})
+  );
+}
+
+function rowsToRecords(rows: ReadonlyArray<ReadonlyArray<unknown>>): Record<string, unknown>[] {
+  const headers = rows[0]?.map((header, index) => String(header ?? `coluna_${index + 1}`).trim()) ?? [];
+  return rows.slice(1, MAX_ROWS + 1).map((values) =>
+    headers.reduce<Record<string, unknown>>((record, header, index) => {
+      if (header) record[header] = values[index] ?? "";
+      return record;
+    }, {})
+  );
+}
+
 export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: ImportadorProps) {
   const [file, setFile] = useState<File | null>(null);
   const [data, setData] = useState<ClienteCreate[]>([]);
@@ -23,36 +79,32 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
   const { success, error: toastError } = useToast();
   const importMutation = useImportClientes();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     if (!uploadedFile) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const bstr = event.target?.result;
-        if (typeof bstr !== "string") return;
+    if (uploadedFile.size > MAX_FILE_SIZE) {
+      toastError("O arquivo excede o limite de 10 MB.");
+      return;
+    }
 
-        const workbook = XLSX.read(bstr, { type: "binary" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet);
-        
-        const mappedData = mapFields(json);
-        
-        if (mappedData.length === 0) {
-          toastError("Nenhum dado válido encontrado. Verifique se a planilha tem uma coluna com 'Nome'.");
-          return;
-        }
+    try {
+      const rawData = uploadedFile.name.toLowerCase().endsWith(".csv")
+        ? parseCsv(await uploadedFile.text())
+        : rowsToRecords((await readXlsxFile(uploadedFile))[0]?.data ?? []);
+      const mappedData = mapFields(rawData);
 
-        setData(mappedData);
-        setFile(uploadedFile);
-        setStep('preview');
-      } catch (err) {
-        toastError("Erro ao ler o arquivo. Certifique-se de que é um Excel (.xlsx) ou CSV válido.");
+      if (mappedData.length === 0) {
+        toastError("Nenhum dado válido encontrado. Verifique se a planilha tem uma coluna com 'Nome'.");
+        return;
       }
-    };
-    reader.readAsBinaryString(uploadedFile);
+
+      setData(mappedData);
+      setFile(uploadedFile);
+      setStep('preview');
+    } catch {
+      toastError("Erro ao ler o arquivo. Certifique-se de que é um Excel (.xlsx) ou CSV válido.");
+    }
   };
 
   const mapFields = (rawJson: Record<string, unknown>[]): ClienteCreate[] => {
@@ -119,8 +171,6 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
     try {
       const CHUNK_SIZE = 500;
       let totalImported = 0;
-      const totalChunks = Math.ceil(data.length / CHUNK_SIZE);
-
       for (let i = 0; i < data.length; i += CHUNK_SIZE) {
         const chunk = data.slice(i, i + CHUNK_SIZE);
         const res = await importMutation.mutateAsync(chunk);
@@ -159,13 +209,13 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
             </div>
             <div className="text-center">
               <p className="font-semibold text-foreground text-lg">Clique ou arraste o arquivo</p>
-              <p className="text-muted-foreground text-sm">Suporta .xlsx, .xls e .csv</p>
+              <p className="text-muted-foreground text-sm">Suporta .xlsx e .csv</p>
             </div>
             <input 
               type="file" 
               ref={fileInputRef} 
               onChange={handleFileUpload} 
-              accept=".xlsx,.xls,.csv" 
+              accept=".xlsx,.csv"
               className="hidden" 
             />
           </div>
