@@ -29,7 +29,7 @@ export async function proxy(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -64,6 +64,7 @@ export async function proxy(request: NextRequest) {
       .from('user_profiles')
       .select('role')
       .eq('user_id', user.id)
+      .is('deleted_at', null)
       .maybeSingle()
 
     if (profileCheck) {
@@ -78,9 +79,14 @@ export async function proxy(request: NextRequest) {
     // 1. Buscar o perfil básico primeiro (sem join para evitar Erro 400 por falta de FK)
     const { data: profile } = await supabase
       .from('user_profiles')
-      .select('role, empresa_id')
+      .select('role, empresa_id, deleted_at')
       .eq('user_id', user.id)
       .maybeSingle()
+
+    if (profile?.deleted_at) {
+      await supabase.auth.signOut()
+      return NextResponse.redirect(new URL('/login?error=access_revoked', request.url))
+    }
 
     // Se logado mas sem perfil, e não está no login/erro, manda pro login
     if (!profile && !pathname.startsWith('/login') && !pathname.startsWith('/erro')) {
@@ -97,7 +103,9 @@ export async function proxy(request: NextRequest) {
           .eq('id', profile.empresa_id)
           .maybeSingle()
         
-        subscriptionStatus = (empresa as any)?.subscription_status || 'ACTIVE'
+        subscriptionStatus = typeof empresa?.subscription_status === 'string'
+          ? empresa.subscription_status
+          : 'ACTIVE'
       }
       
       // Bloquear acesso se a assinatura estiver inativa

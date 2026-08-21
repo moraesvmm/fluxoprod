@@ -34,7 +34,7 @@ export default function AssinaturaPage() {
       const response = await fetch("/api/checkout/upgrade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ empresaId: empresa.id })
+        body: JSON.stringify({ isUpgrade: true })
       });
 
       const data = await response.json();

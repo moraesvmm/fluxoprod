@@ -69,14 +69,21 @@ export async function DELETE(
 
     if (softDeleteError) throw new Error(softDeleteError.message);
 
+    const { error: permissionsError } = await admin
+      .from('usuario_modulos_permitidos')
+      .delete()
+      .eq('user_id', targetUserId)
+      .eq('empresa_id', callerProfile.empresa_id);
+    if (permissionsError) throw new Error(permissionsError.message);
+
     // Banir no Auth (impede novo login sem destruir dados)
     await admin.auth.admin.updateUserById(targetUserId, { ban_duration: '876000h' }); // ~100 anos
 
     return NextResponse.json({ success: true, message: 'Usuário removido com sucesso.' });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[DELETE /api/tenant/users/[id]]', error);
-    return NextResponse.json({ error: error.message || 'Erro interno.' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno.' }, { status: 500 });
   }
 }
 
@@ -130,8 +137,8 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, message: 'Papel atualizado com sucesso.' });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PATCH /api/tenant/users/[id]]', error);
-    return NextResponse.json({ error: error.message || 'Erro interno.' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno.' }, { status: 500 });
   }
 }

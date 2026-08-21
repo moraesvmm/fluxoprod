@@ -56,6 +56,21 @@ export async function PATCH(
       return NextResponse.json({ error: 'Lista de módulos inválida.' }, { status: 400 });
     }
 
+    const { data: contractedModules } = await admin
+      .from('empresa_modulos')
+      .select('modulo_key')
+      .eq('empresa_id', callerProfile.empresa_id)
+      .eq('ativo', true);
+    const contractedKeys = new Set((contractedModules || []).map((module) => module.modulo_key));
+    const invalidModules = modulos.filter((module) =>
+      typeof module.key !== 'string' ||
+      typeof module.permitido !== 'boolean' ||
+      (module.key !== 'dashboard' && module.key !== 'configuracoes' && !contractedKeys.has(module.key))
+    );
+    if (invalidModules.length > 0) {
+      return NextResponse.json({ error: 'Um ou mais módulos não estão contratados pela empresa.' }, { status: 400 });
+    }
+
     // Chamar RPC de upsert (SECURITY DEFINER garante que a RPC usa auth.uid() internamente)
     // Como estamos no server-side com service_role, chamamos diretamente via insert/upsert
     const upsertRows = modulos.map(m => ({
@@ -73,9 +88,9 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, message: 'Permissões de módulo atualizadas.' });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[PATCH /api/tenant/users/[id]/modules]', error);
-    return NextResponse.json({ error: error.message || 'Erro interno.' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno.' }, { status: 500 });
   }
 }
 
@@ -141,8 +156,8 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: result });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[GET /api/tenant/users/[id]/modules]', error);
-    return NextResponse.json({ error: error.message || 'Erro interno.' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno.' }, { status: 500 });
   }
 }

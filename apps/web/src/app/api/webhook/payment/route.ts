@@ -17,6 +17,9 @@ type CheckoutConfig = {
   company_size?: string;
   company_segment?: string;
   plan_name?: string;
+  empresa_id?: string;
+  is_upgrade?: boolean;
+  subscription_id?: string | null;
 };
 
 type ProvisionResult = {
@@ -33,6 +36,7 @@ type WebhookPaymentMetadata = {
 
 type WebhookPayment = {
   metadata?: WebhookPaymentMetadata;
+  value?: number;
   subscription?: string | null;
   externalReference?: string | null;
   id?: string | null;
@@ -128,6 +132,24 @@ export async function POST(request: Request) {
     const payment = body.payment ?? {};
     const metadata = payment.metadata ?? {};
     const subscriptionId = payment.subscription || null;
+    let isUpgradeEvent = metadata.isUpgrade === true || metadata.isUpgrade === "true";
+    let pendingUpgrade: { checkoutReference?: string; empresa_id?: string; modules?: string[] } | null = null;
+
+    if (subscriptionId && !isUpgradeEvent) {
+      const { data: pendingCheckout } = await admin
+        .from("checkout_vendas")
+        .select("external_transaction_id, config_payload")
+        .eq("status", "pendente")
+        .filter("config_payload->>subscription_id", "eq", subscriptionId)
+        .order("criado_em", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const pendingConfig = pendingCheckout?.config_payload as CheckoutConfig | null;
+      if (pendingConfig?.is_upgrade && pendingConfig.empresa_id) {
+        isUpgradeEvent = true;
+        pendingUpgrade = { checkoutReference: pendingCheckout?.external_transaction_id, empresa_id: pendingConfig.empresa_id, modules: pendingConfig.modules };
+      }
+    }
     
     // 1. Caso de Atraso ou Deleção de Cobrança
     if (overdueEvents.includes(event) || deletedEvents.includes(event)) {
@@ -159,7 +181,7 @@ export async function POST(request: Request) {
     }
 
     // Tenta localizar a empresa pelo subscription_id primeiro (para renovações)
-    if (subscriptionId) {
+    if (subscriptionId && !isUpgradeEvent) {
       const { data: existingEmpresa } = await admin
         .from("empresas")
         .select("id, data_vencimento")
@@ -184,7 +206,7 @@ export async function POST(request: Request) {
 
     // 1.5 CASO DE UPGRADE (Trial -> Pago)
     // Se vier empresaId no metadata, apenas ativamos a empresa existente
-    const upgradeEmpresaId = metadata.empresaId || null;
+    const upgradeEmpresaId = metadata.empresaId || pendingUpgrade?.empresa_id || null;
     if (upgradeEmpresaId) {
       const novaDataVencimento = new Date();
       novaDataVencimento.setDate(novaDataVencimento.getDate() + 30);
@@ -203,14 +225,37 @@ export async function POST(request: Request) {
       }
 
       // Ativar módulos específicos se fornecidos no metadata
-      const modulesToActivate = Array.isArray(metadata.modules)
+      const rawModules: unknown = Array.isArray(metadata.modules)
         ? metadata.modules
         : typeof metadata.modules === "string"
           ? JSON.parse(metadata.modules)
-          : [];
+          : pendingUpgrade?.modules || [];
+      const modulesToActivate = Array.isArray(rawModules) ? rawModules : [];
+      const normalizedModules = [...new Set(modulesToActivate.filter((module): module is string => typeof module === "string"))];
+      const { data: empresaForUpgrade } = await admin
+        .from("empresas")
+        .select("plan_name")
+        .eq("id", upgradeEmpresaId)
+        .maybeSingle();
+      const { data: planForUpgrade } = empresaForUpgrade?.plan_name
+        ? await admin.from("planos").select("preco, preco_promocional, modulos_incluidos").ilike("nome", empresaForUpgrade.plan_name).maybeSingle()
+        : { data: null };
+      const includedForUpgrade = Array.isArray(planForUpgrade?.modulos_incluidos) ? planForUpgrade.modulos_incluidos : [];
+      const extrasForUpgrade = normalizedModules.filter((key) => !includedForUpgrade.includes(key));
+      const { data: pricesForUpgrade } = extrasForUpgrade.length
+        ? await admin.from("modulos_avulsos").select("key, preco, preco_promocional").in("key", extrasForUpgrade).eq("ativo", true)
+        : { data: [] as Array<{ key: string; preco: number; preco_promocional: number | null }> };
+      if (extrasForUpgrade.length !== (pricesForUpgrade || []).length) {
+        return NextResponse.json({ error: "Módulo inválido no pagamento." }, { status: 400 });
+      }
+      const expectedAmount = (planForUpgrade?.preco_promocional ?? planForUpgrade?.preco ?? 0)
+        + (pricesForUpgrade || []).reduce((sum, module) => sum + (module.preco_promocional ?? module.preco), 0);
+      if (Number(payment.value || 0) + 0.01 < expectedAmount) {
+        return NextResponse.json({ error: "Valor do pagamento inferior ao valor calculado." }, { status: 400 });
+      }
 
       if (modulesToActivate.length > 0) {
-        for (const modKey of modulesToActivate) {
+        for (const modKey of normalizedModules) {
           // FIX BUG-05: removido atualizado_em (coluna inexistente em empresa_modulos)
           await admin.from("empresa_modulos").upsert({
             empresa_id: upgradeEmpresaId,
@@ -225,8 +270,12 @@ export async function POST(request: Request) {
         external_transaction_id: checkoutReference,
         status: "sucesso",
         payload: body,
-        detalhes: `Upgrade/Adição de módulos realizada. empresa_id=${upgradeEmpresaId}. módulos=${modulesToActivate.join(",")}`,
+        detalhes: `Upgrade/Adição de módulos realizada. empresa_id=${upgradeEmpresaId}. módulos=${normalizedModules.join(",")}`,
       });
+      await admin
+        .from("checkout_vendas")
+        .update({ status: "paga", atualizado_em: new Date().toISOString() })
+        .eq("external_transaction_id", pendingUpgrade?.checkoutReference || checkoutReference);
 
       return NextResponse.json({ success: true, message: "Upgrade/Adição processada" });
     }

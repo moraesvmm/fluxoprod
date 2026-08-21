@@ -11,6 +11,7 @@ interface ModuleCardProps {
   description: string;
   features: string[];
   price: number;
+  originalPrice?: number;
   icon: LucideIcon;
   isActive: boolean;
   onAdd: (id: string) => void;
@@ -23,6 +24,7 @@ export function ModuleCard({
   description,
   features,
   price,
+  originalPrice,
   icon: Icon,
   isActive,
   onAdd,
@@ -73,6 +75,7 @@ export function ModuleCard({
           <div className="flex flex-col">
             <span className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-muted-foreground font-bold">Investimento</span>
             <div className="flex items-baseline gap-1">
+              {originalPrice && originalPrice > price && <span className="text-xs text-slate-400 line-through">R$ {originalPrice.toFixed(2)}</span>}
               <span className="text-lg font-bold text-foreground dark:text-white">R$ {price.toFixed(2)}</span>
               <span className="text-[10px] text-slate-400 dark:text-muted-foreground">/mês</span>
             </div>

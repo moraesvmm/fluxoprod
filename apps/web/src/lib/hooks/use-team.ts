@@ -22,7 +22,7 @@ const TEAM_KEY = ['tenant', 'team'];
 
 // --- Listagem da equipe ---
 export function useTeam() {
-  return useQuery<TeamMember[]>({
+  return useQuery<{ data: TeamMember[]; meta: { usuarios_ativos: number; limite: number; pode_criar: boolean } }>({
     queryKey: TEAM_KEY,
     queryFn: async () => {
       const res = await fetch('/api/tenant/users');

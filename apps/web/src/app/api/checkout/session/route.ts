@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 import { createAdminClient } from "@/utils/supabase/admin";
 import {
@@ -19,6 +21,7 @@ interface CheckoutSessionPayload {
   companySegment: string;
   empresaId?: string;
   isUpgrade?: boolean;
+  moduleKey?: string;
 }
 
 async function findOrCreateAsaasCustomer(
@@ -70,7 +73,8 @@ async function findOrCreateAsaasCustomer(
 
 export async function POST(request: Request) {
   try {
-    const payload = (await request.json()) as CheckoutSessionPayload;
+    let payload = (await request.json()) as CheckoutSessionPayload;
+    let existingSubscriptionId: string | null = null;
     const apiKey = process.env.ASAAS_API_KEY;
 
     if (!apiKey) {
@@ -78,6 +82,87 @@ export async function POST(request: Request) {
         { error: "Configuração do gateway ausente no servidor." },
         { status: 500 }
       );
+    }
+
+    if (payload.isUpgrade) {
+      const cookieStore = await cookies();
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+      );
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("empresa_id, role")
+        .eq("user_id", user.id)
+        .is("deleted_at", null)
+        .single();
+      if (!profile?.empresa_id || profile.role !== "tenant_admin") {
+        return NextResponse.json({ error: "Apenas o administrador da empresa pode alterar a assinatura." }, { status: 403 });
+      }
+
+      const admin = createAdminClient();
+      const { data: empresa } = await admin
+        .from("empresas")
+        .select("id, razao_social, cnpj, porte, segmento, plan_name, subscription_id")
+        .eq("id", profile.empresa_id)
+        .single();
+      if (!empresa) return NextResponse.json({ error: "Empresa não encontrada." }, { status: 404 });
+      existingSubscriptionId = empresa.subscription_id;
+
+      const { data: activeRows } = await admin
+        .from("empresa_modulos")
+        .select("modulo_key")
+        .eq("empresa_id", empresa.id)
+        .eq("ativo", true);
+      const activeModules = [...new Set((activeRows || []).map((row) => row.modulo_key))];
+      const requestedModule = typeof payload.moduleKey === "string" ? payload.moduleKey.trim() : "";
+      if (requestedModule) {
+        if (activeModules.includes(requestedModule)) {
+          return NextResponse.json({ error: "Este módulo já está ativo para a empresa." }, { status: 409 });
+        }
+        const { data: module } = await admin
+          .from("modulos_avulsos")
+          .select("key, ativo")
+          .eq("key", requestedModule)
+          .eq("ativo", true)
+          .maybeSingle();
+        if (!module) return NextResponse.json({ error: "Módulo não disponível." }, { status: 400 });
+        activeModules.push(requestedModule);
+      }
+
+      let basePrice = 0;
+      let includedModules: string[] = [];
+      if (empresa.plan_name) {
+        const { data: plan } = await admin
+          .from("planos")
+          .select("preco, preco_promocional, modulos_incluidos")
+          .ilike("nome", empresa.plan_name)
+          .maybeSingle();
+        basePrice = plan?.preco_promocional ?? plan?.preco ?? 0;
+        includedModules = Array.isArray(plan?.modulos_incluidos) ? plan.modulos_incluidos : [];
+      }
+      const extraKeys = activeModules.filter((key) => !includedModules.includes(key));
+      const { data: extras } = extraKeys.length
+        ? await admin.from("modulos_avulsos").select("key, preco, preco_promocional").in("key", extraKeys).eq("ativo", true)
+        : { data: [] as Array<{ key: string; preco: number; preco_promocional: number | null }> };
+      const amount = basePrice + (extras || []).reduce((sum, extra) => sum + (extra.preco_promocional ?? extra.preco), 0);
+      payload = {
+        ...payload,
+        empresaId: empresa.id,
+        customerName: user.user_metadata?.nome || empresa.razao_social,
+        customerEmail: user.email || "",
+        planName: empresa.plan_name || "Plano Personalizado",
+        amount,
+        modules: activeModules,
+        companyName: empresa.razao_social,
+        companyDocument: empresa.cnpj || "",
+        companySize: empresa.porte || "MPE",
+        companySegment: empresa.segmento || "Geral",
+      };
     }
 
     if (
@@ -128,6 +213,7 @@ export async function POST(request: Request) {
           company_segment: payload.companySegment,
           empresa_id: payload.empresaId,
           is_upgrade: payload.isUpgrade,
+          subscription_id: existingSubscriptionId,
         },
       },
       {
@@ -141,22 +227,23 @@ export async function POST(request: Request) {
 
     const customerId = await findOrCreateAsaasCustomer(apiKey, payload);
     const mode = process.env.NEXT_PUBLIC_GATEWAY_MODE === "production" ? "api" : "sandbox";
-    const paymentResponse = await fetch(`https://${mode}.asaas.com/v3/subscriptions`, {
-      method: "POST",
+    const subscriptionUrl = existingSubscriptionId
+      ? `https://${mode}.asaas.com/v3/subscriptions/${existingSubscriptionId}`
+      : `https://${mode}.asaas.com/v3/subscriptions`;
+    const paymentResponse = await fetch(subscriptionUrl, {
+      method: existingSubscriptionId ? "PATCH" : "POST",
       headers: {
         "Content-Type": "application/json",
         access_token: apiKey,
       },
       body: JSON.stringify({
-        customer: customerId,
-        billingType: "PIX",
+        ...(existingSubscriptionId ? {} : { customer: customerId, billingType: "PIX", cycle: "MONTHLY" }),
         value: payload.amount,
         nextDueDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-        cycle: "MONTHLY",
+        externalReference: checkoutReference,
         description: payload.planName.includes("Personalizado") 
           ? "Assinatura Fluxo ERP - Módulos A La Carte" 
           : `Assinatura Fluxo ERP - Plano ${payload.planName}`,
-        externalReference: checkoutReference,
         metadata: {
           checkoutReference,
           customerName: payload.customerName,
@@ -206,10 +293,10 @@ export async function POST(request: Request) {
       redirectUrl: invoiceUrl || `https://${mode}.asaas.com/v3/subscriptions/${paymentData.id}/payments`,
       checkoutReference,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Checkout Session Error:", error);
     return NextResponse.json(
-      { error: error?.message || "Erro ao iniciar checkout." },
+      { error: error instanceof Error ? error.message : "Erro ao iniciar checkout." },
       { status: 500 }
     );
   }

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { createAdminClient } from '@/utils/supabase/admin';
+import { sendWelcomeEmail } from '@/lib/email';
 
 interface CreateUserPayload {
   nome: string;
@@ -67,6 +68,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'A senha deve ter pelo menos 8 caracteres.' }, { status: 400 });
     }
 
+    const requestedModules = Array.isArray(payload.modulos_permitidos)
+      ? [...new Set(payload.modulos_permitidos.filter((key): key is string => typeof key === 'string'))]
+      : [];
+    const { data: contractedModules } = await admin
+      .from('empresa_modulos')
+      .select('modulo_key')
+      .eq('empresa_id', empresa_id)
+      .eq('ativo', true);
+    const contractedKeys = new Set((contractedModules || []).map((module) => module.modulo_key));
+    const invalidModules = requestedModules.filter((key) => key !== 'dashboard' && !contractedKeys.has(key));
+    if (invalidModules.length > 0) {
+      return NextResponse.json({ error: 'Um ou mais módulos não estão contratados pela empresa.' }, { status: 400 });
+    }
+
     // 5. Criar usuário no Auth (email_confirm: false → Supabase envia link de ativação)
     const { data: newUser, error: createError } = await admin.auth.admin.createUser({
       email: payload.email.trim().toLowerCase(),
@@ -95,8 +110,8 @@ export async function POST(request: Request) {
     if (profileError) throw new Error(profileError.message);
 
     // 7. Gravar permissões de módulo iniciais
-    if (payload.modulos_permitidos && payload.modulos_permitidos.length > 0) {
-      const modulosPayload = payload.modulos_permitidos.map(key => ({
+    if (requestedModules.length > 0) {
+      const modulosPayload = requestedModules.map(key => ({
         user_id: createdAuthUserId!,
         empresa_id,
         modulo_key: key,
@@ -109,9 +124,21 @@ export async function POST(request: Request) {
 
       if (modulosError) {
         console.error('[users/create] Erro ao gravar módulos:', modulosError);
-        // Não derruba o fluxo — módulos podem ser configurados depois
+        throw new Error('Não foi possível configurar as permissões iniciais do usuário.');
       }
     }
+
+    const origin = request.headers.get('origin') || `https://${request.headers.get('host') || 'fluxoerp.com.br'}`;
+    // @ts-expect-error O SDK exige password para signup, mas o usuário já foi criado com senha.
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+      type: 'signup',
+      email: payload.email.trim().toLowerCase(),
+      options: { redirectTo: `${origin}/login?confirmed=true` },
+    });
+    if (linkError || !linkData?.properties?.action_link) {
+      throw new Error(linkError?.message || 'Não foi possível gerar o link de ativação.');
+    }
+    await sendWelcomeEmail(payload.email.trim().toLowerCase(), payload.nome.trim(), linkData.properties.action_link);
 
     return NextResponse.json({
       success: true,
@@ -119,12 +146,12 @@ export async function POST(request: Request) {
       data: { user_id: createdAuthUserId },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Rollback: remover usuário do Auth se o vínculo falhou
     if (createdAuthUserId) {
       await admin.auth.admin.deleteUser(createdAuthUserId).catch(() => undefined);
     }
     console.error('[POST /api/tenant/users/create]', error);
-    return NextResponse.json({ error: error.message || 'Erro interno.' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Erro interno.' }, { status: 500 });
   }
 }

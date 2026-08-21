@@ -6,7 +6,6 @@ import {
   ShoppingBag, 
   Loader2, 
   Search, 
-  Filter, 
   ShoppingCart, 
   Users, 
   Package, 
@@ -76,7 +75,6 @@ export default function LojaPage() {
   const [activeKeys, setActiveKeys] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -113,14 +111,14 @@ export default function LojaPage() {
       }
     } catch (err: unknown) {
       console.error("Erro ao carregar loja:", err);
-      setError(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {
       setLoading(false);
     }
   }, [supabase]);
 
   useEffect(() => {
-    fetchData();
+    const initialFetch = setTimeout(fetchData, 0);
+    return () => clearTimeout(initialFetch);
   }, [fetchData]);
 
   const handleAcquireModule = async (moduleKey: string) => {
@@ -131,26 +129,10 @@ export default function LojaPage() {
       const mod = catalog.find(m => m.key === moduleKey);
       if (!mod) return;
 
-      const { data: userData } = await supabase.auth.getUser();
-      
-      const payload = {
-        empresaId,
-        isUpgrade: true,
-        customerName: userData.user?.user_metadata?.nome || "Cliente",
-        customerEmail: userData.user?.email,
-        planName: `Adição de Módulo: ${mod.nome}`,
-        amount: mod.preco_promocional ?? mod.preco,
-        modules: [moduleKey],
-        companyName: "Empresa", // Idealmente buscaria o nome real
-        companyDocument: "00000000000",
-        companySize: "MPE",
-        companySegment: "Varejo"
-      };
-
       const response = await fetch("/api/checkout/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ isUpgrade: true, moduleKey }),
       });
 
       const data = await response.json();
@@ -251,7 +233,8 @@ export default function LojaPage() {
               name={mod.nome}
               description={mod.descricao}
               features={mod.features || []}
-              price={mod.preco}
+              price={mod.preco_promocional ?? mod.preco}
+              originalPrice={mod.preco}
               icon={ICON_MAP[mod.key] || ShoppingBag}
               isActive={activeKeys.includes(mod.key)}
               onAdd={handleAcquireModule}
@@ -267,7 +250,7 @@ export default function LojaPage() {
             <Search className="w-8 h-8 text-muted-foreground" />
           </div>
           <h3 className="text-xl font-bold text-white">Nenhum módulo encontrado</h3>
-          <p className="text-muted-foreground">Tente buscar por termos mais genéricos como "vendas" ou "financeiro".</p>
+          <p className="text-muted-foreground">Tente buscar por termos mais genéricos como &quot;vendas&quot; ou &quot;financeiro&quot;.</p>
           <Button variant="ghost" onClick={() => setSearchTerm("")} className="text-indigo-400 hover:text-indigo-300">
             Limpar busca
           </Button>

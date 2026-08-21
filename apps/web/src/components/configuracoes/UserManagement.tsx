@@ -53,8 +53,8 @@ export function UserManagement() {
 
   if (callerRole !== 'tenant_admin') return null;
 
-  const members: TeamMember[] = Array.isArray(teamData) ? teamData : [];
-  const meta = { usuarios_ativos: members.length, limite: 3, pode_criar: members.length < 3 };
+  const members: TeamMember[] = teamData?.data || [];
+  const meta = teamData?.meta || { usuarios_ativos: members.length, limite: 0, pode_criar: false };
 
   const toggleModuloInvite = (key: string) => {
     if (key === 'dashboard') return;
