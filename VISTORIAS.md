@@ -1,3 +1,10 @@
+PENDENTE VISTORIA (21/08/2026): Divida tecnica residual apos a rodada de estabilizacao:
+- Tipagem insegura: a rodada atual reduziu os erros de `any` de 61 para 48; ainda existem usos em APIs, testes e componentes. Nao bloqueia o uso atual, mas pode permitir dados invalidos e esconder erros em fluxos de API, estoque e checkout.
+- Lint residual: os erros globais foram reduzidos de 121 para 107 e os avisos de 161 para 151. Ainda ha regras de hooks, tipagem e entidades nao escapadas; isso reduz a capacidade de detectar regresssoes.
+- Imagens: loading, cabecalho, QR Code e galeria de produtos foram migrados para `next/image`; ainda ha imagens dinamicas no WhatsApp e galerias de documentos a revisar.
+- Cobertura: os 36 testes existentes seguem verdes, mas faltam cenarios de interface e importacao de arquivos para proteger esses fluxos contra regresssoes.
+Prioridade: MEDIA-ALTA - tratar na proxima sprint; nao e bloqueadora imediata de producao.
+
 PENDENTE VISTORIA: Modulo de Producao implementado. Foram feitas as alteracoes na API, criacao das telas Kanban e Fichas Tecnicas, e adicionado o modulo na Loja.
 
 PENDENTE VISTORIA (21/05/2026): Correcoes criticas pos-auditoria do modulo de Producao (MRP):

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Smartphone, Wifi, WifiOff, QrCode, RefreshCw, Power } from "lucide-react";
+import Image from "next/image";
 
 type ConnectionStatus = "disconnected" | "qr_pending" | "connecting" | "connected";
 
@@ -57,7 +58,7 @@ export function WhatsAppConnection() {
 
   // Polling estável — sem 'status' nas deps para não recriar o interval a cada mudança
   useEffect(() => {
-    fetchStatus();
+    const initialFetch = setTimeout(fetchStatus, 0);
     const interval = setInterval(() => {
       fetchStatus();
       // Lê do ref para não precisar do status como dependência
@@ -65,7 +66,10 @@ export function WhatsAppConnection() {
         fetchQR();
       }
     }, 5000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialFetch);
+      clearInterval(interval);
+    };
   }, [fetchStatus, fetchQR]); // sem 'status' — evita piscamento
 
   const handleConnect = async () => {
@@ -200,11 +204,12 @@ export function WhatsAppConnection() {
           <div className="flex justify-center">
             {qrBase64 ? (
               <div className="bg-card p-3 rounded-xl border-2 border-border shadow-inner">
-                <img
+                <Image
                   src={qrBase64}
                   alt="QR Code WhatsApp"
                   width={260}
                   height={260}
+                  unoptimized
                   className="rounded-lg"
                 />
               </div>

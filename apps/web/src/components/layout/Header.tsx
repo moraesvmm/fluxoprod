@@ -98,10 +98,13 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
 
           {/* Profile Dropdown (Simulation) */}
           <div className="flex items-center gap-x-4">
-            <img
+            <Image
               className="h-9 w-9 rounded-full bg-muted object-cover border-2 border-border/40 shadow-md ring-2 ring-white dark:ring-slate-800"
               src="https://api.dicebear.com/7.x/notionists/svg?seed=Admin&backgroundColor=f8fafc"
               alt="Avatar"
+              width={36}
+              height={36}
+              unoptimized
             />
             <span className="hidden lg:flex lg:items-center">
               <span

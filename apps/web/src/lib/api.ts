@@ -45,10 +45,6 @@ function assertRpcResult(data: unknown): RpcMutationResult {
   return record ?? {};
 }
 
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
-
 // ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ Types ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬ÃÂÂ¢âââ€šÂ¬ÂÂâââ‚¬Å¡ÂÂ¬
 export interface Venda {
   id: string;
@@ -1035,7 +1031,7 @@ export async function createCanalVenda(nome: string, ativo: boolean = true): Pro
     console.error('Erro ao criar canal de venda:', error);
     throw error;
   }
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return data as CanalVenda;
 }
 
@@ -1050,7 +1046,7 @@ export async function updateCanalVenda(id: string, nome: string, ativo: boolean)
     console.error('Erro ao atualizar canal de venda:', error);
     throw error;
   }
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
   return data as CanalVenda;
 }
 
@@ -1063,7 +1059,7 @@ export async function deleteCanalVenda(id: string): Promise<void> {
     console.error('Erro ao deletar canal de venda:', error);
     throw error;
   }
-  if ((data as any)?.error) throw new Error((data as any).error);
+  assertRpcResult(data);
 }
 
 // --------------------------------------------------------------------------------
@@ -1101,13 +1097,14 @@ export async function uploadProductImage(file: File, produtoId: string): Promise
   let schema = 'public';
   if (typeof schemaData === 'string' && schemaData !== 'public') {
     schema = schemaData;
-  } else if (schemaData && typeof schemaData === 'object' && 'schema' in schemaData) {
-    schema = (schemaData as any).schema;
+  } else {
+    const schemaRecord = asRecord(schemaData);
+    if (typeof schemaRecord?.schema === 'string') schema = schemaRecord.schema;
   }
 
   const filePath = `${schema}/${fileName}`;
 
-  const { error: uploadError, data } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from('product-images')
     .upload(filePath, file, {
       cacheControl: '3600',

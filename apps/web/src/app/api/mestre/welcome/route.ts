@@ -12,8 +12,8 @@ export async function POST(request: Request) {
     await sendWelcomeEmail(email, name);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in welcome email route:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Erro interno" }, { status: 500 });
   }
 }

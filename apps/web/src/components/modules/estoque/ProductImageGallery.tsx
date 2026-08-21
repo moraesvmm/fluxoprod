@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Upload, X, Loader2 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { uploadProductImage } from '@/lib/api';
 import { useToast } from '@/components/ui/toast';
@@ -62,8 +63,8 @@ export function ProductImageGallery({
       
       if (onChange) onChange(newUrls);
       success('Imagens enviadas com sucesso!');
-    } catch (err: any) {
-      toastError(err.message || 'Erro ao enviar imagens.');
+    } catch (err: unknown) {
+      toastError(err instanceof Error ? err.message : 'Erro ao enviar imagens.');
     } finally {
       setIsUploading(false);
       // Reset input
@@ -92,7 +93,7 @@ export function ProductImageGallery({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {images.map((url, idx) => (
           <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden bg-muted border border-border">
-            <img src={url} alt={`Produto ${idx + 1}`} className="w-full h-full object-cover" />
+            <Image src={url} alt={`Produto ${idx + 1}`} fill unoptimized className="object-cover" />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <button
                 type="button"

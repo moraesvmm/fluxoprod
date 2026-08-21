@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Asaas Customer Proxy Error:", error);
     return NextResponse.json({ error: "Erro interno ao processar cliente" }, { status: 500 });
   }
@@ -55,7 +55,7 @@ export async function GET(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json({ error: "Erro ao buscar cliente" }, { status: 500 });
   }
 }

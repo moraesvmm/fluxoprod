@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json({ error: "Erro ao criar pagamento" }, { status: 500 });
   }
 }
@@ -49,7 +49,7 @@ export async function GET(req: Request) {
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json({ error: "Erro ao buscar dados do pagamento" }, { status: 500 });
   }
 }

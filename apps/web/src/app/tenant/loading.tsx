@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function TenantLoading() {
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center p-8 bg-background/50 backdrop-blur-sm animate-fade-in">
@@ -7,9 +9,11 @@ export default function TenantLoading() {
         
         {/* Minimalist Floating Logo */}
         <div className="relative z-10 animate-[float_4s_ease-in-out_infinite]">
-          <img 
+          <Image
             src="/logo-fluxo.png" 
             alt="Fluxo"
+            width={64}
+            height={64}
             className="h-16 w-16 object-contain drop-shadow-[0_0_15px_rgba(var(--primary),0.4)]"
           />
         </div>
