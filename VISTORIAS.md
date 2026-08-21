@@ -1,3 +1,13 @@
+PENDENTE VISTORIA (21/08/2026): Integração WhatsApp Cloud API da Meta preparada:
+- Criada a migração apps/api/migrations/whatsapp_meta.sql para configuração por empresa e persistência de mensagens.
+- Criadas rotas /api/whatsapp/meta/config e /api/whatsapp/meta/webhook.
+- Status, envio, conversas, mensagens e mídia usam Graph API quando o tenant possui configuração Meta; nesse cenário não chamam Baileys.
+- Token Meta é cifrado no backend e nunca retorna ao navegador. A mídia exige autenticação do tenant.
+- Secret global obrigatório: WHATSAPP_META_TOKEN_SECRET (mínimo 32 caracteres), usado apenas para cifrar credenciais dos tenants; WHATSAPP_META_GRAPH_VERSION é opcional.
+- App Secret e Verify Token são dedicados por empresa e cadastrados junto com o Phone Number ID, WABA ID e Access Token na tela do tenant.
+- A migração complementar whatsapp_meta_per_tenant_secrets.sql ainda precisa ser aplicada no Supabase e o webhook configurado no Meta Business antes do teste de produção.
+Prioridade: ALTA - aplicar migração, configurar secrets e testar conexão, envio, webhook e recebimento.
+
 PENDENTE VISTORIA (21/08/2026): Divida tecnica residual apos a rodada de estabilizacao:
 - Tipagem insegura: a rodada atual reduziu os erros de `any` de 61 para 48; ainda existem usos em APIs, testes e componentes. Nao bloqueia o uso atual, mas pode permitir dados invalidos e esconder erros em fluxos de API, estoque e checkout.
 - Lint residual: os erros globais foram reduzidos de 121 para 107 e os avisos de 161 para 151. Ainda ha regras de hooks, tipagem e entidades nao escapadas; isso reduz a capacidade de detectar regresssoes.

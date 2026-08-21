@@ -47,19 +47,28 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
 
   useEffect(() => {
     if (isOpen && (status === "connected" || status === "connecting")) {
-      fetchConversations(false);
+      const initialFetch = setTimeout(() => fetchConversations(false), 0);
       const interval = setInterval(() => fetchConversations(true), 4000);
-      return () => clearInterval(interval);
+      return () => {
+        clearTimeout(initialFetch);
+        clearInterval(interval);
+      };
     }
   }, [isOpen, status, fetchConversations]);
 
   useEffect(() => {
     if (initialPhone && isOpen) {
-      setSelectedPhone(initialPhone);
-      setSelectedName(initialName || null);
+      const timer = setTimeout(() => {
+        setSelectedPhone(initialPhone);
+        setSelectedName(initialName || null);
+      }, 0);
+      return () => clearTimeout(timer);
     } else if (!isOpen) {
-      setSelectedPhone(null);
-      setSelectedName(null);
+      const timer = setTimeout(() => {
+        setSelectedPhone(null);
+        setSelectedName(null);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [initialPhone, initialName, isOpen]);
 
@@ -169,10 +178,6 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
           phone={selectedPhone}
           contactName={selectedName || conversations.find((c) => c.phone === selectedPhone)?.name || selectedPhone}
           initialMessage={initialMessage}
-          onBack={() => {
-            setSelectedPhone(null);
-            setSelectedName(null);
-          }}
         />
       ) : (
         /* Lista de Conversas */

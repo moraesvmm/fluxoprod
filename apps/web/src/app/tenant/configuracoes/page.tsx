@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import {
   AlertCircle,
   Calendar,
@@ -16,7 +16,7 @@ import { useEmpresa, useUpdateEmpresa } from "@/lib/hooks/use-empresas";
 import { useToast, Toast } from "@/components/ui/toast";
 import { TutorialSettingsSection } from "@/components/onboarding/TutorialSettingsSection";
 import { FiscalGuide } from "@/components/modules/fiscal/FiscalGuide";
-import { WhatsAppConnection } from "@/components/configuracoes/WhatsAppConnection";
+import { MetaWhatsAppConnection } from "@/components/configuracoes/MetaWhatsAppConnection";
 import { UserManagement } from "@/components/configuracoes/UserManagement";
 
 interface FiscalConfigState {
@@ -64,7 +64,7 @@ export default function ConfiguracoesPage() {
   useEffect(() => {
     if (!empresa) return;
 
-    setFormData({
+    startTransition(() => setFormData({
       razao_social: empresa.razao_social || "",
       cnpj: empresa.cnpj || "",
       porte: empresa.porte || "",
@@ -77,7 +77,7 @@ export default function ConfiguracoesPage() {
       uf: empresa.uf || "",
       cep: empresa.cep || "",
       codigo_municipio_ibge: empresa.codigo_municipio_ibge || "",
-    });
+    }));
   }, [empresa]);
 
   useEffect(() => {
@@ -554,7 +554,7 @@ export default function ConfiguracoesPage() {
           </div>
 
           {/* WhatsApp Connection */}
-          <WhatsAppConnection />
+          <MetaWhatsAppConnection />
 
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold flex items-center gap-2 mb-4 text-foreground">

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, Mic, Smile, FileText, MapPin, User, Film, Image } from "lucide-react";
+import NextImage from "next/image";
+import { Send, Mic, FileText, MapPin, User, Film, Image as ImageIcon } from "lucide-react";
 
 interface ChatMessageItem {
   id: string;
@@ -20,10 +21,9 @@ interface ChatWindowProps {
   phone: string;
   contactName: string;
   initialMessage?: string | null;
-  onBack: () => void;
 }
 
-export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatWindowProps) {
+export function ChatWindow({ phone, contactName, initialMessage }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessageItem[]>([]);
   const [newMessage, setNewMessage] = useState(initialMessage || "");
   const [sending, setSending] = useState(false);
@@ -33,7 +33,7 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
   // Buscar mensagens
   const fetchMessages = useCallback(async () => {
     try {
-      const res = await fetch(`/api/whatsapp/messages?phone=${phone}`);
+      const res = await fetch(`/api/whatsapp/messages?phone=${encodeURIComponent(phone)}`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages || []);
@@ -44,9 +44,12 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
   }, [phone]);
 
   useEffect(() => {
-    fetchMessages();
+    const initialFetch = setTimeout(fetchMessages, 0);
     const interval = setInterval(fetchMessages, 3000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialFetch);
+      clearInterval(interval);
+    };
   }, [fetchMessages]);
 
   // Scroll para a última mensagem
@@ -62,7 +65,8 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
   // Preencher mensagem inicial (se houver) ao abrir o chat para esse telefone
   useEffect(() => {
     if (initialMessage) {
-      setNewMessage(initialMessage);
+      const timer = setTimeout(() => setNewMessage(initialMessage), 0);
+      return () => clearTimeout(timer);
     }
   }, [initialMessage, phone]);
 
@@ -151,7 +155,7 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
                 controls 
                 className="h-8 w-full max-w-[240px] [&::-webkit-media-controls-enclosure]:bg-emerald-50 [&::-webkit-media-controls-panel]:bg-emerald-50"
               >
-                <source src={`/api/whatsapp/media/${msg.id}`} type={msg.mediaMime || 'audio/ogg'} />
+                <source src={`/api/whatsapp/media/${encodeURIComponent(msg.id)}`} type={msg.mediaMime || 'audio/ogg'} />
                 Seu navegador não suporta áudio.
               </audio>
             ) : (
@@ -168,9 +172,12 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
         return (
           <div className="flex flex-col items-center py-1">
             {msg.hasMedia ? (
-              <img 
-                src={`/api/whatsapp/media/${msg.id}`} 
+              <NextImage
+                src={`/api/whatsapp/media/${encodeURIComponent(msg.id)}`}
                 alt="Figurinha" 
+                width={120}
+                height={120}
+                unoptimized
                 className="max-w-[120px] h-auto rounded-lg"
               />
             ) : (
@@ -186,16 +193,19 @@ export function ChatWindow({ phone, contactName, initialMessage, onBack }: ChatW
         return (
           <div className="flex flex-col gap-2 py-1">
             {msg.hasMedia ? (
-              <img 
-                src={`/api/whatsapp/media/${msg.id}`} 
+              <NextImage
+                src={`/api/whatsapp/media/${encodeURIComponent(msg.id)}`}
                 alt="Imagem" 
+                width={320}
+                height={240}
+                unoptimized
                 className="max-w-full rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
-                onClick={() => window.open(`/api/whatsapp/media/${msg.id}`, '_blank')}
+                onClick={() => window.open(`/api/whatsapp/media/${encodeURIComponent(msg.id)}`, '_blank')}
               />
             ) : (
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                  <Image className="w-4 h-4 text-blue-600" />
+                  <ImageIcon className="w-4 h-4 text-blue-600" />
                 </div>
                 <span className="text-[12px] text-muted-foreground italic">Imagem</span>
               </div>
