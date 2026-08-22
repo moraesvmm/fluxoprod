@@ -245,7 +245,7 @@ export default function FinanceiroPage() {
           <button 
             onClick={verFluxoCaixa}
             data-tour="fin-dre"
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border hover:bg-muted/50 text-foreground h-10 px-4 py-2 shadow-sm"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border hover:bg-muted text-foreground h-10 px-4 py-2 shadow-sm"
           >
             Ver Fluxo de Caixa
           </button>
@@ -507,11 +507,11 @@ export default function FinanceiroPage() {
                   <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
                   <TableCell className="font-medium text-foreground">{item.descricao}</TableCell>
                   <TableCell>
-                    <span className={item.tipo === 'receber' ? 'text-emerald-600' : 'text-red-600'}>
+                    <span className={item.tipo === 'receber' ? 'text-emerald-600' : 'text-red-600 dark:text-red-500'}>
                       {item.tipo === 'receber' ? 'Receita' : 'Despesa'}
                     </span>
                   </TableCell>
-                  <TableCell className={item.tipo === 'receber' ? 'font-medium text-emerald-600' : 'font-medium text-red-600'}>
+                  <TableCell className={item.tipo === 'receber' ? 'font-medium text-emerald-600' : 'font-medium text-red-600 dark:text-red-500'}>
                     {formatarValor(item.valor)}
                   </TableCell>
                   <TableCell>
@@ -519,17 +519,17 @@ export default function FinanceiroPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => abrirEdicao(item)} className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
+                      <button onClick={() => abrirEdicao(item)} className="text-muted-foreground hover:text-blue-600 dark:text-blue-500 p-1" title="Editar">
                         <Edit className="h-4 w-4" />
                       </button>
                       <button 
                         onClick={() => setDeleteId(item.id)}
-                        className="text-slate-400 hover:text-red-600 p-1" 
+                        className="text-muted-foreground hover:text-red-600 dark:text-red-500 p-1" 
                         title="Excluir"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                      <button onClick={() => abrirDetalhes(item)} className="text-slate-400 hover:text-primary p-1" title="Ver Detalhes">
+                      <button onClick={() => abrirDetalhes(item)} className="text-muted-foreground hover:text-primary p-1" title="Ver Detalhes">
                         <ExternalLink className="h-4 w-4" />
                       </button>
                     </div>

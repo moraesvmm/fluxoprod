@@ -60,7 +60,7 @@ export function FinanceiroDashboard({ resumo, custos, onAdd, onEdit, onDelete }:
           <div className="text-sm font-medium text-muted-foreground mb-1">Variação</div>
           <div className={cn(
             "text-2xl font-bold",
-            resumo.variacao >= 0 ? "text-destructive" : "text-green-600"
+            resumo.variacao >= 0 ? "text-destructive" : "text-green-600 dark:text-green-500"
           )}>
             {resumo.variacao >= 0 ? '+' : ''}{formatCurrency(resumo.variacao)}
           </div>
@@ -102,7 +102,7 @@ export function FinanceiroDashboard({ resumo, custos, onAdd, onEdit, onDelete }:
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b bg-muted/50">
+              <tr className="border-b bg-muted">
                 <th className="text-left p-3 text-xs font-medium text-muted-foreground">Data</th>
                 <th className="text-left p-3 text-xs font-medium text-muted-foreground">Categoria</th>
                 <th className="text-left p-3 text-xs font-medium text-muted-foreground">Tipo</th>
@@ -124,7 +124,7 @@ export function FinanceiroDashboard({ resumo, custos, onAdd, onEdit, onDelete }:
                 custos.map((custo) => {
                   const variacao = custo.valor_real ? custo.valor_real - custo.valor_previsto : 0;
                   return (
-                    <tr key={custo.id} className="border-b hover:bg-muted/50">
+                    <tr key={custo.id} className="border-b hover:bg-muted">
                       <td className="p-3 text-sm text-foreground">
                         {custo.data ? new Date(custo.data).toLocaleDateString('pt-BR') : '-'}
                       </td>
@@ -148,7 +148,7 @@ export function FinanceiroDashboard({ resumo, custos, onAdd, onEdit, onDelete }:
                       </td>
                       <td className={cn(
                         "p-3 text-sm text-right font-medium",
-                        variacao >= 0 ? "text-destructive" : "text-green-600"
+                        variacao >= 0 ? "text-destructive" : "text-green-600 dark:text-green-500"
                       )}>
                         {custo.valor_real ? (variacao >= 0 ? '+' : '') + formatCurrency(variacao) : '-'}
                       </td>

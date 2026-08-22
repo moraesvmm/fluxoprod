@@ -279,10 +279,10 @@ export default function PDVPage() {
       ))}
 
       {/* Esquerda: Catálogo */}
-      <div className="flex-1 flex flex-col bg-slate-50/50 rounded-xl border border-border shadow-sm overflow-hidden">
+      <div className="flex-1 flex flex-col bg-muted rounded-xl border border-border shadow-sm overflow-hidden">
         <div className="p-4 bg-card border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/tenant/vendas" className="text-slate-400 hover:text-foreground transition-colors">
+            <Link href="/tenant/vendas" className="text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <h2 className="text-lg font-bold">Frente de Caixa (PDV)</h2>
@@ -294,7 +294,7 @@ export default function PDVPage() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar por nome ou código..."
-              className="w-full bg-slate-100/50 border border-transparent rounded-full pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+              className="w-full bg-muted border border-transparent rounded-full pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
             />
           </div>
         </div>
@@ -303,7 +303,7 @@ export default function PDVPage() {
           {loading ? (
             <div className="col-span-full text-center py-8 text-muted-foreground">Carregando produtos do estoque...</div>
           ) : error ? (
-            <div className="col-span-full text-center py-8 text-red-600 flex items-center justify-center gap-2">
+            <div className="col-span-full text-center py-8 text-red-600 dark:text-red-500 flex items-center justify-center gap-2">
               <AlertCircle className="h-5 w-5" />
               {error}
             </div>
@@ -360,9 +360,9 @@ export default function PDVPage() {
                       clsx(
                         "text-xs px-2 py-1 rounded-md",
                         semEstoque
-                          ? "bg-red-100 text-red-600"
+                          ? "bg-red-100 text-red-600 dark:text-red-500"
                           : estoqueBaixo
-                          ? "bg-amber-100 text-amber-600"
+                          ? "bg-amber-100 text-amber-600 dark:text-amber-500"
                           : "bg-muted text-muted-foreground"
                       )
                     )}>
@@ -370,7 +370,7 @@ export default function PDVPage() {
                     </span>
                   </div>
                   {semEstoque && (
-                    <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
+                    <div className="mt-2 text-xs text-red-600 dark:text-red-500 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       Produto indisponível
                     </div>
@@ -384,24 +384,24 @@ export default function PDVPage() {
 
       {/* Direita: Carrinho */}
       <div className="w-96 flex flex-col bg-card rounded-xl border border-border shadow-lg">
-        <div className="p-4 border-b border-border bg-slate-900 text-white rounded-t-xl flex justify-between items-center">
+        <div className="p-4 border-b border-border bg-card text-white rounded-t-xl flex justify-between items-center">
           <div className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
             <h3 className="font-semibold">Carrinho</h3>
           </div>
-          <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-bold">{cart.length}</span>
+          <span className="bg-card/20 px-2 py-0.5 rounded-full text-xs font-bold">{cart.length}</span>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 hide-scrollbar">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3">
+            <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-3">
               <ShoppingCart className="h-12 w-12 opacity-20" />
               <p className="text-sm">Carrinho vazio</p>
             </div>
           ) : (
             <div className="space-y-3">
               {cart.map(item => (
-                <div key={item.id} className="flex gap-3 justify-between items-center group bg-muted p-2 rounded-lg border border-slate-100">
+                <div key={item.id} className="flex gap-3 justify-between items-center group bg-muted p-2 rounded-lg border border-border">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{item.nome}</p>
                     <div className="flex items-center gap-2 mt-1">
@@ -503,7 +503,7 @@ export default function PDVPage() {
                 className={twMerge(clsx(
                   "flex flex-col items-center p-2 rounded border transition-colors",
                   metodoPagamento === 'pix'
-                    ? "border-primary bg-indigo-50 text-primary"
+                    ? "border-primary bg-indigo-50 dark:bg-indigo-500/10 text-primary"
                     : "border-border bg-card hover:border-primary hover:text-primary text-muted-foreground"
                 ))}
               >
@@ -516,7 +516,7 @@ export default function PDVPage() {
                 className={twMerge(clsx(
                   "flex flex-col items-center p-2 rounded border transition-colors",
                   metodoPagamento === 'cartao_credito'
-                    ? "border-primary bg-indigo-50 text-primary"
+                    ? "border-primary bg-indigo-50 dark:bg-indigo-500/10 text-primary"
                     : "border-border bg-card hover:border-primary hover:text-primary text-muted-foreground"
                 ))}
               >
@@ -529,7 +529,7 @@ export default function PDVPage() {
                 className={twMerge(clsx(
                   "flex flex-col items-center p-2 rounded border transition-colors",
                   metodoPagamento === 'dinheiro'
-                    ? "border-primary bg-indigo-50 text-primary"
+                    ? "border-primary bg-indigo-50 dark:bg-indigo-500/10 text-primary"
                     : "border-border bg-card hover:border-primary hover:text-primary text-muted-foreground"
                 ))}
               >
@@ -540,7 +540,7 @@ export default function PDVPage() {
             </div>
           </div>
 
-          <div className="mb-4 flex items-center justify-between bg-indigo-50/50 p-2 rounded-md border border-indigo-100">
+          <div className="mb-4 flex items-center justify-between bg-indigo-50 dark:bg-indigo-500/10/50 p-2 rounded-md border border-indigo-100 dark:border-indigo-500/20">
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-foreground">Emitir NFe automaticamente</span>
@@ -549,7 +549,7 @@ export default function PDVPage() {
               onClick={() => setEmitirNfe(!emitirNfe)}
               className={twMerge(clsx(
                 "relative inline-flex h-5 w-9 items-center rounded-full transition-colors",
-                emitirNfe ? "bg-primary" : "bg-slate-200"
+                emitirNfe ? "bg-primary" : "bg-muted"
               ))}
             >
               <span

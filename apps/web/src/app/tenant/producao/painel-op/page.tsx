@@ -119,7 +119,7 @@ export default function PainelOPPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-tour="prod-ops">
         {/* Coluna Em Andamento */}
-        <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-border dark:border-slate-800">
+        <div className="bg-muted dark:bg-card/50 p-4 rounded-xl border border-border dark:border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-lg flex items-center">
               <Factory className="w-5 h-5 mr-2 text-blue-500" /> Em Produção
@@ -147,7 +147,7 @@ export default function PainelOPPage() {
                   Início: {new Date(op.data_inicio!).toLocaleString('pt-BR')}
                 </div>
                 <div className="mt-2 flex justify-end" data-tour="prod-concluir">
-                  <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50" onClick={() => handleOpenConcluir(op)}>
+                  <Button size="sm" variant="outline" className="text-green-600 dark:text-green-500 border-green-200 dark:border-green-500/20 hover:bg-green-50 dark:bg-green-500/10" onClick={() => handleOpenConcluir(op)}>
                     <CheckCircle className="w-4 h-4 mr-1" />
                     Apontar Conclusão
                   </Button>
@@ -158,7 +158,7 @@ export default function PainelOPPage() {
         </div>
 
         {/* Coluna Concluídas (Recentes) */}
-        <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-border dark:border-slate-800">
+        <div className="bg-muted dark:bg-card/50 p-4 rounded-xl border border-border dark:border-border">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-lg flex items-center">
               <CheckCircle className="w-5 h-5 mr-2 text-green-500" /> Concluídas
@@ -177,7 +177,7 @@ export default function PainelOPPage() {
                     <span className="text-xs font-mono text-muted-foreground">OP #{op.numero_op}</span>
                     <h3 className="font-medium text-muted-foreground">{op.produto_nome}</h3>
                   </div>
-                  <Badge variant="outline" className="text-green-600 border-green-200">Concluída</Badge>
+                  <Badge variant="outline" className="text-green-600 dark:text-green-500 border-green-200 dark:border-green-500/20">Concluída</Badge>
                 </div>
                 <div className="text-sm text-muted-foreground flex justify-between mt-2">
                   <span>Produzido: <strong className="text-foreground">{op.quantidade_produzida} {op.unidade_medida || 'UN'}</strong></span>
@@ -229,7 +229,7 @@ export default function PainelOPPage() {
             Informe a quantidade real produzida. O estoque do produto acabado será incrementado e cada matéria-prima da Ficha Técnica será descontada proporcionalmente.
           </p>
           {fichasTecnicas && fichasTecnicas.filter(f => f.produto_acabado_id === selectedOp?.produto_id).length === 0 && (
-            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+            <div className="flex items-start gap-2 rounded-md border border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-500">
               <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
               <span>Este produto não tem Ficha Técnica cadastrada. Nenhuma matéria-prima será descontada ao concluir.</span>
             </div>
@@ -241,7 +241,7 @@ export default function PainelOPPage() {
                 {fichasTecnicas.filter(f => f.produto_acabado_id === selectedOp?.produto_id).map(f => (
                   <li key={f.id} className="flex justify-between text-sm">
                     <span>{f.materia_prima_nome}</span>
-                    <span className="font-mono font-medium text-red-600">
+                    <span className="font-mono font-medium text-red-600 dark:text-red-500">
                       -{(f.quantidade_necessaria * parseFloat(qtdProduzida || '0')).toFixed(4)} {f.unidade_medida || 'UN'}
                     </span>
                   </li>

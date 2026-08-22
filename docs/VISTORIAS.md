@@ -5,6 +5,33 @@
 
 ---
 
+## ⚠️ VISTORIA PENDENTE — Integração WhatsApp Cloud API Meta (Vistoria 82)
+**Data:** 10/08/2026
+**Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
+**Alterações:**
+- Criação de 5 RPCs no Supabase para gerenciamento seguro de credenciais da Cloud API Meta:
+  - `tenant_salvar_whatsapp_cloud_api` — Salva credenciais com verify_token único por tenant
+  - `tenant_buscar_whatsapp_cloud_api` — Retorna dados mascarados (token nunca exposto ao browser)
+  - `tenant_remover_whatsapp_cloud_api` — Remove integração
+  - `tenant_whatsapp_cloud_api_credentials` — RPC interna para webhook (busca por phone_number_id)
+  - `webhook_verificar_token_whatsapp` — Valida verify_token do webhook contra todos os tenants
+- Criação de 4 API Routes Next.js:
+  - `/api/whatsapp-meta/config` (GET/POST/DELETE) — Configuração com validação via API Meta
+  - `/api/whatsapp-meta/send` (POST) — Envio de mensagens (texto e template)
+  - `/api/whatsapp-meta/templates` (GET) — Listagem de templates aprovados na Meta
+  - `/api/webhooks/whatsapp-meta` (GET/POST) — Webhook público para receber mensagens da Meta
+- Criação do componente `WhatsAppCloudAPI.tsx` no módulo Configurações com:
+  - Formulário de credenciais (Access Token, Phone Number ID, WABA ID)
+  - Guia passo-a-passo integrado para empresas se conectarem
+  - Exibição de Webhook URL e Verify Token para copiar e colar no painel Meta
+  - Status de conexão em tempo real
+  - Validação automática do token com a API da Meta antes de salvar
+- Modificação de `WhatsAppConnection.tsx` para bloqueio mútuo com Cloud API (dual-mode)
+- Integração na página `configuracoes/page.tsx` com estado compartilhado `cloudApiAtivo`
+- **Segurança**: Tokens armazenados como JSONB na tabela configuracoes do tenant, mascarados no retorno
+
+---
+
 ## ⚠️ VISTORIA PENDENTE — Correção: Erros de Tipagem e Build da Vercel (Vistoria 81)
 **Data:** 20/05/2026
 **Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)
@@ -81,7 +108,7 @@
 #### ⚠️ AÇÃO PENDENTE OBRIGATÓRIA (Operador Humano):
 **Adicionar `RESEND_API_KEY` nas variáveis de ambiente da Vercel:**
 1. Acesse: https://vercel.com → Projeto `fluxoprod` → Settings → Environment Variables
-2. Adicione: `RESEND_API_KEY` = `re_JHkrdxZh_AZT4AN4UiZaubqfdcdSjYBYA`
+2. Adicione: `RESEND_API_KEY` = `re_***_***`
 3. Marque os ambientes: **Production**, **Preview**, **Development**
 4. Faça um **Redeploy** para as variáveis entrarem em vigor.
 

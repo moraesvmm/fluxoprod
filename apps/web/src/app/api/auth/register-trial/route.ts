@@ -260,11 +260,10 @@ export async function POST(request: Request) {
     }
 
     // 1. Gerar o link de confirmação oficial do Supabase
-    const reqOrigin = request.headers.get("origin");
-    const reqHost = request.headers.get("host");
-    const origin = reqOrigin 
-      ? (reqOrigin.startsWith("http") ? reqOrigin : `https://${reqOrigin}`) 
-      : (reqHost ? `https://${reqHost}` : "https://fluxoprod.vercel.app");
+    // Usa NEXT_PUBLIC_APP_URL (definida na Vercel) como fonte principal para garantir
+    // que a URL de redirect esteja sempre correta, independente de proxies/CDN.
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://seufluxoerp.com.br";
+    const origin = appUrl.replace(/\/+$/, ""); // Remove trailing slash se houver
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'signup',
       email: payload.customerEmail,
@@ -274,7 +273,20 @@ export async function POST(request: Request) {
       }
     });
 
-    const activationLink = linkData?.properties?.action_link || undefined;
+    let activationLink = linkData?.properties?.action_link || undefined;
+
+    // Corrige o redirect_to dentro do action_link gerado pelo Supabase.
+    // O Supabase pode gerar o link com o Site URL do dashboard (que pode estar incorreto).
+    // Reescrevemos para garantir que aponta para a URL correta da aplicação.
+    if (activationLink) {
+      try {
+        const linkUrl = new URL(activationLink);
+        linkUrl.searchParams.set("redirect_to", `${origin}/login?confirmed=true`);
+        activationLink = linkUrl.toString();
+      } catch {
+        console.error("Erro ao reescrever redirect_to no action_link");
+      }
+    }
 
     if (linkError) {
       console.error("Erro ao gerar link de ativação:", linkError);

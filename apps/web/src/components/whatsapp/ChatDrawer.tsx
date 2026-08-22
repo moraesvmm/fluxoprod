@@ -121,7 +121,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
           <>
             <button
               onClick={() => setSelectedPhone(null)}
-              className="p-1 hover:bg-white/10 rounded-full transition-colors"
+              className="p-1 hover:bg-card/10 rounded-full transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -147,7 +147,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
         )}
         <button
           onClick={onClose}
-          className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+          className="p-1.5 hover:bg-card/10 rounded-full transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -158,7 +158,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
         /* Estado Desconectado */
         <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-4">
           <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
-            <WifiOff className="w-10 h-10 text-slate-400" />
+            <WifiOff className="w-10 h-10 text-muted-foreground" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">WhatsApp Desconectado</h3>
           <p className="text-sm text-muted-foreground">
@@ -183,15 +183,15 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
         /* Lista de Conversas */
         <div className="flex-1 flex flex-col overflow-hidden">
           {status === "connecting" && (
-            <div className="bg-amber-50 border-b border-amber-200 px-3 py-2 flex items-center gap-2 text-amber-800 text-[11px] font-medium">
+            <div className="bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/20 px-3 py-2 flex items-center gap-2 text-amber-800 dark:text-amber-500 text-[11px] font-medium">
               <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />
               Sincronizando. O envio de mensagens pode atrasar.
             </div>
           )}
           {/* Busca */}
-          <div className="px-3 py-2 bg-muted border-b border-slate-100 flex items-center gap-2">
+          <div className="px-3 py-2 bg-muted border-b border-border flex items-center gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Buscar conversa..."
@@ -202,7 +202,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-muted-foreground hover:bg-slate-200 rounded-lg transition-colors"
+              className="p-2 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded-lg transition-colors"
               title="Fechar chat"
             >
               <X className="w-5 h-5" />
@@ -231,7 +231,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
                 <button
                   key={convo.phone}
                   onClick={() => setSelectedPhone(convo.phone)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors border-b border-slate-100 text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors border-b border-border text-left"
                 >
                   {/* Avatar */}
                   <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-sm border border-primary/20">
@@ -244,7 +244,7 @@ export function ChatDrawer({ isOpen, onClose, status, initialPhone, initialName,
                       <span className="font-medium text-foreground truncate text-sm">
                         {convo.name}
                       </span>
-                      <span className={`text-xs flex-shrink-0 ml-2 ${convo.unreadCount > 0 ? "text-emerald-600 font-medium" : "text-slate-400"}`}>
+                      <span className={`text-xs flex-shrink-0 ml-2 ${convo.unreadCount > 0 ? "text-emerald-600 font-medium" : "text-muted-foreground"}`}>
                         {formatTime(convo.lastTimestamp)}
                       </span>
                     </div>

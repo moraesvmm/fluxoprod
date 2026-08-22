@@ -193,10 +193,10 @@ export default function EstoquePage() {
           <KPICard title="Total SKUs" value={String(totalSKUs)} icon={Boxes} />
         </div>
         <div data-tour="estoque-kpi-baixo">
-          <KPICard title="Estoque Baixo" value={String(estoqueBaixo)} icon={AlertTriangle} className="border-amber-200 bg-amber-50/10" />
+          <KPICard title="Estoque Baixo" value={String(estoqueBaixo)} icon={AlertTriangle} className="border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/10/10" />
         </div>
         <div data-tour="estoque-kpi-criticos">
-          <KPICard title="Itens Críticos" value={String(itensCriticos)} icon={PackageOpen} className="border-red-200 bg-red-50/10" />
+          <KPICard title="Itens Críticos" value={String(itensCriticos)} icon={PackageOpen} className="border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/10/10" />
         </div>
       </div>
 
@@ -212,7 +212,7 @@ export default function EstoquePage() {
 
         <TabsContent value="produtos" className="mt-4">
           <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
+            <div className="p-4 border-b border-border flex items-center justify-between bg-muted">
               <div className="relative w-full max-w-sm">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <input
@@ -265,7 +265,7 @@ export default function EstoquePage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-bold text-foreground">
-                        <span className={item.estoque_atual <= item.estoque_minimo ? "text-red-600" : ""}>{item.estoque_atual}</span>
+                        <span className={item.estoque_atual <= item.estoque_minimo ? "text-red-600 dark:text-red-500" : ""}>{item.estoque_atual}</span>
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground">{item.estoque_minimo}</TableCell>
                       <TableCell className="text-right text-emerald-600 font-medium">{formatarPreco(item.preco_venda)}</TableCell>
@@ -295,7 +295,7 @@ export default function EstoquePage() {
                               <div className="border-t border-border my-1" />
                               <button
                                 onClick={() => { setDeleteId(item.id); setActionMenuId(null); }}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:bg-red-500/10 dark:hover:bg-red-950/20 transition-colors"
                               >
                                 <Trash2 className="h-4 w-4" /> Excluir
                               </button>
@@ -377,7 +377,7 @@ export default function EstoquePage() {
             <button type="submit" disabled={createMutation.isPending} className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
               {createMutation.isPending ? "Salvando..." : "Salvar Produto"}
             </button>
-            <button type="button" onClick={handleFecharModal} className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors">
+            <button type="button" onClick={handleFecharModal} className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors">
               Cancelar
             </button>
           </div>
@@ -422,7 +422,7 @@ export default function EstoquePage() {
                   {updateMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
                 <button type="button" onClick={() => setEditProdutoId(null)}
-                  className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-muted">
                   Cancelar
                 </button>
               </div>
@@ -461,28 +461,28 @@ export default function EstoquePage() {
               )}
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted rounded-lg p-3">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Categoria</p>
                   <p className="text-sm font-semibold text-foreground">{detailProduto.categoria || '-'}</p>
                 </div>
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted rounded-lg p-3">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Tipo</p>
                   <p className="text-sm font-semibold text-foreground capitalize">{detailProduto.tipo_item || 'produto'}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <div className="bg-muted rounded-lg p-3 text-center">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Estoque</p>
-                  <p className={`text-xl font-bold ${detailProduto.estoque_atual <= detailProduto.estoque_minimo ? 'text-red-600' : 'text-foreground'}`}>
+                  <p className={`text-xl font-bold ${detailProduto.estoque_atual <= detailProduto.estoque_minimo ? 'text-red-600 dark:text-red-500' : 'text-foreground'}`}>
                     {detailProduto.estoque_atual}
                   </p>
                 </div>
-                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <div className="bg-muted rounded-lg p-3 text-center">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Mínimo</p>
                   <p className="text-xl font-bold text-foreground">{detailProduto.estoque_minimo}</p>
                 </div>
-                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <div className="bg-muted rounded-lg p-3 text-center">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Preço</p>
                   <p className="text-xl font-bold text-emerald-600">{formatarPreco(detailProduto.preco_venda)}</p>
                 </div>
@@ -490,11 +490,11 @@ export default function EstoquePage() {
 
               {detailProduto.preco_custo != null && (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="bg-muted rounded-lg p-3">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Custo Unitário</p>
                     <p className="text-sm font-semibold text-foreground">{formatarPreco(detailProduto.preco_custo)}</p>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="bg-muted rounded-lg p-3">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Margem</p>
                     <p className="text-sm font-semibold text-emerald-600">
                       {detailProduto.preco_venda && detailProduto.preco_custo
@@ -514,7 +514,7 @@ export default function EstoquePage() {
                 <Edit className="h-4 w-4" /> Editar Produto
               </button>
               <button onClick={() => setDetailProduto(null)}
-                className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+                className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors"
               >
                 Fechar
               </button>

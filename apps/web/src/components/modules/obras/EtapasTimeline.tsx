@@ -85,8 +85,8 @@ export function EtapasTimeline({ etapas, progresso, onEdit, onDelete }: EtapasTi
                         className={cn(
                           "text-xs px-2 py-0.5 rounded-full font-medium",
                           etapa.status === "pendente" && "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
-                          etapa.status === "em_andamento" && "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-                          etapa.status === "concluida" && "bg-green-500/10 text-green-700 dark:text-green-400"
+                          etapa.status === "em_andamento" && "bg-blue-500/10 text-blue-700 dark:text-blue-500 dark:text-blue-400",
+                          etapa.status === "concluida" && "bg-green-500/10 text-green-700 dark:text-green-500 dark:text-green-400"
                         )}
                       >
                         {statusLabels[etapa.status]}

@@ -34,6 +34,9 @@ export default function ConfiguracoesPage() {
   const updateMutation = useUpdateEmpresa();
   const { toasts, success, error: toastError, removeToast } = useToast();
 
+  // Estado de bloqueio mútuo: Cloud API ativa desabilita modo QR (Baileys) e vice-versa
+  const [cloudApiAtivo, setCloudApiAtivo] = useState(false);
+
   const [formData, setFormData] = useState({
     razao_social: "",
     cnpj: "",
@@ -215,7 +218,7 @@ export default function ConfiguracoesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -400,21 +403,21 @@ export default function ConfiguracoesPage() {
               </div>
             ) : (
               <>
-                <div className="mb-8 p-4 rounded-lg bg-blue-50 border border-blue-100 flex gap-4">
+                <div className="mb-8 p-4 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 flex gap-4">
                   <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                     <AlertCircle className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-blue-900 mb-1">Iniciando com Notas Fiscais no Fluxo?</h4>
-                    <p className="text-xs text-blue-800 leading-relaxed mb-3">
+                    <p className="text-xs text-blue-800 dark:text-blue-500 leading-relaxed mb-3">
                       Para emitir NF-e no fluxo nativo, sua empresa precisa operar no <strong>Simples Nacional</strong>, possuir certificado A1 e estar credenciada para emissão em software próprio na SEFAZ da UF correspondente.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px]">
-                      <div className="bg-white/50 p-2 rounded border border-blue-200">
+                      <div className="bg-card/50 p-2 rounded border border-blue-200 dark:border-blue-500/20">
                         <span className="font-bold text-blue-900 block mb-1">1. Simples Nacional + Certificado A1</span>
                         O certificado é usado pelo backend para assinar o XML da NF-e com validade jurídica.
                       </div>
-                      <div className="bg-white/50 p-2 rounded border border-blue-200">
+                      <div className="bg-card/50 p-2 rounded border border-blue-200 dark:border-blue-500/20">
                         <span className="font-bold text-blue-900 block mb-1">2. Credenciamento e UF suportada</span>
                         O fluxo nativo atende RS, SP, MG e estados operados pela SVRS. Solicite ao contador o credenciamento para emissão via software próprio.
                       </div>
@@ -504,18 +507,18 @@ export default function ConfiguracoesPage() {
                             />
                           </div>
                           <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
-                            <span className={`inline-flex items-center rounded-full px-2 py-1 ${fiscalMeta?.certificado_configurado ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
+                            <span className={`inline-flex items-center rounded-full px-2 py-1 ${fiscalMeta?.certificado_configurado ? "bg-green-100 text-green-700 dark:text-green-500" : "bg-muted text-muted-foreground"}`}>
                               <ShieldCheck className="h-3 w-3 mr-1" />
                               {fiscalMeta?.certificado_configurado ? "Certificado configurado" : "Certificado pendente"}
                             </span>
                             {certificateUploading && (
-                              <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 px-2 py-1">
+                              <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 dark:text-amber-500 px-2 py-1">
                                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                                 Enviando...
                               </span>
                             )}
                           </div>
-                          <p className="mt-1 text-[10px] text-slate-400">
+                          <p className="mt-1 text-[10px] text-muted-foreground">
                             O arquivo será armazenado de forma segura e só ficará acessível server-side.
                           </p>
                         </div>
@@ -606,12 +609,12 @@ export default function ConfiguracoesPage() {
 
               <div className="w-full md:w-64 flex flex-col gap-3">
                 <button
-                  className="w-full py-2 px-4 bg-slate-900 text-white rounded-md text-sm font-medium hover:bg-slate-800 transition-colors"
+                  className="w-full py-2 px-4 bg-card text-white rounded-md text-sm font-medium hover:bg-card transition-colors"
                   onClick={() => window.open("https://www.asaas.com/customer/billing", "_blank")}
                 >
                   Gerenciar no Asaas
                 </button>
-                <p className="text-[10px] text-center text-slate-400">
+                <p className="text-[10px] text-center text-muted-foreground">
                   Você será redirecionado para o portal de faturamento seguro do Asaas.
                 </p>
               </div>

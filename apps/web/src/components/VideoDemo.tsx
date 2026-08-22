@@ -112,11 +112,11 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
             className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm hover:bg-black/50 transition-colors group"
           >
             <div className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${
-              darkMode ? 'bg-white/20' : 'bg-white/30'
+              darkMode ? 'bg-card/20' : 'bg-card/30'
             }`}>
               <Play className="w-10 h-10 text-white ml-1" fill="white" />
               {/* Glow */}
-              <div className="absolute inset-0 rounded-full bg-white/20 blur-xl animate-pulse" />
+              <div className="absolute inset-0 rounded-full bg-card/20 blur-xl animate-pulse" />
             </div>
           </motion.button>
         )}
@@ -134,7 +134,7 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
             {/* Play/Pause */}
             <button
               onClick={togglePlay}
-              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white"
+              className="p-2 rounded-lg bg-card/20 hover:bg-card/30 transition-colors text-white"
             >
               <Play className="w-5 h-5 ml-0.5" />
             </button>
@@ -142,7 +142,7 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
             {/* Mute */}
             <button
               onClick={toggleMute}
-              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white"
+              className="p-2 rounded-lg bg-card/20 hover:bg-card/30 transition-colors text-white"
             >
               {isMuted ? (
                 <VolumeX className="w-5 h-5" />
@@ -154,7 +154,7 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
             {/* Fullscreen */}
             <button
               onClick={toggleFullscreen}
-              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-white"
+              className="p-2 rounded-lg bg-card/20 hover:bg-card/30 transition-colors text-white"
             >
               {isFullscreen ? (
                 <Minimize className="w-5 h-5" />
@@ -167,7 +167,7 @@ export default function VideoDemo({ darkMode = false }: VideoDemoProps) {
       </div>
 
       {/* Caption */}
-      <p className={`mt-4 text-center text-sm ${darkMode ? 'text-slate-400' : 'text-muted-foreground'}`}>
+      <p className={`mt-4 text-center text-sm ${darkMode ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
         Demonstração completa do sistema Fluxo ERP em 2 minutos
       </p>
     </motion.div>

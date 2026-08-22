@@ -371,7 +371,7 @@ export default function ObrasPage() {
           <div className="bg-card rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Adicionar Custo</h3>
-              <button onClick={() => setShowCustoModal(false)} className="text-slate-400 hover:text-muted-foreground"><X className="h-4 w-4" /></button>
+              <button onClick={() => setShowCustoModal(false)} className="text-muted-foreground hover:text-muted-foreground"><X className="h-4 w-4" /></button>
             </div>
             <form onSubmit={handleSubmitCusto} className="space-y-3">
               <div>
@@ -410,7 +410,7 @@ export default function ObrasPage() {
                   {createCustoMutation.isPending ? 'Salvando...' : 'Adicionar Custo'}
                 </button>
                 <button type="button" onClick={() => setShowCustoModal(false)}
-                  className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-muted">
                   Cancelar
                 </button>
               </div>
@@ -425,7 +425,7 @@ export default function ObrasPage() {
           <div className="bg-card rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Alocar Recurso</h3>
-              <button onClick={() => setShowRecursoModal(false)} className="text-slate-400 hover:text-muted-foreground"><X className="h-4 w-4" /></button>
+              <button onClick={() => setShowRecursoModal(false)} className="text-muted-foreground hover:text-muted-foreground"><X className="h-4 w-4" /></button>
             </div>
             <form onSubmit={handleSubmitRecurso} className="space-y-3">
               <div>
@@ -456,7 +456,7 @@ export default function ObrasPage() {
                   {createRecursoMutation.isPending ? 'Salvando...' : 'Alocar Recurso'}
                 </button>
                 <button type="button" onClick={() => setShowRecursoModal(false)}
-                  className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+                  className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-muted">
                   Cancelar
                 </button>
               </div>
@@ -484,8 +484,8 @@ export default function ObrasPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <KPICard title="Planejadas" value={planejadas} icon={Calendar} className="border-border bg-slate-50/10" />
-        <KPICard title="Em Andamento" value={andamento} icon={Building2} className="border-blue-200 bg-blue-50/10" />
+        <KPICard title="Planejadas" value={planejadas} icon={Calendar} className="border-border bg-muted/10" />
+        <KPICard title="Em Andamento" value={andamento} icon={Building2} className="border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10/10" />
         <KPICard title="Concluídas" value={concluidas} icon={Building2} className="border-emerald-200 bg-emerald-50/10" />
         <div data-tour="obras-financeiro">
           <KPICard title="Investimento Total" value={formatarMoeda(investimentoTotal)} icon={Building2} />
@@ -493,7 +493,7 @@ export default function ObrasPage() {
       </div>
 
       <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
+        <div className="p-4 border-b border-border flex items-center justify-between bg-muted">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
@@ -548,7 +548,7 @@ export default function ObrasPage() {
                   <div className="flex flex-col items-center gap-2">
                     <Building2 className="h-10 w-10 text-slate-200" />
                     <p className="text-muted-foreground text-sm">Nenhuma obra encontrada</p>
-                    <p className="text-slate-400 text-xs">Clique em &quot;Nova Obra&quot; para criar a primeira.</p>
+                    <p className="text-muted-foreground text-xs">Clique em &quot;Nova Obra&quot; para criar a primeira.</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -556,7 +556,7 @@ export default function ObrasPage() {
                 obras?.map((obra) => (
                   <TableRow 
                     key={obra.id} 
-                    className={selectedObra?.id === obra.id ? "bg-blue-50" : "cursor-pointer hover:bg-muted"}
+                    className={selectedObra?.id === obra.id ? "bg-blue-50 dark:bg-blue-500/10" : "cursor-pointer hover:bg-muted"}
                     onClick={() => selecionarObra(obra)}
                   >
                     <TableCell className="font-medium text-foreground">{obra.nome}</TableCell>
@@ -580,14 +580,14 @@ export default function ObrasPage() {
                       <div className="flex items-center justify-end gap-1">
                         <button 
                           onClick={(e) => { e.stopPropagation(); abrirEdicao(obra); }} 
-                          className="text-slate-400 hover:text-blue-600 p-1 transition-colors" 
+                          className="text-muted-foreground hover:text-blue-600 dark:text-blue-500 p-1 transition-colors" 
                           title="Editar"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button 
                           onClick={(e) => { e.stopPropagation(); setDeleteId(obra.id); }} 
-                          className="text-slate-400 hover:text-red-600 p-1 transition-colors" 
+                          className="text-muted-foreground hover:text-red-600 dark:text-red-500 p-1 transition-colors" 
                           title="Excluir"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -700,7 +700,7 @@ export default function ObrasPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors"
             >
               Cancelar
             </button>
@@ -808,7 +808,7 @@ export default function ObrasPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(false)}
-              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors"
             >
               Cancelar
             </button>
@@ -825,7 +825,7 @@ export default function ObrasPage() {
               <h3 className="font-semibold text-lg">{selectedObra.nome}</h3>
               <button
                 onClick={fecharDetalhes}
-                className="p-1 hover:bg-slate-200 rounded-md transition-colors"
+                className="p-1 hover:bg-muted rounded-md transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>

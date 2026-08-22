@@ -54,10 +54,21 @@ const LazyAreaChart = dynamic(
                 <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(value) => `R$${(value / 1000).toFixed(0)}k`} />
-            <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value) => [formatarMoeda(Number(value ?? 0)), 'Faturamento']} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} dy={10} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} tickFormatter={(value) => `R$${(value / 1000).toFixed(0)}k`} />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: 'var(--card)', 
+                color: 'var(--card-foreground)', 
+                borderRadius: '8px', 
+                border: '1px solid var(--border)', 
+                boxShadow: 'var(--shadow-md)' 
+              }} 
+              itemStyle={{ color: 'var(--foreground)' }}
+              labelStyle={{ color: 'var(--muted-foreground)' }}
+              formatter={(value) => [formatarMoeda(Number(value ?? 0)), 'Faturamento']} 
+            />
             <Area type="monotone" dataKey="total" stroke="#4f46e5" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" />
           </AreaChart>
         </ResponsiveContainer>
@@ -79,7 +90,7 @@ function ChartSkeleton() {
     <div className="h-[300px] flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-primary" />
-        <p className="text-xs text-slate-400">Carregando gráfico...</p>
+        <p className="text-xs text-muted-foreground">Carregando gráfico...</p>
       </div>
     </div>
   );
@@ -251,7 +262,7 @@ export default function DashboardPage() {
                 <TrendingUp className="h-12 w-12 text-slate-200" />
                 <div>
                   <p className="text-sm text-muted-foreground font-medium">Nenhum dado de faturamento</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Os dados aparecerão aqui conforme as vendas forem registradas.</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Os dados aparecerão aqui conforme as vendas forem registradas.</p>
                 </div>
               </div>
             )}
@@ -300,7 +311,7 @@ export default function DashboardPage() {
                 <div className="text-center">
                   <ShoppingBag className="h-10 w-10 text-slate-200 mx-auto mb-3" />
                   <p className="text-sm text-muted-foreground">Nenhuma venda registrada</p>
-                  <p className="text-xs text-slate-400 mt-0.5">As vendas aparecerão aqui automaticamente.</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">As vendas aparecerão aqui automaticamente.</p>
                 </div>
               </div>
             )}

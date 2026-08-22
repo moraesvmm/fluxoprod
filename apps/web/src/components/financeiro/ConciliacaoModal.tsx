@@ -152,9 +152,9 @@ export function ConciliacaoModal({
                       <th className="px-4 py-3 font-medium">Lançamento no Sistema</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border">
                     {bankTransactions.map(bt => (
-                      <tr key={bt.id} className="hover:bg-slate-50/50">
+                      <tr key={bt.id} className="hover:bg-muted">
                         <td className="px-4 py-4">
                           <div className="flex flex-col">
                             <span className="font-medium text-foreground">{bt.descricao}</span>

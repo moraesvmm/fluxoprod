@@ -26,14 +26,14 @@ const statusConfig: Record<StatusType, { bg: string; text: string; dot: string; 
   concluido: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", defaultLabel: "Concluído" },
   normal: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", defaultLabel: "Normal" },
   
-  warning: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", defaultLabel: "Atenção" },
-  pendente: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", defaultLabel: "Pendente" },
-  baixo: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", defaultLabel: "Baixo" },
+  warning: { bg: "bg-amber-50 dark:bg-amber-500/10", text: "text-amber-700 dark:text-amber-500", dot: "bg-amber-500", defaultLabel: "Atenção" },
+  pendente: { bg: "bg-amber-50 dark:bg-amber-500/10", text: "text-amber-700 dark:text-amber-500", dot: "bg-amber-500", defaultLabel: "Pendente" },
+  baixo: { bg: "bg-amber-50 dark:bg-amber-500/10", text: "text-amber-700 dark:text-amber-500", dot: "bg-amber-500", defaultLabel: "Baixo" },
   
-  error: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", defaultLabel: "Erro" },
-  critico: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", defaultLabel: "Crítico" },
+  error: { bg: "bg-red-50 dark:bg-red-500/10", text: "text-red-700 dark:text-red-500", dot: "bg-red-500", defaultLabel: "Erro" },
+  critico: { bg: "bg-red-50 dark:bg-red-500/10", text: "text-red-700 dark:text-red-500", dot: "bg-red-500", defaultLabel: "Crítico" },
   
-  info: { bg: "bg-indigo-50", text: "text-indigo-700", dot: "bg-indigo-500", defaultLabel: "Info" },
+  info: { bg: "bg-indigo-50 dark:bg-indigo-500/10", text: "text-indigo-700 dark:text-indigo-500", dot: "bg-indigo-500", defaultLabel: "Info" },
   default: { bg: "bg-muted", text: "text-foreground", dot: "bg-slate-400", defaultLabel: "Status" },
 };
 

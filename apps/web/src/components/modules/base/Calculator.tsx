@@ -181,7 +181,7 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
           </div>
           <button
             onClick={onToggle}
-            className="hover:bg-white/20 rounded-full p-1 transition-colors"
+            className="hover:bg-card/20 rounded-full p-1 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -203,25 +203,25 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
         <div className="p-4 grid grid-cols-4 gap-2">
           <button
             onClick={handleClear}
-            className="bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-md p-3 transition-colors"
+            className="bg-red-100 hover:bg-red-200 text-red-700 dark:text-red-500 font-semibold rounded-md p-3 transition-colors"
           >
             C
           </button>
           <button
             onClick={handlePercent}
-            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-muted text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             %
           </button>
           <button
             onClick={() => handleOperation("÷")}
-            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-muted text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             ÷
           </button>
           <button
             onClick={() => handleOperation("×")}
-            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-muted text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             ×
           </button>
@@ -246,7 +246,7 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
           </button>
           <button
             onClick={() => handleOperation("-")}
-            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-muted text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             -
           </button>
@@ -271,7 +271,7 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
           </button>
           <button
             onClick={() => handleOperation("+")}
-            className="bg-muted hover:bg-slate-200 text-foreground font-semibold rounded-md p-3 transition-colors"
+            className="bg-muted hover:bg-muted text-foreground font-semibold rounded-md p-3 transition-colors"
           >
             +
           </button>

@@ -212,7 +212,7 @@ export default function BarcodeScanner({
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-red-600">
+          <div className="flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-500/10 p-3 text-red-600 dark:text-red-500">
             <AlertCircle className="h-5 w-5" />
             <p className="text-sm">{error}</p>
           </div>
@@ -223,18 +223,18 @@ export default function BarcodeScanner({
         )}
 
         {produtoEncontrado && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+          <div className="rounded-lg border border-green-200 dark:border-green-500/20 bg-green-50 dark:bg-green-500/10 p-4">
             <div className="flex items-start gap-3">
               <CheckCircle className="mt-0.5 h-5 w-5 text-green-600" />
               <div className="flex-1">
                 <h4 className="font-medium text-green-900">{produtoEncontrado.nome}</h4>
-                <p className="mt-1 text-sm text-green-700">
+                <p className="mt-1 text-sm text-green-700 dark:text-green-500">
                   Codigo: {produtoEncontrado.codigo_barras || produtoEncontrado.codigo_qr || "-"}
                 </p>
-                <p className="text-sm text-green-700">
+                <p className="text-sm text-green-700 dark:text-green-500">
                   Preco: R$ {produtoEncontrado.preco_base?.toFixed(2) || "0,00"}
                 </p>
-                <p className="text-sm text-green-700">Estoque: {produtoEncontrado.estoque_atual || 0}</p>
+                <p className="text-sm text-green-700 dark:text-green-500">Estoque: {produtoEncontrado.estoque_atual || 0}</p>
               </div>
             </div>
             <button
@@ -249,7 +249,7 @@ export default function BarcodeScanner({
         {!produtoEncontrado && (
           <button
             onClick={handleFechar}
-            className="inline-flex h-9 w-full items-center justify-center rounded-md bg-muted text-sm font-medium text-foreground transition-colors hover:bg-slate-200"
+            className="inline-flex h-9 w-full items-center justify-center rounded-md bg-muted text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
             <X className="mr-2 h-4 w-4" /> Cancelar
           </button>

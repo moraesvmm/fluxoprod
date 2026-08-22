@@ -67,7 +67,7 @@ export function FechamentoMesModal() {
           </p>
           
           <div className="space-y-4">
-            <div className="flex items-center p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+            <div className="flex items-center p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl border border-indigo-100 dark:border-indigo-500/20">
               <div className="bg-indigo-100 p-3 rounded-lg mr-4 text-indigo-600">
                 <Banknote className="w-6 h-6" />
               </div>
@@ -78,22 +78,22 @@ export function FechamentoMesModal() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center p-4 bg-muted rounded-xl border border-slate-100">
-                <div className="bg-card shadow-sm p-2 rounded-md mr-3 text-emerald-500 border border-slate-100">
+              <div className="flex items-center p-4 bg-muted rounded-xl border border-border">
+                <div className="bg-card shadow-sm p-2 rounded-md mr-3 text-emerald-500 border border-border">
                   <ShoppingBag className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase">Total Vendas</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Total Vendas</p>
                   <p className="text-lg font-bold text-foreground">{fechamentoData.total_vendas}</p>
                 </div>
               </div>
 
-              <div className="flex items-center p-4 bg-muted rounded-xl border border-slate-100">
-                <div className="bg-card shadow-sm p-2 rounded-md mr-3 text-amber-500 border border-slate-100">
+              <div className="flex items-center p-4 bg-muted rounded-xl border border-border">
+                <div className="bg-card shadow-sm p-2 rounded-md mr-3 text-amber-500 border border-border">
                   <TrendingUp className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase">Ticket Médio</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">Ticket Médio</p>
                   <p className="text-lg font-bold text-foreground">{formatarMoeda(fechamentoData.ticket_medio)}</p>
                 </div>
               </div>
@@ -104,7 +104,7 @@ export function FechamentoMesModal() {
             <button
               onClick={handleEntendi}
               disabled={isMarking}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full bg-card hover:bg-card text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <CheckCircle className="w-5 h-5" />
               {isMarking ? "Registrando..." : "Legal, entendi!"}

@@ -15,23 +15,23 @@ interface ToastProps {
 const toastConfig = {
   success: {
     icon: CheckCircle,
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
-    textColor: 'text-green-800',
+    bgColor: 'bg-green-50 dark:bg-green-500/10',
+    borderColor: 'border-green-200 dark:border-green-500/20',
+    textColor: 'text-green-800 dark:text-green-500',
     iconColor: 'text-green-500'
   },
   error: {
     icon: AlertCircle,
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200',
-    textColor: 'text-red-800',
+    bgColor: 'bg-red-50 dark:bg-red-500/10',
+    borderColor: 'border-red-200 dark:border-red-500/20',
+    textColor: 'text-red-800 dark:text-red-500',
     iconColor: 'text-red-500'
   },
   info: {
     icon: Info,
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-    textColor: 'text-blue-800',
+    bgColor: 'bg-blue-50 dark:bg-blue-500/10',
+    borderColor: 'border-blue-200 dark:border-blue-500/20',
+    textColor: 'text-blue-800 dark:text-blue-500',
     iconColor: 'text-blue-500'
   },
   warning: {

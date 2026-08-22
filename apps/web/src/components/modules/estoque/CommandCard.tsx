@@ -32,7 +32,7 @@ export function CommandCard({
       className={twMerge(
         "relative flex flex-col items-start p-6 rounded-2xl border text-left transition-all duration-300",
         "bg-card hover:shadow-lg hover:border-primary/50 group w-full h-full min-h-[220px]",
-        alert ? "border-red-200 dark:border-red-900/50" : "border-border",
+        alert ? "border-red-200 dark:border-red-500/20 dark:border-red-900/50" : "border-border",
         className
       )}
     >
@@ -42,7 +42,7 @@ export function CommandCard({
       <div className="flex justify-between items-start w-full mb-4 z-10">
         <div className={twMerge(
           "p-3 rounded-xl",
-          alert ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" : "bg-primary/10 text-primary"
+          alert ? "bg-red-100 text-red-600 dark:text-red-500 dark:bg-red-900/30 dark:text-red-400" : "bg-primary/10 text-primary"
         )}>
           <Icon className="w-6 h-6" />
         </div>
@@ -51,7 +51,7 @@ export function CommandCard({
           <div className="text-right">
             <span className={twMerge(
               "text-2xl font-bold block",
-              alert ? "text-red-600 dark:text-red-400" : "text-foreground"
+              alert ? "text-red-600 dark:text-red-500 dark:text-red-400" : "text-foreground"
             )}>
               {kpi}
             </span>

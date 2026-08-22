@@ -30,9 +30,9 @@ const TIPO_LABELS = {
 };
 
 const TIPO_CORES = {
-  ligacao: "bg-blue-100 text-blue-600 border-blue-200",
+  ligacao: "bg-blue-100 text-blue-600 border-blue-200 dark:border-blue-500/20",
   email: "bg-purple-100 text-purple-600 border-purple-200",
-  reuniao: "bg-green-100 text-green-600 border-green-200",
+  reuniao: "bg-green-100 text-green-600 dark:text-green-500 border-green-200 dark:border-green-500/20",
   nota: "bg-yellow-100 text-yellow-600 border-yellow-200",
   whatsapp: "bg-emerald-100 text-emerald-600 border-emerald-200",
   visita: "bg-orange-100 text-orange-600 border-orange-200",
@@ -240,7 +240,7 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+                className="bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors"
               >
                 Cancelar
               </button>
@@ -264,7 +264,7 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
               <div key={interacao.id} className="relative pl-8">
                 {/* Timeline line */}
                 {!isLast && (
-                  <div className="absolute left-3 top-8 bottom-0 w-0.5 bg-slate-200" />
+                  <div className="absolute left-3 top-8 bottom-0 w-0.5 bg-muted" />
                 )}
 
                 {/* Icon */}
@@ -281,7 +281,7 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
                           {TIPO_LABELS[interacao.tipo]}
                         </span>
                         {interacao.duracao_minutos && (
-                          <span className="inline-flex items-center gap-1 text-xs text-slate-400">
+                          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                             <Clock className="w-3 h-3" />
                             {formatarDuracao(interacao.duracao_minutos)}
                           </span>
@@ -296,12 +296,12 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
                             </span>
                           )}
                           {interacao.metadata.valor && (
-                            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-blue-200">
+                            <span className="text-[10px] bg-blue-100 text-blue-700 dark:text-blue-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-blue-200 dark:border-blue-500/20">
                               R$ {Number(interacao.metadata.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </span>
                           )}
                           {interacao.metadata.ciclo_recompra_dias && (
-                            <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-amber-200">
+                            <span className="text-[10px] bg-amber-100 text-amber-700 dark:text-amber-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-amber-200 dark:border-amber-500/20">
                               🔄 {interacao.metadata.ciclo_recompra_dias} dias
                             </span>
                           )}
@@ -310,13 +310,13 @@ export default function TimelineInteracoes({ clienteId }: TimelineInteracoesProp
                       {interacao.descricao && (
                         <p className="text-sm text-muted-foreground line-clamp-2">{interacao.descricao}</p>
                       )}
-                      <p className="text-xs text-slate-400 mt-2">{formatarData(interacao.data_interacao)}</p>
+                      <p className="text-xs text-muted-foreground mt-2">{formatarData(interacao.data_interacao)}</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => excluir(interacao.id)}
                       disabled={isDeleting}
-                      className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                      className="p-1 text-muted-foreground hover:text-red-600 dark:text-red-500 hover:bg-red-50 dark:bg-red-500/10 rounded transition-colors disabled:opacity-50"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

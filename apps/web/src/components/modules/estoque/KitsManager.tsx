@@ -163,7 +163,7 @@ export default function KitsManager() {
                   </button>
                   <button
                     onClick={() => setDeleteId(kit.id)}
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-red-100 text-red-700 hover:bg-red-200 h-8 px-3"
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-red-100 text-red-700 dark:text-red-500 hover:bg-red-200 h-8 px-3"
                   >
                     <Trash2 className="h-4 w-4 mr-1" /> Excluir
                   </button>
@@ -171,7 +171,7 @@ export default function KitsManager() {
               </div>
 
               {expandedKits.has(kit.id) && (
-                <div className="mt-4 pt-4 border-t border-slate-100">
+                <div className="mt-4 pt-4 border-t border-border">
                   <h4 className="text-sm font-medium text-foreground mb-2">Itens do Kit</h4>
                   <div className="space-y-1">
                     {kit.itens.map((item) => (
@@ -256,7 +256,7 @@ export default function KitsManager() {
                 <button
                   type="button"
                   onClick={() => handleRemoverItem(index)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded"
+                  className="p-2 text-red-600 hover:bg-red-50 dark:bg-red-500/10 rounded"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -265,7 +265,7 @@ export default function KitsManager() {
             <button
               type="button"
               onClick={handleAdicionarItem}
-              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700"
+              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 dark:text-blue-500"
             >
               <Plus className="h-4 w-4 mr-1" /> Adicionar Item
             </button>

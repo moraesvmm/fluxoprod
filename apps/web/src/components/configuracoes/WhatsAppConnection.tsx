@@ -6,7 +6,12 @@ import Image from "next/image";
 
 type ConnectionStatus = "disconnected" | "qr_pending" | "connecting" | "connected";
 
-export function WhatsAppConnection() {
+interface WhatsAppConnectionProps {
+  /** Se a Cloud API oficial está ativa, desabilita o modo QR Code (Baileys) */
+  cloudApiAtivo?: boolean;
+}
+
+export function WhatsAppConnection({ cloudApiAtivo = false }: WhatsAppConnectionProps) {
   const [status, setStatus] = useState<ConnectionStatus>("disconnected");
   const [qrBase64, setQrBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -109,14 +114,14 @@ export function WhatsAppConnection() {
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-            <WifiOff className="w-5 h-5 text-slate-400" />
+            <WifiOff className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
             <h3 className="font-semibold text-foreground">WhatsApp</h3>
             <p className="text-xs text-muted-foreground">Serviço indisponível</p>
           </div>
         </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-4 text-center">
           <p className="text-sm text-amber-800 mb-3">
             O serviço de WhatsApp não está respondendo. Verifique se o microserviço está rodando no Railway.
           </p>
@@ -132,7 +137,7 @@ export function WhatsAppConnection() {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+    <div className={`rounded-xl border border-border bg-card p-6 shadow-sm ${cloudApiAtivo ? 'opacity-60' : ''}`}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div
@@ -142,7 +147,12 @@ export function WhatsAppConnection() {
           <Smartphone className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1">
-          <h3 className="font-semibold text-foreground">Conexão WhatsApp</h3>
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
+            Conexão WhatsApp
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+              Não-Oficial (QR)
+            </span>
+          </h3>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span
               className={`w-2 h-2 rounded-full ${
@@ -163,10 +173,23 @@ export function WhatsAppConnection() {
         </div>
       </div>
 
+      {/* Aviso de bloqueio mútuo quando Cloud API está ativa */}
+      {cloudApiAtivo && (
+        <div className="bg-blue-50 dark:bg-blue-500/10 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-500/20 dark:border-blue-800 rounded-lg p-4 mb-4">
+          <p className="text-sm text-blue-800 dark:text-blue-500 dark:text-blue-300 font-medium">
+            A Cloud API oficial da Meta está ativa para este tenant.
+          </p>
+          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+            O modo QR Code (não-oficial) está desabilitado enquanto a Cloud API estiver configurada.
+            Para voltar a usar o modo QR, desconecte a Cloud API primeiro.
+          </p>
+        </div>
+      )}
+
       {/* Conteúdo por estado */}
-      {status === "disconnected" && (
+      {!cloudApiAtivo && status === "disconnected" && (
         <div className="space-y-4">
-          <div className="bg-muted rounded-lg p-4 border border-slate-100">
+          <div className="bg-muted rounded-lg p-4 border border-border">
             <p className="text-sm text-muted-foreground">
               Conecte seu WhatsApp para enviar e receber mensagens diretamente pelo sistema.
               As campanhas em massa e o chat com clientes ficarão disponíveis.
@@ -216,9 +239,9 @@ export function WhatsAppConnection() {
             ) : (
               <div className="w-[260px] h-[260px] bg-muted rounded-xl flex items-center justify-center border-2 border-dashed border-border">
                 <div className="text-center">
-                  <RefreshCw className="w-8 h-8 text-slate-400 mx-auto animate-spin" />
+                  <RefreshCw className="w-8 h-8 text-muted-foreground mx-auto animate-spin" />
                   <p className="text-xs text-muted-foreground mt-2">Gerando QR Code...</p>
-                  <p className="text-[10px] text-slate-400 mt-1 max-w-[200px]">Isso pode levar até 30 segundos na primeira vez</p>
+                  <p className="text-[10px] text-muted-foreground mt-1 max-w-[200px]">Isso pode levar até 30 segundos na primeira vez</p>
                 </div>
               </div>
             )}
@@ -229,7 +252,7 @@ export function WhatsAppConnection() {
               setStatus("disconnected");
               setQrBase64(null);
             }}
-            className="w-full px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
+            className="w-full px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-muted transition-colors"
           >
             Cancelar
           </button>
@@ -238,12 +261,12 @@ export function WhatsAppConnection() {
 
       {status === "connecting" && (
         <div className="space-y-4">
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 flex flex-col gap-3">
+          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-5 flex flex-col gap-3">
             <h4 className="font-medium text-amber-800 text-sm flex items-center gap-2">
               <RefreshCw className="w-5 h-5 animate-spin" />
               Sincronizando com o aparelho...
             </h4>
-            <p className="text-sm text-amber-700 leading-relaxed">
+            <p className="text-sm text-amber-700 dark:text-amber-500 leading-relaxed">
               Sua sessão já está salva! O sistema está aguardando o seu celular restabelecer o sinal de internet para retomar a comunicação.
             </p>
           </div>
@@ -251,7 +274,7 @@ export function WhatsAppConnection() {
           <button
             onClick={handleDisconnect}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors disabled:opacity-50 mt-4 border border-border shadow-sm"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50 mt-4 border border-border shadow-sm"
           >
             {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Power className="w-4 h-4" />}
             {loading ? "Desconectando..." : "Forçar Desconexão (Gerar novo QR)"}
@@ -261,10 +284,10 @@ export function WhatsAppConnection() {
 
       {status === "connected" && (
         <div className="space-y-4">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+          <div className="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4 flex items-center gap-3">
             <Wifi className="w-5 h-5 text-green-600 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-green-800">WhatsApp conectado com sucesso!</p>
+              <p className="text-sm font-medium text-green-800 dark:text-green-500">WhatsApp conectado com sucesso!</p>
               <p className="text-xs text-green-600 mt-0.5">
                 Mensagens recebidas aparecerão no botão flutuante. Campanhas serão enviadas automaticamente.
               </p>
@@ -274,7 +297,7 @@ export function WhatsAppConnection() {
           <button
             onClick={handleDisconnect}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-500 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
           >
             {loading ? (
               <RefreshCw className="w-4 h-4 animate-spin" />

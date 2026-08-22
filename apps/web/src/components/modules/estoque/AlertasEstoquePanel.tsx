@@ -40,7 +40,7 @@ export default function AlertasEstoquePanel() {
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-amber-500" />
           <h3 className="text-lg font-semibold">Alertas de Estoque</h3>
-          <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+          <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-500">
             {alertasPendentes.length} pendentes
           </span>
         </div>
@@ -69,15 +69,15 @@ export default function AlertasEstoquePanel() {
               key={alerta.id}
               className={`p-4 rounded-lg border ${
                 alerta.tipo_alerta === "sem_estoque"
-                  ? "bg-red-50 border-red-200"
-                  : "bg-amber-50 border-amber-200"
+                  ? "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20"
+                  : "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20"
               }`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     {alerta.tipo_alerta === "sem_estoque" ? (
-                      <X className="h-4 w-4 text-red-600" />
+                      <X className="h-4 w-4 text-red-600 dark:text-red-500" />
                     ) : (
                       <AlertTriangle className="h-4 w-4 text-amber-600" />
                     )}
@@ -85,7 +85,7 @@ export default function AlertasEstoquePanel() {
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{alerta.mensagem}</p>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>Estoque atual: <strong className={alerta.estoque_atual === 0 ? "text-red-600" : "text-amber-600"}>{alerta.estoque_atual}</strong></span>
+                    <span>Estoque atual: <strong className={alerta.estoque_atual === 0 ? "text-red-600 dark:text-red-500" : "text-amber-600"}>{alerta.estoque_atual}</strong></span>
                     <span>Mínimo: <strong>{alerta.estoque_minimo}</strong></span>
                   </div>
                 </div>

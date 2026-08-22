@@ -358,9 +358,9 @@ export default function CatalogoPage() {
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         p.estoque_atual <= 0
-                          ? "bg-red-100 text-red-700"
+                          ? "bg-red-100 text-red-700 dark:text-red-500"
                           : p.estoque_atual <= p.estoque_minimo
-                            ? "bg-amber-100 text-amber-700"
+                            ? "bg-amber-100 text-amber-700 dark:text-amber-500"
                             : "bg-emerald-100 text-emerald-700"
                       }`}
                     >
@@ -369,12 +369,12 @@ export default function CatalogoPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => abrirEdicao(p)} className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
+                      <button onClick={() => abrirEdicao(p)} className="text-muted-foreground hover:text-blue-600 dark:text-blue-500 p-1 transition-colors" title="Editar">
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setDeleteId(p.id)}
-                        className="text-slate-400 hover:text-red-600 p-1 transition-colors"
+                        className="text-muted-foreground hover:text-red-600 p-1 transition-colors"
                         title="Excluir"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -600,8 +600,8 @@ export default function CatalogoPage() {
             />
           </div>
 
-          <div className="border-t border-slate-100 pt-4">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Informações Fiscais (NFe)</h4>
+          <div className="border-t border-border pt-4">
+            <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Informações Fiscais (NFe)</h4>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">NCM</label>
@@ -655,7 +655,7 @@ export default function CatalogoPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(false)}
-              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors"
             >
               Cancelar
             </button>

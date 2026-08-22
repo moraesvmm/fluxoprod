@@ -183,7 +183,7 @@ export function ChatWindow({ phone, contactName, initialMessage }: ChatWindowPro
             ) : (
               <>
                 <span className="text-4xl">🎭</span>
-                <span className="text-[10px] text-slate-400 mt-1">Figurinha</span>
+                <span className="text-[10px] text-muted-foreground mt-1">Figurinha</span>
               </>
             )}
           </div>
@@ -231,7 +231,7 @@ export function ChatWindow({ phone, contactName, initialMessage }: ChatWindowPro
         return (
           <div className="flex items-center gap-2 py-1">
             <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <FileText className="w-4 h-4 text-amber-600" />
+              <FileText className="w-4 h-4 text-amber-600 dark:text-amber-500" />
             </div>
             <span className="text-[12px] text-muted-foreground italic">{msg.text || 'Documento'}</span>
           </div>
@@ -240,7 +240,7 @@ export function ChatWindow({ phone, contactName, initialMessage }: ChatWindowPro
       case 'contact':
         return (
           <div className="flex items-center gap-2 py-1">
-            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
               <User className="w-4 h-4 text-muted-foreground" />
             </div>
             <span className="text-[12px] text-foreground">{msg.text}</span>
@@ -278,7 +278,7 @@ export function ChatWindow({ phone, contactName, initialMessage }: ChatWindowPro
       >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <div className="bg-white/80 backdrop-blur rounded-lg px-4 py-3 shadow-sm text-center">
+            <div className="bg-card/80 backdrop-blur rounded-lg px-4 py-3 shadow-sm text-center">
               <p className="text-sm text-muted-foreground">
                 Nenhuma mensagem ainda. Envie a primeira mensagem para <strong>{contactName}</strong>.
               </p>
@@ -289,7 +289,7 @@ export function ChatWindow({ phone, contactName, initialMessage }: ChatWindowPro
             <div key={gi}>
               {/* Divisor de data */}
               <div className="flex justify-center my-3">
-                <span className="bg-white/90 backdrop-blur text-muted-foreground text-xs px-3 py-1 rounded-lg shadow-sm font-medium">
+                <span className="bg-card/90 backdrop-blur text-muted-foreground text-xs px-3 py-1 rounded-lg shadow-sm font-medium">
                   {group.date}
                 </span>
               </div>

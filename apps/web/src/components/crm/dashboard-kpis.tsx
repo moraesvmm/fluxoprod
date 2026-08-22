@@ -70,13 +70,13 @@ export default function DashboardKPIs() {
           title="Churn Rate (30d)"
           value={formatPercent(m.churn_rate)}
           icon={TrendingDown}
-          className={(m.churn_rate ?? 0) > 10 ? 'border-red-200 bg-red-50/10' : 'border-green-200 bg-green-50/10'}
+          className={(m.churn_rate ?? 0) > 10 ? 'border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/10/10' : 'border-green-200 dark:border-green-500/20 bg-green-50 dark:bg-green-500/10/10'}
         />
         <KPICard
           title="Velocidade Pipeline"
           value={formatDays(m.velocidade_media)}
           icon={Clock}
-          className="border-blue-200 bg-blue-50/10"
+          className="border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10/10"
         />
       </div>
 

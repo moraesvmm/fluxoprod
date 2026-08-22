@@ -243,7 +243,7 @@ export default function ComissoesPage() {
                     <TableCell className="text-right">
                       <button
                         onClick={() => setDeleteRegraId(regra.id)}
-                        className="text-sm font-medium text-red-600 transition-colors hover:text-red-700"
+                        className="text-sm font-medium text-red-600 transition-colors hover:text-red-700 dark:text-red-500"
                       >
                         Excluir
                       </button>

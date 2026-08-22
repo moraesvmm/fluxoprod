@@ -267,7 +267,7 @@ export function DocumentosModal({
                     ? "Solte o arquivo aqui..."
                     : "Arraste e solte um arquivo aqui, ou clique no botão acima"}
                 </p>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   PDF, JPG, PNG ou WEBP • Máximo 10MB
                 </p>
               </div>
@@ -290,7 +290,7 @@ export function DocumentosModal({
                   {documentos.map((doc: DocumentoFuncionario) => (
                     <div
                       key={doc.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-muted transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted hover:bg-muted transition-colors"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {getIconeDocumento(doc.mime_type)}
@@ -298,7 +298,7 @@ export function DocumentosModal({
                           <p className="text-sm font-medium text-foreground truncate max-w-[200px]">
                             {doc.nome_arquivo}
                           </p>
-                          <p className="text-xs text-slate-400">
+                          <p className="text-xs text-muted-foreground">
                             {getLabelTipo(doc.tipo)} •{" "}
                             {formatarTamanho(doc.tamanho_bytes)} •{" "}
                             {new Date(doc.criado_em).toLocaleDateString(
@@ -311,7 +311,7 @@ export function DocumentosModal({
                         <button
                           onClick={() => handleVisualizar(doc.id)}
                           disabled={loadingUrl === doc.id}
-                          className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors"
+                          className="p-1.5 text-muted-foreground hover:text-blue-600 dark:text-blue-500 transition-colors"
                           title="Visualizar"
                         >
                           {loadingUrl === doc.id ? (
@@ -322,14 +322,14 @@ export function DocumentosModal({
                         </button>
                         <button
                           onClick={() => handleVisualizar(doc.id)}
-                          className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                          className="p-1.5 text-muted-foreground hover:text-emerald-600 transition-colors"
                           title="Baixar"
                         >
                           <Download className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setDeleteDocId(doc.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 transition-colors"
+                          className="p-1.5 text-muted-foreground hover:text-red-600 dark:text-red-500 transition-colors"
                           title="Excluir"
                         >
                           <Trash2 className="h-4 w-4" />

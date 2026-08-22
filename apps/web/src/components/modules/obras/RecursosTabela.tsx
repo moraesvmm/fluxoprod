@@ -98,7 +98,7 @@ export function RecursosTabela({ recursos, onAdd, onEdit, onDelete }: RecursosTa
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b bg-muted/50">
+              <tr className="border-b bg-muted">
                 <th className="text-left p-3 text-xs font-medium text-muted-foreground">Tipo</th>
                 <th className="text-left p-3 text-xs font-medium text-muted-foreground">Descrição</th>
                 <th className="text-left p-3 text-xs font-medium text-muted-foreground">Quantidade</th>
@@ -119,7 +119,7 @@ export function RecursosTabela({ recursos, onAdd, onEdit, onDelete }: RecursosTa
                 </tr>
               ) : (
                 recursos.map((recurso) => (
-                  <tr key={recurso.id} className="border-b hover:bg-muted/50">
+                  <tr key={recurso.id} className="border-b hover:bg-muted">
                     <td className="p-3">
                       <span
                         className={cn(
@@ -143,9 +143,9 @@ export function RecursosTabela({ recursos, onAdd, onEdit, onDelete }: RecursosTa
                       <span
                         className={cn(
                           "text-xs px-2 py-1 rounded-full font-medium",
-                          recurso.status === 'alocado' && "bg-gray-200 text-foreground",
-                          recurso.status === 'em_uso' && "bg-blue-100 text-blue-700",
-                          recurso.status === 'liberado' && "bg-green-100 text-green-700"
+                          recurso.status === 'alocado' && "bg-muted text-foreground",
+                          recurso.status === 'em_uso' && "bg-blue-100 text-blue-700 dark:text-blue-500",
+                          recurso.status === 'liberado' && "bg-green-100 text-green-700 dark:text-green-500"
                         )}
                       >
                         {statusLabels[recurso.status]}

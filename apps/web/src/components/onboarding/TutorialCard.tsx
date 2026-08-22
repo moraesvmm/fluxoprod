@@ -36,7 +36,7 @@ export function TutorialCard() {
             "pointer-events-auto w-full max-w-md overflow-hidden rounded-3xl",
             "bg-card/90 backdrop-blur-xl border border-primary/20",
             "shadow-[0_20px_50px_rgba(0,0,0,0.3),0_0_30px_rgba(79,70,229,0.15)]",
-            "dark:bg-slate-900/90 dark:border-indigo-500/30"
+            "dark:bg-card/90 dark:border-indigo-500/30"
           )}
         >
           {/* Progress Bar */}

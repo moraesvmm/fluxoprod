@@ -164,7 +164,7 @@ export default function LojaPage() {
       <div className="flex h-[80vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
-          <p className="text-gray-400 animate-pulse">Carregando marketplace...</p>
+          <p className="text-muted-foreground animate-pulse">Carregando marketplace...</p>
         </div>
       </div>
     );
@@ -198,7 +198,7 @@ export default function LojaPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-muted-foreground dark:text-gray-400 text-lg leading-relaxed font-medium"
+            className="text-muted-foreground dark:text-muted-foreground text-lg leading-relaxed font-medium"
           >
             Adicione funcionalidades específicas para sua operação sem trocar de plano. 
             Módulos a la carte com ativação instantânea após o pagamento.
@@ -212,7 +212,7 @@ export default function LojaPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-indigo-400 transition-colors" />
           <Input 
             placeholder="Buscar módulo ou funcionalidade..." 
-            className="pl-10 bg-white/5 border-white/10 focus:border-indigo-500/50 transition-all rounded-xl h-12"
+            className="pl-10 bg-card/5 border-white/10 focus:border-indigo-500/50 transition-all rounded-xl h-12"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -246,7 +246,7 @@ export default function LojaPage() {
 
       {filteredCatalog.length === 0 && (
         <div className="py-20 text-center space-y-4">
-          <div className="inline-flex p-4 rounded-full bg-white/5 border border-white/10">
+          <div className="inline-flex p-4 rounded-full bg-card/5 border border-white/10">
             <Search className="w-8 h-8 text-muted-foreground" />
           </div>
           <h3 className="text-xl font-bold text-white">Nenhum módulo encontrado</h3>
@@ -258,7 +258,7 @@ export default function LojaPage() {
       )}
 
       {/* Support Section */}
-      <div className="mt-12 p-8 rounded-2xl bg-white/5 border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="mt-12 p-8 rounded-2xl bg-card/5 border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-full bg-indigo-500/10 text-indigo-400">
             <AlertCircle className="w-6 h-6" />
@@ -268,7 +268,7 @@ export default function LojaPage() {
             <p className="text-sm text-muted-foreground">Nossa equipe de engenharia pode desenvolver soluções sob medida para sua empresa.</p>
           </div>
         </div>
-        <Button className="bg-white/10 hover:bg-white/20 text-white border-white/10 rounded-xl">
+        <Button className="bg-card/10 hover:bg-card/20 text-white border-white/10 rounded-xl">
           Falar com Especialista
         </Button>
       </div>

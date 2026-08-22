@@ -150,7 +150,7 @@ export default function VendasPage() {
       </div>
 
       <div data-tour="vendas-historico" className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
+        <div className="p-4 border-b border-border flex items-center justify-between bg-muted">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
@@ -207,7 +207,7 @@ export default function VendasPage() {
                   <TableCell className={item.status === 'cancelado' ? 'line-through' : ''}>{item.cliente}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{item.metodo}</TableCell>
-                  <TableCell className={`font-medium ${item.status === 'cancelado' ? 'text-slate-400 line-through' : 'text-foreground'}`}>
+                  <TableCell className={`font-medium ${item.status === 'cancelado' ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                     {formatarValor(item.valor)}
                   </TableCell>
                   <TableCell>
@@ -215,9 +215,9 @@ export default function VendasPage() {
                   </TableCell>
                   <TableCell>
                     <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                      item.nfe_status === 'emitida' ? 'bg-green-100 text-green-700' :
-                      item.nfe_status === 'erro' ? 'bg-red-100 text-red-700' :
-                      item.nfe_status === 'pendente' ? 'bg-amber-100 text-amber-700 animate-pulse' :
+                      item.nfe_status === 'emitida' ? 'bg-green-100 text-green-700 dark:text-green-500' :
+                      item.nfe_status === 'erro' ? 'bg-red-100 text-red-700 dark:text-red-500' :
+                      item.nfe_status === 'pendente' ? 'bg-amber-100 text-amber-700 dark:text-amber-500 animate-pulse' :
                       'bg-muted text-muted-foreground'
                     }`}>
                       {item.nfe_status?.replace('_', ' ') || 'Não Emitida'}
@@ -239,7 +239,7 @@ export default function VendasPage() {
                           </button>
                           <Link 
                             href={`/tenant/vendas/nfe/${item.id}/danfe`}
-                            className="text-blue-600 hover:text-blue-800 transition-colors p-1" 
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-500 transition-colors p-1" 
                             title="Visualizar DANFE"
                           >
                             <Printer className="h-4 w-4" />
@@ -266,7 +266,7 @@ export default function VendasPage() {
                               toastError("Falha ao comunicar com o servidor.");
                             }
                           }}
-                          className="text-amber-500 hover:text-amber-700 transition-colors p-1" 
+                          className="text-amber-500 hover:text-amber-700 dark:text-amber-500 transition-colors p-1" 
                           title="Emitir NFe Manual"
                         >
                           <Banknote className="h-4 w-4" />
@@ -276,24 +276,24 @@ export default function VendasPage() {
                       {item.status !== 'cancelado' && (
                         <button 
                           onClick={() => setCancelId(item.id)}
-                          className="text-slate-400 hover:text-amber-600 transition-colors p-1" 
+                          className="text-muted-foreground hover:text-amber-600 transition-colors p-1" 
                           title="Cancelar venda"
                         >
                           <Ban className="h-4 w-4" />
                         </button>
                       )}
-                      <button className="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Visualizar Detalhes">
+                      <button className="text-muted-foreground hover:text-blue-600 transition-colors p-1" title="Visualizar Detalhes">
                         <FileText className="h-4 w-4" />
                       </button>
                       <button
-                        className="text-slate-400 hover:text-red-600 transition-colors p-1"
+                        className="text-muted-foreground hover:text-red-600 transition-colors p-1"
                         title="Excluir transação"
                         onClick={() => setDeleteId(item.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                       <button 
-                        className="text-slate-400 hover:text-primary transition-colors p-1" 
+                        className="text-muted-foreground hover:text-primary transition-colors p-1" 
                         title="Gerar Recibo PDF"
                         onClick={() => imprimirRecibo(item)}
                       >

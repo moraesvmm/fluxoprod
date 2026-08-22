@@ -119,9 +119,9 @@ export default function TransferenciasManager() {
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      pendente: "bg-amber-100 text-amber-800",
-      em_transito: "bg-blue-100 text-blue-800",
-      concluida: "bg-green-100 text-green-800",
+      pendente: "bg-amber-100 text-amber-800 dark:text-amber-500",
+      em_transito: "bg-blue-100 text-blue-800 dark:text-blue-500",
+      concluida: "bg-green-100 text-green-800 dark:text-green-500",
       cancelada: "bg-red-100 text-red-800"
     };
     const icons = {
@@ -155,7 +155,7 @@ export default function TransferenciasManager() {
           <div className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-blue-500" />
             <h3 className="text-lg font-semibold">Locais de Estoque</h3>
-            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:text-blue-500">
               {locais.length} ativos
             </span>
           </div>
@@ -190,7 +190,7 @@ export default function TransferenciasManager() {
                   </div>
                   <button
                     onClick={() => setDeleteLocalId(local.id)}
-                    className="p-1 text-red-600 hover:bg-red-50 rounded"
+                    className="p-1 text-red-600 hover:bg-red-50 dark:bg-red-500/10 rounded"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -251,10 +251,10 @@ export default function TransferenciasManager() {
               </thead>
               <tbody>
                 {filteredTransferencias.map((t) => (
-                  <tr key={t.id} className="border-b border-slate-100 hover:bg-muted">
+                  <tr key={t.id} className="border-b border-border hover:bg-muted">
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-slate-400" />
+                        <Package className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium text-foreground">{t.produto_nome}</span>
                       </div>
                     </td>
@@ -274,7 +274,7 @@ export default function TransferenciasManager() {
                             </button>
                             <button
                               onClick={() => setCancelarTransferenciaId(t.id)}
-                              className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-red-100 text-red-700 hover:bg-red-200 h-7 px-2"
+                              className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-red-100 text-red-700 dark:text-red-500 hover:bg-red-200 h-7 px-2"
                             >
                               <XCircle className="h-3 w-3 mr-1" /> Cancelar
                             </button>

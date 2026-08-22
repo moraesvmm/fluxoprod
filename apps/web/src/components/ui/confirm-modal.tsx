@@ -17,14 +17,14 @@ interface ConfirmModalProps {
 const variantConfig = {
   danger: {
     icon: Trash2,
-    iconBg: 'bg-red-50',
-    iconColor: 'text-red-600',
+    iconBg: 'bg-red-50 dark:bg-red-500/10',
+    iconColor: 'text-red-600 dark:text-red-500',
     btnColor: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
   },
   warning: {
     icon: AlertTriangle,
-    iconBg: 'bg-amber-50',
-    iconColor: 'text-amber-600',
+    iconBg: 'bg-amber-50 dark:bg-amber-500/10',
+    iconColor: 'text-amber-600 dark:text-amber-500',
     btnColor: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500',
   },
   default: {

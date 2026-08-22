@@ -59,8 +59,8 @@ export default function PrevisaoDemandaPanel() {
 
   const getPrecisaoColor = (precisao?: number) => {
     if (!precisao) return "text-muted-foreground";
-    if (precisao >= 80) return "text-green-600";
-    if (precisao >= 60) return "text-amber-600";
+    if (precisao >= 80) return "text-green-600 dark:text-green-500";
+    if (precisao >= 60) return "text-amber-600 dark:text-amber-500";
     return "text-red-600";
   };
 
@@ -125,12 +125,12 @@ export default function PrevisaoDemandaPanel() {
         </div>
 
         {ultimaPrevisao && (
-          <div className={`mt-4 p-4 rounded-lg ${ultimaPrevisao.dias_para_zerar !== null && ultimaPrevisao.dias_para_zerar < diasPrevisao ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+          <div className={`mt-4 p-4 rounded-lg ${ultimaPrevisao.dias_para_zerar !== null && ultimaPrevisao.dias_para_zerar < diasPrevisao ? 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20' : 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20'}`}>
             <div className="flex items-start gap-3">
               {ultimaPrevisao.dias_para_zerar !== null && ultimaPrevisao.dias_para_zerar < diasPrevisao ? (
                 <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
               ) : (
-                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-500 mt-0.5" />
               )}
               <div>
                 <h4 className="font-medium text-foreground">Previsão Gerada</h4>
@@ -141,7 +141,7 @@ export default function PrevisaoDemandaPanel() {
                   Média diária: <strong>{ultimaPrevisao.media_venda_diaria.toFixed(2)}</strong> unidades/dia
                 </p>
                 {ultimaPrevisao.dias_para_zerar !== null && ultimaPrevisao.dias_para_zerar < diasPrevisao && (
-                  <p className="text-sm text-red-700 mt-2 font-medium">
+                  <p className="text-sm text-red-700 dark:text-red-500 mt-2 font-medium">
                     ⚠️ Reposição urgente necessária (estoque zera em {ultimaPrevisao.dias_para_zerar} dias)
                   </p>
                 )}
@@ -171,7 +171,7 @@ export default function PrevisaoDemandaPanel() {
             </thead>
             <tbody>
               {Array.isArray(previsoes) && previsoes.map((previsao) => (
-                <tr key={previsao.id} className="border-b border-slate-100 hover:bg-muted">
+                <tr key={previsao.id} className="border-b border-border hover:bg-muted">
                   <td className="p-3 font-medium text-foreground">{previsao.produto_nome}</td>
                   <td className="p-3 text-muted-foreground">
                     {new Date(previsao.periodo_inicio).toLocaleDateString('pt-BR')} - {new Date(previsao.periodo_fim).toLocaleDateString('pt-BR')}
@@ -186,7 +186,7 @@ export default function PrevisaoDemandaPanel() {
                         className="w-20 border border-border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
                       />
                     ) : (
-                      <span className={previsao.demanda_real ? "text-foreground" : "text-slate-400"}>
+                      <span className={previsao.demanda_real ? "text-foreground" : "text-muted-foreground"}>
                         {previsao.demanda_real ?? "-"}
                       </span>
                     )}
@@ -213,7 +213,7 @@ export default function PrevisaoDemandaPanel() {
                     ) : (
                       <button
                         onClick={() => setEditandoDemandaReal(prev => ({ ...prev, [previsao.id]: previsao.demanda_real || 0 }))}
-                        className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-muted text-foreground hover:bg-slate-200 h-7 px-2"
+                        className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-muted text-foreground hover:bg-muted h-7 px-2"
                       >
                         Editar
                       </button>

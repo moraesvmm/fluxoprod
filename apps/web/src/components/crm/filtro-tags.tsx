@@ -61,7 +61,7 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
             <h4 className="font-medium text-foreground">Filtrar por Tags</h4>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-muted-foreground"
+              className="text-muted-foreground hover:text-muted-foreground"
             >
               <X className="w-4 h-4" />
             </button>
@@ -75,7 +75,7 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
                 className={`flex-1 px-3 py-1.5 text-sm rounded-md transition-colors ${
                   operador === 'all'
                     ? 'bg-violet-600 text-white'
-                    : 'bg-muted text-foreground hover:bg-slate-200'
+                    : 'bg-muted text-foreground hover:bg-muted'
                 }`}
               >
                 Tem todas
@@ -85,7 +85,7 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
                 className={`flex-1 px-3 py-1.5 text-sm rounded-md transition-colors ${
                   operador === 'any'
                     ? 'bg-violet-600 text-white'
-                    : 'bg-muted text-foreground hover:bg-slate-200'
+                    : 'bg-muted text-foreground hover:bg-muted'
                 }`}
               >
                 Tem qualquer
@@ -97,7 +97,7 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
             <label className="block text-sm font-medium text-foreground mb-2">Tags</label>
             <div className="max-h-48 overflow-auto space-y-1">
               {catalogTags.length === 0 ? (
-                <p className="text-sm text-slate-400">Nenhuma tag disponível</p>
+                <p className="text-sm text-muted-foreground">Nenhuma tag disponível</p>
               ) : (
                 catalogTags.map((tag) => (
                   <button
@@ -121,7 +121,7 @@ export default function FiltroTags({ onFiltroChange }: FiltroTagsProps) {
                       style={{ backgroundColor: tag.cor }}
                     />
                     <span className="flex-1 text-left text-foreground">{tag.nome}</span>
-                    <span className="text-xs text-slate-400">{tag.uso_count}</span>
+                    <span className="text-xs text-muted-foreground">{tag.uso_count}</span>
                   </button>
                 ))
               )}

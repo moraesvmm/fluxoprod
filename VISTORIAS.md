@@ -47,3 +47,22 @@ PENDENTE VISTORIA (28/07/2026): Correções e melhorias de múltiplos módulos:
 - BANCO DE DADOS: Criadas RPCs faltando no schema demo (tenant_dashboard_kpis_por_mes, tenant_obter_sugestoes_nurturing, tenant_finalizar_alerta_nurturing, tenant_listar_ordens_producao, tenant_listar_fichas_tecnicas). Adicionada coluna unidade_medida em produtos. Criada tabela ordens_producao. Corrigida RPC pública tenant_obter_fechamento_pendente com SECURITY DEFINER.
 - TUTORIAIS: Reset completo dos tutoriais da conta demo para experiência de primeiro acesso.
 Prioridade: ALTA - vistoriar dropdown de ações no estoque, calculadora e tutoriais da conta demo.
+
+PENDENTE VISTORIA (22/08/2026): Correção do link de confirmação de e-mail no cadastro Trial:
+- BUG CRÍTICO: O link "ATIVAR MINHA CONTA AGORA" no e-mail de boas-vindas redirecionava para o Supabase com erro {"error":"requested path is invalid"}. O redirect_to gerado estava como "seufluxoerp.com.br" (sem https:// e sem /login?confirmed=true).
+- CAUSA RAIZ: A lógica de construção do `origin` baseada em request.headers (origin/host) era frágil e produzia URLs inválidas dependendo do proxy/CDN. Além disso, o `action_link` gerado pelo Supabase usava o Site URL do dashboard (possivelmente mal configurado) em vez do redirectTo passado nas options.
+- CORREÇÃO: (1) Substituída derivação dinâmica de origin por NEXT_PUBLIC_APP_URL com fallback fixo para https://seufluxoerp.com.br em register-trial/route.ts e resend-confirmation/route.ts. (2) Adicionada lógica de reescrita do redirect_to dentro do action_link gerado pelo Supabase para garantir que aponta sempre para ${origin}/login?confirmed=true.
+- AÇÃO MANUAL NECESSÁRIA: Configurar no Supabase Dashboard (Auth → URL Configuration): Site URL = https://seufluxoerp.com.br, Redirect URLs = https://seufluxoerp.com.br/**, https://fluxoprod.vercel.app/**
+Prioridade: CRÍTICA - vistoriar e testar fluxo completo de cadastro trial com confirmação de e-mail.
+
+## PENDENTE VISTORIA (22/08/2026)
+**Arquivos Afetados:** > 50 arquivos (src/app/tenant/* e src/components/*)
+**O que foi feito:**
+- Refatoração massiva de todo o sistema para corrigir problemas de contraste no Dark Mode.
+- Substituição de classes tailwind hardcoded (`bg-white`, `bg-gray-*`, `bg-slate-*`, `text-gray-*`) por variáveis nativas do tema (`bg-card`, `bg-muted`, `text-foreground`, `border-border`).
+- Ajustes específicos de grids e tooltips na lib Recharts no Dashboard.
+- Ajuste das opacidades de containers e alertas (`bg-amber-50`, `bg-red-50`, `bg-muted/50`) para ficarem legíveis e destacarem no fundo dark mode sem perder a característica light.
+**Motivo:** As variáveis fixas e as transparências ruins causavam textos não legíveis e elementos que sumiam no modo escuro.
+**Como testar:**
+- Navegar nas telas principais (Dashboard, Vendas, Estoque, etc) alterando o tema do sistema para Dark Mode e garantindo legibilidade e boa distinção de borders e backgrounds.
+- Verificar o componente de gráficos (Recharts) no Dashboard.

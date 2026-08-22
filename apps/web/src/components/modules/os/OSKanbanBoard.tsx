@@ -12,10 +12,10 @@ interface OSKanbanBoardProps {
 }
 
 const COLUMNS = [
-  { id: 'aberta', title: 'Aberta', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-  { id: 'em_execucao', title: 'Em Execução', icon: Wrench, color: 'text-blue-600', bg: 'bg-blue-50' },
+  { id: 'aberta', title: 'Aberta', icon: Clock, color: 'text-amber-600 dark:text-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10' },
+  { id: 'em_execucao', title: 'Em Execução', icon: Wrench, color: 'text-blue-600 dark:text-blue-500', bg: 'bg-blue-50 dark:bg-blue-500/10' },
   { id: 'concluida', title: 'Concluída', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  { id: 'cancelada', title: 'Cancelada', icon: XCircle, color: 'text-red-600', bg: 'bg-red-50' },
+  { id: 'cancelada', title: 'Cancelada', icon: XCircle, color: 'text-red-600 dark:text-red-500', bg: 'bg-red-50 dark:bg-red-500/10' },
 ];
 
 export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardProps) {
@@ -53,7 +53,7 @@ export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardP
                 </div>
                 <h3 className="font-semibold text-foreground">{col.title}</h3>
               </div>
-              <span className="text-xs font-bold text-slate-400 bg-card px-2 py-1 rounded-full border border-slate-100 shadow-sm">
+              <span className="text-xs font-bold text-muted-foreground bg-card px-2 py-1 rounded-full border border-border shadow-sm">
                 {colOrdens.length}
               </span>
             </div>
@@ -68,10 +68,10 @@ export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardP
                   className="group bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md hover:border-violet-200 transition-all cursor-grab active:cursor-grabbing"
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">#{os.numero}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">#{os.numero}</span>
                     <button 
                       onClick={() => onEdit(os)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-violet-600 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-violet-600 transition-all"
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </button>
@@ -87,7 +87,7 @@ export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardP
                       </span>
                     </div>
                     {os.tempo_total_minutos && os.tempo_total_minutos > 0 && (
-                      <div className="flex items-center gap-1 text-slate-400 text-[10px]">
+                      <div className="flex items-center gap-1 text-muted-foreground text-[10px]">
                         <Clock className="w-3 h-3" />
                         {Math.floor(os.tempo_total_minutos / 60)}h {os.tempo_total_minutos % 60}m
                       </div>
@@ -97,7 +97,7 @@ export function OSKanbanBoard({ ordens, onEdit, onStatusChange }: OSKanbanBoardP
               ))}
 
               {colOrdens.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-slate-100 rounded-xl">
+                <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-border rounded-xl">
                   <p className="text-xs text-slate-300">Arraste aqui</p>
                 </div>
               )}

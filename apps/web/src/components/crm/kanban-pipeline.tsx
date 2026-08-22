@@ -130,7 +130,7 @@ export default function KanbanPipeline({ onClienteClick }: KanbanPipelineProps) 
                             </div>
                           )}
                         </div>
-                        <button className="p-1 text-slate-400 hover:text-muted-foreground hover:bg-muted rounded">
+                        <button className="p-1 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded">
                           <MoreHorizontal className="w-4 h-4" />
                         </button>
                       </div>
@@ -143,7 +143,7 @@ export default function KanbanPipeline({ onClienteClick }: KanbanPipelineProps) 
                   ))}
 
                   {coluna.clientes.length === 0 && (
-                    <div className="text-center py-6 text-slate-400 text-sm">
+                    <div className="text-center py-6 text-muted-foreground text-sm">
                       Nenhum cliente nesta fase
                     </div>
                   )}

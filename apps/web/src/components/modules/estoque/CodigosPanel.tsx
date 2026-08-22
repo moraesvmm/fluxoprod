@@ -68,7 +68,7 @@ export default function CodigosPanel() {
       {/* Busca por código */}
       <div className="p-4 rounded-lg border border-border bg-card">
         <div className="flex items-center gap-2">
-          <Search className="h-5 w-5 text-slate-400" />
+          <Search className="h-5 w-5 text-muted-foreground" />
           <input
             type="text"
             value={codigoBusca}
@@ -87,15 +87,15 @@ export default function CodigosPanel() {
         </div>
 
         {produtoEncontrado && (
-          <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+          <div className="mt-4 p-4 bg-green-50 dark:bg-green-500/10 rounded-lg border border-green-200 dark:border-green-500/20">
             <div className="flex items-start gap-3">
               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
               <div>
                 <h4 className="font-medium text-green-900">{produtoEncontrado.nome}</h4>
-                <p className="text-sm text-green-700 mt-1">
+                <p className="text-sm text-green-700 dark:text-green-500 mt-1">
                   Código: {produtoEncontrado.codigo_barras || produtoEncontrado.codigo_qr || "-"}
                 </p>
-                <p className="text-sm text-green-700">
+                <p className="text-sm text-green-700 dark:text-green-500">
                   Preço: R$ {produtoEncontrado.preco_base?.toFixed(2) || "0,00"}
                 </p>
               </div>
@@ -121,7 +121,7 @@ export default function CodigosPanel() {
             </thead>
             <tbody>
               {produtos.map((produto) => (
-                <tr key={produto.id} className="border-b border-slate-100 hover:bg-muted">
+                <tr key={produto.id} className="border-b border-border hover:bg-muted">
                   <td className="p-3 font-medium text-foreground">{produto.nome}</td>
                   <td className="p-3">
                     {produto.codigo_barras ? (
@@ -129,7 +129,7 @@ export default function CodigosPanel() {
                         {produto.codigo_barras}
                       </code>
                     ) : (
-                      <span className="text-slate-400">-</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </td>
                   <td className="p-3">
@@ -141,7 +141,7 @@ export default function CodigosPanel() {
                         </code>
                       </div>
                     ) : (
-                      <span className="text-slate-400">-</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </td>
                   <td className="p-3">

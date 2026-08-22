@@ -39,11 +39,8 @@ export async function POST(request: Request) {
     }
 
     // Gera novo magic link de ativação
-    const reqOrigin = request.headers.get("origin");
-    const reqHost = request.headers.get("host");
-    const origin = reqOrigin 
-      ? (reqOrigin.startsWith("http") ? reqOrigin : `https://${reqOrigin}`) 
-      : (reqHost ? `https://${reqHost}` : "https://fluxoprod.vercel.app");
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://seufluxoerp.com.br";
+    const origin = appUrl.replace(/\/+$/, "");
     // @ts-expect-error Supabase types require a password for signup links, but we only want to generate the confirmation link for an existing user
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: "signup",
@@ -61,7 +58,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const activationLink = linkData?.properties?.action_link;
+    const activationLink = (() => {
+      const raw = linkData?.properties?.action_link;
+      if (!raw) return undefined;
+      try {
+        const linkUrl = new URL(raw);
+        linkUrl.searchParams.set("redirect_to", `${origin}/login?confirmed=true`);
+        return linkUrl.toString();
+      } catch {
+        return raw;
+      }
+    })();
     const userName =
       (user.user_metadata?.nome as string | undefined) ||
       email.split("@")[0];

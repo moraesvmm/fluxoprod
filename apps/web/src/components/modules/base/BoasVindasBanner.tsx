@@ -93,7 +93,7 @@ export default function BoasVindasBanner({ nome, userId, onDismiss }: BoasVindas
           </div>
           <button
             onClick={handleDismiss}
-            className="self-start sm:self-center p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors shrink-0"
+            className="self-start sm:self-center p-1.5 rounded-full bg-card/20 hover:bg-card/30 transition-colors shrink-0"
             aria-label="Fechar"
           >
             <X className="w-4 h-4 text-white" />

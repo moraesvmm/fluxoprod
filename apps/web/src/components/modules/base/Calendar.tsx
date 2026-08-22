@@ -53,15 +53,15 @@ export function Calendar({ events, onEventClick, title = "Calendário" }: Calend
     switch (status) {
       case 'aberta':
       case 'planejada':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
+        return 'bg-blue-100 text-blue-700 dark:text-blue-500 border-blue-200 dark:border-blue-500/20';
       case 'em_andamento':
-        return 'bg-amber-100 text-amber-700 border-amber-200';
+        return 'bg-amber-100 text-amber-700 dark:text-amber-500 border-amber-200 dark:border-amber-500/20';
       case 'concluida':
       case 'concluido':
-        return 'bg-green-100 text-green-700 border-green-200';
+        return 'bg-green-100 text-green-700 dark:text-green-500 border-green-200 dark:border-green-500/20';
       case 'cancelada':
       case 'cancelado':
-        return 'bg-red-100 text-red-700 border-red-200';
+        return 'bg-red-100 text-red-700 dark:text-red-500 border-red-200 dark:border-red-500/20';
       default:
         return 'bg-muted text-foreground border-border';
     }
@@ -105,7 +105,7 @@ export function Calendar({ events, onEventClick, title = "Calendário" }: Calend
             </button>
             <button
               onClick={goToToday}
-              className="px-3 py-1 text-sm font-medium bg-muted hover:bg-slate-200 rounded-md transition-colors"
+              className="px-3 py-1 text-sm font-medium bg-muted hover:bg-muted rounded-md transition-colors"
             >
               Hoje
             </button>
@@ -126,7 +126,7 @@ export function Calendar({ events, onEventClick, title = "Calendário" }: Calend
 
           {/* Status Filter */}
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-slate-400" />
+            <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
@@ -158,7 +158,7 @@ export function Calendar({ events, onEventClick, title = "Calendário" }: Calend
         <div className="grid grid-cols-7 gap-1">
           {/* Empty cells for days before first day of month */}
           {Array.from({ length: startDayOfWeek }).map((_, i) => (
-            <div key={`empty-${i}`} className="h-32 bg-slate-50/50 rounded-md" />
+            <div key={`empty-${i}`} className="h-32 bg-muted rounded-md" />
           ))}
 
           {/* Days of month */}
@@ -210,7 +210,7 @@ export function Calendar({ events, onEventClick, title = "Calendário" }: Calend
 
           {/* Empty cells for days after last day of month */}
           {Array.from({ length: (7 - ((startDayOfWeek + daysInMonth) % 7)) % 7 }).map((_, i) => (
-            <div key={`empty-end-${i}`} className="h-32 bg-slate-50/50 rounded-md" />
+            <div key={`empty-end-${i}`} className="h-32 bg-muted rounded-md" />
           ))}
         </div>
       </div>
@@ -227,15 +227,15 @@ export function Calendar({ events, onEventClick, title = "Calendário" }: Calend
             <span className="text-muted-foreground">Obras</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200" />
+            <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200 dark:border-blue-500/20" />
             <span className="text-muted-foreground">Aberta/Planejada</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-amber-100 border border-amber-200" />
+            <div className="w-3 h-3 rounded bg-amber-100 border border-amber-200 dark:border-amber-500/20" />
             <span className="text-muted-foreground">Em andamento</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-green-100 border border-green-200" />
+            <div className="w-3 h-3 rounded bg-green-100 border border-green-200 dark:border-green-500/20" />
             <span className="text-muted-foreground">Concluída</span>
           </div>
         </div>

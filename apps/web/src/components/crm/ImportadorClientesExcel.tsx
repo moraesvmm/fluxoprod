@@ -229,7 +229,7 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
                   <p className="text-xs text-muted-foreground">{data.length} registros prontos para importar</p>
                 </div>
               </div>
-              <button onClick={reset} className="p-1 hover:bg-slate-200 rounded-md text-muted-foreground">
+              <button onClick={reset} className="p-1 hover:bg-muted rounded-md text-muted-foreground">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -244,9 +244,9 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
                     <th className="px-3 py-2 font-semibold text-foreground">Endereço</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-card">
+                <tbody className="divide-y divide-border bg-card">
                   {data.slice(0, 10).map((p, i) => (
-                    <tr key={i} className="hover:bg-slate-50/50">
+                    <tr key={i} className="hover:bg-muted">
                       <td className="px-3 py-2 font-medium text-foreground">{p.nome}</td>
                       <td className="px-3 py-2 text-muted-foreground font-mono text-xs">{p.cpf_cnpj || '-'}</td>
                       <td className="px-3 py-2 text-muted-foreground">{p.email || '-'}</td>
@@ -258,15 +258,15 @@ export default function ImportadorClientesExcel({ isOpen, onClose, onSuccess }: 
                 </tbody>
               </table>
               {data.length > 10 && (
-                <div className="p-2 text-center text-xs text-slate-400 bg-slate-50/50 border-t border-slate-100">
+                <div className="p-2 text-center text-xs text-muted-foreground bg-muted border-t border-border">
                   E mais {data.length - 10} registros...
                 </div>
               )}
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
+            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-4 flex gap-3">
               <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-              <p className="text-xs text-amber-800 leading-relaxed">
+              <p className="text-xs text-amber-800 dark:text-amber-500 leading-relaxed">
                 <strong>Atenção:</strong> Mapeamos automaticamente campos como Nome, E-mail, Telefone e Endereço (Rua, Número, Bairro, etc). 
                 Qualquer outra coluna será descartada durante o processo.
               </p>

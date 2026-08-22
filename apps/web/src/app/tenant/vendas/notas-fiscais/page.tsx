@@ -144,7 +144,7 @@ export default function NotasFiscaisPage() {
           title="Total NFs Saída" 
           value={formatarValor(totaisSaida)} 
           icon={ArrowUpRight} 
-          className="bg-indigo-50/50 dark:bg-indigo-900/10 border-indigo-200 dark:border-indigo-800"
+          className="bg-indigo-50 dark:bg-indigo-500/10/50 dark:bg-indigo-900/10 border-indigo-200 dark:border-indigo-500/20 dark:border-indigo-800"
         />
         <KPICard 
           title="Total NFs Entrada" 
@@ -173,7 +173,7 @@ export default function NotasFiscaisPage() {
           return (
             <TabsContent key={tabValue} value={tabValue} className="mt-4">
               <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/20">
+                <div className="p-4 border-b border-border flex items-center justify-between bg-muted dark:bg-card/20">
                   <div className="relative w-full max-w-sm">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <input
@@ -242,7 +242,7 @@ export default function NotasFiscaisPage() {
 
         <TabsContent value="configuracoes" className="mt-4">
           <div className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-border bg-slate-50/50 dark:bg-slate-900/20">
+            <div className="p-6 border-b border-border bg-muted dark:bg-card/20">
               <h3 className="text-lg font-semibold text-foreground">Gestão de Canais de Venda</h3>
               <p className="text-sm text-muted-foreground mt-1">
                 Configure os canais pelos quais sua empresa realiza vendas. Estes canais aparecerão no Checkout do PDV para categorizar a origem da venda.
@@ -284,7 +284,7 @@ export default function NotasFiscaisPage() {
                           </button>
                           <button
                             onClick={() => setDeleteCanalId(canal.id)}
-                            className="p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors"
+                            className="p-2 rounded-md hover:bg-red-50 dark:bg-red-500/10 dark:hover:bg-red-900/20 text-red-500 transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -331,7 +331,7 @@ export default function NotasFiscaisPage() {
             <button type="submit" className="flex-1 bg-primary text-white py-2 rounded-md text-sm font-medium hover:bg-primary/90">
               {editCanal ? "Salvar Alterações" : "Criar Canal"}
             </button>
-            <button type="button" onClick={() => setShowCanalModal(false)} className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-slate-200">
+            <button type="button" onClick={() => setShowCanalModal(false)} className="flex-1 bg-muted text-foreground py-2 rounded-md text-sm font-medium hover:bg-muted">
               Cancelar
             </button>
           </div>
@@ -349,8 +349,8 @@ export default function NotasFiscaisPage() {
               Procurar Arquivo
             </button>
           </div>
-          <div className="bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/50 rounded-lg p-3">
-            <p className="text-xs text-amber-800 dark:text-amber-400 font-medium">
+          <div className="bg-amber-50 dark:bg-amber-500/10/50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 dark:border-amber-900/50 rounded-lg p-3">
+            <p className="text-xs text-amber-800 dark:text-amber-500 dark:text-amber-400 font-medium">
               Nota: A funcionalidade de parser completo de XML para integração direta com estoque será liberada em breve. No momento os documentos serão apenas arquivados no repositório documental.
             </p>
           </div>

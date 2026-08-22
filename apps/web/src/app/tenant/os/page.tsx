@@ -215,14 +215,14 @@ export default function OSPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <KPICard title="Abertas" value={abertas} icon={Clock} className="border-amber-200 bg-amber-50/10" />
-        <KPICard title="Em Execução" value={execucao} icon={Wrench} className="border-blue-200 bg-blue-50/10" />
+        <KPICard title="Abertas" value={abertas} icon={Clock} className="border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/10/10" />
+        <KPICard title="Em Execução" value={execucao} icon={Wrench} className="border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10/10" />
         <KPICard title="Concluídas" value={concluidas} icon={CheckCircle} className="border-emerald-200 bg-emerald-50/10" />
-        <KPICard title="Canceladas" value={canceladas} icon={XCircle} className="border-red-200 bg-red-50/10" />
+        <KPICard title="Canceladas" value={canceladas} icon={XCircle} className="border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/10/10" />
       </div>
 
       <div data-tour="os-tabela" className="flex-1 rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center justify-between bg-slate-50/50">
+        <div className="p-4 border-b border-border flex items-center justify-between bg-muted">
           <div className="relative w-full max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
@@ -301,7 +301,7 @@ export default function OSPage() {
                   <div className="flex flex-col items-center gap-2">
                     <Wrench className="h-10 w-10 text-slate-200" />
                     <p className="text-muted-foreground text-sm">Nenhuma ordem de serviço encontrada</p>
-                    <p className="text-slate-400 text-xs">Clique em &quot;Nova OS&quot; para criar a primeira.</p>
+                    <p className="text-muted-foreground text-xs">Clique em &quot;Nova OS&quot; para criar a primeira.</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -322,10 +322,10 @@ export default function OSPage() {
                   <TableCell className="text-sm text-muted-foreground">{formatarData(os.criado_em)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => abrirEdicao(os)} className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
+                      <button onClick={() => abrirEdicao(os)} className="text-muted-foreground hover:text-blue-600 dark:text-blue-500 p-1 transition-colors" title="Editar">
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button onClick={() => setDeleteId(os.id)} className="text-slate-400 hover:text-red-600 p-1 transition-colors" title="Excluir">
+                      <button onClick={() => setDeleteId(os.id)} className="text-muted-foreground hover:text-red-600 dark:text-red-500 p-1 transition-colors" title="Excluir">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -440,7 +440,7 @@ export default function OSPage() {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors"
             >
               Cancelar
             </button>
@@ -539,7 +539,7 @@ export default function OSPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(false)}
-              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors"
             >
               Cancelar
             </button>

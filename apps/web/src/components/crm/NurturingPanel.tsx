@@ -79,7 +79,7 @@ export function NurturingPanel() {
     return { 
       icon: <Clock className="w-3 h-3" />, 
       label: 'Recuperação', 
-      color: 'bg-amber-100 text-amber-700 border-amber-200' 
+      color: 'bg-amber-100 text-amber-700 dark:text-amber-500 border-amber-200 dark:border-amber-500/20' 
     };
   };
 
@@ -137,7 +137,7 @@ export function NurturingPanel() {
 
               <div className="flex justify-between items-start mb-3">
                 <div className={`p-2 rounded-lg ${
-                  item.categoria === 'recompra' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                  item.categoria === 'recompra' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600'
                 }`}>
                   {config.icon}
                 </div>
@@ -150,7 +150,7 @@ export function NurturingPanel() {
                       e.stopPropagation();
                       handleFinalizar(item.id, item.cliente_nome);
                     }}
-                    className="p-1 text-slate-400 hover:text-muted-foreground hover:bg-muted rounded-full transition-all"
+                    className="p-1 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded-full transition-all"
                     title="Descartar"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -163,7 +163,7 @@ export function NurturingPanel() {
                   {item.cliente_nome || 'Cliente sem nome'}
                 </h3>
                 {item.cliente_telefone && (
-                  <p className="text-[11px] text-slate-400 font-mono mt-0.5">{item.cliente_telefone}</p>
+                  <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{item.cliente_telefone}</p>
                 )}
                 <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
                   {getDescricaoContextual(item)}

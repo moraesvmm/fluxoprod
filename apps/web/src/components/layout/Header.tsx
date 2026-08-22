@@ -34,7 +34,7 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
         <button
           type="button"
           onClick={onMenuClick}
-          className="-m-2 p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
+          className="-m-2 p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
         >
           <span className="sr-only">Abrir menu principal</span>
           <Menu className="h-6 w-6" aria-hidden="true" />
@@ -59,7 +59,7 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
         <button
           onClick={onSearchClick}
           data-tour="global-search"
-          className="relative flex flex-1 items-center gap-2 px-4 py-2 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors text-left"
+          className="relative flex flex-1 items-center gap-2 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-left"
         >
           <Search className="h-4 w-4 text-muted-foreground/60" />
           <span className="text-sm text-muted-foreground/60">Buscar transações, produtos ou clientes...</span>
@@ -84,11 +84,11 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
 
           <button
             type="button"
-            className="-m-2.5 p-2.5 text-muted-foreground/70 hover:text-foreground hover:bg-muted/50 transition-all rounded-lg relative"
+            className="-m-2.5 p-2.5 text-muted-foreground/70 hover:text-foreground hover:bg-muted transition-all rounded-lg relative"
           >
             <span className="sr-only">Notificações</span>
             <Bell className="h-5 w-5" aria-hidden="true" />
-            <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-destructive border-2 border-white dark:border-slate-900 shadow-sm"></span>
+            <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-destructive border-2 border-white dark:border-border shadow-sm"></span>
           </button>
 
           <div
@@ -98,8 +98,13 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
 
           {/* Profile Dropdown (Simulation) */}
           <div className="flex items-center gap-x-4">
+<<<<<<< ours
             <Image
               className="h-9 w-9 rounded-full bg-muted object-cover border-2 border-border/40 shadow-md ring-2 ring-white dark:ring-slate-800"
+=======
+            <Image
+              className="h-9 w-9 rounded-full bg-muted object-cover border-2 border-border/40 shadow-md ring-2 ring-white dark:ring-border"
+>>>>>>> theirs
               src="https://api.dicebear.com/7.x/notionists/svg?seed=Admin&backgroundColor=f8fafc"
               alt="Avatar"
               width={36}
@@ -116,7 +121,7 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
             </span>
             <button
               onClick={handleLogout}
-              className="-m-2.5 p-2.5 text-muted-foreground/70 hover:text-foreground hover:bg-muted/50 transition-all rounded-lg"
+              className="-m-2.5 p-2.5 text-muted-foreground/70 hover:text-foreground hover:bg-muted transition-all rounded-lg"
               title="Logout"
             >
               <LogOut className="h-5 w-5" />

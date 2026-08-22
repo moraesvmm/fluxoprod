@@ -101,12 +101,12 @@ export default function ValorizacaoDashboard() {
               </p>
             </div>
             {valorizacao.produtos_sem_custo > 0 && (
-              <div className="p-4 rounded-lg border border-amber-200 bg-amber-50">
+              <div className="p-4 rounded-lg border border-amber-500/20 bg-amber-500/10">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  <span className="text-sm text-amber-700">Produtos Sem Custo</span>
+                  <span className="text-sm text-amber-500 font-medium">Produtos Sem Custo</span>
                 </div>
-                <p className="text-2xl font-bold text-amber-700 mt-2">
+                <p className="text-2xl font-bold text-amber-500 mt-2">
                   {valorizacao.produtos_sem_custo}
                 </p>
               </div>
@@ -130,7 +130,7 @@ export default function ValorizacaoDashboard() {
                 </thead>
                 <tbody>
                   {produtos.map((produto) => (
-                    <tr key={produto.id} className="border-b border-slate-100 hover:bg-muted">
+                    <tr key={produto.id} className="border-b border-border hover:bg-muted">
                       <td className="p-3 font-medium text-foreground">{produto.nome}</td>
                       <td className="p-3 text-muted-foreground">{produto.categoria || "-"}</td>
                       <td className="p-3">
@@ -162,7 +162,7 @@ export default function ValorizacaoDashboard() {
                         ) : (
                           <button
                             onClick={() => setEditingCusto(prev => ({ ...prev, [produto.id]: produto.custo_unitario || 0 }))}
-                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-muted text-foreground hover:bg-slate-200 h-7 px-2"
+                            className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors bg-muted text-foreground hover:bg-muted h-7 px-2"
                           >
                             Editar
                           </button>

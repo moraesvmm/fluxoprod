@@ -19,7 +19,7 @@ export function KPISkeleton({ count = 4 }: { count?: number }) {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
       {[...Array(count)].map((_, i) => (
         <div key={i} className="rounded-xl border border-border bg-card p-6 shadow-sm animate-pulse">
-          <div className="h-4 w-24 bg-slate-200 rounded mb-3" />
+          <div className="h-4 w-24 bg-muted rounded mb-3" />
           <div className="h-8 w-32 bg-muted rounded" />
         </div>
       ))}

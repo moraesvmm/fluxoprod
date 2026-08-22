@@ -116,7 +116,7 @@ export default function GerenciarTags({ clienteId, tagsAtuais, onChange, onRefre
               placeholder="Adicionar tag..."
               className="w-full px-3 py-2 pr-10 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           </div>
           <button
             type="button"
@@ -163,7 +163,7 @@ export default function GerenciarTags({ clienteId, tagsAtuais, onChange, onRefre
               type="button"
               onClick={() => handleRemoverTag(tag)}
               disabled={isRemoving}
-              className="hover:bg-white/20 rounded-full p-0.5 transition-colors disabled:opacity-50"
+              className="hover:bg-card/20 rounded-full p-0.5 transition-colors disabled:opacity-50"
             >
               <X className="w-3 h-3" />
             </button>
@@ -172,10 +172,10 @@ export default function GerenciarTags({ clienteId, tagsAtuais, onChange, onRefre
       </div>
       
       {tagsAtuais.length === 0 && (
-        <p className="text-xs text-slate-400">Nenhuma tag adicionada</p>
+        <p className="text-xs text-muted-foreground">Nenhuma tag adicionada</p>
       )}
       
-      <p className="text-xs text-slate-400">{tagsAtuais.length}/10 tags</p>
+      <p className="text-xs text-muted-foreground">{tagsAtuais.length}/10 tags</p>
     </div>
   );
 }

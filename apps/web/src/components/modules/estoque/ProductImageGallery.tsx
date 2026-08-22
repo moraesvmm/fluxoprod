@@ -120,7 +120,7 @@ export function ProductImageGallery({
             onClick={() => fileInputRef.current?.click()}
             className={twMerge(
               "aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors p-4 text-center",
-              isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted/50",
+              isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted",
               isUploading ? "opacity-50 pointer-events-none" : ""
             )}
           >

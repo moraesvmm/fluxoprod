@@ -228,7 +228,7 @@ export default function RHPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowConfig(true)}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-border bg-card text-foreground hover:bg-muted/50 h-10 px-4 py-2 shadow-sm"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-border bg-card text-foreground hover:bg-muted h-10 px-4 py-2 shadow-sm"
           >
             <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
             Configurações
@@ -337,7 +337,7 @@ export default function RHPage() {
                         {pendente && diaEfetivo && diaAtual >= diaEfetivo && (
                           <div className="group relative flex items-center">
                             <AlertCircle className={`h-4 w-4 ${atrasado ? 'text-rose-500' : 'text-amber-500'}`} />
-                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg z-10">
+                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-max bg-card text-white text-xs px-2 py-1 rounded shadow-lg z-10">
                               {atrasado ? `Atrasado em ${diaAtual - diaEfetivo} dia(s)` : "Pagamento vence hoje"}
                             </div>
                           </div>
@@ -353,17 +353,17 @@ export default function RHPage() {
                       <div className="flex flex-col">
                         {f.email && (
                           <span className="text-sm flex items-center gap-1">
-                            <Mail className="h-3 w-3 text-slate-400" />
+                            <Mail className="h-3 w-3 text-muted-foreground" />
                             {f.email}
                           </span>
                         )}
                         {f.telefone && (
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Phone className="h-3 w-3 text-slate-400" />
+                            <Phone className="h-3 w-3 text-muted-foreground" />
                             {f.telefone}
                           </span>
                         )}
-                        {!f.email && !f.telefone && <span className="text-xs text-slate-400">—</span>}
+                        {!f.email && !f.telefone && <span className="text-xs text-muted-foreground">—</span>}
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">{formatarMoeda(f.salario)}</TableCell>
@@ -374,7 +374,7 @@ export default function RHPage() {
                           <button
                             onClick={() => registrarPagamento(f.id)}
                             disabled={pagarFuncionario.isPending}
-                            className="text-slate-400 hover:text-emerald-600 p-1 transition-colors"
+                            className="text-muted-foreground hover:text-emerald-600 p-1 transition-colors"
                             title="Marcar como pago"
                           >
                             <CheckCircle className="h-4 w-4" />
@@ -382,17 +382,17 @@ export default function RHPage() {
                         )}
                         <button
                           onClick={() => setDocFuncionario(f)}
-                          className="text-slate-400 hover:text-purple-600 p-1 transition-colors"
+                          className="text-muted-foreground hover:text-purple-600 p-1 transition-colors"
                           title="Documentos"
                         >
                           <FolderOpen className="h-4 w-4" />
                         </button>
-                        <button onClick={() => abrirEdicao(f)} className="text-slate-400 hover:text-blue-600 p-1 transition-colors" title="Editar">
+                        <button onClick={() => abrirEdicao(f)} className="text-muted-foreground hover:text-blue-600 dark:text-blue-500 p-1 transition-colors" title="Editar">
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setDeleteId(f.id)}
-                          className="text-slate-400 hover:text-red-600 p-1 transition-colors"
+                          className="text-muted-foreground hover:text-red-600 dark:text-red-500 p-1 transition-colors"
                           title="Excluir"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -613,7 +613,7 @@ export default function RHPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(false)}
-              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+              className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-muted transition-colors"
             >
               Cancelar
             </button>

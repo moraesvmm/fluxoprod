@@ -27,14 +27,14 @@ export function SubscriptionBanner() {
           </p>
           <Link 
             href="/tenant/configuracoes" 
-            className="flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full transition-colors font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1 bg-card/20 hover:bg-card/30 rounded-full transition-colors font-semibold"
           >
             Regularizar <ExternalLink className="h-3 w-3" />
           </Link>
         </div>
         <button 
           onClick={() => setIsVisible(false)}
-          className="p-1 hover:bg-white/10 rounded-full transition-colors"
+          className="p-1 hover:bg-card/10 rounded-full transition-colors"
           title="Fechar aviso"
         >
           <X className="h-4 w-4" />
@@ -54,14 +54,14 @@ export function SubscriptionBanner() {
           </p>
           <Link 
             href="/tenant/assinatura" 
-            className="flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full transition-colors font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1 bg-card/20 hover:bg-card/30 rounded-full transition-colors font-semibold"
           >
             Assinar Agora <ExternalLink className="h-3 w-3" />
           </Link>
         </div>
         <button 
           onClick={() => setIsVisible(false)}
-          className="p-1 hover:bg-white/10 rounded-full transition-colors"
+          className="p-1 hover:bg-card/10 rounded-full transition-colors"
           title="Fechar aviso"
         >
           <X className="h-4 w-4" />

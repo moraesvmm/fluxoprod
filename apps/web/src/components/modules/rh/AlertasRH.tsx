@@ -74,14 +74,14 @@ export default function AlertasRH() {
 
   if (amanhaPendentes.length > 0) {
     return (
-      <div className="mb-6 rounded-xl border border-indigo-200 bg-indigo-50 p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="mb-6 rounded-xl border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="bg-indigo-100 p-2 rounded-lg">
             <Clock className="h-5 w-5 text-indigo-600" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-indigo-900">Amanhã há pagamentos programados!</h3>
-            <p className="text-sm text-indigo-700">Prepare o financeiro para {amanhaPendentes.length} colaboradores.</p>
+            <p className="text-sm text-indigo-700 dark:text-indigo-500">Prepare o financeiro para {amanhaPendentes.length} colaboradores.</p>
           </div>
         </div>
         <Link href="/tenant/rh" className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap">

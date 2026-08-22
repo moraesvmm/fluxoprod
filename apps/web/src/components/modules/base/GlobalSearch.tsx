@@ -135,7 +135,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       <div className="bg-card rounded-xl shadow-2xl w-full max-w-2xl mx-4" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center gap-3 p-4 border-b border-border">
-          <Search className="h-5 w-5 text-slate-400" />
+          <Search className="h-5 w-5 text-muted-foreground" />
           <input
             type="text"
             value={query}
@@ -146,7 +146,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
           />
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-muted-foreground transition-colors"
+            className="text-muted-foreground hover:text-muted-foreground transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -180,7 +180,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                       <div className="font-medium text-foreground">{result.title}</div>
                       <div className="text-sm text-muted-foreground">{result.subtitle}</div>
                     </div>
-                    <div className="text-xs text-slate-400 bg-muted px-2 py-1 rounded">
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                       {getTypeLabel(result.type)}
                     </div>
                   </a>

@@ -68,13 +68,13 @@ export default function DanfePage() {
           </div>
         </div>
 
-        <div className="text-center py-20 border-2 border-dashed border-border rounded-lg text-slate-400">
+        <div className="text-center py-20 border-2 border-dashed border-border rounded-lg text-muted-foreground">
           <p className="font-medium">Visualizador de DANFE Premium</p>
           <p className="text-sm mt-2">Os dados serão extraídos automaticamente do XML {id?.toString().substring(0, 8)}</p>
           {xml && <p className="text-xs mt-3 text-muted-foreground">XML fiscal carregado com sucesso para esta venda.</p>}
         </div>
 
-        <div className="mt-8 text-[9px] text-slate-400">
+        <div className="mt-8 text-[9px] text-muted-foreground">
           <p>Fluxo ERP - Sistema de Gestão Inteligente</p>
         </div>
       </div>

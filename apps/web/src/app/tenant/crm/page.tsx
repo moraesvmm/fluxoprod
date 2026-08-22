@@ -360,7 +360,7 @@ export default function CRMPage() {
             </button>
             <button
               onClick={() => setShowImportModal(true)}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border text-foreground hover:bg-muted/50 h-10 px-4 py-2 shadow-sm"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-card border border-border text-foreground hover:bg-muted h-10 px-4 py-2 shadow-sm"
             >
               <FileSpreadsheet className="mr-2 h-4 w-4 text-emerald-500" />
               Importar Excel
@@ -456,21 +456,21 @@ export default function CRMPage() {
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Nome *</label>
-                <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="Nome completo" required />
+                <input type="text" value={formData.nome} onChange={(e) => setFormData({...formData, nome: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-muted" placeholder="Nome completo" required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Telefone</label>
-                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="(00) 00000-0000" />
+                  <input type="tel" value={formData.telefone} onChange={(e) => setFormData({...formData, telefone: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-muted" placeholder="(00) 00000-0000" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">CPF/CNPJ</label>
-                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="000.000.000-00" />
+                  <input type="text" value={formData.cpf_cnpj} onChange={(e) => setFormData({...formData, cpf_cnpj: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-muted" placeholder="000.000.000-00" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Email</label>
-                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-slate-50/50" placeholder="email@exemplo.com" />
+                <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-muted" placeholder="email@exemplo.com" />
               </div>
             </div>
             
@@ -583,10 +583,10 @@ export default function CRMPage() {
                           >
                             <MessageCircle className="h-4 w-4" />
                           </button>
-                          <button onClick={() => abrirEdicao(item)} className="text-slate-400 hover:text-blue-600 p-1" title="Editar">
+                          <button onClick={() => abrirEdicao(item)} className="text-muted-foreground hover:text-blue-600 dark:text-blue-500 p-1" title="Editar">
                             <Edit className="h-4 w-4" />
                           </button>
-                          <button onClick={() => setDeleteId(item.id)} className="text-slate-400 hover:text-red-600 p-1" title="Excluir">
+                          <button onClick={() => setDeleteId(item.id)} className="text-muted-foreground hover:text-red-600 dark:text-red-500 p-1" title="Excluir">
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>

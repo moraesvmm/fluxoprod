@@ -19,7 +19,7 @@ export default function AssinaturaPage() {
 
   if (!empresa) {
     return (
-      <div className="p-8 text-center text-gray-400">
+      <div className="p-8 text-center text-muted-foreground">
         Dados da empresa não encontrados.
       </div>
     );
@@ -55,7 +55,7 @@ export default function AssinaturaPage() {
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Assinatura Fluxo ERP</h1>
-        <p className="text-gray-400">Gerencie sua assinatura e garanta acesso contínuo à plataforma.</p>
+        <p className="text-muted-foreground">Gerencie sua assinatura e garanta acesso contínuo à plataforma.</p>
       </div>
 
       {isExpired && (
@@ -127,7 +127,7 @@ export default function AssinaturaPage() {
                 <CheckCircle2 className="w-8 h-8 text-emerald-400" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Tudo Certo!</h3>
-              <p className="text-gray-400">Sua assinatura está ativa e você tem acesso total ao Fluxo ERP.</p>
+              <p className="text-muted-foreground">Sua assinatura está ativa e você tem acesso total ao Fluxo ERP.</p>
             </div>
           )}
         </div>
