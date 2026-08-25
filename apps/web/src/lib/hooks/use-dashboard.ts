@@ -12,6 +12,12 @@ const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "O
 
 // Tipos derivados dos retornos de RPC
 interface DashboardKPI {
+  faturamento_hoje?: number;
+  qtd_vendas_hoje?: number;
+  faturamento_mes?: number;
+  cmv_mes?: number;
+  lucro_bruto_mes?: number;
+  qtd_vendas_mes?: number;
   total_vendas?: number;
   qtd_vendas?: number;
   qtd_clientes?: number;
@@ -26,6 +32,9 @@ interface DashboardKPI {
 interface KPIPorMes {
   mes: string;
   faturamento: number;
+  cmv?: number;
+  lucro_bruto?: number;
+  margem_bruta?: number;
   total_vendas: number;
   ticket_medio: number;
 }
@@ -98,9 +107,14 @@ export function useDashboardData() {
   });
 
   const kpis = kpisRaw?.[0];
-  const faturamentoHoje = kpis?.total_vendas || 0;
-  const vendasHoje = kpis?.qtd_vendas || 0;
-  const ticketMedio = vendasHoje > 0 ? faturamentoHoje / vendasHoje : 0;
+  const faturamentoHoje = kpis?.faturamento_hoje ?? 0;
+  const vendasHoje = kpis?.qtd_vendas_hoje ?? 0;
+  const faturamentoMes = kpis?.faturamento_mes ?? 0;
+  const cmvMes = kpis?.cmv_mes ?? 0;
+  const lucroBrutoMes = kpis?.lucro_bruto_mes ?? (faturamentoMes - cmvMes);
+  const margemBrutaMes = faturamentoMes > 0 ? (lucroBrutoMes / faturamentoMes) * 100 : 0;
+  const vendasMes = kpis?.qtd_vendas_mes ?? 0;
+  const ticketMedioMes = vendasMes > 0 ? faturamentoMes / vendasMes : 0;
   const totalClientes = kpis?.qtd_clientes || 0;
   const totalProdutos = kpis?.qtd_produtos || 0;
   const osAbertas = kpis?.qtd_os_abertas || 0;
@@ -111,9 +125,14 @@ export function useDashboardData() {
 
   const chartData = (kpisPorMes || []).map(item => {
     const [, monthStr] = item.mes.split('-');
+    const faturamento = item.faturamento ?? 0;
+    const lucro = item.lucro_bruto ?? (faturamento - (item.cmv ?? 0));
     return {
       name: MESES[parseInt(monthStr, 10) - 1] ?? item.mes,
-      total: item.faturamento ?? 0,
+      mes: item.mes,
+      total: faturamento,
+      lucro,
+      margem: item.margem_bruta ?? (faturamento > 0 ? (lucro / faturamento) * 100 : 0),
     };
   });
 
@@ -123,7 +142,12 @@ export function useDashboardData() {
     error: error || vendasError,
     faturamentoHoje,
     vendasHoje,
-    ticketMedio,
+    faturamentoMes,
+    cmvMes,
+    lucroBrutoMes,
+    margemBrutaMes,
+    vendasMes,
+    ticketMedioMes,
     totalClientes,
     totalProdutos,
     osAbertas,

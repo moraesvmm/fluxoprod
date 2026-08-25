@@ -1,6 +1,27 @@
 import type { Metadata } from "next";
+import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "500", "600"],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://fluxoerp.com.br"),
@@ -25,7 +46,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="h-full antialiased">
+    <html
+      lang="pt-BR"
+      className={`h-full antialiased ${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}
+    >
       <body className="flex min-h-full flex-col font-sans">
         <Providers>{children}</Providers>
       </body>

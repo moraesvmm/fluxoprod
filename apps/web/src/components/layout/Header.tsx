@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
 interface HeaderProps {
   onSearchClick?: () => void;
@@ -15,6 +16,14 @@ interface HeaderProps {
 export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
   const [supabase] = useState(() => createClient());
   const router = useRouter();
+  const { nome } = useUserProfile();
+
+  const iniciais = (nome || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((parte) => parte[0]?.toUpperCase())
+    .join("") || "\u2014";
 
   const [currentDate] = useState(() => new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
@@ -45,11 +54,11 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
           width={32}
           height={32}
           priority
-          className="object-contain drop-shadow-[0_0_10px_rgba(124,58,237,0.4)] hidden sm:block"
+          className="object-contain hidden sm:block"
           style={{ width: "auto", height: "auto" }}
         />
         <span 
-          className="text-xl font-bold tracking-tight text-foreground ml-1"
+          className="text-xl font-semibold tracking-tight text-foreground ml-1"
           style={{ fontFamily: "var(--font-brand)" }}
         >
           Fluxo
@@ -96,22 +105,20 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
             aria-hidden="true"
           />
 
-          {/* Profile Dropdown (Simulation) */}
-          <div className="flex items-center gap-x-4">
-            <Image
-              className="h-9 w-9 rounded-full bg-muted object-cover border-2 border-border/40 shadow-md ring-2 ring-white dark:ring-border"
-              src="https://api.dicebear.com/7.x/notionists/svg?seed=Admin&backgroundColor=f8fafc"
-              alt="Avatar"
-              width={36}
-              height={36}
-              unoptimized
-            />
+          {/* Perfil */}
+          <div className="flex items-center gap-x-3">
+            <span
+              aria-hidden="true"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold tracking-wide select-none"
+            >
+              {iniciais}
+            </span>
             <span className="hidden lg:flex lg:items-center">
               <span
-                className="text-sm font-semibold leading-6 text-foreground"
+                className="text-sm font-medium leading-6 text-foreground"
                 aria-hidden="true"
               >
-                Admin User
+                {nome || "\u2026"}
               </span>
             </span>
             <button

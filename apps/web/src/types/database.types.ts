@@ -1985,12 +1985,19 @@ export type Database = {
       tenant_dashboard_kpis: {
         Args: never
         Returns: {
+          cmv_mes: number
           estoque_baixo: number
+          faturamento_hoje: number
+          faturamento_mes: number
+          lucro_bruto_mes: number
+          patrimonio_estoque: number
           qtd_clientes: number
           qtd_obras_em_andamento: number
           qtd_os_abertas: number
           qtd_produtos: number
           qtd_vendas: number
+          qtd_vendas_hoje: number
+          qtd_vendas_mes: number
           saldo: number
           total_vendas: number
         }[]

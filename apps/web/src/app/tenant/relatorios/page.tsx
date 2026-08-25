@@ -27,6 +27,7 @@ import {
 } from "@/lib/api";
 import { useSidebarData } from "@/lib/hooks/use-sidebar-data";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
+import { DREWaterfall } from "@/components/financeiro/DREWaterfall";
 
 type ReportType = "vendas" | "financeiro" | "estoque" | "crm" | "rh" | "comissoes" | "dre" | "os" | "obras";
 type ReportRow = Record<string, unknown>;
@@ -79,6 +80,7 @@ export default function RelatoriosPage() {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<ReportRow[]>([]);
   const [kpis, setKpis] = useState<{ label: string; value: string; icon: LucideIcon }[]>([]);
+  const [dreData, setDreData] = useState<DREData | null>(null);
   const { toasts, removeToast, info, success, error: toastError } = useToast();
 
   const isModuleActive = (type: ReportType) => {
@@ -95,6 +97,7 @@ export default function RelatoriosPage() {
     setLoading(true);
     setRows([]);
     setKpis([]);
+    setDreData(null);
 
     try {
       switch (tipo) {
@@ -181,7 +184,8 @@ export default function RelatoriosPage() {
           const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString();
           const fimMes = hoje.toISOString();
           const dre = await fetchDRE(inicioMes, fimMes);
-          
+          setDreData(dre);
+
           setRows([
             { indicador: "Faturamento Bruto", valor: dre.faturamento, margem: 100 },
             { indicador: "(-) Custo de Mercadoria (CMV)", valor: -dre.cmv, margem: dre.margem_bruta - 100 },
@@ -336,12 +340,16 @@ export default function RelatoriosPage() {
       return;
     }
 
+    const agora = new Date();
+    const dataEmissao = agora.toLocaleDateString("pt-BR");
+    const horaEmissao = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
     const kpisHtml = kpis.length > 0 ? `
-      <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+      <div class="figures">
         ${kpis.map(kpi => `
-          <div style="flex: 1; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <div style="font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">${kpi.label}</div>
-            <div style="font-size: 20px; font-weight: 600; color: #0f172a;">${kpi.value}</div>
+          <div class="figure">
+            <div class="figure-label">${kpi.label}</div>
+            <div class="figure-value">${kpi.value}</div>
           </div>
         `).join('')}
       </div>
@@ -349,91 +357,145 @@ export default function RelatoriosPage() {
 
     const tableHtml = `
       <!DOCTYPE html>
-      <html>
+      <html lang="pt-BR">
       <head>
-        <title>Relatório - ${relatorioNome}</title>
+        <meta charset="utf-8" />
+        <title>Relatório de ${relatorioNome} — Fluxo</title>
         <style>
-          body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            padding: 40px; 
-            color: #0f172a;
-            max-width: 1000px;
-            margin: 0 auto;
+          :root {
+            --ink: #1a2233;
+            --ink-soft: #4a5468;
+            --ink-faint: #8892a6;
+            --rule: #d4d9e2;
+            --rule-strong: #1a2233;
           }
-          .header {
+          * { box-sizing: border-box; }
+          body {
+            font-family: Georgia, 'Times New Roman', serif;
+            color: var(--ink);
+            margin: 0 auto;
+            padding: 48px 56px;
+            max-width: 960px;
+            font-size: 13px;
+            line-height: 1.5;
+          }
+          .doc-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e2e8f0;
+            align-items: baseline;
+            border-bottom: 2px solid var(--rule-strong);
+            padding-bottom: 16px;
           }
-          .header h1 { 
-            font-size: 28px; 
-            margin: 0; 
-            font-weight: 700;
-            color: #1e1b4b;
+          .doc-kicker {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--ink-faint);
+            margin: 0 0 6px;
           }
-          .header .brand {
-            font-size: 14px;
-            color: #64748b;
+          .doc-header h1 {
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin: 0;
+          }
+          .doc-meta {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 11px;
+            color: var(--ink-soft);
             text-align: right;
           }
-          table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 20px;
+          .doc-meta strong {
+            display: block;
+            font-family: Georgia, serif;
+            font-size: 16px;
+            color: var(--ink);
+            letter-spacing: -0.01em;
           }
-          th, td { 
-            padding: 12px 16px; 
-            text-align: left; 
-            font-size: 13px; 
+          .figures {
+            display: flex;
+            margin: 28px 0 8px;
+            border-top: 1px solid var(--rule);
+            border-bottom: 1px solid var(--rule);
           }
-          th { 
-            background-color: #f8fafc; 
-            font-weight: 600; 
-            color: #475569;
-            border-bottom: 2px solid #e2e8f0;
+          .figure {
+            flex: 1;
+            padding: 14px 20px 16px 0;
+          }
+          .figure + .figure {
+            border-left: 1px solid var(--rule);
+            padding-left: 20px;
+          }
+          .figure-label {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 9.5px;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 0.05em;
+            color: var(--ink-faint);
+          }
+          .figure-value {
+            font-size: 21px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin-top: 6px;
+            font-variant-numeric: tabular-nums lining-nums;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+          }
+          thead { display: table-header-group; }
+          th {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 9.5px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--ink-soft);
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1.5px solid var(--rule-strong);
           }
           td {
-            border-bottom: 1px solid #f1f5f9;
-            color: #334155;
+            padding: 7px 10px;
+            border-bottom: 0.5px solid var(--rule);
+            font-variant-numeric: tabular-nums lining-nums;
           }
-          tr:last-child td {
-            border-bottom: 2px solid #e2e8f0;
-          }
-          tr:nth-child(even) td {
-            background-color: #fcfcfd;
-          }
-          .footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 11px;
-            color: #94a3b8;
+          tr { page-break-inside: avoid; }
+          tbody tr:last-child td { border-bottom: 1.5px solid var(--rule-strong); }
+          .doc-footer {
+            margin-top: 36px;
+            padding-top: 12px;
+            border-top: 1px solid var(--rule);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 9.5px;
+            color: var(--ink-faint);
+            display: flex;
+            justify-content: space-between;
           }
           @media print {
             body { padding: 0; }
-            @page { margin: 1.5cm; }
-            .header { border-bottom-color: #cbd5e1; }
-            th { border-bottom-color: #cbd5e1; }
-            tr:last-child td { border-bottom-color: #cbd5e1; }
+            @page {
+              margin: 2cm 1.8cm;
+              size: A4;
+            }
           }
         </style>
       </head>
       <body>
-        <div class="header">
+        <header class="doc-header">
           <div>
-            <h1>Relatório de ${relatorioNome}</h1>
-            <div style="margin-top: 4px; color: #64748b; font-size: 14px;">Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</div>
+            <p class="doc-kicker">Relatório de gestão &middot; Confidencial</p>
+            <h1>${relatorioNome}</h1>
           </div>
-          <div class="brand">
-            <strong style="color: #4f46e5; font-size: 18px;">Fluxo</strong><br/>
-            Gestão Empresarial
+          <div class="doc-meta">
+            <strong>Fluxo</strong>
+            Emitido em ${dataEmissao}, ${horaEmissao}<br/>
+            Valores em BRL
           </div>
-        </div>
+        </header>
 
         ${kpisHtml}
 
@@ -446,9 +508,10 @@ export default function RelatoriosPage() {
           </tbody>
         </table>
 
-        <div class="footer">
-          Documento gerado automaticamente pelo sistema Fluxo ERP.
-        </div>
+        <footer class="doc-footer">
+          <span>Fluxo &middot; Relatório de ${relatorioNome}</span>
+          <span>Documento gerado pelo sistema em ${dataEmissao}. Uso interno.</span>
+        </footer>
       </body>
       </html>`;
 
@@ -506,8 +569,8 @@ export default function RelatoriosPage() {
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Relatórios</h2>
-          <p className="text-muted-foreground">Consolidação e exportação de dados via camada RPC.</p>
+          <h2 className="font-heading text-2xl font-semibold tracking-tight">Relatórios</h2>
+          <p className="text-muted-foreground">Demonstrativos consolidados por módulo, com exportação em CSV e PDF.</p>
         </div>
         <div className="flex items-center gap-2" data-tour="relatorios-gerar">
           <TutorialHelpButton moduleKey="relatorios" />
@@ -547,7 +610,7 @@ export default function RelatoriosPage() {
                 key={type}
                 onClick={() => active && setReportType(type)}
                 title={!active ? `Para ter acesso a esse relatório, adquira o módulo ${config.label}` : undefined}
-                className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all shadow-sm ${
+                className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                   !active 
                     ? "bg-muted text-muted-foreground/50 border border-dashed border-border cursor-not-allowed opacity-70"
                     : reportType === type
@@ -556,14 +619,23 @@ export default function RelatoriosPage() {
                 }`}
               >
                 {!active && <Lock className="h-3 w-3" />}
-                {type.toUpperCase()}
+                {config.label}
               </button>
             );
           }
         )}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      {/* Cascata de resultado — peça central do DRE */}
+      {reportType === "dre" && dreData && !loading && (
+        <section aria-label="Cascata de resultado" className="border-y border-border py-6">
+          <h3 className="font-heading text-lg font-semibold tracking-tight">Formação do resultado no mês corrente</h3>
+          <p className="mb-6 text-sm text-muted-foreground">Do faturamento bruto ao lucro líquido.</p>
+          <DREWaterfall dre={dreData} />
+        </section>
+      )}
+
+      <div className="overflow-hidden rounded-md border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent bg-muted/20">

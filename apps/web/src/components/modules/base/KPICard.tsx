@@ -47,28 +47,25 @@ export function KPICard({ title, value, icon: Icon, trend, className, disabled, 
       title={disabled ? disabledMessage : undefined}
       className={twMerge(
         clsx(
-          "relative overflow-hidden rounded-xl p-6 border transition-all duration-300 shadow-sm",
+          "relative overflow-hidden rounded-md p-5 border transition-colors",
           disabled 
-            ? "bg-muted/30 border-border/40 grayscale opacity-70 cursor-not-allowed" 
-            : "bg-card border-border/60 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1",
+            ? "bg-muted/20 border-border/40 opacity-60 cursor-not-allowed" 
+            : "bg-card border-border",
           className
         )
       )}
     >
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-muted-foreground transition-colors group-hover:text-foreground">
+        <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
           {title}
         </p>
-        <div className={clsx(
-          "rounded-xl p-2.5 shadow-inner ring-1",
-          disabled ? "bg-muted text-muted-foreground ring-border/20" : "bg-primary/10 text-primary ring-primary/20"
-        )}>
-          {disabled ? <Lock className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
-        </div>
+        <span className={clsx("text-muted-foreground/50", disabled && "text-muted-foreground/30")}>
+          {disabled ? <Lock className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+        </span>
       </div>
-      <div className="mt-4 flex items-baseline gap-x-2">
+      <div className="mt-3 flex items-baseline gap-x-2">
         <h3 
-          className="text-2xl 2xl:text-3xl font-bold tracking-tight text-foreground break-words" 
+          className="text-2xl font-semibold tracking-tight text-foreground tnum break-words" 
           title={disabled ? undefined : String(value)}
         >
           {disabled ? "—" : value}
@@ -76,21 +73,11 @@ export function KPICard({ title, value, icon: Icon, trend, className, disabled, 
       </div>
       
       {!disabled && trend && (
-        <div className="mt-4 flex items-center text-sm">
-          <span
-            className={twMerge(
-              clsx(
-                "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-bold text-[11px] uppercase tracking-wider shadow-sm ring-1 ring-inset",
-                trend.isPositive 
-                  ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20" 
-                  : "bg-rose-500/10 text-rose-400 ring-rose-500/20"
-              )
-            )}
-          >
-            {trend.isPositive ? "+" : "-"}
-            {Math.abs(trend.value)}%
+        <div className="mt-3 flex items-baseline gap-x-2 text-xs tnum">
+          <span className={trend.isPositive ? "text-positive font-semibold" : "text-negative font-semibold"}>
+            {trend.isPositive ? "+" : "\u2212"}{Math.abs(trend.value)}%
           </span>
-          <span className="ml-2 text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wide">{trend.label}</span>
+          <span className="text-muted-foreground">{trend.label}</span>
         </div>
       )}
     </div>
