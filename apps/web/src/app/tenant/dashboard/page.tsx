@@ -41,6 +41,13 @@ const LazyAreaChart = dynamic(
       return (
         <ResponsiveContainer width="100%" height="100%" minHeight={300}>
           <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="faturamentoVioleta" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#7c3aed" stopOpacity={0.32} />
+                <stop offset="55%" stopColor="#8b5cf6" stopOpacity={0.14} />
+                <stop offset="100%" stopColor="#a78bfa" stopOpacity={0.02} />
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="1 4" vertical={false} stroke="var(--border)" />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} dy={10} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} tickFormatter={(value) => `R$${(value / 1000).toFixed(0)}k`} />
@@ -65,7 +72,7 @@ const LazyAreaChart = dynamic(
                 </span>
               )}
             />
-            <Area type="monotone" dataKey="total" stroke="var(--chart-1)" strokeWidth={1.5} fill="var(--chart-1)" fillOpacity={0.08} />
+            <Area type="monotone" dataKey="total" stroke="#6d28d9" strokeWidth={2} fill="url(#faturamentoVioleta)" />
             <Line type="monotone" dataKey="lucro" stroke="var(--chart-4)" strokeWidth={2} dot={false} />
           </ComposedChart>
         </ResponsiveContainer>
