@@ -38,6 +38,7 @@ BEGIN
             ALTER TABLE %1$I.produtos ADD COLUMN ncm VARCHAR(8);
             ALTER TABLE %1$I.produtos ADD COLUMN cfop_padrao VARCHAR(4);
             ALTER TABLE %1$I.produtos ADD COLUMN origem INTEGER DEFAULT 0;
+            ALTER TABLE %1$I.produtos ADD COLUMN nf_entrada VARCHAR(60);
           END IF;
         END IF;
       END $inner$;

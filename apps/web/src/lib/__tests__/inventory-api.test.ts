@@ -6,15 +6,16 @@ import {
   criarKit, 
   criarTransferencia, 
   concluirTransferencia,
+  registrarEntradaEstoque,
   calcularValorEstoque,
   gerarCodigoBarras
 } from '../api'
 
-import type { Produto, Kit, TransferenciaEstoque } from '../api'
+import type { Produto } from '../api'
 
 // Mock Supabase Client
 const mockRpc = vi.fn()
-const mockSupabase: any = {
+const mockSupabase = {
   rpc: mockRpc,
 }
 
@@ -98,6 +99,27 @@ describe('Inventory API (api.ts)', () => {
   })
 
   describe('Movimentações e Transferências', () => {
+    it('deve registrar uma entrada com documento e itens', async () => {
+      mockRpc.mockResolvedValueOnce({
+        data: { success: true, entrada_id: 'ent-123', valor_total: 250 },
+        error: null,
+      })
+
+      const result = await registrarEntradaEstoque({
+        fornecedor_nome: 'Fornecedor Teste',
+        numero_documento: '987',
+        idempotency_key: 'entrada-987',
+        itens: [{ produto_id: 'p1', quantidade: 10, custo_unitario: 25 }],
+      })
+
+      expect(mockRpc).toHaveBeenCalledWith('tenant_registrar_entrada_estoque', expect.objectContaining({
+        p_numero_documento: '987',
+        p_idempotency_key: 'entrada-987',
+        p_itens: [{ produto_id: 'p1', quantidade: 10, custo_unitario: 25 }],
+      }))
+      expect(result.entrada_id).toBe('ent-123')
+    })
+
     it('deve criar uma transferência entre locais', async () => {
       mockRpc.mockResolvedValueOnce({
         data: { transferencia_id: 'tr-123' },

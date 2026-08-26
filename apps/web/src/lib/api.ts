@@ -225,6 +225,7 @@ export interface Produto {
   tipo_item?: string;
   unidade_medida?: string;
   image_urls?: string[];
+  nf_entrada?: string;
 }
 
 export interface ProdutoLookupError {
@@ -244,6 +245,7 @@ export interface ProdutoCreate {
   categoria?: string;
   tipo?: string;
   image_urls?: string[];
+  nf_entrada?: string;
 }
 
 export interface ProdutoUpdate {
@@ -257,6 +259,7 @@ export interface ProdutoUpdate {
   estoque_minimo?: number;
   categoria?: string;
   image_urls?: string[];
+  nf_entrada?: string;
 }
 
 export interface AlertaEstoque {
@@ -339,6 +342,61 @@ export interface TransferenciaCreate {
   quantidade: number;
   observacao?: string;
   criado_por: string;
+}
+
+export interface EstoqueEntradaItemCreate {
+  produto_id: string;
+  quantidade: number;
+  custo_unitario: number;
+  local_id?: string;
+  lote?: string;
+  data_validade?: string;
+}
+
+export interface EstoqueEntradaCreate {
+  fornecedor_id?: string;
+  fornecedor_nome?: string;
+  fornecedor_documento?: string;
+  numero_documento?: string;
+  serie_documento?: string;
+  chave_nfe?: string;
+  data_emissao?: string;
+  observacao?: string;
+  origem?: 'manual' | 'xml_nfe' | 'focus_nfe' | 'estoque_inicial' | 'importacao';
+  itens: EstoqueEntradaItemCreate[];
+  idempotency_key: string;
+}
+
+export interface EstoqueEntrada {
+  id: string;
+  fornecedor_nome?: string;
+  fornecedor_documento?: string;
+  numero_documento?: string;
+  serie_documento?: string;
+  chave_nfe?: string;
+  data_emissao?: string;
+  data_entrada: string;
+  valor_total: number;
+  origem: string;
+  status: string;
+  quantidade_itens: number;
+}
+
+export interface EstoqueMovimentacao {
+  id: string;
+  produto_id: string;
+  produto_nome: string;
+  tipo: string;
+  origem: string;
+  quantidade: number;
+  saldo_anterior: number;
+  saldo_posterior: number;
+  custo_unitario?: number;
+  documento?: string;
+  entrada_id?: string;
+  venda_id?: string;
+  transferencia_id?: string;
+  criado_em: string;
 }
 
 export interface ValorizacaoEstoque {
@@ -965,6 +1023,7 @@ export async function createProduto(produto: ProdutoCreate): Promise<Produto> {
       p_categoria: produto.categoria || 'geral',
       p_estoque_atual: produto.estoque_atual || 0,
       p_estoque_minimo: produto.estoque_minimo || 10,
+      p_nf_entrada: produto.nf_entrada || null,
       p_image_urls: produto.image_urls
     });
   if (error) throw new Error(error.message);
@@ -993,6 +1052,7 @@ export async function updateProduto(id: string, produto: ProdutoUpdate): Promise
     p_sku: produto.sku,
     p_preco_custo: produto.preco_custo,
     p_categoria: produto.categoria,
+    p_nf_entrada: produto.nf_entrada,
     p_image_urls: produto.image_urls
   });
   if (error) throw new Error(error.message);
@@ -1265,6 +1325,46 @@ export async function cancelarTransferencia(transferenciaId: string): Promise<vo
     });
   if (error) throw new Error(error.message);
   assertRpcResult(data);
+}
+
+// Entradas e movimentacoes de estoque
+export async function registrarEntradaEstoque(entrada: EstoqueEntradaCreate): Promise<{ entrada_id: string; valor_total?: number; duplicada?: boolean }> {
+  const { data, error } = await _untyped().rpc('tenant_registrar_entrada_estoque', {
+    p_itens: entrada.itens,
+    p_fornecedor_id: entrada.fornecedor_id || null,
+    p_fornecedor_nome: entrada.fornecedor_nome || null,
+    p_fornecedor_documento: entrada.fornecedor_documento || null,
+    p_numero_documento: entrada.numero_documento || null,
+    p_serie_documento: entrada.serie_documento || null,
+    p_chave_nfe: entrada.chave_nfe || null,
+    p_data_emissao: entrada.data_emissao || null,
+    p_observacao: entrada.observacao || null,
+    p_origem: entrada.origem || 'manual',
+    p_idempotency_key: entrada.idempotency_key,
+  });
+  if (error) throw new Error(error.message);
+  return assertRpcResult(data) as { entrada_id: string; valor_total?: number; duplicada?: boolean };
+}
+
+export async function fetchEntradasEstoque(produtoId?: string): Promise<EstoqueEntrada[]> {
+  const { data, error } = await _untyped().rpc('tenant_listar_entradas_estoque', {
+    p_produto_id: produtoId || null,
+    p_limit: 100,
+    p_offset: 0,
+  });
+  if (error) throw new Error(error.message);
+  return (data as EstoqueEntrada[]) || [];
+}
+
+export async function fetchMovimentacoesEstoque(produtoId?: string, tipo?: string): Promise<EstoqueMovimentacao[]> {
+  const { data, error } = await _untyped().rpc('tenant_listar_movimentacoes_estoque', {
+    p_produto_id: produtoId || null,
+    p_tipo: tipo || null,
+    p_limit: 100,
+    p_offset: 0,
+  });
+  if (error) throw new Error(error.message);
+  return (data as EstoqueMovimentacao[]) || [];
 }
 
 // ValoraÃÃ†â€™ÂÂÂ§ÃÃ†â€™ÂÂÂ£o de Estoque

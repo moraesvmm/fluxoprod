@@ -1103,6 +1103,7 @@ BEGIN
           descricao TEXT,
           tipo VARCHAR(50),
           preco_base NUMERIC(10, 2),
+          nf_entrada VARCHAR(60),
           criado_em TIMESTAMPTZ,
           atualizado_em TIMESTAMPTZ
         )
@@ -1113,7 +1114,7 @@ BEGIN
         BEGIN
           RETURN QUERY 
           SELECT 
-            id, nome, descricao, tipo, preco_base, criado_em, atualizado_em 
+            id, nome, descricao, tipo, preco_base, nf_entrada, criado_em, atualizado_em
           FROM produtos 
           ORDER BY nome 
           LIMIT p_limit OFFSET p_offset;
@@ -4175,6 +4176,10 @@ BEGIN
     -- Grant permissions para RPCs dentro do schema tenant
     EXECUTE format('GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA %I TO authenticated;', novo_schema);
 
+    IF to_regprocedure('public.provisionar_estoque_movimentacoes(text)') IS NOT NULL THEN
+      PERFORM public.provisionar_estoque_movimentacoes(novo_schema);
+    END IF;
+
     RETURN json_build_object(
         'status', 'success', 
         'message', 'Ambiente Multi-Tenant provisionado com sucesso para todos os módulos!',
@@ -4229,6 +4234,10 @@ BEGIN
   v_rpc := public.provisionar_empresa(p_schema_name);
   IF COALESCE(v_rpc->>'status', 'error') <> 'success' THEN
     RAISE EXCEPTION 'Falha ao criar schema tenant';
+  END IF;
+
+  IF to_regprocedure('public.provisionar_estoque_movimentacoes(text)') IS NOT NULL THEN
+    PERFORM public.provisionar_estoque_movimentacoes(p_schema_name);
   END IF;
 
   IF array_length(COALESCE(p_modules, ARRAY[]::text[]), 1) > 0 THEN

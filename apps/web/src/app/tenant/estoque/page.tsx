@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PackageOpen, AlertTriangle, Boxes, Plus, Search, Filter, Edit, Trash2, Barcode, MoreVertical, Eye } from "lucide-react";
+import { PackageOpen, AlertTriangle, Boxes, Plus, Search, Filter, Edit, Trash2, Barcode, MoreVertical, Eye, History } from "lucide-react";
 import { useProdutos, useCreateProduto, useDeleteProduto, useUpdateProduto } from "@/lib/hooks/use-produtos";
 import { type Produto } from "@/lib/api";
 import { useToast, Toast } from "@/components/ui/toast";
@@ -25,6 +25,7 @@ import ValorizacaoDashboard from "@/components/modules/estoque/ValorizacaoDashbo
 import CodigosPanel from "@/components/modules/estoque/CodigosPanel";
 import PrevisaoDemandaPanel from "@/components/modules/estoque/PrevisaoDemandaPanel";
 import BarcodeScanner from "@/components/modules/estoque/BarcodeScanner";
+import MovimentacoesEstoqueManager from "@/components/modules/estoque/MovimentacoesEstoqueManager";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 
 export default function EstoquePage() {
@@ -37,6 +38,7 @@ export default function EstoquePage() {
   const [buscaProduto, setBuscaProduto] = useState('');
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
   const [detailProduto, setDetailProduto] = useState<Produto | null>(null);
+  const [historicoProdutoId, setHistoricoProdutoId] = useState("");
   const actionMenuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -50,10 +52,10 @@ export default function EstoquePage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [actionMenuId]);
   const [editProdutoId, setEditProdutoId] = useState<string | null>(null);
-  const [editFormData, setEditFormData] = useState({ nome: '', preco_venda: '', estoque_minimo: '', categoria: '' });
+  const [editFormData, setEditFormData] = useState({ nome: '', preco_venda: '', estoque_minimo: '', categoria: '', nf_entrada: '' });
   const [formData, setFormData] = useState({
     nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '',
-    estoque_atual: '0', estoque_minimo: '10', categoria: ''
+    estoque_atual: '0', estoque_minimo: '10', categoria: '', nf_entrada: ''
   });
   const { toasts, removeToast, success, error: toastError } = useToast();
   const createMutation = useCreateProduto();
@@ -84,7 +86,8 @@ export default function EstoquePage() {
         preco_venda: formData.preco_venda ? parseFloat(formData.preco_venda) : undefined,
         estoque_atual: parseInt(formData.estoque_atual) || 0,
         estoque_minimo: parseInt(formData.estoque_minimo) || 10,
-        categoria: formData.categoria || undefined
+        categoria: formData.categoria || undefined,
+        nf_entrada: formData.nf_entrada || undefined
       });
       success("Produto adicionado com sucesso!");
       setIsModalOpen(false);
@@ -96,7 +99,7 @@ export default function EstoquePage() {
 
   const resetForm = () => setFormData({
     nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '',
-    estoque_atual: '0', estoque_minimo: '10', categoria: ''
+    estoque_atual: '0', estoque_minimo: '10', categoria: '', nf_entrada: ''
   });
 
   const abrirEdicaoProduto = (item: Produto) => {
@@ -106,6 +109,7 @@ export default function EstoquePage() {
       preco_venda: item.preco_venda ? String(item.preco_venda) : '',
       estoque_minimo: item.estoque_minimo ? String(item.estoque_minimo) : '',
       categoria: item.categoria || '',
+      nf_entrada: item.nf_entrada || '',
     });
   };
 
@@ -120,6 +124,7 @@ export default function EstoquePage() {
           preco_venda: editFormData.preco_venda ? parseFloat(editFormData.preco_venda) : undefined,
           estoque_minimo: editFormData.estoque_minimo ? parseInt(editFormData.estoque_minimo) : undefined,
           categoria: editFormData.categoria || undefined,
+          nf_entrada: editFormData.nf_entrada || undefined,
         },
       });
       success('Produto atualizado com sucesso!');
@@ -201,10 +206,11 @@ export default function EstoquePage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="inline-flex rounded-lg bg-muted p-1">
+        <TabsList className="flex h-auto w-full flex-wrap justify-start rounded-lg bg-muted p-1">
           <TabsTrigger value="produtos" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Produtos</TabsTrigger>
           <TabsTrigger value="alertas" data-tour="estoque-alertas" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Alertas</TabsTrigger>
           <TabsTrigger value="kits" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Kits</TabsTrigger>
+          <TabsTrigger value="movimentacoes" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Movimentações</TabsTrigger>
           <TabsTrigger value="transferencias" data-tour="estoque-mov" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Transferências</TabsTrigger>
           <TabsTrigger value="valoracao" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Valoração</TabsTrigger>
           <TabsTrigger value="previsao" className="data-[state=active]:bg-card data-[state=active]:shadow-sm">Previsão</TabsTrigger>
@@ -292,6 +298,12 @@ export default function EstoquePage() {
                               >
                                 <Edit className="h-4 w-4 text-amber-500" /> Editar
                               </button>
+                              <button
+                                onClick={() => { setHistoricoProdutoId(item.id); setActiveTab("movimentacoes"); setActionMenuId(null); }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                              >
+                                <History className="h-4 w-4 text-emerald-600" /> Ver movimentações
+                              </button>
                               <div className="border-t border-border my-1" />
                               <button
                                 onClick={() => { setDeleteId(item.id); setActionMenuId(null); }}
@@ -317,6 +329,13 @@ export default function EstoquePage() {
 
         <TabsContent value="kits" className="mt-4">
           <KitsManager />
+        </TabsContent>
+
+        <TabsContent value="movimentacoes" className="mt-4">
+          <MovimentacoesEstoqueManager
+            key={historicoProdutoId || "todos"}
+            produtoInicialId={historicoProdutoId || undefined}
+          />
         </TabsContent>
 
         <TabsContent value="transferencias" className="mt-4">
@@ -352,6 +371,11 @@ export default function EstoquePage() {
               <label className="block text-sm font-medium text-foreground mb-1">Categoria</label>
               <input type="text" value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Ex: Cabos" />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">NF de entrada</label>
+            <input type="text" value={formData.nf_entrada} onChange={(e) => setFormData({ ...formData, nf_entrada: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Número, série ou chave de acesso" />
+            <p className="mt-1 text-xs text-muted-foreground">Identifica a nota que originou este estoque.</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -395,6 +419,12 @@ export default function EstoquePage() {
                 <input type="text" required value={editFormData.nome}
                   onChange={e => setEditFormData({ ...editFormData, nome: e.target.value })}
                   className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">NF de entrada</label>
+                <input type="text" value={editFormData.nf_entrada}
+                  onChange={e => setEditFormData({ ...editFormData, nf_entrada: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Número, série ou chave de acesso" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -504,6 +534,13 @@ export default function EstoquePage() {
                   </div>
                 </div>
               )}
+
+              {detailProduto.nf_entrada && (
+                <div className="bg-muted rounded-lg p-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">NF de entrada</p>
+                  <p className="text-sm font-semibold text-foreground break-all">{detailProduto.nf_entrada}</p>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 pt-5 mt-2 border-t border-border">
@@ -526,7 +563,7 @@ export default function EstoquePage() {
       <BarcodeScanner
         isOpen={scannerOpen}
         onClose={() => setScannerOpen(false)}
-        onProdutoEncontrado={(produto) => {
+        onProdutoEncontrado={() => {
           // Opcional: fazer algo quando produto é encontrado
         }}
       />

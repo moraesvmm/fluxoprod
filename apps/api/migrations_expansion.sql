@@ -112,6 +112,7 @@ BEGIN
             descricao TEXT,
             tipo VARCHAR(50) DEFAULT ''produto'' CHECK (tipo IN (''produto'', ''servico'')),
             preco_base NUMERIC(10, 2) NOT NULL CHECK (preco_base >= 0),
+            nf_entrada VARCHAR(60),
             criado_em TIMESTAMPTZ DEFAULT NOW(),
             atualizado_em TIMESTAMPTZ DEFAULT NOW()
         );
@@ -507,6 +508,10 @@ BEGIN
     EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM anon;', novo_schema);
     EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM authenticated;', novo_schema);
     EXECUTE format('GRANT ALL ON ALL TABLES IN SCHEMA %I TO service_role;', novo_schema);
+
+    IF to_regprocedure('public.provisionar_estoque_movimentacoes(text)') IS NOT NULL THEN
+        PERFORM public.provisionar_estoque_movimentacoes(novo_schema);
+    END IF;
 
     RETURN json_build_object(
         'status', 'success', 
