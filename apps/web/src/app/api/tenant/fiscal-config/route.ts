@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 
 import { getFiscalConfig, updateFiscalConfig } from '@/lib/server/fiscal-config'
+import { autoProvisionFocusCompany } from '@/lib/server/focus-nfe-service'
 import { getAuthenticatedTenantContext } from '@/lib/server/tenant-context'
+import { createAdminClient } from '@/utils/supabase/admin'
 
 function isMasterTenantContextError(error: unknown): boolean {
   if (!(error instanceof Error)) {
@@ -49,6 +51,11 @@ export async function POST(request: Request) {
     const { empresaId } = await getAuthenticatedTenantContext()
     const body = (await request.json()) as Record<string, unknown>
     const config = await updateFiscalConfig(empresaId, body)
+    try {
+      await autoProvisionFocusCompany(createAdminClient(), empresaId)
+    } catch (provisionError) {
+      console.error('Auto-provisionamento FocusNFe não concluído:', provisionError)
+    }
     return NextResponse.json({ success: true, config })
   } catch (error: unknown) {
     if (isMasterTenantContextError(error)) {

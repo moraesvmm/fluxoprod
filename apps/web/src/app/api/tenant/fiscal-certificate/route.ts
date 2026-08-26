@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { createAdminClient } from '@/utils/supabase/admin'
+import { autoProvisionFocusCompany } from '@/lib/server/focus-nfe-service'
 import { getAuthenticatedTenantContext } from '@/lib/server/tenant-context'
 
 export const runtime = 'nodejs'
@@ -32,10 +33,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: error.message }, { status: 400 })
     }
 
+    try {
+      await autoProvisionFocusCompany(admin, empresaId)
+    } catch (provisionError) {
+      console.error('Auto-provisionamento FocusNFe não concluído:', provisionError)
+    }
+
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error.message || 'Falha ao enviar certificado.' },
+      { success: false, error: error instanceof Error ? error.message : 'Falha ao enviar certificado.' },
       { status: 400 }
     )
   }

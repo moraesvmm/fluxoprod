@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { NfeService } from '@/lib/services/nfe/nfe-service'
+import { emitirNfeFocus } from '@/lib/server/focus-nfe-service'
 import { getAuthenticatedTenantContext } from '@/lib/server/tenant-context'
 import { createAdminClient } from '@/utils/supabase/admin'
 
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
 
     const { data: empresa, error: empresaError } = await admin
       .from('empresas')
-      .select('id, cnpj, razao_social, inscricao_estadual, inscricao_municipal, logradouro, numero, complemento, bairro, cidade, uf, cep, codigo_municipio_ibge, regime_tributario, nfe_ambiente, nfe_certificado_senha')
+      .select('id, cnpj, razao_social, inscricao_estadual, inscricao_municipal, logradouro, numero, complemento, bairro, cidade, uf, cep, codigo_municipio_ibge, regime_tributario, nfe_ambiente, nfe_certificado_senha, fiscal_provedor, focusnfe_token_producao, focusnfe_token_homologacao')
       .eq('id', empresaId)
       .single()
 
@@ -28,6 +29,11 @@ export async function POST(request: Request) {
         { success: false, error: 'Empresa não encontrada ou sem acesso.' },
         { status: 404 }
       )
+    }
+
+    if (empresa.fiscal_provedor === 'focusnfe') {
+      const result = await emitirNfeFocus({ admin, tenantSchema, empresa, vendaId })
+      return NextResponse.json(result, { status: 'success' in result && result.success ? 200 : 400 })
     }
 
     const { data: certBlob, error: downloadError } = await admin.storage
@@ -59,8 +65,9 @@ export async function POST(request: Request) {
     return NextResponse.json(result, {
       status: result.success ? 200 : 400,
     })
-  } catch (error: any) {
-    console.error('API NFe Error:', error.message)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Falha ao emitir NFe.'
+    console.error('API NFe Error:', message)
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
 }
