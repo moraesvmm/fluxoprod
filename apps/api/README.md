@@ -1,8 +1,10 @@
-# ⚠️ DIRETÓRIO OBSOLETO - ARQUIVO LEGADO
+# apps/api — SQL do Fluxo ERP
 
-Este diretório contém código legado que NÃO deve ser usado no sistema Fluxo ERP atual.
+Este diretório **não** hospeda backend próprio. Toda a lógica de negócio vive no banco, em RPCs PL/pgSQL do Supabase.
 
-## Status: ÓRFÃO E LEGADO
+Ele é, porém, a **fonte da verdade do SQL versionado**. Leia [AGENTS.md](../../AGENTS.md) antes de qualquer alteração.
+
+## Status: ATIVO para SQL, LEGADO para código Python
 
 Conforme a arquitetura definida (Opção A - Arquitetura Correta):
 
@@ -10,13 +12,13 @@ Conforme a arquitetura definida (Opção A - Arquitetura Correta):
 - **Frontend NÃO deve conter regras de negócio críticas:** Apenas orquestrar chamadas RPC e renderizar UI.
 - **Backend Python (FastAPI) está desativado:** Não foi analisado, alterado ou considerado na refatoração.
 
-## Arquivos Úteis
+## Arquivos e diretórios ativos
 
-O único arquivo que deve ser usado deste diretório é:
-
-- **`supabase_rpc.sql`** - Script SQL principal com todas as RPCs e definições de schema
-  - Este arquivo deve ser executado no SQL Editor do Supabase
-  - Contém: Schema routing, RPCs de provisionamento, RPCs de leitura, RPCs de escrita transacionais
+- **`migrations/`** — onde toda alteração de SQL deve ser criada e commitada.
+  - Mudança em schema `tenant_*` exige hook registrado em `public.provisionamento_hooks`, senão empresas novas nascem incompletas.
+- **`testes_provisionamento_hooks.sql`** — smoke test transacional do provisionamento. Termina em `ROLLBACK`.
+- **`supabase_rpc.sql`** — definição base usada na criação de novos tenants.
+  - **NÃO execute este arquivo inteiro em produção.** Ele recria estruturas de provisionamento; use uma migração focada.
 
 ## Arquivos Legado (Não usar)
 
@@ -29,10 +31,7 @@ O único arquivo que deve ser usado deste diretório é:
 
 ## Ação Recomendada
 
-Este diretório pode ser arquivado ou removido após garantir que:
-1. O arquivo `supabase_rpc.sql` foi movido para um local apropriado (ex: `database/` ou raiz do projeto)
-2. O script foi executado no Supabase
-3. Não há referências a este diretório no código ativo
+O diretório permanece necessário enquanto abrigar `migrations/`, `supabase_rpc.sql` e os testes de provisionamento. Apenas os arquivos Python legados podem ser removidos.
 
 ---
 *Gerado durante refatoração da arquitetura multi-tenant - Data: 2024*

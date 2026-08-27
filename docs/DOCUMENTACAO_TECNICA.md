@@ -157,6 +157,17 @@ Para garantir a integridade do sistema em caso de rollbacks e evitar quebra de p
 6. **Mensagens de Commit SemÃ¢nticas (Rastreabilidade)**:
    - Commits de alteraÃ§Ãµes de cÃ³digo devem obrigatoriamente seguir as diretrizes do Conventional Commits (ex: `fix(checkout): adjust coupon counter schema validation`). Isso garante rastreabilidade total via `git log` ou `git blame` para identificar qual agente e qual commit ocasionou qualquer regressÃ£o.
 
+7. **Persistência Obrigatória no Provisionamento (Multi-Tenant)**:
+   - Toda alteração de SQL deve estar em arquivo versionado em `apps/api/migrations/`. É proibido aplicar SQL apenas pelo Editor do Supabase.
+   - Se a alteração toca **tabela, coluna, índice ou constraint dentro de um schema `tenant_*`**, ela **deve** ser registrada como hook em `public.provisionamento_hooks`. Migração que apenas percorre os tenants existentes é considerada incompleta: cada empresa nova nasceria sem a estrutura.
+   - O arquivo de migração deve conter, na ordem: função hook idempotente (`CREATE TABLE IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS`), registro em `provisionamento_hooks` e aplicação aos tenants existentes.
+   - **Uma assinatura por função pública**: o PostgREST resolve pela lista de parâmetros nomeados, então duas versões publicadas tornam a chamada ambígua. Ao adicionar parâmetro, use `DEFAULT` e remova a versão antiga.
+   - Nunca leia `RETURNING id` para variável `JSONB`; monte o retorno com `jsonb_build_object`.
+   - `SECURITY DEFINER` exige `SET search_path = public, pg_temp`, `REVOKE` de `PUBLIC`/`anon` e `GRANT` explícito. Funções que recebem o schema por parâmetro são cross-tenant e ficam restritas a `service_role`.
+   - Validação antes de aplicar: rodar a migração em transação com `ROLLBACK`, executar `apps/api/testes_provisionamento_hooks.sql` e conferir `python scripts/export_db_map.py` (`docs/diagnosticos/db-drift.md`) sem piora de indicadores.
+   - **NUNCA** execute `apps/api/supabase_rpc.sql` inteiro em produção.
+   - Regras completas e checklist: [AGENTS.md](file:///c:/Users/VMORAES1/Documents/fluxoprod/AGENTS.md).
+
 ---
 
 ## ðŸ“‚ GOVERNANÃ‡A DE DOCUMENTAÃ‡ÃƒO (BACKLOG)
