@@ -1,26 +1,8 @@
 # Divergencias entre banco e codigo
 
-## Funcoes publicas com mais de uma assinatura (5)
+## Funcoes publicas com mais de uma assinatura (0)
 
-Chamadas por parametros nomeados podem ficar ambiguas no PostgREST.
-
-- `tenant_atualizar_cliente`
-  - `tenant_atualizar_cliente(uuid,character varying,character varying,character varying,character varying,character varying)`
-  - `tenant_atualizar_cliente(uuid,text,text,text,text,text,text,text)`
-- `tenant_atualizar_funcionario`
-  - `tenant_atualizar_funcionario(uuid,character varying,character varying,character varying,character varying,numeric,character varying,integer)`
-  - `tenant_atualizar_funcionario(uuid,character varying,character varying,character varying,character varying,numeric,character varying)`
-- `tenant_atualizar_produto`
-  - `tenant_atualizar_produto(uuid,character varying,text,character varying,numeric,character varying,numeric,character varying,character varying,jsonb)`
-  - `tenant_atualizar_produto(uuid,character varying,text,character varying,numeric,character varying,numeric,character varying)`
-  - `tenant_atualizar_produto(uuid,text,text,text,numeric,text,numeric,text,integer,jsonb)`
-- `tenant_criar_produto`
-  - `tenant_criar_produto(character varying,text,character varying,numeric,character varying,numeric,character varying,integer,integer,character varying,jsonb)`
-  - `tenant_criar_produto(character varying,text,character varying,numeric,character varying,numeric,character varying,integer,integer)`
-  - `tenant_criar_produto(text,text,text,numeric,text,numeric,text,integer,integer,jsonb)`
-- `tenant_processar_venda`
-  - `tenant_processar_venda(uuid,text,jsonb,uuid,text,text,numeric,numeric,boolean,uuid)`
-  - `tenant_processar_venda(uuid,text,jsonb,uuid,text,text,numeric,numeric,integer)`
+Nenhuma.
 
 ## RPCs chamadas no codigo e ausentes no banco (19)
 
@@ -44,12 +26,10 @@ Chamadas por parametros nomeados podem ficar ambiguas no PostgREST.
 - `tenant_obras_resumo_financeiro` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
 - `tenant_upload_documento_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
 
-## Colunas divergentes entre tenants (58)
+## Colunas divergentes entre tenants (51)
 
 - `tenant_62a495e1.audit_log` sem: <tabela ausente>
 - `tenant_gelucos_eb10dd.audit_log` sem: details, resource
-- `tenant_blackpink_f4f2cb.canais_venda` sem: <tabela ausente>
-- `tenant_vitormoraes_a3cbc1.canais_venda` sem: <tabela ausente>
 - `tenant_blackpink_f4f2cb.clientes` sem: data_ultima_compra, tags, total_pedidos
 - `tenant_gelucos_eb10dd.clientes` sem: data_ultima_compra, endereco, tags, total_pedidos
 - `tenant_suplementos_257cc9.clientes` sem: data_ultima_compra, tags, total_pedidos
@@ -98,14 +78,9 @@ Chamadas por parametros nomeados podem ficar ambiguas no PostgREST.
 - `tenant_vitormoraes_5fdcf8.tags_catalog` sem: <tabela ausente>
 - `tenant_vitormoraes_a3cbc1.tags_catalog` sem: <tabela ausente>
 - `tenant_62a495e1.transferencias_estoque` sem: deleted_at
-- `tenant_blackpink_f4f2cb.vendas` sem: canal_venda_id, nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
-- `tenant_gelucos_eb10dd.vendas` sem: nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
-- `tenant_suplementos_257cc9.vendas` sem: nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
-- `tenant_vitormoraes_5fdcf8.vendas` sem: nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
-- `tenant_vitormoraes_a3cbc1.vendas` sem: canal_venda_id, nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
 - `tenant_62a495e1.vendas_itens` sem: deleted_at
 
-## Funcoes SECURITY DEFINER expostas a anon (147)
+## Funcoes SECURITY DEFINER expostas a anon (138)
 
 - `_after_empresa_insert_seed_modules()`
 - `_provisionar_rpcs_escrita_a(text)`
@@ -158,7 +133,6 @@ Chamadas por parametros nomeados podem ficar ambiguas no PostgREST.
 - `tenant_abrir_ordem_producao(uuid,numeric)`
 - `tenant_adicionar_tag(uuid,text)`
 - `tenant_atualizar_canal_venda(uuid,text,boolean)`
-- `tenant_atualizar_cliente(uuid,character varying,character varying,character varying,character varying,character varying)`
 - `tenant_atualizar_cliente(uuid,text,text,text,text,text,text,text)`
 - `tenant_atualizar_comissao(uuid,character varying,date)`
 - `tenant_atualizar_custo_produto(uuid,numeric,character varying,text)`
@@ -166,13 +140,9 @@ Chamadas por parametros nomeados podem ficar ambiguas no PostgREST.
 - `tenant_atualizar_demanda_real(uuid,integer,text)`
 - `tenant_atualizar_estoque(uuid,character varying,integer,integer)`
 - `tenant_atualizar_financeiro(uuid,character varying,text,numeric,date,character varying,character varying)`
-- `tenant_atualizar_funcionario(uuid,character varying,character varying,character varying,character varying,numeric,character varying,integer)`
-- `tenant_atualizar_funcionario(uuid,character varying,character varying,character varying,character varying,numeric,character varying)`
 - `tenant_atualizar_modulos_usuario(uuid,jsonb)`
 - `tenant_atualizar_obra(uuid,uuid,character varying,text,text,date,date,character varying,numeric)`
 - `tenant_atualizar_os(uuid,uuid,uuid,character varying,text,character varying,numeric,text,text,jsonb)`
-- `tenant_atualizar_produto(uuid,character varying,text,character varying,numeric,character varying,numeric,character varying)`
-- `tenant_atualizar_produto(uuid,text,text,text,numeric,text,numeric,text,integer,jsonb)`
 - `tenant_buscar_configuracao(text)`
 - `tenant_buscar_produto_por_codigo(character varying)`
 - `tenant_buscar_whatsapp_cloud_api()`
@@ -183,14 +153,11 @@ Chamadas por parametros nomeados podem ficar ambiguas no PostgREST.
 - `tenant_criar_cliente(text,text,text,text,text,text,text)`
 - `tenant_criar_ficha_tecnica(uuid,uuid,numeric)`
 - `tenant_criar_financeiro(character varying,text,numeric,date,character varying,character varying)`
-- `tenant_criar_funcionario(character varying,character varying,character varying,character varying,numeric,character varying,integer)`
 - `tenant_criar_interacao(uuid,text,text,text,timestamp with time zone,integer,uuid,jsonb)`
 - `tenant_criar_kit(uuid,character varying,text,jsonb,text)`
 - `tenant_criar_local_estoque(character varying,character varying,text,text)`
 - `tenant_criar_obra(uuid,character varying,text,text,date,date,character varying,numeric)`
 - `tenant_criar_os(uuid,uuid,character varying,text,character varying,numeric,text,text,text,jsonb)`
-- `tenant_criar_produto(character varying,text,character varying,numeric,character varying,numeric,character varying,integer,integer)`
-- `tenant_criar_produto(text,text,text,numeric,text,numeric,text,integer,integer,jsonb)`
 - `tenant_criar_regra_comissao(uuid,character varying,numeric,boolean)`
 - `tenant_criar_transferencia(uuid,uuid,uuid,integer,text,uuid,text)`
 - `tenant_dashboard_metricas()`
@@ -235,7 +202,6 @@ Chamadas por parametros nomeados podem ficar ambiguas no PostgREST.
 - `tenant_obter_dre(text,text)`
 - `tenant_obter_fechamento_pendente()`
 - `tenant_obter_lucro_os(uuid)`
-- `tenant_processar_venda(uuid,text,jsonb,uuid,text,text,numeric,numeric,integer)`
 - `tenant_registrar_documento(uuid,character varying,character varying,bigint,character varying,text)`
 - `tenant_registrar_entrada_estoque(jsonb,uuid,text,text,text,text,text,date,text,text,text)`
 - `tenant_registrar_pagamento_rh(uuid,character varying)`
@@ -255,12 +221,14 @@ Chamadas por parametros nomeados podem ficar ambiguas no PostgREST.
 - `webhook_provisionar_assinatura(text,text,text,text,text,text,text,text,numeric,text[],jsonb)`
 - `webhook_verificar_token_whatsapp(text)`
 
-## Hooks de provisionamento ativos (7)
+## Hooks de provisionamento ativos (9)
 
 - `catalogo_produtos` (ordem 10) — `provisionar_hook_catalogo_produtos(text)`
 - `estoque_movimentacoes` (ordem 20) — `provisionar_estoque_movimentacoes(text)`
 - `dashboard_executivo` (ordem 30) — `provisionar_hook_dashboard_executivo(text)`
 - `locais_estoque` (ordem 40) — `provisionar_hook_locais_estoque(text)`
 - `nurturing_interacoes` (ordem 50) — `provisionar_hook_nurturing_interacoes(text)`
+- `vendas_canais` (ordem 55) — `provisionar_hook_vendas_canais(text)`
 - `processar_venda` (ordem 60) — `provisionar_hook_processar_venda(text)`
+- `rh_funcionarios` (ordem 65) — `provisionar_hook_rh_funcionarios(text)`
 - `mrp_producao` (ordem 70) — `provisionar_hook_mrp_producao(text)`

@@ -3702,6 +3702,30 @@
       ]
     },
     {
+      "nome": "provisionar_hook_rh_funcionarios",
+      "assinatura": "provisionar_hook_rh_funcionarios(text)",
+      "retorno": "void",
+      "security_definer": true,
+      "configuracao": [
+        "search_path=public, pg_temp"
+      ],
+      "executavel_por": [
+        "service_role"
+      ]
+    },
+    {
+      "nome": "provisionar_hook_vendas_canais",
+      "assinatura": "provisionar_hook_vendas_canais(text)",
+      "retorno": "void",
+      "security_definer": true,
+      "configuracao": [
+        "search_path=public, pg_temp"
+      ],
+      "executavel_por": [
+        "service_role"
+      ]
+    },
+    {
       "nome": "provisionar_novo_tenant",
       "assinatura": "provisionar_novo_tenant(character varying,character varying)",
       "retorno": "json",
@@ -3815,20 +3839,6 @@
     },
     {
       "nome": "tenant_atualizar_cliente",
-      "assinatura": "tenant_atualizar_cliente(uuid,character varying,character varying,character varying,character varying,character varying)",
-      "retorno": "jsonb",
-      "security_definer": true,
-      "configuracao": [
-        "search_path=public"
-      ],
-      "executavel_por": [
-        "anon",
-        "authenticated",
-        "service_role"
-      ]
-    },
-    {
-      "nome": "tenant_atualizar_cliente",
       "assinatura": "tenant_atualizar_cliente(uuid,text,text,text,text,text,text,text)",
       "retorno": "jsonb",
       "security_definer": true,
@@ -3923,24 +3933,9 @@
       "retorno": "jsonb",
       "security_definer": true,
       "configuracao": [
-        "search_path=public"
+        "search_path=public, pg_temp"
       ],
       "executavel_por": [
-        "anon",
-        "authenticated",
-        "service_role"
-      ]
-    },
-    {
-      "nome": "tenant_atualizar_funcionario",
-      "assinatura": "tenant_atualizar_funcionario(uuid,character varying,character varying,character varying,character varying,numeric,character varying)",
-      "retorno": "jsonb",
-      "security_definer": true,
-      "configuracao": [
-        "search_path=public"
-      ],
-      "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3994,32 +3989,6 @@
         "search_path=public, pg_temp"
       ],
       "executavel_por": [
-        "authenticated",
-        "service_role"
-      ]
-    },
-    {
-      "nome": "tenant_atualizar_produto",
-      "assinatura": "tenant_atualizar_produto(uuid,character varying,text,character varying,numeric,character varying,numeric,character varying)",
-      "retorno": "jsonb",
-      "security_definer": true,
-      "configuracao": [
-        "search_path=public"
-      ],
-      "executavel_por": [
-        "anon",
-        "authenticated",
-        "service_role"
-      ]
-    },
-    {
-      "nome": "tenant_atualizar_produto",
-      "assinatura": "tenant_atualizar_produto(uuid,text,text,text,numeric,text,numeric,text,integer,jsonb)",
-      "retorno": "jsonb",
-      "security_definer": true,
-      "configuracao": null,
-      "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4193,10 +4162,9 @@
       "retorno": "jsonb",
       "security_definer": true,
       "configuracao": [
-        "search_path=public"
+        "search_path=public, pg_temp"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4272,32 +4240,6 @@
         "search_path=public, pg_temp"
       ],
       "executavel_por": [
-        "authenticated",
-        "service_role"
-      ]
-    },
-    {
-      "nome": "tenant_criar_produto",
-      "assinatura": "tenant_criar_produto(character varying,text,character varying,numeric,character varying,numeric,character varying,integer,integer)",
-      "retorno": "jsonb",
-      "security_definer": true,
-      "configuracao": [
-        "search_path=public"
-      ],
-      "executavel_por": [
-        "anon",
-        "authenticated",
-        "service_role"
-      ]
-    },
-    {
-      "nome": "tenant_criar_produto",
-      "assinatura": "tenant_criar_produto(text,text,text,numeric,text,numeric,text,integer,integer,jsonb)",
-      "retorno": "jsonb",
-      "security_definer": true,
-      "configuracao": null,
-      "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5090,18 +5032,6 @@
       ]
     },
     {
-      "nome": "tenant_processar_venda",
-      "assinatura": "tenant_processar_venda(uuid,text,jsonb,uuid,text,text,numeric,numeric,integer)",
-      "retorno": "jsonb",
-      "security_definer": true,
-      "configuracao": null,
-      "executavel_por": [
-        "anon",
-        "authenticated",
-        "service_role"
-      ]
-    },
-    {
       "nome": "tenant_registrar_documento",
       "assinatura": "tenant_registrar_documento(uuid,character varying,character varying,bigint,character varying,text)",
       "retorno": "jsonb",
@@ -5624,7 +5554,9 @@
           "endereco",
           "pis_pasep",
           "ctps",
-          "data_admissao"
+          "data_admissao",
+          "email",
+          "telefone"
         ],
         "interacoes_clientes": [
           "id",
@@ -6013,6 +5945,14 @@
           "user_agent",
           "created_at"
         ],
+        "canais_venda": [
+          "id",
+          "nome",
+          "ativo",
+          "criado_em",
+          "atualizado_em",
+          "deleted_at"
+        ],
         "clientes": [
           "id",
           "nome",
@@ -6176,7 +6116,9 @@
           "data_admissao",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "email",
+          "telefone"
         ],
         "idempotency_control": [
           "idempotency_key",
@@ -6437,7 +6379,12 @@
           "status",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "canal_venda_id",
+          "nfe_chave",
+          "nfe_xml_url",
+          "nfe_pdf_url",
+          "nfe_protocolo"
         ],
         "vendas_itens": [
           "id",
@@ -6725,7 +6672,9 @@
           "data_admissao",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "email",
+          "telefone"
         ],
         "idempotency_control": [
           "idempotency_key",
@@ -7017,7 +6966,11 @@
           "criado_em",
           "atualizado_em",
           "deleted_at",
-          "canal_venda_id"
+          "canal_venda_id",
+          "nfe_chave",
+          "nfe_xml_url",
+          "nfe_pdf_url",
+          "nfe_protocolo"
         ],
         "vendas_itens": [
           "id",
@@ -7323,7 +7276,9 @@
           "data_admissao",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "email",
+          "telefone"
         ],
         "idempotency_control": [
           "idempotency_key",
@@ -7609,7 +7564,11 @@
           "criado_em",
           "atualizado_em",
           "deleted_at",
-          "canal_venda_id"
+          "canal_venda_id",
+          "nfe_chave",
+          "nfe_xml_url",
+          "nfe_pdf_url",
+          "nfe_protocolo"
         ],
         "vendas_itens": [
           "id",
@@ -7909,7 +7868,9 @@
           "data_admissao",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "email",
+          "telefone"
         ],
         "idempotency_control": [
           "idempotency_key",
@@ -8195,7 +8156,11 @@
           "criado_em",
           "atualizado_em",
           "deleted_at",
-          "canal_venda_id"
+          "canal_venda_id",
+          "nfe_chave",
+          "nfe_xml_url",
+          "nfe_pdf_url",
+          "nfe_protocolo"
         ],
         "vendas_itens": [
           "id",
@@ -8320,6 +8285,14 @@
           "ip_address",
           "user_agent",
           "created_at"
+        ],
+        "canais_venda": [
+          "id",
+          "nome",
+          "ativo",
+          "criado_em",
+          "atualizado_em",
+          "deleted_at"
         ],
         "clientes": [
           "id",
@@ -8484,7 +8457,9 @@
           "data_admissao",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "email",
+          "telefone"
         ],
         "idempotency_control": [
           "idempotency_key",
@@ -8747,7 +8722,12 @@
           "status",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "canal_venda_id",
+          "nfe_chave",
+          "nfe_xml_url",
+          "nfe_pdf_url",
+          "nfe_protocolo"
         ],
         "vendas_itens": [
           "id",
@@ -8874,10 +8854,22 @@
       "funcao": "provisionar_hook_nurturing_interacoes(text)"
     },
     {
+      "hook_key": "vendas_canais",
+      "ordem": 55,
+      "ativo": true,
+      "funcao": "provisionar_hook_vendas_canais(text)"
+    },
+    {
       "hook_key": "processar_venda",
       "ordem": 60,
       "ativo": true,
       "funcao": "provisionar_hook_processar_venda(text)"
+    },
+    {
+      "hook_key": "rh_funcionarios",
+      "ordem": 65,
+      "ativo": true,
+      "funcao": "provisionar_hook_rh_funcionarios(text)"
     },
     {
       "hook_key": "mrp_producao",
