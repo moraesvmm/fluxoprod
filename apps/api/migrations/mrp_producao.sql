@@ -46,30 +46,18 @@ ALTER TABLE public.fichas_tecnicas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ordens_producao ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ordens_producao_insumos ENABLE ROW LEVEL SECURITY;
 
--- 3. Loop em schemas de tenants existentes
-DO $$
-DECLARE
-    r RECORD;
+-- 3. Hook idempotente para schemas tenant
+CREATE OR REPLACE FUNCTION public.provisionar_hook_mrp_producao(p_schema TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
-    -- Schemas tenant_* incompletos (provisionamento abortado) não têm produtos e quebrariam o ALTER
-    FOR r IN
-        SELECT s.schema_name
-        FROM information_schema.schemata s
-        WHERE s.schema_name LIKE 'tenant_%'
-          AND EXISTS (
-              SELECT 1
-              FROM information_schema.tables t
-              WHERE t.table_schema = s.schema_name
-                AND t.table_name = 'produtos'
-          )
-    LOOP
-        -- Alterar produtos
-        BEGIN
-            EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN tipo_item VARCHAR(50) DEFAULT ''produto_acabado'';', r.schema_name);
-        EXCEPTION WHEN duplicate_column THEN NULL; END;
-        BEGIN
-            EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN unidade_medida VARCHAR(20) DEFAULT ''UN'';', r.schema_name);
-        EXCEPTION WHEN duplicate_column THEN NULL; END;
+        PERFORM public.validar_schema_tenant_provisionamento(p_schema);
+
+        EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS tipo_item VARCHAR(50) DEFAULT ''produto_acabado''', p_schema);
+        EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS unidade_medida VARCHAR(20) DEFAULT ''UN''', p_schema);
 
         -- Criar fichas_tecnicas
         EXECUTE format('
@@ -81,7 +69,7 @@ BEGIN
                 criado_em TIMESTAMPTZ DEFAULT NOW(),
                 deleted_at TIMESTAMPTZ
             );
-        ', r.schema_name, r.schema_name, r.schema_name);
+        ', p_schema, p_schema, p_schema);
 
         -- Criar ordens_producao
         EXECUTE format('
@@ -99,7 +87,7 @@ BEGIN
                 atualizado_em TIMESTAMPTZ DEFAULT NOW(),
                 deleted_at TIMESTAMPTZ
             );
-        ', r.schema_name, r.schema_name);
+        ', p_schema, p_schema);
 
         -- Criar ordens_producao_insumos
         EXECUTE format('
@@ -112,11 +100,11 @@ BEGIN
                 custo_unitario_real NUMERIC(12, 4) DEFAULT 0,
                 criado_em TIMESTAMPTZ DEFAULT NOW()
             );
-        ', r.schema_name, r.schema_name, r.schema_name);
+        ', p_schema, p_schema, p_schema);
 
         -- RPC Tenant Local: Concluir OP (Executa a transação atômica)
         -- A versão anterior tem defaults nos parâmetros, e CREATE OR REPLACE não pode removê-los (42P13)
-        EXECUTE format('DROP FUNCTION IF EXISTS %I.tenant_concluir_ordem_producao_local(UUID, NUMERIC, JSONB);', r.schema_name);
+        EXECUTE format('DROP FUNCTION IF EXISTS %I.tenant_concluir_ordem_producao_local(UUID, NUMERIC, JSONB);', p_schema);
 
         EXECUTE format('
             CREATE OR REPLACE FUNCTION %I.tenant_concluir_ordem_producao_local(
@@ -127,7 +115,7 @@ BEGIN
             RETURNS JSONB
             LANGUAGE plpgsql
             SECURITY DEFINER
-            SET search_path = %I
+            SET search_path = %I, pg_temp
             AS $func$
             DECLARE
                 v_status VARCHAR;
@@ -137,9 +125,13 @@ BEGIN
                 v_qtd_consumida NUMERIC;
                 v_custo_unitario NUMERIC;
                 v_custo_total_op NUMERIC := 0;
+                v_estoque_id UUID;
+                v_quantidade_estoque NUMERIC;
             BEGIN
                 SELECT status, produto_id INTO v_status, v_produto_acabado_id
-                FROM ordens_producao WHERE id = p_ordem_id;
+                FROM ordens_producao
+                WHERE id = p_ordem_id
+                FOR UPDATE;
 
                 IF v_status IS NULL THEN
                     RETURN jsonb_build_object(''success'', false, ''error'', ''Ordem não encontrada'');
@@ -149,17 +141,71 @@ BEGIN
                     RETURN jsonb_build_object(''success'', false, ''error'', ''Ordem já concluída'');
                 END IF;
 
+                IF jsonb_typeof(p_insumos) IS DISTINCT FROM ''array'' THEN
+                    RAISE EXCEPTION ''Insumos devem ser informados como array'';
+                END IF;
+
+                IF EXISTS (
+                    SELECT 1
+                    FROM ordens_producao_insumos opi
+                    WHERE opi.ordem_id = p_ordem_id
+                      AND NOT EXISTS (
+                          SELECT 1
+                          FROM jsonb_array_elements(p_insumos) item
+                          WHERE item->>''insumo_id'' = opi.insumo_id::TEXT
+                      )
+                ) THEN
+                    RAISE EXCEPTION ''Todos os insumos previstos devem ser informados'';
+                END IF;
+
+                IF (
+                    SELECT COUNT(*)
+                    FROM jsonb_array_elements(p_insumos)
+                ) <> (
+                    SELECT COUNT(DISTINCT item->>''insumo_id'')
+                    FROM jsonb_array_elements(p_insumos) item
+                ) THEN
+                    RAISE EXCEPTION ''Insumos duplicados nao sao permitidos'';
+                END IF;
+
                 FOR v_insumo IN SELECT * FROM jsonb_array_elements(p_insumos) LOOP
                     v_id_insumo := (v_insumo->>''insumo_id'')::UUID;
                     v_qtd_consumida := (v_insumo->>''quantidade_consumida'')::NUMERIC;
-                    
-                    SELECT COALESCE(preco_custo, 0) INTO v_custo_unitario
-                    FROM produtos WHERE id = v_id_insumo;
 
-                    UPDATE produtos 
-                    SET estoque_atual = COALESCE(estoque_atual, 0) - v_qtd_consumida,
+                    IF v_qtd_consumida IS NULL OR v_qtd_consumida <= 0 THEN
+                        RAISE EXCEPTION ''Quantidade consumida deve ser maior que zero'';
+                    END IF;
+
+                    IF NOT EXISTS (
+                        SELECT 1
+                        FROM ordens_producao_insumos opi
+                        WHERE opi.ordem_id = p_ordem_id
+                          AND opi.insumo_id = v_id_insumo
+                    ) THEN
+                        RAISE EXCEPTION ''Insumo %% nao pertence a ordem de producao'', v_id_insumo;
+                    END IF;
+                    
+                    SELECT COALESCE(p.custo_unitario, 0), e.id, e.quantidade
+                    INTO v_custo_unitario, v_estoque_id, v_quantidade_estoque
+                    FROM produtos p
+                    JOIN estoque e ON e.produto_id = p.id
+                    WHERE p.id = v_id_insumo
+                    ORDER BY e.atualizado_em DESC NULLS LAST, e.id
+                    LIMIT 1
+                    FOR UPDATE OF e;
+
+                    IF NOT FOUND THEN
+                        RAISE EXCEPTION ''Insumo %% nao possui registro de estoque'', v_id_insumo;
+                    END IF;
+
+                    IF v_quantidade_estoque < v_qtd_consumida THEN
+                        RAISE EXCEPTION ''Estoque insuficiente para o insumo %%'', v_id_insumo;
+                    END IF;
+
+                    UPDATE estoque
+                    SET quantidade = quantidade - v_qtd_consumida,
                         atualizado_em = NOW()
-                    WHERE id = v_id_insumo;
+                    WHERE id = v_estoque_id;
 
                     UPDATE ordens_producao_insumos
                     SET quantidade_consumida = v_qtd_consumida,
@@ -169,9 +215,28 @@ BEGIN
                     v_custo_total_op := v_custo_total_op + (v_qtd_consumida * v_custo_unitario);
                 END LOOP;
 
+                SELECT e.id
+                INTO v_estoque_id
+                FROM estoque e
+                WHERE e.produto_id = v_produto_acabado_id
+                ORDER BY e.atualizado_em DESC NULLS LAST, e.id
+                LIMIT 1
+                FOR UPDATE;
+
+                IF NOT FOUND THEN
+                    RAISE EXCEPTION ''Produto acabado %% nao possui registro de estoque'', v_produto_acabado_id;
+                END IF;
+
+                UPDATE estoque
+                SET quantidade = quantidade + p_qtd_produzida,
+                    atualizado_em = NOW()
+                WHERE id = v_estoque_id;
+
                 UPDATE produtos
-                SET estoque_atual = COALESCE(estoque_atual, 0) + p_qtd_produzida,
-                    preco_custo = CASE WHEN p_qtd_produzida > 0 THEN (v_custo_total_op / p_qtd_produzida) ELSE preco_custo END,
+                SET custo_unitario = CASE
+                        WHEN p_qtd_produzida > 0 THEN v_custo_total_op / p_qtd_produzida
+                        ELSE custo_unitario
+                    END,
                     atualizado_em = NOW()
                 WHERE id = v_produto_acabado_id;
 
@@ -188,22 +253,48 @@ BEGIN
                 RETURN jsonb_build_object(''success'', false, ''error'', SQLERRM);
             END;
             $func$;
-        ', r.schema_name, r.schema_name);
+        ', p_schema, p_schema);
 
         -- Permissões
-        EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM PUBLIC;', r.schema_name);
-        EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM anon;', r.schema_name);
-        EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM authenticated;', r.schema_name);
-        EXECUTE format('GRANT ALL ON ALL TABLES IN SCHEMA %I TO service_role;', r.schema_name);
-        EXECUTE format('GRANT ALL ON ALL FUNCTIONS IN SCHEMA %I TO service_role;', r.schema_name);
+        EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM PUBLIC;', p_schema);
+        EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM anon;', p_schema);
+        EXECUTE format('REVOKE ALL ON ALL TABLES IN SCHEMA %I FROM authenticated;', p_schema);
+        EXECUTE format('GRANT ALL ON ALL TABLES IN SCHEMA %I TO service_role;', p_schema);
+        EXECUTE format('GRANT ALL ON ALL FUNCTIONS IN SCHEMA %I TO service_role;', p_schema);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.provisionar_hook_mrp_producao(TEXT) FROM PUBLIC, anon, authenticated;
+
+INSERT INTO public.provisionamento_hooks (hook_key, ordem, hook_function)
+VALUES ('mrp_producao', 70, 'public.provisionar_hook_mrp_producao(text)'::REGPROCEDURE)
+ON CONFLICT (hook_key) DO UPDATE
+SET ordem = EXCLUDED.ordem,
+    hook_function = EXCLUDED.hook_function,
+    ativo = TRUE;
+
+DO $$
+DECLARE
+    v_schema TEXT;
+BEGIN
+    FOR v_schema IN
+        SELECT e.schema_name
+        FROM public.empresas e
+        WHERE e.schema_name LIKE 'tenant_%'
+          AND to_regnamespace(e.schema_name) IS NOT NULL
+        ORDER BY e.schema_name
+    LOOP
+        PERFORM public.provisionar_hook_mrp_producao(v_schema);
     END LOOP;
-END $$;
+END;
+$$;
 
 -- 4. Criar RPCs Globais de Roteamento (Public)
 CREATE OR REPLACE FUNCTION public.tenant_listar_fichas_tecnicas(p_limit INT DEFAULT 1000, p_offset INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
     v_schema TEXT;
@@ -228,10 +319,14 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.tenant_listar_fichas_tecnicas(INT, INT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.tenant_listar_fichas_tecnicas(INT, INT) TO authenticated;
+
 CREATE OR REPLACE FUNCTION public.tenant_listar_ordens_producao(p_limit INT DEFAULT 1000, p_offset INT DEFAULT 0)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
     v_schema TEXT;
@@ -255,6 +350,9 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.tenant_listar_ordens_producao(INT, INT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.tenant_listar_ordens_producao(INT, INT) TO authenticated;
+
 CREATE OR REPLACE FUNCTION public.tenant_concluir_ordem_producao(
     p_ordem_id UUID,
     p_qtd_produzida NUMERIC,
@@ -263,6 +361,7 @@ CREATE OR REPLACE FUNCTION public.tenant_concluir_ordem_producao(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
     v_schema TEXT;
@@ -280,7 +379,7 @@ BEGIN
 END;
 $$;
 
--- 5. RPC para Atualizar o Template do Provisionador (se houver)
--- O script CORRECOES_CRITICAS_SUPABASE.sql contém a provisionar_empresa inteira.
--- Como ela é DDL longo, para evitar reescrevê-la aqui e quebrar algo, o DO $$ garante os tenants atuais.
--- Idealmente, adicione manualmente no sql/CORRECOES_CRITICAS_SUPABASE.sql depois.
+REVOKE ALL ON FUNCTION public.tenant_concluir_ordem_producao(UUID, NUMERIC, JSONB) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.tenant_concluir_ordem_producao(UUID, NUMERIC, JSONB) TO authenticated;
+
+-- O hook registrado acima atende os tenants atuais e o provisionador master.

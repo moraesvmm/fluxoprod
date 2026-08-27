@@ -5,20 +5,16 @@ CREATE OR REPLACE FUNCTION public.provisionar_estoque_movimentacoes(p_schema TEX
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_schema TEXT := p_schema;
 BEGIN
-  IF v_schema !~ '^tenant_[a-zA-Z0-9_]+$'
-     OR NOT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = v_schema) THEN
-    RAISE EXCEPTION 'Schema tenant invalido: %', v_schema;
-  END IF;
+  PERFORM public.validar_schema_tenant_provisionamento(v_schema);
 
   IF to_regclass(format('%I.produtos', v_schema)) IS NULL
      OR to_regclass(format('%I.estoque', v_schema)) IS NULL THEN
-    RAISE NOTICE 'Schema % ignorado: tabelas produtos/estoque nao encontradas', v_schema;
-    RETURN;
+    RAISE EXCEPTION 'Schema % nao possui as tabelas produtos e estoque', v_schema;
   END IF;
 
     EXECUTE format($sql$
@@ -524,6 +520,23 @@ $$;
 
 REVOKE ALL ON FUNCTION public.provisionar_estoque_movimentacoes(TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.provisionar_estoque_movimentacoes(TEXT) TO service_role;
+
+DO $$
+BEGIN
+  IF to_regclass('public.provisionamento_hooks') IS NOT NULL THEN
+    INSERT INTO public.provisionamento_hooks (hook_key, ordem, hook_function)
+    VALUES (
+      'estoque_movimentacoes',
+      20,
+      'public.provisionar_estoque_movimentacoes(text)'::REGPROCEDURE
+    )
+    ON CONFLICT (hook_key) DO UPDATE
+    SET ordem = EXCLUDED.ordem,
+        hook_function = EXCLUDED.hook_function,
+        ativo = TRUE;
+  END IF;
+END;
+$$;
 
 DO $$
 DECLARE

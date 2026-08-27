@@ -20,7 +20,7 @@ DECLARE
   v_rpc JSON;
   v_invalid_modules TEXT[];
 BEGIN
-  IF p_schema_name IS NULL OR p_schema_name !~ '^[a-z][a-z0-9_]{1,63}$' THEN
+  IF p_schema_name IS NULL OR p_schema_name !~ '^tenant_[a-z0-9_]+$' OR octet_length(p_schema_name) > 63 THEN
     RAISE EXCEPTION 'schema_name invalido';
   END IF;
 
@@ -48,16 +48,11 @@ BEGIN
     RAISE EXCEPTION 'Falha ao criar schema tenant';
   END IF;
 
-  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS nf_entrada VARCHAR(60)', p_schema_name);
-  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS ncm VARCHAR(8)', p_schema_name);
-  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS cfop_padrao VARCHAR(4)', p_schema_name);
-  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS origem INTEGER DEFAULT 0', p_schema_name);
-  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ', p_schema_name);
-  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS image_urls JSONB DEFAULT ''[]''::jsonb', p_schema_name);
-
-  IF to_regprocedure('public.provisionar_estoque_movimentacoes(text)') IS NOT NULL THEN
-    PERFORM public.provisionar_estoque_movimentacoes(p_schema_name);
+  IF to_regprocedure('public.executar_hooks_provisionamento(text)') IS NULL THEN
+    RAISE EXCEPTION 'Executor de hooks de provisionamento nao instalado';
   END IF;
+
+  PERFORM public.executar_hooks_provisionamento(p_schema_name);
 
   IF array_length(COALESCE(p_modules, ARRAY[]::TEXT[]), 1) > 0 THEN
     INSERT INTO public.empresa_modulos (empresa_id, modulo_key, ativo)

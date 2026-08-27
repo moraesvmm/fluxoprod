@@ -3,22 +3,38 @@
 -- 2) tenant_dashboard_kpis_por_mes: exclui vendas canceladas e adiciona CMV, lucro bruto e margem por mês
 -- Convenção de cancelamento tolerante a variações históricas ('Cancelado', 'cancelada', ...): lower(status) NOT LIKE 'cancel%'
 
-DO $$
+CREATE OR REPLACE FUNCTION public.provisionar_hook_dashboard_executivo(p_schema TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
-  schema_record RECORD;
   v_sql text;
+  v_table TEXT;
 BEGIN
-  FOR schema_record IN
-    SELECT schema_name
-    FROM information_schema.schemata
-    WHERE schema_name LIKE 'tenant_%'
-  LOOP
-    RAISE NOTICE 'Atualizando KPIs executivos no schema %', schema_record.schema_name;
+    PERFORM public.validar_schema_tenant_provisionamento(p_schema);
+    RAISE NOTICE 'Atualizando KPIs executivos no schema %', p_schema;
+
+    FOREACH v_table IN ARRAY ARRAY[
+      'vendas', 'clientes', 'produtos', 'ordens_servico', 'obras', 'financeiro'
+    ]
+    LOOP
+      IF to_regclass(format('%I.%I', p_schema, v_table)) IS NULL THEN
+        RAISE EXCEPTION 'Tabela %.% inexistente', p_schema, v_table;
+      END IF;
+
+      EXECUTE format(
+        'ALTER TABLE %I.%I ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ',
+        p_schema,
+        v_table
+      );
+    END LOOP;
 
     -- ── 1. tenant_dashboard_kpis ─────────────────────────────────────────────
     -- Tenants provisionados antes desta migração têm a versão RETURNS TABLE, e
     -- CREATE OR REPLACE não altera o tipo de retorno (42P13).
-    EXECUTE format('DROP FUNCTION IF EXISTS %I.tenant_dashboard_kpis();', schema_record.schema_name);
+    EXECUTE format('DROP FUNCTION IF EXISTS %I.tenant_dashboard_kpis();', p_schema);
 
     v_sql := format('
       CREATE OR REPLACE FUNCTION %I.tenant_dashboard_kpis()
@@ -127,11 +143,11 @@ BEGIN
         );
       END;
       $func$;
-    ', schema_record.schema_name, schema_record.schema_name);
+    ', p_schema, p_schema);
     EXECUTE v_sql;
 
     -- ── 2. tenant_dashboard_kpis_por_mes ────────────────────────────────────
-    EXECUTE format('DROP FUNCTION IF EXISTS %I.tenant_dashboard_kpis_por_mes(INTEGER);', schema_record.schema_name);
+    EXECUTE format('DROP FUNCTION IF EXISTS %I.tenant_dashboard_kpis_por_mes(INTEGER);', p_schema);
 
     v_sql := format('
       CREATE OR REPLACE FUNCTION %I.tenant_dashboard_kpis_por_mes(p_meses INTEGER DEFAULT 6)
@@ -191,11 +207,35 @@ BEGIN
         RETURN COALESCE(v_result, ''[]''::jsonb);
       END;
       $func$;
-    ', schema_record.schema_name, schema_record.schema_name);
+    ', p_schema, p_schema);
     EXECUTE v_sql;
+END;
+$$;
 
+REVOKE ALL ON FUNCTION public.provisionar_hook_dashboard_executivo(TEXT) FROM PUBLIC, anon, authenticated;
+
+INSERT INTO public.provisionamento_hooks (hook_key, ordem, hook_function)
+VALUES ('dashboard_executivo', 30, 'public.provisionar_hook_dashboard_executivo(text)'::REGPROCEDURE)
+ON CONFLICT (hook_key) DO UPDATE
+SET ordem = EXCLUDED.ordem,
+    hook_function = EXCLUDED.hook_function,
+    ativo = TRUE;
+
+DO $$
+DECLARE
+  v_schema TEXT;
+BEGIN
+  FOR v_schema IN
+    SELECT e.schema_name
+    FROM public.empresas e
+    WHERE e.schema_name LIKE 'tenant_%'
+      AND to_regnamespace(e.schema_name) IS NOT NULL
+    ORDER BY e.schema_name
+  LOOP
+    PERFORM public.provisionar_hook_dashboard_executivo(v_schema);
   END LOOP;
-END $$;
+END;
+$$;
 
 -- ── Wrappers públicos (roteamento por tenant) ────────────────────────────────
 
@@ -223,6 +263,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_schema TEXT;
@@ -258,12 +299,14 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON FUNCTION public.tenant_dashboard_kpis() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.tenant_dashboard_kpis TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.tenant_dashboard_kpis_por_mes(p_meses INTEGER DEFAULT 6)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_tenant_schema TEXT;
@@ -290,3 +333,6 @@ BEGIN
   RETURN v_result;
 END;
 $$;
+
+REVOKE ALL ON FUNCTION public.tenant_dashboard_kpis_por_mes(INTEGER) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.tenant_dashboard_kpis_por_mes(INTEGER) TO authenticated;

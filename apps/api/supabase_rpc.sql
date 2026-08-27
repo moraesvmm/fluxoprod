@@ -4181,10 +4181,6 @@ BEGIN
     -- Grant permissions para RPCs dentro do schema tenant
     EXECUTE format('GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA %I TO authenticated;', novo_schema);
 
-    IF to_regprocedure('public.provisionar_estoque_movimentacoes(text)') IS NOT NULL THEN
-      PERFORM public.provisionar_estoque_movimentacoes(novo_schema);
-    END IF;
-
     RETURN json_build_object(
         'status', 'success', 
         'message', 'Ambiente Multi-Tenant provisionado com sucesso para todos os módulos!',
@@ -4217,7 +4213,7 @@ DECLARE
   v_rpc json;
   v_invalid_modules text[];
 BEGIN
-  IF p_schema_name IS NULL OR p_schema_name !~ '^[a-z][a-z0-9_]{1,63}$' THEN
+  IF p_schema_name IS NULL OR p_schema_name !~ '^tenant_[a-z0-9_]+$' OR octet_length(p_schema_name) > 63 THEN
     RAISE EXCEPTION 'schema_name inválido';
   END IF;
 
@@ -4241,9 +4237,11 @@ BEGIN
     RAISE EXCEPTION 'Falha ao criar schema tenant';
   END IF;
 
-  IF to_regprocedure('public.provisionar_estoque_movimentacoes(text)') IS NOT NULL THEN
-    PERFORM public.provisionar_estoque_movimentacoes(p_schema_name);
+  IF to_regprocedure('public.executar_hooks_provisionamento(text)') IS NULL THEN
+    RAISE EXCEPTION 'Executor de hooks de provisionamento não instalado';
   END IF;
+
+  PERFORM public.executar_hooks_provisionamento(p_schema_name);
 
   IF array_length(COALESCE(p_modules, ARRAY[]::text[]), 1) > 0 THEN
     INSERT INTO public.empresa_modulos (empresa_id, modulo_key, ativo)
@@ -4489,6 +4487,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_schema TEXT;
@@ -4515,13 +4514,15 @@ BEGIN
   ', v_schema, v_schema, v_schema, v_schema, v_schema, v_schema, v_schema, v_schema);
 END;
 $$;
-GRANT EXECUTE ON FUNCTION public.tenant_dashboard_kpis TO authenticated, anon;
+REVOKE ALL ON FUNCTION public.tenant_dashboard_kpis() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.tenant_dashboard_kpis() TO authenticated;
 
 -- 7.2 Série temporal de faturamento por mês
 CREATE OR REPLACE FUNCTION public.tenant_dashboard_kpis_por_mes(p_meses INTEGER DEFAULT 6)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_tenant_schema TEXT;
@@ -4549,7 +4550,8 @@ BEGIN
   RETURN v_result;
 END;
 $$;
-GRANT EXECUTE ON FUNCTION public.tenant_dashboard_kpis_por_mes TO authenticated;
+REVOKE ALL ON FUNCTION public.tenant_dashboard_kpis_por_mes(INTEGER) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.tenant_dashboard_kpis_por_mes(INTEGER) TO authenticated;
 
 -- 7.3 Fechamento mensal pendente
 CREATE OR REPLACE FUNCTION public.tenant_obter_fechamento_pendente()
@@ -4610,10 +4612,10 @@ END;
 $$;
 GRANT EXECUTE ON FUNCTION public.tenant_marcar_fechamento_visto TO authenticated;
 
-REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) FROM anon;
-REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) FROM authenticated;
-GRANT EXECUTE ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[]) TO service_role;
+REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[], text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[], text) FROM anon;
+REVOKE ALL ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[], text) FROM authenticated;
+GRANT EXECUTE ON FUNCTION public.provisionar_empresa_master(uuid, text, text, text, text, text, text[], text) TO service_role;
 -- 1. tenant_atualizar_custo_produto
 CREATE OR REPLACE FUNCTION public.tenant_atualizar_custo_produto(p_produto_id uuid, p_custo_unitario numeric, p_metodo_valoracao character varying DEFAULT 'custo_medio'::character varying, p_idempotency_key text DEFAULT NULL::text)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER AS $function$

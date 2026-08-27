@@ -1,5 +1,52 @@
 -- Corrige o contrato da listagem do catalogo com os campos de produto e estoque.
 
+CREATE OR REPLACE FUNCTION public.provisionar_hook_catalogo_produtos(p_schema TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+BEGIN
+  PERFORM public.validar_schema_tenant_provisionamento(p_schema);
+
+  IF to_regclass(format('%I.produtos', p_schema)) IS NULL THEN
+    RAISE EXCEPTION 'Tabela %.produtos inexistente', p_schema;
+  END IF;
+
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS nf_entrada VARCHAR(60)', p_schema);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS ncm VARCHAR(8)', p_schema);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS cfop_padrao VARCHAR(4)', p_schema);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS origem INTEGER DEFAULT 0', p_schema);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ', p_schema);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS image_urls JSONB DEFAULT ''[]''::JSONB', p_schema);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.provisionar_hook_catalogo_produtos(TEXT) FROM PUBLIC, anon, authenticated;
+
+INSERT INTO public.provisionamento_hooks (hook_key, ordem, hook_function)
+VALUES ('catalogo_produtos', 10, 'public.provisionar_hook_catalogo_produtos(text)'::REGPROCEDURE)
+ON CONFLICT (hook_key) DO UPDATE
+SET ordem = EXCLUDED.ordem,
+    hook_function = EXCLUDED.hook_function,
+    ativo = TRUE;
+
+DO $$
+DECLARE
+  v_schema TEXT;
+BEGIN
+  FOR v_schema IN
+    SELECT e.schema_name
+    FROM public.empresas e
+    WHERE e.schema_name LIKE 'tenant_%'
+      AND to_regnamespace(e.schema_name) IS NOT NULL
+    ORDER BY e.schema_name
+  LOOP
+    PERFORM public.provisionar_hook_catalogo_produtos(v_schema);
+  END LOOP;
+END;
+$$;
+
 DROP FUNCTION IF EXISTS public.tenant_listar_produtos(INTEGER, INTEGER);
 
 CREATE OR REPLACE FUNCTION public.tenant_listar_produtos(

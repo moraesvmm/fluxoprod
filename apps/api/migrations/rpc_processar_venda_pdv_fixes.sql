@@ -1,39 +1,19 @@
 -- Corrige a transacao do PDV conforme constraints e FKs reais dos tenants.
 
-DO $$
-DECLARE
-    tenant_schema RECORD;
+CREATE OR REPLACE FUNCTION public.provisionar_hook_processar_venda(p_schema TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
-    FOR tenant_schema IN
-        SELECT e.schema_name
-        FROM public.empresas e
-        WHERE e.schema_name LIKE 'tenant_%'
-          AND EXISTS (
-              SELECT 1
-              FROM information_schema.tables t
-              WHERE t.table_schema = e.schema_name
-                AND t.table_name = 'clientes'
-          )
-          AND EXISTS (
-              SELECT 1
-              FROM information_schema.tables t
-              WHERE t.table_schema = e.schema_name
-                AND t.table_name = 'vendas'
-          )
-          AND EXISTS (
-              SELECT 1
-              FROM information_schema.tables t
-              WHERE t.table_schema = e.schema_name
-                AND t.table_name = 'vendas_itens'
-          )
-          AND EXISTS (
-              SELECT 1
-              FROM information_schema.tables t
-              WHERE t.table_schema = e.schema_name
-                AND t.table_name = 'estoque'
-          )
-    LOOP
-        EXECUTE format($sql$
+    PERFORM public.validar_schema_tenant_provisionamento(p_schema);
+    EXECUTE format(
+        'ALTER TABLE %I.clientes ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ',
+        p_schema
+    );
+
+    EXECUTE format($sql$
             CREATE OR REPLACE FUNCTION %I.tenant_processar_venda(
                 p_cliente_id UUID,
                 p_cliente_nome TEXT,
@@ -189,9 +169,43 @@ BEGIN
                 RETURN jsonb_build_object('success', FALSE, 'error', SQLERRM);
             END;
             $func$;
-        $sql$, tenant_schema.schema_name, tenant_schema.schema_name);
+        $sql$, p_schema, p_schema);
+
+    EXECUTE format(
+        'REVOKE ALL ON FUNCTION %I.tenant_processar_venda(UUID, TEXT, JSONB, UUID, TEXT, TEXT, NUMERIC, NUMERIC, BOOLEAN, UUID) FROM PUBLIC, anon, authenticated',
+        p_schema
+    );
+    EXECUTE format(
+        'GRANT EXECUTE ON FUNCTION %I.tenant_processar_venda(UUID, TEXT, JSONB, UUID, TEXT, TEXT, NUMERIC, NUMERIC, BOOLEAN, UUID) TO service_role',
+        p_schema
+    );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.provisionar_hook_processar_venda(TEXT) FROM PUBLIC, anon, authenticated;
+
+INSERT INTO public.provisionamento_hooks (hook_key, ordem, hook_function)
+VALUES ('processar_venda', 60, 'public.provisionar_hook_processar_venda(text)'::REGPROCEDURE)
+ON CONFLICT (hook_key) DO UPDATE
+SET ordem = EXCLUDED.ordem,
+    hook_function = EXCLUDED.hook_function,
+    ativo = TRUE;
+
+DO $$
+DECLARE
+    v_schema TEXT;
+BEGIN
+    FOR v_schema IN
+        SELECT e.schema_name
+        FROM public.empresas e
+        WHERE e.schema_name LIKE 'tenant_%'
+          AND to_regnamespace(e.schema_name) IS NOT NULL
+        ORDER BY e.schema_name
+    LOOP
+        PERFORM public.provisionar_hook_processar_venda(v_schema);
     END LOOP;
-END $$;
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.tenant_processar_venda(
     p_cliente_id UUID,
