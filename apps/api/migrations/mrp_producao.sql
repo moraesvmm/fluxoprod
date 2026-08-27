@@ -51,7 +51,18 @@ DO $$
 DECLARE
     r RECORD;
 BEGIN
-    FOR r IN SELECT schema_name FROM information_schema.schemata WHERE schema_name LIKE 'tenant_%' LOOP
+    -- Schemas tenant_* incompletos (provisionamento abortado) não têm produtos e quebrariam o ALTER
+    FOR r IN
+        SELECT s.schema_name
+        FROM information_schema.schemata s
+        WHERE s.schema_name LIKE 'tenant_%'
+          AND EXISTS (
+              SELECT 1
+              FROM information_schema.tables t
+              WHERE t.table_schema = s.schema_name
+                AND t.table_name = 'produtos'
+          )
+    LOOP
         -- Alterar produtos
         BEGIN
             EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN tipo_item VARCHAR(50) DEFAULT ''produto_acabado'';', r.schema_name);
