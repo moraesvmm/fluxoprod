@@ -266,6 +266,12 @@ BEGIN
             metodo_valoracao VARCHAR(50) DEFAULT ''custo_medio'' CHECK (metodo_valoracao IN (''custo_medio'', ''fifo'', ''lifo'')),
             codigo_barras VARCHAR(50),
             codigo_qr TEXT,
+            nf_entrada VARCHAR(60),
+            ncm VARCHAR(8),
+            cfop_padrao VARCHAR(4),
+            origem INTEGER DEFAULT 0,
+            deleted_at TIMESTAMPTZ,
+            image_urls JSONB DEFAULT ''[]''::jsonb,
             criado_em TIMESTAMPTZ DEFAULT NOW(),
             atualizado_em TIMESTAMPTZ DEFAULT NOW()
         );

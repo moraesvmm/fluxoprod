@@ -50,6 +50,7 @@ export default function CatalogoPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [fiscalByProduct, setFiscalByProduct] = useState<Record<string, { ncm?: string; cfop_padrao?: string; origem?: number }>>({});
   const [formData, setFormData] = useState({
     nome: "",
@@ -69,6 +70,14 @@ export default function CatalogoPage() {
     ...produto,
     ...(fiscalByProduct[produto.id] || {}),
   }));
+  const normalizedSearch = searchTerm.trim().toLocaleLowerCase("pt-BR");
+  const produtosFiltrados = normalizedSearch
+    ? produtosComFiscal.filter((produto) =>
+        [produto.nome, produto.sku, produto.categoria].some((value) =>
+          value?.toLocaleLowerCase("pt-BR").includes(normalizedSearch)
+        )
+      )
+    : produtosComFiscal;
 
   useEffect(() => {
     const loadFiscalData = async () => {
@@ -289,6 +298,8 @@ export default function CatalogoPage() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Buscar por nome, SKU ou categoria..."
               className="w-full bg-background border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
             />
@@ -319,18 +330,24 @@ export default function CatalogoPage() {
                   <div className="text-red-500">{error.message}</div>
                 </TableCell>
               </TableRow>
-            ) : produtosComFiscal.length === 0 ? (
+            ) : produtosFiltrados.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-12">
                   <div className="flex flex-col items-center gap-2">
                     <Package className="h-10 w-10 text-muted/30" />
-                    <p className="text-foreground/60 text-sm font-medium">Nenhum produto cadastrado</p>
-                    <p className="text-muted-foreground text-xs">Clique em &quot;Adicionar Produto&quot; para começar.</p>
+                    <p className="text-foreground/60 text-sm font-medium">
+                      {normalizedSearch ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {normalizedSearch
+                        ? "Tente buscar por outro nome, SKU ou categoria."
+                        : <>Clique em &quot;Adicionar Produto&quot; para começar.</>}
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
             ) : (
-              produtosComFiscal.map((p) => (
+              produtosFiltrados.map((p) => (
                 <TableRow key={p.id} className="hover:bg-muted/30">
                   <TableCell>
                     <div className="flex flex-col">

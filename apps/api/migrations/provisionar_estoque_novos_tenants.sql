@@ -48,6 +48,13 @@ BEGIN
     RAISE EXCEPTION 'Falha ao criar schema tenant';
   END IF;
 
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS nf_entrada VARCHAR(60)', p_schema_name);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS ncm VARCHAR(8)', p_schema_name);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS cfop_padrao VARCHAR(4)', p_schema_name);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS origem INTEGER DEFAULT 0', p_schema_name);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ', p_schema_name);
+  EXECUTE format('ALTER TABLE %I.produtos ADD COLUMN IF NOT EXISTS image_urls JSONB DEFAULT ''[]''::jsonb', p_schema_name);
+
   IF to_regprocedure('public.provisionar_estoque_movimentacoes(text)') IS NOT NULL THEN
     PERFORM public.provisionar_estoque_movimentacoes(p_schema_name);
   END IF;
