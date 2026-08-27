@@ -4,7 +4,7 @@ import { Bell, Search, LogOut, Menu } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
@@ -25,12 +25,20 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
     .map((parte) => parte[0]?.toUpperCase())
     .join("") || "\u2014";
 
-  const [currentDate] = useState(() => new Date().toLocaleDateString("pt-BR", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }));
+  // Inicializa vazio para evitar hydration mismatch (React error #418)
+  // new Date() no servidor e no cliente produz valores diferentes
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    setCurrentDate(
+      new Date().toLocaleDateString("pt-BR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    );
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
