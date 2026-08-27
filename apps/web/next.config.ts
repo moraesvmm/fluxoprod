@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
-import path from "node:path";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/favicon.ico',
+        destination: '/icon.png',
+        permanent: true,
+      },
+    ];
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
   },

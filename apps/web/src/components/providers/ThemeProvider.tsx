@@ -21,14 +21,8 @@ export function ThemeProvider({
   defaultTheme?: Theme;
   storageKey?: string;
 }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === "undefined") return defaultTheme;
-    return (localStorage.getItem(storageKey) as Theme | null) ?? defaultTheme;
-  });
-  const [systemTheme, setSystemTheme] = useState<"light" | "dark">(() => {
-    if (typeof window === "undefined") return "light";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  });
+  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+  const [systemTheme, setSystemTheme] = useState<"light" | "dark">("light");
   const resolvedTheme = theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
@@ -39,12 +33,21 @@ export function ThemeProvider({
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const storedTheme = localStorage.getItem(storageKey) as Theme | null;
+    const frameId = window.requestAnimationFrame(() => {
+      setThemeState(storedTheme ?? defaultTheme);
+      setSystemTheme(mediaQuery.matches ? "dark" : "light");
+    });
+
     const handleChange = (event: MediaQueryListEvent) => {
       setSystemTheme(event.matches ? "dark" : "light");
     };
     mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, [defaultTheme, storageKey]);
 
   const setTheme = (theme: Theme) => {
     localStorage.setItem(storageKey, theme);

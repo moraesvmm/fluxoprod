@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ActionCard } from "@/components/modules/base/ActionCard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
 import { KPISkeleton } from "@/components/modules/base/KPISkeleton";
@@ -39,7 +39,7 @@ const LazyAreaChart = dynamic(
     const { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = m;
     return function Chart({ data, formatarMoeda }: { data: SeriePonto[]; formatarMoeda: (v: number) => string }) {
       return (
-        <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
           <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="faturamentoVioleta" x1="0" y1="0" x2="0" y2="1">
@@ -104,6 +104,22 @@ export default function DashboardPage() {
   const dashboard = useDashboardData();
   const userProfile = useUserProfile();
   const queryClient = useQueryClient();
+  const [dateLabels, setDateLabels] = useState({
+    periodo: "período atual",
+    emissao: "hoje",
+  });
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      const hoje = new Date();
+      setDateLabels({
+        periodo: hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
+        emissao: hoje.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }),
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, []);
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -117,9 +133,8 @@ export default function DashboardPage() {
       day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
     });
 
-  const hoje = new Date();
-  const periodoLabel = hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
-  const emissaoLabel = hoje.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const periodoLabel = dateLabels.periodo;
+  const emissaoLabel = dateLabels.emissao;
 
   const temVendas = dashboard.modulosAtivos?.includes("vendas");
   const temFinanceiro = dashboard.modulosAtivos?.includes("financeiro");
