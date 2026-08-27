@@ -3050,13 +3050,12 @@ BEGIN
                 ''endereco'', l.endereco,
                 ''ativo'', l.ativo,
                 ''criado_em'', l.criado_em
-              )
+              ) ORDER BY l.criado_em DESC
             ),
             ''[]''::JSONB
           ) INTO v_result
           FROM locais_estoque l
-          WHERE l.ativo = true
-          ORDER BY l.criado_em DESC;
+          WHERE l.ativo = true;
 
           RETURN v_result;
         EXCEPTION WHEN OTHERS THEN

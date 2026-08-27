@@ -1056,7 +1056,7 @@ export async function updateProduto(id: string, produto: ProdutoUpdate): Promise
     p_image_urls: produto.image_urls
   });
   if (error) throw new Error(error.message);
-  return (data as unknown) as Produto;
+  return assertRpcResult(data) as unknown as Produto;
 }
 
 // --------------------------------------------------------------------------------

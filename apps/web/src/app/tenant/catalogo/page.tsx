@@ -217,6 +217,7 @@ export default function CatalogoPage() {
       if (formData.descricao) payload.descricao = formData.descricao;
       if (formData.sku) payload.sku = formData.sku;
       if (formData.preco_custo) payload.preco_custo = parseFloat(formData.preco_custo);
+      if (formData.preco_venda) payload.preco_base = parseFloat(formData.preco_venda);
       if (formData.categoria) payload.categoria = formData.categoria;
 
       await updateProduto.mutateAsync({ id: editId, produto: payload });
@@ -528,9 +529,10 @@ export default function CatalogoPage() {
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              disabled={createProduto.isPending}
+              className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Cadastrar Produto
+              {createProduto.isPending ? "Cadastrando..." : "Cadastrar Produto"}
             </button>
             <button
               type="button"

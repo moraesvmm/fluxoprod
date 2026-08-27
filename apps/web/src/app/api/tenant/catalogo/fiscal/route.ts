@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import { createAdminClient } from '@/utils/supabase/admin'
+import { createClient } from '@/utils/supabase/server'
 
 function assertRoutePayload(data: unknown): void {
   if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
@@ -13,8 +13,14 @@ function assertRoutePayload(data: unknown): void {
 
 export async function GET() {
   try {
-    const admin = createAdminClient()
-    const { data, error } = await admin.rpc('tenant_listar_produtos_fiscal')
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 })
+    }
+
+    const { data, error } = await supabase.rpc('tenant_listar_produtos_fiscal')
 
     if (error) {
       throw new Error(error.message)
@@ -36,7 +42,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const admin = createAdminClient()
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ success: false, error: 'Não autorizado.' }, { status: 401 })
+    }
+
     const body = (await request.json()) as Record<string, unknown>
     const produtoId = String(body.produtoId || '')
 
@@ -51,7 +63,7 @@ export async function POST(request: Request) {
       p_origem: Number.isFinite(Number(body.origem)) ? Number(body.origem) : 0,
     }
 
-    const { data, error } = await admin.rpc('tenant_atualizar_produto_fiscal', payload)
+    const { data, error } = await supabase.rpc('tenant_atualizar_produto_fiscal', payload)
 
     if (error) {
       throw new Error(error.message)
