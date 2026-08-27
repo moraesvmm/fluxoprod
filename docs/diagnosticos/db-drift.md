@@ -1,0 +1,266 @@
+# Divergencias entre banco e codigo
+
+## Funcoes publicas com mais de uma assinatura (5)
+
+Chamadas por parametros nomeados podem ficar ambiguas no PostgREST.
+
+- `tenant_atualizar_cliente`
+  - `tenant_atualizar_cliente(uuid,character varying,character varying,character varying,character varying,character varying)`
+  - `tenant_atualizar_cliente(uuid,text,text,text,text,text,text,text)`
+- `tenant_atualizar_funcionario`
+  - `tenant_atualizar_funcionario(uuid,character varying,character varying,character varying,character varying,numeric,character varying,integer)`
+  - `tenant_atualizar_funcionario(uuid,character varying,character varying,character varying,character varying,numeric,character varying)`
+- `tenant_atualizar_produto`
+  - `tenant_atualizar_produto(uuid,character varying,text,character varying,numeric,character varying,numeric,character varying,character varying,jsonb)`
+  - `tenant_atualizar_produto(uuid,character varying,text,character varying,numeric,character varying,numeric,character varying)`
+  - `tenant_atualizar_produto(uuid,text,text,text,numeric,text,numeric,text,integer,jsonb)`
+- `tenant_criar_produto`
+  - `tenant_criar_produto(character varying,text,character varying,numeric,character varying,numeric,character varying,integer,integer,character varying,jsonb)`
+  - `tenant_criar_produto(character varying,text,character varying,numeric,character varying,numeric,character varying,integer,integer)`
+  - `tenant_criar_produto(text,text,text,numeric,text,numeric,text,integer,integer,jsonb)`
+- `tenant_processar_venda`
+  - `tenant_processar_venda(uuid,text,jsonb,uuid,text,text,numeric,numeric,boolean,uuid)`
+  - `tenant_processar_venda(uuid,text,jsonb,uuid,text,text,numeric,numeric,integer)`
+
+## RPCs chamadas no codigo e ausentes no banco (19)
+
+- `tenant_alocar_recurso_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_atualizar_custo_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_atualizar_etapa_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_atualizar_recurso_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_cancelar_venda` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_criar_custo_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_criar_etapa_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_devolver_item` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_excluir_custo_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_excluir_documento_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_excluir_etapa_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_excluir_recurso_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_listar_custos_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_listar_documentos_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_listar_etapas_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_listar_recursos_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_obras_progresso` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_obras_resumo_financeiro` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+- `tenant_upload_documento_obra` — apps/web/src/lib/api.ts, apps/web/src/lib/api.ts.bak
+
+## Colunas divergentes entre tenants (58)
+
+- `tenant_62a495e1.audit_log` sem: <tabela ausente>
+- `tenant_gelucos_eb10dd.audit_log` sem: details, resource
+- `tenant_blackpink_f4f2cb.canais_venda` sem: <tabela ausente>
+- `tenant_vitormoraes_a3cbc1.canais_venda` sem: <tabela ausente>
+- `tenant_blackpink_f4f2cb.clientes` sem: data_ultima_compra, tags, total_pedidos
+- `tenant_gelucos_eb10dd.clientes` sem: data_ultima_compra, endereco, tags, total_pedidos
+- `tenant_suplementos_257cc9.clientes` sem: data_ultima_compra, tags, total_pedidos
+- `tenant_vitormoraes_5fdcf8.clientes` sem: data_ultima_compra, tags, total_pedidos
+- `tenant_vitormoraes_a3cbc1.clientes` sem: data_ultima_compra, tags, total_pedidos
+- `tenant_62a495e1.configuracoes` sem: <tabela ausente>
+- `tenant_blackpink_f4f2cb.crm_nurturing_alertas` sem: <tabela ausente>
+- `tenant_gelucos_eb10dd.crm_nurturing_alertas` sem: <tabela ausente>
+- `tenant_suplementos_257cc9.crm_nurturing_alertas` sem: <tabela ausente>
+- `tenant_vitormoraes_5fdcf8.crm_nurturing_alertas` sem: <tabela ausente>
+- `tenant_vitormoraes_a3cbc1.crm_nurturing_alertas` sem: <tabela ausente>
+- `tenant_62a495e1.estoque` sem: deleted_at
+- `tenant_62a495e1.estoque_por_local` sem: deleted_at
+- `tenant_62a495e1.fechamentos_mensais` sem: atualizado_em, status, visto
+- `tenant_gelucos_eb10dd.fechamentos_mensais` sem: atualizado_em, status
+- `tenant_62a495e1.idempotency_control` sem: <tabela ausente>
+- `tenant_gelucos_eb10dd.interacoes_clientes` sem: deleted_at
+- `tenant_suplementos_257cc9.interacoes_clientes` sem: deleted_at
+- `tenant_vitormoraes_5fdcf8.interacoes_clientes` sem: deleted_at
+- `tenant_vitormoraes_a3cbc1.interacoes_clientes` sem: deleted_at
+- `tenant_62a495e1.locais_estoque` sem: deleted_at
+- `tenant_blackpink_f4f2cb.notas_fiscais` sem: <tabela ausente>
+- `tenant_vitormoraes_a3cbc1.notas_fiscais` sem: <tabela ausente>
+- `tenant_62a495e1.obras_ordens_servico` sem: <tabela ausente>
+- `tenant_blackpink_f4f2cb.obras_ordens_servico` sem: deleted_at
+- `tenant_suplementos_257cc9.obras_ordens_servico` sem: deleted_at
+- `tenant_vitormoraes_5fdcf8.obras_ordens_servico` sem: deleted_at
+- `tenant_vitormoraes_a3cbc1.obras_ordens_servico` sem: deleted_at
+- `tenant_blackpink_f4f2cb.ordens_servico` sem: checklist_entrada, equipamento_serial, laudo_tecnico, numero, tempo_total_minutos, timer_iniciado_em, valor_servico
+- `tenant_suplementos_257cc9.ordens_servico` sem: numero, tempo_total_minutos, timer_iniciado_em, valor_servico
+- `tenant_vitormoraes_5fdcf8.ordens_servico` sem: numero, tempo_total_minutos, timer_iniciado_em, valor_servico
+- `tenant_vitormoraes_a3cbc1.ordens_servico` sem: numero, tempo_total_minutos, timer_iniciado_em, valor_servico
+- `tenant_62a495e1.ordens_servico_historico` sem: <tabela ausente>
+- `tenant_62a495e1.ordens_servico_itens` sem: <tabela ausente>
+- `tenant_blackpink_f4f2cb.ordens_servico_itens` sem: valor_custo
+- `tenant_suplementos_257cc9.ordens_servico_itens` sem: valor_custo
+- `tenant_vitormoraes_5fdcf8.ordens_servico_itens` sem: valor_custo
+- `tenant_vitormoraes_a3cbc1.ordens_servico_itens` sem: valor_custo
+- `tenant_62a495e1.previsoes_demanda` sem: deleted_at
+- `tenant_62a495e1.regras_comissao` sem: deleted_at
+- `tenant_62a495e1.role_permissions` sem: <tabela ausente>
+- `tenant_62a495e1.schema_migrations` sem: <tabela ausente>
+- `tenant_blackpink_f4f2cb.tags_catalog` sem: <tabela ausente>
+- `tenant_gelucos_eb10dd.tags_catalog` sem: <tabela ausente>
+- `tenant_suplementos_257cc9.tags_catalog` sem: <tabela ausente>
+- `tenant_vitormoraes_5fdcf8.tags_catalog` sem: <tabela ausente>
+- `tenant_vitormoraes_a3cbc1.tags_catalog` sem: <tabela ausente>
+- `tenant_62a495e1.transferencias_estoque` sem: deleted_at
+- `tenant_blackpink_f4f2cb.vendas` sem: canal_venda_id, nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
+- `tenant_gelucos_eb10dd.vendas` sem: nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
+- `tenant_suplementos_257cc9.vendas` sem: nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
+- `tenant_vitormoraes_5fdcf8.vendas` sem: nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
+- `tenant_vitormoraes_a3cbc1.vendas` sem: canal_venda_id, nfe_chave, nfe_pdf_url, nfe_protocolo, nfe_xml_url
+- `tenant_62a495e1.vendas_itens` sem: deleted_at
+
+## Funcoes SECURITY DEFINER expostas a anon (147)
+
+- `_after_empresa_insert_seed_modules()`
+- `_provisionar_rpcs_escrita_a(text)`
+- `_provisionar_rpcs_escrita_b(text)`
+- `_provisionar_rpcs_leitura(text)`
+- `_provisionar_tabelas(text)`
+- `admin_criar_cupom(text,text,numeric,integer,timestamp with time zone)`
+- `admin_excluir_cupom(uuid)`
+- `admin_listar_cupons()`
+- `calcular_comissao_trigger()`
+- `create_tenant_schema(text)`
+- `criar_rpcs_tenant(text)`
+- `debug_check_tabela_registros(text,text)`
+- `debug_columns_test(text,text)`
+- `debug_financeiro_check()`
+- `debug_get_create_produto_args()`
+- `debug_get_os_signature()`
+- `debug_get_source()`
+- `debug_kpis_source()`
+- `debug_listar_clientes()`
+- `debug_listar_signature()`
+- `debug_listar_signatures()`
+- `drop_old_tenant_atualizar_cliente()`
+- `drop_old_tenant_criar_cliente()`
+- `execute_dynamic_ddl(text)`
+- `get_clientes_tenant(text)`
+- `get_current_empresa_id()`
+- `get_current_role()`
+- `get_estoque_baixo(text)`
+- `get_frase_do_dia()`
+- `get_pendencias_financeiro(text,text)`
+- `get_tenant_schema()`
+- `get_user_settings()`
+- `get_vendas_periodo(text,text,text)`
+- `incrementar_numero_nfe(uuid,character varying,integer,character varying)`
+- `incrementar_uso_cupom(uuid)`
+- `is_master()`
+- `is_tenant_of(uuid)`
+- `listar_modulos_avulsos_checkout()`
+- `listar_planos_checkout()`
+- `master_atualizar_modulo_avulso(uuid,numeric,numeric,boolean)`
+- `master_atualizar_plano(uuid,numeric,numeric,boolean)`
+- `master_listar_historico_precos()`
+- `provision_base_tables(text)`
+- `provisionar_estoque_movimentacoes(text)`
+- `registrar_audit(text,text,text,uuid,uuid,uuid,jsonb,jsonb)`
+- `relatorio_estoque_tenant(text)`
+- `relatorio_financeiro_tenant(text,text,text)`
+- `relatorio_vendas_tenant(text,text,text)`
+- `tenant_abrir_ordem_producao(uuid,numeric)`
+- `tenant_adicionar_tag(uuid,text)`
+- `tenant_atualizar_canal_venda(uuid,text,boolean)`
+- `tenant_atualizar_cliente(uuid,character varying,character varying,character varying,character varying,character varying)`
+- `tenant_atualizar_cliente(uuid,text,text,text,text,text,text,text)`
+- `tenant_atualizar_comissao(uuid,character varying,date)`
+- `tenant_atualizar_custo_produto(uuid,numeric,character varying,text)`
+- `tenant_atualizar_dados_pessoais(uuid,character varying,character varying,date,character varying,text,character varying,character varying,date)`
+- `tenant_atualizar_demanda_real(uuid,integer,text)`
+- `tenant_atualizar_estoque(uuid,character varying,integer,integer)`
+- `tenant_atualizar_financeiro(uuid,character varying,text,numeric,date,character varying,character varying)`
+- `tenant_atualizar_funcionario(uuid,character varying,character varying,character varying,character varying,numeric,character varying,integer)`
+- `tenant_atualizar_funcionario(uuid,character varying,character varying,character varying,character varying,numeric,character varying)`
+- `tenant_atualizar_modulos_usuario(uuid,jsonb)`
+- `tenant_atualizar_obra(uuid,uuid,character varying,text,text,date,date,character varying,numeric)`
+- `tenant_atualizar_os(uuid,uuid,uuid,character varying,text,character varying,numeric,text,text,jsonb)`
+- `tenant_atualizar_produto(uuid,character varying,text,character varying,numeric,character varying,numeric,character varying)`
+- `tenant_atualizar_produto(uuid,text,text,text,numeric,text,numeric,text,integer,jsonb)`
+- `tenant_buscar_configuracao(text)`
+- `tenant_buscar_produto_por_codigo(character varying)`
+- `tenant_buscar_whatsapp_cloud_api()`
+- `tenant_cancelar_transferencia(uuid,text)`
+- `tenant_concluir_transferencia(uuid,text)`
+- `tenant_criar_alerta_nurturing(uuid,text,text,integer,text)`
+- `tenant_criar_canal_venda(text,boolean)`
+- `tenant_criar_cliente(text,text,text,text,text,text,text)`
+- `tenant_criar_ficha_tecnica(uuid,uuid,numeric)`
+- `tenant_criar_financeiro(character varying,text,numeric,date,character varying,character varying)`
+- `tenant_criar_funcionario(character varying,character varying,character varying,character varying,numeric,character varying,integer)`
+- `tenant_criar_interacao(uuid,text,text,text,timestamp with time zone,integer,uuid,jsonb)`
+- `tenant_criar_kit(uuid,character varying,text,jsonb,text)`
+- `tenant_criar_local_estoque(character varying,character varying,text,text)`
+- `tenant_criar_obra(uuid,character varying,text,text,date,date,character varying,numeric)`
+- `tenant_criar_os(uuid,uuid,character varying,text,character varying,numeric,text,text,text,jsonb)`
+- `tenant_criar_produto(character varying,text,character varying,numeric,character varying,numeric,character varying,integer,integer)`
+- `tenant_criar_produto(text,text,text,numeric,text,numeric,text,integer,integer,jsonb)`
+- `tenant_criar_regra_comissao(uuid,character varying,numeric,boolean)`
+- `tenant_criar_transferencia(uuid,uuid,uuid,integer,text,uuid,text)`
+- `tenant_dashboard_metricas()`
+- `tenant_deletar_canal_venda(uuid)`
+- `tenant_desativar_local_estoque(uuid,text)`
+- `tenant_enviar_campanha(uuid[],text,text,text)`
+- `tenant_excluir_cliente(uuid)`
+- `tenant_excluir_documento(uuid)`
+- `tenant_excluir_financeiro(uuid)`
+- `tenant_excluir_funcionario(uuid)`
+- `tenant_excluir_interacao(uuid)`
+- `tenant_excluir_kit(uuid,text)`
+- `tenant_excluir_obra(uuid)`
+- `tenant_excluir_os(uuid)`
+- `tenant_excluir_produto(uuid)`
+- `tenant_excluir_regra_comissao(uuid)`
+- `tenant_excluir_venda(uuid)`
+- `tenant_finalizar_alerta_nurturing(uuid)`
+- `tenant_gerar_codigo_barras(uuid,text)`
+- `tenant_gerar_previsao_demanda(uuid,integer,integer,text)`
+- `tenant_gerenciar_timer_os(uuid,text)`
+- `tenant_importar_clientes_lote(jsonb,uuid)`
+- `tenant_listar_audit(uuid,text,integer)`
+- `tenant_listar_canais_venda()`
+- `tenant_listar_clientes(uuid,integer,text,text,text,text,text,text[])`
+- `tenant_listar_documentos(uuid)`
+- `tenant_listar_entradas_estoque(uuid,integer,integer)`
+- `tenant_listar_financeiro(integer,integer)`
+- `tenant_listar_funcionarios(integer,integer)`
+- `tenant_listar_interacoes(uuid,integer,uuid)`
+- `tenant_listar_modulos_usuario(uuid)`
+- `tenant_listar_movimentacoes_estoque(uuid,text,integer,integer)`
+- `tenant_listar_notas_fiscais()`
+- `tenant_listar_obras()`
+- `tenant_listar_ordens_servico(integer,integer)`
+- `tenant_listar_regras_comissao(integer,integer)`
+- `tenant_listar_tags_catalog(text,integer)`
+- `tenant_listar_usuarios()`
+- `tenant_listar_vendas(integer,integer,text)`
+- `tenant_marcar_fechamento_visto(text)`
+- `tenant_obter_documento(uuid)`
+- `tenant_obter_dre(text,text)`
+- `tenant_obter_fechamento_pendente()`
+- `tenant_obter_lucro_os(uuid)`
+- `tenant_processar_venda(uuid,text,jsonb,uuid,text,text,numeric,numeric,integer)`
+- `tenant_registrar_documento(uuid,character varying,character varying,bigint,character varying,text)`
+- `tenant_registrar_entrada_estoque(jsonb,uuid,text,text,text,text,text,date,text,text,text)`
+- `tenant_registrar_pagamento_rh(uuid,character varying)`
+- `tenant_registrar_pagamento_rh_todos(character varying)`
+- `tenant_remover_tag(uuid,text)`
+- `tenant_remover_whatsapp_cloud_api()`
+- `tenant_salvar_configuracao(text,text,text)`
+- `tenant_salvar_whatsapp_cloud_api(text,text,text)`
+- `tenant_vender_kit(uuid,integer,text)`
+- `tenant_whatsapp_cloud_api_credentials(text)`
+- `update_all_tenants_atualizar_cliente()`
+- `update_all_tenants_criar_cliente()`
+- `update_clientes_funil_fase_constraint()`
+- `update_user_settings(jsonb)`
+- `validar_cupom(text)`
+- `verificar_limite_usuarios(uuid)`
+- `webhook_provisionar_assinatura(text,text,text,text,text,text,text,text,numeric,text[],jsonb)`
+- `webhook_verificar_token_whatsapp(text)`
+
+## Hooks de provisionamento ativos (7)
+
+- `catalogo_produtos` (ordem 10) — `provisionar_hook_catalogo_produtos(text)`
+- `estoque_movimentacoes` (ordem 20) — `provisionar_estoque_movimentacoes(text)`
+- `dashboard_executivo` (ordem 30) — `provisionar_hook_dashboard_executivo(text)`
+- `locais_estoque` (ordem 40) — `provisionar_hook_locais_estoque(text)`
+- `nurturing_interacoes` (ordem 50) — `provisionar_hook_nurturing_interacoes(text)`
+- `processar_venda` (ordem 60) — `provisionar_hook_processar_venda(text)`
+- `mrp_producao` (ordem 70) — `provisionar_hook_mrp_producao(text)`
