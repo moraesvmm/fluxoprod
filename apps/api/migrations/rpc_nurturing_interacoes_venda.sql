@@ -50,16 +50,18 @@ BEGIN
                         v.id,
                         ''RECOMPRA''::TEXT AS tipo,
                         ''recompra''::TEXT AS categoria,
-                        p.nome AS produto_servico,
+                        p.nome::TEXT AS produto_servico,
                         (v.criado_em + INTERVAL ''30 days'')::TEXT AS data_alerta,
-                        ''Olá '' || c.nome || ''! Identificamos que seu produto '' || p.nome || '' pode estar acabando. Gostaria de repor?'' AS mensagem_sugerida,
-                        c.nome AS cliente_nome,
-                        COALESCE(c.telefone, '''') AS cliente_telefone
+                        (''Olá '' || c.nome || ''! Identificamos que seu produto '' || p.nome || '' pode estar acabando. Gostaria de repor?'')::TEXT AS mensagem_sugerida,
+                        c.nome::TEXT AS cliente_nome,
+                        COALESCE(c.telefone, '''')::TEXT AS cliente_telefone
                     FROM vendas v
                     JOIN clientes c ON c.id = v.cliente_id
                     JOIN vendas_itens vi ON vi.venda_id = v.id
-                    JOIN produtos p ON p.id = vi.produto_id
-                    WHERE v.status = ''concluida''
+                    -- vendas_itens.produto_id referencia estoque(id), não produtos(id)
+                    JOIN estoque e ON e.id = vi.produto_id
+                    JOIN produtos p ON p.id = e.produto_id
+                    WHERE lower(v.status) LIKE ''conclu%%''
                         AND v.criado_em >= NOW() - INTERVAL ''90 days''
                         AND c.deleted_at IS NULL
                     
@@ -70,11 +72,11 @@ BEGIN
                         ic.id,
                         ''RECOMPRA''::TEXT AS tipo,
                         ''recompra''::TEXT AS categoria,
-                        ic.metadata->>''produto_descricao'' AS produto_servico,
+                        (ic.metadata->>''produto_descricao'')::TEXT AS produto_servico,
                         (ic.data_interacao + ((COALESCE(ic.metadata->>''ciclo_recompra_dias'', ''30''))::INT * INTERVAL ''1 day''))::TEXT AS data_alerta,
-                        ''Olá '' || c.nome || ''! Seu ciclo de '' || COALESCE(ic.metadata->>''produto_descricao'', ''produto'') || '' está se encerrando. Podemos renovar?'' AS mensagem_sugerida,
-                        c.nome AS cliente_nome,
-                        COALESCE(c.telefone, '''') AS cliente_telefone
+                        (''Olá '' || c.nome || ''! Seu ciclo de '' || COALESCE(ic.metadata->>''produto_descricao'', ''produto'') || '' está se encerrando. Podemos renovar?'')::TEXT AS mensagem_sugerida,
+                        c.nome::TEXT AS cliente_nome,
+                        COALESCE(c.telefone, '''')::TEXT AS cliente_telefone
                     FROM interacoes_clientes ic
                     JOIN clientes c ON c.id = ic.cliente_id
                     WHERE ic.tipo = ''venda''
