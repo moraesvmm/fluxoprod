@@ -325,7 +325,8 @@ export default function DashboardPage() {
               Lucro bruto após custo de mercadoria (CMV); despesas operacionais não incluídas.
             </p>
           </div>
-          <div className="h-[300px] w-full min-h-[300px] flex items-center justify-center">
+          {/* Bloco (não flex): o ResponsiveContainer precisa de largura definida para se medir */}
+          <div className="h-[300px] w-full">
             {dashboard.isLoadingChart ? (
               <ChartSkeleton />
             ) : Array.isArray(dashboard.chartData) && dashboard.chartData.some((d) => d.total > 0) ? (
@@ -333,7 +334,7 @@ export default function DashboardPage() {
                 <LazyAreaChart data={dashboard.chartData} formatarMoeda={formatarMoeda} />
               </Suspense>
             ) : (
-              <div className="flex flex-col items-center gap-3 text-center">
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
                 <TrendingUp className="h-12 w-12 text-border" />
                 <div>
                   <p className="text-sm text-muted-foreground font-medium">Nenhum dado de faturamento</p>
