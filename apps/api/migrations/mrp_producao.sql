@@ -115,6 +115,9 @@ BEGIN
         ', r.schema_name, r.schema_name, r.schema_name);
 
         -- RPC Tenant Local: Concluir OP (Executa a transação atômica)
+        -- A versão anterior tem defaults nos parâmetros, e CREATE OR REPLACE não pode removê-los (42P13)
+        EXECUTE format('DROP FUNCTION IF EXISTS %I.tenant_concluir_ordem_producao_local(UUID, NUMERIC, JSONB);', r.schema_name);
+
         EXECUTE format('
             CREATE OR REPLACE FUNCTION %I.tenant_concluir_ordem_producao_local(
                 p_ordem_id UUID,
