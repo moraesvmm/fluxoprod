@@ -257,7 +257,6 @@ export default function PDVPage() {
       setProdutos(produtosMapeados);
     } catch (err: unknown) {
       toastError('Erro ao processar pagamento: ' + (err instanceof Error ? err.message : 'Tente novamente.'));
-      throw err; // Propagar erro (não silencioso)
     } finally {
       setSubmitting(false);
     }

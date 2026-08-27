@@ -1,6 +1,6 @@
--- Migração para corrigir a chamada da RPC tenant_listar_estoque no PDV
--- A versão antiga estava causando HTTP 404 porque não resolvia o schema dinamicamente (chamava public.estoque)
--- e retornava TABLE, causando os mesmos problemas de desserialização que ocorreram no CRM.
+-- Migração para corrigir a chamada da RPC tenant_listar_estoque no PDV.
+-- A versão antiga delegava para funções internas divergentes entre tenants:
+-- algumas consultavam produtos.preco_venda e outras retornavam image_urls.
 
 DROP FUNCTION IF EXISTS public.tenant_listar_estoque();
 DROP FUNCTION IF EXISTS public.tenant_listar_estoque(INT, INT);
@@ -12,6 +12,7 @@ CREATE OR REPLACE FUNCTION public.tenant_listar_estoque(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
     v_schema_name TEXT;
@@ -31,7 +32,7 @@ BEGIN
         RETURN '[]'::JSONB;
     END IF;
     
-    -- Executar a busca de forma segura diretamente nas tabelas do tenant
+    -- Consultar diretamente as colunas comuns a todos os schemas provisionados.
     EXECUTE format('
         SELECT jsonb_agg(
             jsonb_build_object(
@@ -43,10 +44,11 @@ BEGIN
                 ''atualizado_em'', e.atualizado_em,
                 ''produto_nome'', p.nome,
                 ''produto_preco_base'', p.preco_base
-            )
+            ) ORDER BY e.quantidade ASC, p.nome ASC
         )
         FROM (
-            SELECT * FROM %I.estoque
+            SELECT id, produto_id, sku, quantidade, quantidade_minima, atualizado_em
+            FROM %I.estoque
             ORDER BY quantidade ASC
             LIMIT $1 OFFSET $2
         ) e
@@ -57,10 +59,10 @@ BEGIN
 
     -- Garantir que sempre retorna um array (evitar null no frontend)
     RETURN COALESCE(v_result, '[]'::JSONB);
-EXCEPTION WHEN OTHERS THEN
-    -- Em caso de erro, retornar JSON formatado com o erro ao invés de quebrar a resposta
-    RETURN jsonb_build_object('error', SQLERRM);
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.tenant_listar_estoque TO authenticated;
+REVOKE ALL ON FUNCTION public.tenant_listar_estoque(INT, INT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.tenant_listar_estoque(INT, INT) TO authenticated;
+
+NOTIFY pgrst, 'reload schema';
