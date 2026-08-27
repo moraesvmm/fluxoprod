@@ -2983,8 +2983,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -2995,8 +2993,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3007,8 +3003,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3019,8 +3013,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3031,8 +3023,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3043,7 +3033,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3055,7 +3044,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3067,7 +3055,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3091,7 +3078,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3103,8 +3089,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3117,8 +3101,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3129,8 +3111,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3141,8 +3121,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3153,8 +3131,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3165,8 +3141,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3177,8 +3151,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3189,8 +3161,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3201,8 +3171,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3213,8 +3181,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3225,8 +3191,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3237,8 +3201,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3262,8 +3224,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3274,8 +3234,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3298,8 +3256,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3310,8 +3266,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3324,7 +3278,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3338,7 +3291,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3350,8 +3302,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3362,7 +3312,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3374,8 +3323,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3401,7 +3348,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3413,7 +3359,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3425,8 +3370,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3437,7 +3380,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3449,7 +3391,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3476,7 +3417,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3490,7 +3430,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3526,7 +3465,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3538,7 +3476,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3550,7 +3487,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3588,8 +3524,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3624,8 +3558,6 @@
         "search_path=public, pg_temp"
       ],
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3680,6 +3612,18 @@
     {
       "nome": "provisionar_hook_nurturing_interacoes",
       "assinatura": "provisionar_hook_nurturing_interacoes(text)",
+      "retorno": "void",
+      "security_definer": true,
+      "configuracao": [
+        "search_path=public, pg_temp"
+      ],
+      "executavel_por": [
+        "service_role"
+      ]
+    },
+    {
+      "nome": "provisionar_hook_paridade_tenants",
+      "assinatura": "provisionar_hook_paridade_tenants(text)",
       "retorno": "void",
       "security_definer": true,
       "configuracao": [
@@ -3747,7 +3691,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3759,8 +3702,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3771,8 +3712,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3783,8 +3722,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -3808,7 +3745,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3820,7 +3756,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3832,7 +3767,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3844,7 +3778,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3856,7 +3789,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3868,7 +3800,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3882,7 +3813,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3894,7 +3824,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3908,7 +3837,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3922,7 +3850,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3947,7 +3874,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3961,7 +3887,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -3975,7 +3900,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4013,7 +3937,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4025,7 +3948,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4039,7 +3961,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4064,7 +3985,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4089,7 +4009,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4101,7 +4020,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4113,7 +4031,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4125,7 +4042,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4137,7 +4053,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4151,7 +4066,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4176,7 +4090,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4188,7 +4101,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4200,7 +4112,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4214,7 +4125,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4226,7 +4136,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4251,7 +4160,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4263,7 +4171,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4301,7 +4208,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4313,7 +4219,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4325,7 +4230,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4337,7 +4241,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4351,7 +4254,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4365,7 +4267,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4379,7 +4280,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4393,7 +4293,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4405,7 +4304,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4417,7 +4315,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4431,7 +4328,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4445,7 +4341,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4459,7 +4354,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4471,7 +4365,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4485,7 +4378,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4497,7 +4389,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4509,7 +4400,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4521,7 +4411,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4533,7 +4422,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4545,7 +4433,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4572,7 +4459,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4584,7 +4470,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4596,7 +4481,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4623,7 +4507,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4637,7 +4520,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4690,7 +4572,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4704,7 +4585,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4716,7 +4596,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4754,7 +4633,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4781,7 +4659,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4793,7 +4670,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4807,7 +4683,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4834,7 +4709,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4885,7 +4759,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4897,7 +4770,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4922,7 +4794,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4934,7 +4805,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4946,7 +4816,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4960,7 +4829,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4974,7 +4842,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -4988,7 +4855,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5000,7 +4866,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5040,7 +4905,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5054,7 +4918,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5068,7 +4931,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5082,7 +4944,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5094,7 +4955,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5108,7 +4968,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5133,7 +4992,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5147,7 +5005,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5159,7 +5016,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5186,7 +5042,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5222,8 +5077,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -5234,8 +5087,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -5246,8 +5097,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -5270,7 +5119,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5330,7 +5178,6 @@
       "security_definer": true,
       "configuracao": null,
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5344,8 +5191,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
-        "authenticated",
         "service_role"
       ]
     },
@@ -5358,7 +5203,6 @@
         "search_path=public"
       ],
       "executavel_por": [
-        "anon",
         "authenticated",
         "service_role"
       ]
@@ -5378,6 +5222,21 @@
           "criado_em",
           "resolvido_em",
           "deleted_at"
+        ],
+        "audit_log": [
+          "id",
+          "operation_type",
+          "resource_type",
+          "resource_id",
+          "user_id",
+          "changes",
+          "status",
+          "error_message",
+          "ip_address",
+          "user_agent",
+          "created_at",
+          "resource",
+          "details"
         ],
         "canais_venda": [
           "id",
@@ -5416,6 +5275,12 @@
           "criado_em",
           "deleted_at"
         ],
+        "configuracoes": [
+          "id",
+          "chave",
+          "valor",
+          "atualizado_em"
+        ],
         "crm_nurturing_alertas": [
           "id",
           "cliente_id",
@@ -5445,7 +5310,8 @@
           "sku",
           "quantidade",
           "quantidade_minima",
-          "atualizado_em"
+          "atualizado_em",
+          "deleted_at"
         ],
         "estoque_entrada_itens": [
           "id",
@@ -5506,7 +5372,8 @@
           "local_id",
           "quantidade",
           "criado_em",
-          "atualizado_em"
+          "atualizado_em",
+          "deleted_at"
         ],
         "fechamentos_mensais": [
           "id",
@@ -5515,7 +5382,10 @@
           "total_vendas",
           "ticket_medio",
           "criado_em",
-          "visto_em"
+          "visto_em",
+          "atualizado_em",
+          "status",
+          "visto"
         ],
         "fichas_tecnicas": [
           "id",
@@ -5558,6 +5428,12 @@
           "email",
           "telefone"
         ],
+        "idempotency_control": [
+          "idempotency_key",
+          "operation_type",
+          "result",
+          "created_at"
+        ],
         "interacoes_clientes": [
           "id",
           "cliente_id",
@@ -5596,7 +5472,8 @@
           "tipo",
           "endereco",
           "ativo",
-          "criado_em"
+          "criado_em",
+          "deleted_at"
         ],
         "notas_fiscais": [
           "id",
@@ -5732,6 +5609,26 @@
           "laudo_tecnico",
           "checklist_entrada"
         ],
+        "ordens_servico_historico": [
+          "id",
+          "ordem_servico_id",
+          "status_anterior",
+          "status_novo",
+          "alterado_por",
+          "alterado_em"
+        ],
+        "ordens_servico_itens": [
+          "id",
+          "ordem_servico_id",
+          "produto_id",
+          "descricao",
+          "quantidade",
+          "preco_unitario",
+          "subtotal",
+          "valor_custo",
+          "criado_em",
+          "deleted_at"
+        ],
         "previsoes_demanda": [
           "id",
           "produto_id",
@@ -5742,7 +5639,8 @@
           "media_venda_diaria",
           "demanda_real",
           "precisao",
-          "criado_em"
+          "criado_em",
+          "deleted_at"
         ],
         "produtos": [
           "id",
@@ -5773,7 +5671,22 @@
           "valor",
           "ativo",
           "criado_em",
-          "atualizado_em"
+          "atualizado_em",
+          "deleted_at"
+        ],
+        "role_permissions": [
+          "id",
+          "role",
+          "resource",
+          "action",
+          "allowed",
+          "criado_em"
+        ],
+        "schema_migrations": [
+          "id",
+          "version",
+          "description",
+          "applied_at"
         ],
         "tags_catalog": [
           "id",
@@ -5792,7 +5705,8 @@
           "observacao",
           "criado_por",
           "criado_em",
-          "concluida_em"
+          "concluida_em",
+          "deleted_at"
         ],
         "vendas": [
           "id",
@@ -5820,7 +5734,8 @@
           "quantidade",
           "preco_unitario",
           "subtotal",
-          "criado_em"
+          "criado_em",
+          "deleted_at"
         ]
       },
       "funcoes": [
@@ -5964,7 +5879,10 @@
           "endereco",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "tags",
+          "data_ultima_compra",
+          "total_pedidos"
         ],
         "comissoes": [
           "id",
@@ -5983,6 +5901,18 @@
           "id",
           "chave",
           "valor",
+          "atualizado_em"
+        ],
+        "crm_nurturing_alertas": [
+          "id",
+          "cliente_id",
+          "tipo",
+          "produto_servico",
+          "data_alerta",
+          "mensagem_sugerida",
+          "status",
+          "metadata",
+          "criado_em",
           "atualizado_em"
         ],
         "documentos_funcionarios": [
@@ -6167,6 +6097,28 @@
           "criado_em",
           "deleted_at"
         ],
+        "notas_fiscais": [
+          "id",
+          "tipo",
+          "numero",
+          "serie",
+          "chave_acesso",
+          "emitente_nome",
+          "emitente_cnpj",
+          "destinatario_nome",
+          "destinatario_cnpj",
+          "valor_total",
+          "data_emissao",
+          "data_entrada_saida",
+          "status",
+          "venda_id",
+          "xml_url",
+          "pdf_url",
+          "observacoes",
+          "criado_em",
+          "atualizado_em",
+          "deleted_at"
+        ],
         "obras": [
           "id",
           "cliente_id",
@@ -6274,7 +6226,14 @@
           "valor_orcamento",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "numero",
+          "tempo_total_minutos",
+          "timer_iniciado_em",
+          "valor_servico",
+          "equipamento_serial",
+          "laudo_tecnico",
+          "checklist_entrada"
         ],
         "ordens_servico_historico": [
           "id",
@@ -6293,7 +6252,8 @@
           "preco_unitario",
           "subtotal",
           "criado_em",
-          "deleted_at"
+          "deleted_at",
+          "valor_custo"
         ],
         "previsoes_demanda": [
           "id",
@@ -6353,6 +6313,13 @@
           "version",
           "description",
           "applied_at"
+        ],
+        "tags_catalog": [
+          "id",
+          "nome",
+          "cor",
+          "uso_count",
+          "criado_em"
         ],
         "transferencias_estoque": [
           "id",
@@ -6502,7 +6469,9 @@
           "error_message",
           "ip_address",
           "user_agent",
-          "created_at"
+          "created_at",
+          "resource",
+          "details"
         ],
         "canais_venda": [
           "id",
@@ -6522,7 +6491,11 @@
           "status",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "tags",
+          "data_ultima_compra",
+          "total_pedidos",
+          "endereco"
         ],
         "comissoes": [
           "id",
@@ -6541,6 +6514,18 @@
           "id",
           "chave",
           "valor",
+          "atualizado_em"
+        ],
+        "crm_nurturing_alertas": [
+          "id",
+          "cliente_id",
+          "tipo",
+          "produto_servico",
+          "data_alerta",
+          "mensagem_sugerida",
+          "status",
+          "metadata",
+          "criado_em",
           "atualizado_em"
         ],
         "documentos_funcionarios": [
@@ -6633,7 +6618,9 @@
           "ticket_medio",
           "visto",
           "visto_em",
-          "criado_em"
+          "criado_em",
+          "atualizado_em",
+          "status"
         ],
         "fichas_tecnicas": [
           "id",
@@ -6693,7 +6680,8 @@
           "usuario_id",
           "metadata",
           "criado_em",
-          "atualizado_em"
+          "atualizado_em",
+          "deleted_at"
         ],
         "kit_itens": [
           "id",
@@ -6940,6 +6928,13 @@
           "description",
           "applied_at"
         ],
+        "tags_catalog": [
+          "id",
+          "nome",
+          "cor",
+          "uso_count",
+          "criado_em"
+        ],
         "transferencias_estoque": [
           "id",
           "produto_id",
@@ -7124,7 +7119,10 @@
           "endereco",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "tags",
+          "data_ultima_compra",
+          "total_pedidos"
         ],
         "comissoes": [
           "id",
@@ -7143,6 +7141,18 @@
           "id",
           "chave",
           "valor",
+          "atualizado_em"
+        ],
+        "crm_nurturing_alertas": [
+          "id",
+          "cliente_id",
+          "tipo",
+          "produto_servico",
+          "data_alerta",
+          "mensagem_sugerida",
+          "status",
+          "metadata",
+          "criado_em",
           "atualizado_em"
         ],
         "documentos_funcionarios": [
@@ -7297,7 +7307,8 @@
           "usuario_id",
           "metadata",
           "criado_em",
-          "atualizado_em"
+          "atualizado_em",
+          "deleted_at"
         ],
         "kit_itens": [
           "id",
@@ -7458,7 +7469,11 @@
           "deleted_at",
           "equipamento_serial",
           "laudo_tecnico",
-          "checklist_entrada"
+          "checklist_entrada",
+          "numero",
+          "tempo_total_minutos",
+          "timer_iniciado_em",
+          "valor_servico"
         ],
         "ordens_servico_historico": [
           "id",
@@ -7477,7 +7492,8 @@
           "preco_unitario",
           "subtotal",
           "criado_em",
-          "deleted_at"
+          "deleted_at",
+          "valor_custo"
         ],
         "previsoes_demanda": [
           "id",
@@ -7537,6 +7553,13 @@
           "version",
           "description",
           "applied_at"
+        ],
+        "tags_catalog": [
+          "id",
+          "nome",
+          "cor",
+          "uso_count",
+          "criado_em"
         ],
         "transferencias_estoque": [
           "id",
@@ -7716,7 +7739,10 @@
           "endereco",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "tags",
+          "data_ultima_compra",
+          "total_pedidos"
         ],
         "comissoes": [
           "id",
@@ -7735,6 +7761,18 @@
           "id",
           "chave",
           "valor",
+          "atualizado_em"
+        ],
+        "crm_nurturing_alertas": [
+          "id",
+          "cliente_id",
+          "tipo",
+          "produto_servico",
+          "data_alerta",
+          "mensagem_sugerida",
+          "status",
+          "metadata",
+          "criado_em",
           "atualizado_em"
         ],
         "documentos_funcionarios": [
@@ -7889,7 +7927,8 @@
           "usuario_id",
           "metadata",
           "criado_em",
-          "atualizado_em"
+          "atualizado_em",
+          "deleted_at"
         ],
         "kit_itens": [
           "id",
@@ -8050,7 +8089,11 @@
           "deleted_at",
           "equipamento_serial",
           "laudo_tecnico",
-          "checklist_entrada"
+          "checklist_entrada",
+          "numero",
+          "tempo_total_minutos",
+          "timer_iniciado_em",
+          "valor_servico"
         ],
         "ordens_servico_historico": [
           "id",
@@ -8069,7 +8112,8 @@
           "preco_unitario",
           "subtotal",
           "criado_em",
-          "deleted_at"
+          "deleted_at",
+          "valor_custo"
         ],
         "previsoes_demanda": [
           "id",
@@ -8129,6 +8173,13 @@
           "version",
           "description",
           "applied_at"
+        ],
+        "tags_catalog": [
+          "id",
+          "nome",
+          "cor",
+          "uso_count",
+          "criado_em"
         ],
         "transferencias_estoque": [
           "id",
@@ -8305,7 +8356,10 @@
           "endereco",
           "criado_em",
           "atualizado_em",
-          "deleted_at"
+          "deleted_at",
+          "tags",
+          "data_ultima_compra",
+          "total_pedidos"
         ],
         "comissoes": [
           "id",
@@ -8324,6 +8378,18 @@
           "id",
           "chave",
           "valor",
+          "atualizado_em"
+        ],
+        "crm_nurturing_alertas": [
+          "id",
+          "cliente_id",
+          "tipo",
+          "produto_servico",
+          "data_alerta",
+          "mensagem_sugerida",
+          "status",
+          "metadata",
+          "criado_em",
           "atualizado_em"
         ],
         "documentos_funcionarios": [
@@ -8478,7 +8544,8 @@
           "usuario_id",
           "metadata",
           "criado_em",
-          "atualizado_em"
+          "atualizado_em",
+          "deleted_at"
         ],
         "kit_itens": [
           "id",
@@ -8505,6 +8572,28 @@
           "endereco",
           "ativo",
           "criado_em",
+          "deleted_at"
+        ],
+        "notas_fiscais": [
+          "id",
+          "tipo",
+          "numero",
+          "serie",
+          "chave_acesso",
+          "emitente_nome",
+          "emitente_cnpj",
+          "destinatario_nome",
+          "destinatario_cnpj",
+          "valor_total",
+          "data_emissao",
+          "data_entrada_saida",
+          "status",
+          "venda_id",
+          "xml_url",
+          "pdf_url",
+          "observacoes",
+          "criado_em",
+          "atualizado_em",
           "deleted_at"
         ],
         "obras": [
@@ -8617,7 +8706,11 @@
           "deleted_at",
           "equipamento_serial",
           "laudo_tecnico",
-          "checklist_entrada"
+          "checklist_entrada",
+          "numero",
+          "tempo_total_minutos",
+          "timer_iniciado_em",
+          "valor_servico"
         ],
         "ordens_servico_historico": [
           "id",
@@ -8636,7 +8729,8 @@
           "preco_unitario",
           "subtotal",
           "criado_em",
-          "deleted_at"
+          "deleted_at",
+          "valor_custo"
         ],
         "previsoes_demanda": [
           "id",
@@ -8696,6 +8790,13 @@
           "version",
           "description",
           "applied_at"
+        ],
+        "tags_catalog": [
+          "id",
+          "nome",
+          "cor",
+          "uso_count",
+          "criado_em"
         ],
         "transferencias_estoque": [
           "id",
@@ -8828,6 +8929,12 @@
       "ordem": 10,
       "ativo": true,
       "funcao": "provisionar_hook_catalogo_produtos(text)"
+    },
+    {
+      "hook_key": "paridade_tenants",
+      "ordem": 15,
+      "ativo": true,
+      "funcao": "provisionar_hook_paridade_tenants(text)"
     },
     {
       "hook_key": "estoque_movimentacoes",
