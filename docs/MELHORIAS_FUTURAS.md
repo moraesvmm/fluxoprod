@@ -56,3 +56,60 @@ Este documento é destinado exclusivamente para o planejamento de novas funciona
 
 > [!TIP]
 > Priorize implementações que gerem valor imediato ao cliente final (ex: Portal de Orçamentos).
+
+---
+
+## 🩺 FLUXO HEALTH — VERTICAL DE SAÚDE (ESCOPO DEFINIDO EM 27/08/2026)
+
+ERP para clínicas, entregue como **vertical do mesmo produto**: mesmo código, mesmo banco, mesmo provisionamento. Não haverá sistema nem base separada.
+
+### Modelo de produto (três eixos independentes)
+
+| Eixo | Valores | Decide |
+|---|---|---|
+| **Vertical** | `geral`, `health` | Landing, marca e catálogo de módulos |
+| **Setor** | `nutricao`, `odontologia`, `estetica`, `fisioterapia`, `psicologia`, `multi` | Pacote de módulos e formulários |
+| **Nível** | Starter, Business, Pro | Limites de uso |
+
+Exige `vertical` e `setor` em `public.empresas` e em `public.planos`. Landing separada por domínio (a definir), resolvida pelo `Host` no proxy.
+
+### Primeiro setor: NUTRIÇÃO
+
+Escolhido por ter a menor superfície clínica e nenhuma dependência de convênio.
+
+Módulos específicos do setor:
+
+- **`antropometria`** — série temporal de peso, altura, IMC, circunferências e dobras, com gráficos de evolução.
+- **`plano_alimentar`** — refeições, porções, substituições e cálculo de macros.
+- **`recordatorio`** — recordatório alimentar de 24h e diário do paciente.
+
+### Módulos da vertical (comuns a todos os setores)
+
+| Chave | Função | Fase |
+|---|---|---|
+| `pacientes` | Cadastro clínico | 1 |
+| `agenda` | Agendamentos por profissional e sala | 1 |
+| `prontuario` | Evolução dos atendimentos | 1 |
+| `anamnese` | Formulários configuráveis por setor | 2 |
+| `convenios` | Cadastro de convênio e carteirinha (**sem TISS**) | 2 |
+| `documentos_clinicos` | Receituário e atestados | 2 |
+| `portal_paciente` | Confirmação de consulta e acesso a documentos | 3 |
+
+### Reaproveitamento sem reescrita
+
+Financeiro, estoque, RH (profissionais), comissões, dashboard, relatórios e configurações. O componente `Calendar` (já usado em OS e Obras) atende a agenda, e procedimentos usam `produtos` com `tipo = 'servico'`, que já existe.
+
+### Decisões técnicas
+
+- `pacientes` é tabela própria com vínculo opcional a `clientes`, preservando financeiro e vendas sem alteração.
+- `prontuario_evolucoes` é **append-only**, com autor e data. Prontuário não é sobrescrito.
+- Anamnese em `formularios_modelo` + `formularios_respostas` (JSONB), variando por setor.
+- Dado de saúde é dado sensível na LGPD: exige auditoria de acesso ao prontuário (via `audit_log`) e restrição por profissional.
+- Todo módulo novo nasce com hook de provisionamento, conforme [AGENTS.md](../AGENTS.md).
+
+### Fora do MVP
+
+- **TISS**: apenas cadastro de convênio no MVP; guias e lotes ANS ficam para a fase 3.
+- **NFS-e**: fase 2. A integração FocusNFe já provisiona `habilita_nfse`, mas não há tela de emissão de serviço.
+- **Portal do paciente**: fase 3. Introduz usuário sem vínculo com empresa, quebrando a premissa atual de `user_profiles` + `empresas`.
+
