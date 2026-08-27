@@ -16,6 +16,10 @@ BEGIN
     RAISE NOTICE 'Atualizando KPIs executivos no schema %', schema_record.schema_name;
 
     -- ── 1. tenant_dashboard_kpis ─────────────────────────────────────────────
+    -- Tenants provisionados antes desta migração têm a versão RETURNS TABLE, e
+    -- CREATE OR REPLACE não altera o tipo de retorno (42P13).
+    EXECUTE format('DROP FUNCTION IF EXISTS %I.tenant_dashboard_kpis();', schema_record.schema_name);
+
     v_sql := format('
       CREATE OR REPLACE FUNCTION %I.tenant_dashboard_kpis()
       RETURNS JSONB
@@ -49,12 +53,23 @@ BEGIN
           AND criado_em < date_trunc(''day'', now()) + INTERVAL ''1 day'';
 
         -- Recorte MÊS CORRENTE
-        SELECT COALESCE(SUM(valor_total), 0), COALESCE(SUM(COALESCE(valor_custo_total, 0)), 0), COUNT(*)
-        INTO v_faturamento_mes, v_cmv_mes, v_qtd_vendas_mes
+        SELECT COALESCE(SUM(valor_total), 0), COUNT(*)
+        INTO v_faturamento_mes, v_qtd_vendas_mes
         FROM vendas
         WHERE deleted_at IS NULL
           AND lower(status) NOT LIKE ''cancel%%''
           AND criado_em >= date_trunc(''month'', now());
+
+        -- CMV vem dos itens: vendas_itens.produto_id referencia estoque(id), não produtos(id)
+        SELECT COALESCE(SUM(vi.quantidade * COALESCE(p.custo_unitario, 0)), 0)
+        INTO v_cmv_mes
+        FROM vendas v
+        JOIN vendas_itens vi ON vi.venda_id = v.id
+        LEFT JOIN estoque e ON e.id = vi.produto_id
+        LEFT JOIN produtos p ON p.id = e.produto_id
+        WHERE v.deleted_at IS NULL
+          AND lower(v.status) NOT LIKE ''cancel%%''
+          AND v.criado_em >= date_trunc(''month'', now());
 
         -- Acumulado histórico (mantido por compatibilidade de contrato)
         SELECT COALESCE(SUM(valor_total), 0), COUNT(*)
@@ -64,15 +79,34 @@ BEGIN
 
         SELECT COUNT(*) INTO v_qtd_clientes FROM clientes WHERE deleted_at IS NULL;
         SELECT COUNT(*) INTO v_qtd_produtos FROM produtos WHERE deleted_at IS NULL;
-        SELECT COUNT(*) INTO v_qtd_os_abertas FROM ordens_servico WHERE deleted_at IS NULL AND status != ''Concluída'';
-        SELECT COUNT(*) INTO v_qtd_obras FROM obras WHERE deleted_at IS NULL AND status != ''Concluída'';
-        SELECT COUNT(*) INTO v_estoque_baixo FROM produtos WHERE deleted_at IS NULL AND estoque_atual <= estoque_minimo;
 
-        SELECT COALESCE(SUM(CASE WHEN tipo IN (''receita'', ''receber'') THEN valor ELSE -valor END), 0)
-        INTO v_saldo FROM financeiro WHERE deleted_at IS NULL AND status = ''concluido'';
+        SELECT COUNT(*) INTO v_qtd_os_abertas
+        FROM ordens_servico
+        WHERE deleted_at IS NULL
+          AND lower(status) NOT LIKE ''conclu%%''
+          AND lower(status) NOT LIKE ''cancel%%'';
 
-        SELECT COALESCE(SUM(estoque_atual * preco_custo), 0) INTO v_patrimonio_estoque
-        FROM produtos WHERE deleted_at IS NULL;
+        SELECT COUNT(*) INTO v_qtd_obras
+        FROM obras
+        WHERE deleted_at IS NULL AND lower(status) = ''em_andamento'';
+
+        -- estoque/vendas_itens não têm deleted_at em schemas antigos; filtra-se por produtos
+        SELECT COUNT(*) INTO v_estoque_baixo
+        FROM estoque e
+        JOIN produtos p ON p.id = e.produto_id
+        WHERE p.deleted_at IS NULL AND e.quantidade <= e.quantidade_minima;
+
+        -- ''pago'' é o estado liquidado em financeiro.status
+        SELECT COALESCE(SUM(CASE WHEN tipo = ''receber'' THEN valor ELSE -valor END), 0)
+        INTO v_saldo
+        FROM financeiro
+        WHERE deleted_at IS NULL AND status = ''pago'';
+
+        SELECT COALESCE(SUM(e.quantidade * COALESCE(p.custo_unitario, 0)), 0)
+        INTO v_patrimonio_estoque
+        FROM estoque e
+        JOIN produtos p ON p.id = e.produto_id
+        WHERE p.deleted_at IS NULL;
 
         RETURN jsonb_build_object(
           ''faturamento_hoje'', v_faturamento_hoje,
@@ -97,6 +131,8 @@ BEGIN
     EXECUTE v_sql;
 
     -- ── 2. tenant_dashboard_kpis_por_mes ────────────────────────────────────
+    EXECUTE format('DROP FUNCTION IF EXISTS %I.tenant_dashboard_kpis_por_mes(INTEGER);', schema_record.schema_name);
+
     v_sql := format('
       CREATE OR REPLACE FUNCTION %I.tenant_dashboard_kpis_por_mes(p_meses INTEGER DEFAULT 6)
       RETURNS JSONB
@@ -125,7 +161,7 @@ BEGIN
           SELECT
             meses.mes,
             COALESCE(SUM(v.valor_total), 0) AS faturamento,
-            COALESCE(SUM(COALESCE(v.valor_custo_total, 0)), 0) AS cmv,
+            COALESCE(SUM(cmv.custo), 0) AS cmv,
             COUNT(v.id) AS total_vendas,
             CASE WHEN COUNT(v.id) > 0
               THEN COALESCE(SUM(v.valor_total), 0) / COUNT(v.id)
@@ -141,6 +177,14 @@ BEGIN
             date_trunc(''month'', v.criado_em) = meses.mes
             AND v.deleted_at IS NULL
             AND lower(v.status) NOT LIKE ''cancel%%''
+          -- LATERAL evita que o join de itens multiplique valor_total
+          LEFT JOIN LATERAL (
+            SELECT COALESCE(SUM(vi.quantidade * COALESCE(p.custo_unitario, 0)), 0) AS custo
+            FROM vendas_itens vi
+            LEFT JOIN estoque e ON e.id = vi.produto_id
+            LEFT JOIN produtos p ON p.id = e.produto_id
+            WHERE vi.venda_id = v.id
+          ) cmv ON TRUE
           GROUP BY meses.mes
         ) sub;
 
