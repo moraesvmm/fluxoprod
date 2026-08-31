@@ -130,32 +130,32 @@ O Fluxo ERP utiliza uma arquitetura de **Blindagem E2E (End-to-End Typing)** par
 
 Para garantir a integridade do sistema em caso de rollbacks e evitar quebra de produÃ§Ã£o por agentes ou manutenÃ§Ãµes:
 
-1. **MudanÃ§as Aditivas (NÃ£o Destrutivas)**: 
-   - Ao adicionar funcionalidades, priorize a **adiÃ§Ã£o** de novas colunas ou tabelas. 
+1. **Mudanças Aditivas (Não Destrutivas)**: 
+   - Ao adicionar funcionalidades, priorize a **adição** de novas colunas ou tabelas. 
    - **PROIBIDO** renomear ou excluir colunas existentes sem um plano de migraÃ§Ã£o de dados de duas etapas (dual-run).
    - O cÃ³digo antigo deve sempre ser capaz de ignorar novas colunas adicionadas ao banco.
 
 2. **Versionamento de RPCs (Modo Seguro)**:
-   - Se uma alteraÃ§Ã£o em uma RPC existente puder quebrar o contrato atual (ex: mudar parÃ¢metros ou tipo de retorno), **NÃƒO ALTERE** a funÃ§Ã£o original.
-   - Crie uma nova versÃ£o da funÃ§Ã£o (ex: `tenant_listar_vendas_v2`).
+   - Se uma alteraÃ§Ã£o em uma RPC existente puder quebrar o contrato atual (ex: mudar parâmetros ou tipo de retorno), **NÃO ALTERE** a função original.
+   - Crie uma nova versão da função (ex: `tenant_listar_vendas_v2`).
    - Mantenha a `v1` funcional atÃ© que todos os clientes/componentes tenham migrado para a nova versÃ£o.
 
-3. **IndependÃªncia de Rollback**:
+3. **Independência de Rollback**:
    - O sistema deve ser projetado para que o rollback de um commit do Frontend (Git) nÃ£o resulte em falha catastrÃ³fica devido ao estado "mais novo" do Banco de Dados.
 
-4. **SincronizaÃ§Ã£o de Tipos (EstÃ¡tico)**:
-   - **HistÃ³rico e SincronizaÃ§Ã£o**: Sempre que vocÃª alterar o banco de dados por migraÃ§Ãµes ou pelo Editor SQL do Supabase, basta rodar o seguinte comando (jÃ¡ deixei o binÃ¡rio `supabase.exe` na raiz do seu projeto local para facilitar, dispensando o uso de npx/node global):
+4. **Sincronização de Tipos (Estático)**:
+   - **Histórico e Sincronização**: Sempre que vocÃª alterar o banco de dados por migraÃ§Ãµes ou pelo Editor SQL do Supabase, basta rodar o seguinte comando (já deixei o binário `supabase.exe` na raiz do seu projeto local para facilitar, dispensando o uso de npx/node global):
      ```powershell
      $env:SUPABASE_ACCESS_TOKEN="SEU_TOKEN_DO_SUPABASE"
      .\supabase.exe gen types typescript --project-id wkxtlvxotvutycbupfuh > apps/web/src/types/database.types.ts
      ```
-   - **CONFORMIDADE OBRIGATÃ“RIA**: Qualquer alteraÃ§Ã£o de schema, nova tabela, view ou RPC exige a execuÃ§Ã£o imediata deste comando de geraÃ§Ã£o e o commit conjunto do arquivo `database.types.ts` atualizado. Todos os inicializadores de cliente do Supabase no projeto usam estritamente o tipo genÃ©rico `<Database>`, forÃ§ando o compilador Next.js a barrar qualquer deploy que possua falha de comunicaÃ§Ã£o entre frontend e banco.
+   - **CONFORMIDADE OBRIGATÓRIA**: Qualquer alteração de schema, nova tabela, view ou RPC exige a execuÃ§Ã£o imediata deste comando de geração e o commit conjunto do arquivo `database.types.ts` atualizado. Todos os inicializadores de cliente do Supabase no projeto usam estritamente o tipo genérico `<Database>`, forÃ§ando o compilador Next.js a barrar qualquer deploy que possua falha de comunicaÃ§Ã£o entre frontend e banco.
 
-5. **PolÃ­tica de Testes de RegressÃ£o (Bug-First Testing)**:
-   - Toda e qualquer correÃ§Ã£o de bug realizada por agentes ou humanos **deve** ser acompanhada de um caso de teste correspondente no Vitest (`vitest run`). O teste deve reproduzir a falha e validar que a correÃ§Ã£o se mantÃ©m estÃ¡vel, evitando que um agente futuro reverta a soluÃ§Ã£o.
+5. **Política de Testes de Regressão (Bug-First Testing)**:
+   - Toda e qualquer correção de bug realizada por agentes ou humanos **deve** ser acompanhada de um caso de teste correspondente no Vitest (`vitest run`). O teste deve reproduzir a falha e validar que a correção se mantém sustentável, evitando que um agente futuro reverta a soluÃ§Ã£o.
 
-6. **Mensagens de Commit SemÃ¢nticas (Rastreabilidade)**:
-   - Commits de alteraÃ§Ãµes de cÃ³digo devem obrigatoriamente seguir as diretrizes do Conventional Commits (ex: `fix(checkout): adjust coupon counter schema validation`). Isso garante rastreabilidade total via `git log` ou `git blame` para identificar qual agente e qual commit ocasionou qualquer regressÃ£o.
+6. **Mensagens de Commit Semânticas (Rastreabilidade)**:
+   - Commits de alterações de código devem obrigatoriamente seguir as diretrizes do Conventional Commits (ex: `fix(checkout): adjust coupon counter schema validation`). Isso garante rastreabilidade total via `git log` ou `git blame` para identificar qual agente e qual commit ocasionou qualquer regressÃ£o.
 
 7. **Persistência Obrigatória no Provisionamento (Multi-Tenant)**:
    - Toda alteração de SQL deve estar em arquivo versionado em `apps/api/migrations/`. É proibido aplicar SQL apenas pelo Editor do Supabase.
@@ -170,16 +170,16 @@ Para garantir a integridade do sistema em caso de rollbacks e evitar quebra de p
 
 ---
 
-## ðŸ“‚ GOVERNANÃ‡A DE DOCUMENTAÃ‡ÃƒO (BACKLOG)
+## GOVERNANÇA DE DOCUMENTAÇÃO (BACKLOG)
 
-Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquivos de planejamento:
+Para manter a organização do repositório, utilizamos apenas dois arquivos de planejamento:
 
-1. **[PENDENCIAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PENDENCIAS.md)**: Exclusivo para **alteraÃ§Ãµes de cÃ³digo**, dÃ­vidas tÃ©cnicas, refatoraÃ§Ãµes, correÃ§Ãµes de bugs e riscos de escalabilidade. Se envolve cÃ³digo existente ou estrutura, fica aqui.
-2. **[MELHORIAS_FUTURAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/MELHORIAS_FUTURAS.md)**: Exclusivo para **novas funcionalidades**, melhorias de UX/UI, expansÃ£o de mÃ³dulos e novas integraÃ§Ãµes. Se Ã© algo que o sistema ainda nÃ£o faz, fica aqui.
+1. **[PENDENCIAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/PENDENCIAS.md)**: Exclusivo para **alterações de código**, dú­vidas técnicas, refatorações, correções de bugs e riscos de escalabilidade. Se envolve código existente ou estrutura, fica aqui.
+2. **[MELHORIAS_FUTURAS.MD](file:///c:/Users/VMORAES1/Documents/fluxoprod/docs/MELHORIAS_FUTURAS.md)**: Exclusivo para **novas funcionalidades**, melhorias de UX/UI, expansÃ£o de mÃ³dulos e novas integraÃ§Ãµes. Se há algo que o sistema ainda não faz, fica aqui.
 
 ---
 
-## ðŸ“‹ ESTRUTURA DO SISTEMA
+## ESTRUTURA DO SISTEMA
 
 ### Arquitetura Geral (OPÃ‡ÃƒO A - IMPLEMENTADA)
 - **Backend**: Supabase (PostgreSQL + RPC) - **FONTE DA VERDADE**
@@ -216,14 +216,14 @@ Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquiv
 > [!WARNING]
 > **Ressalva Pendente:** A funcionalidade de gestÃ£o de regras de comissÃ£o depende da aplicaÃ§Ã£o de `apps/api/migrations/rpc_comissoes_regras.sql` no banco live. AtÃ© lÃ¡, o mÃ³dulo opera em modo degradado.
 
-### EstratÃ©gia Multi-Tenant (OPÃ‡ÃƒO A - IMPLEMENTADA)
+### Estrategia Multi-Tenant (OPÃ‡ÃƒO A - IMPLEMENTADA)
 - **Isolamento**: Um schema PostgreSQL por tenant (ex: `tenant_empresa_xyz`)
 - **Schema Routing**: RPC `set_tenant_schema()` configura `search_path` baseado em `user_profiles`
 - **Middleware**: Injeta schema via RPC em cada request, valida role e feature flags
 - **RLS**: Policies permissivas (`USING (true)`) pois isolamento Ã© por schema routing
 - **RBAC**: Tabela `role_permissions` com roles `tenant_admin` e `tenant_user` padrÃ£o
 
-### MÃ³dulo Fiscal (NFe Nativa - OPÃ‡ÃƒO CUSTO ZERO)
+### Modulo Fiscal (NFe Nativa - OPÇAO CUSTO ZERO)
 - **Motor**: Node.js Nativo (`node-forge` + `xml-crypto` + `axios`)
 - **Escopo Atual**: EmissÃ£o nativa liberada somente para empresas do **Simples Nacional**.
 - **Certificado (Multi-tenant)**: Armazenamento isolado em Supabase Storage (`fiscal/{empresa_id}/certificado.pfx`).
@@ -306,7 +306,7 @@ Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquiv
 - **tenant_obter_sugestoes_nurturing()** - **Modelo HÃ­brido**: Detecta inatividade via tabela `vendas` OU via interaÃ§Ãµes de tipo `venda` (CRM-only).
 - **tenant_obter_dre(p_data_inicio, p_data_fim)** - Motor de DRE que consolida Faturamento, CMV e Despesas Operacionais em tempo real.
 
-### RPCs do Schema Tenant (DinÃ¢micas)
+### RPCs do Schema Tenant (Dinamicas)
 
 #### Listagem (todas com LIMIT padrÃ£o 1000 e SELECT explÃ­cito)
 - **tenant_listar_clientes(p_limit, p_offset)** - Lista clientes
@@ -319,7 +319,7 @@ Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquiv
 - **tenant_listar_obras(p_limit, p_offset)** - Lista obras
 - **tenant_listar_comissoes(p_limit, p_offset)** - Lista comissÃµes
 
-#### CriaÃ§Ã£o (todas com idempotÃªncia via p_idempotency_key)
+#### Criaçao (todas com idempotencia via p_idempotency_key)
 - **tenant_criar_cliente(p_nome, p_telefone, p_email, p_endereco, p_funil_fase, p_status, p_idempotency_key)**
 - **tenant_criar_produto(p_nome, p_descricao, p_tipo, p_preco_base, p_sku, p_qtd_inicial, p_qtd_minima, p_idempotency_key)**
 - **tenant_criar_financeiro(p_tipo, p_descricao, p_valor, p_data_vencimento, p_status, p_categoria, p_idempotency_key)**
@@ -328,7 +328,7 @@ Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquiv
 - **tenant_criar_interacao(p_cliente_id, p_tipo, p_titulo, p_descricao, p_data_interacao, p_duracao_minutos, p_usuario_id, p_metadata)** - Suporta tipo 'venda' para CRM-only
 - **tenant_processar_venda(p_cliente_id, p_cliente_nome, p_itens, p_vendedor_id, p_metodo_pagamento, p_valor_total, p_desconto, p_emitir_nfe)** - RPC transacional que automatiza criaÃ§Ã£o de CMV e lanÃ§amento financeiro de receita.
 
-#### ExclusÃ£o
+#### Exclusao
 - **tenant_excluir_cliente(p_cliente_id)**
 - **tenant_excluir_produto(p_produto_id)**
 - **tenant_excluir_financeiro(p_financeiro_id)**
@@ -337,7 +337,7 @@ Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquiv
 
 ---
 
-## ðŸ—‚ï¸ ESTRUTURA DO FRONTEND (NEXT.JS)
+## ESTRUTURA DO FRONTEND (NEXT.JS)
 
 ### apps/web/src/utils/supabase/
 - **client.ts** - Browser client Supabase
@@ -384,9 +384,9 @@ Para manter a organizaÃ§Ã£o do repositÃ³rio, utilizamos apenas dois arquiv
 
 ---
 
-## ðŸ”„ FLUXO COMPLETO DA REQUISIÃ‡ÃƒO
+## ðŸ”„ FLUXO COMPLETO DA REQUISIÇAO
 
-### 1. UsuÃ¡rio Acessa Rota (ex: /tenant/crm)
+### 1. Usuario Acessa Rota (ex: /tenant/crm)
 
 ### 2. Middleware Next.js Intercepta
 
@@ -399,7 +399,7 @@ export async function middleware(request: NextRequest) {
   // 2.2 Cria cliente Supabase SSR
   const supabase = createServerClient(...)
   
-  // 2.3 ObtÃ©m usuÃ¡rio autenticado
+  // 2.3 Obtem usuario autenticado
   const { data: { user } } = await supabase.auth.getUser()
   
   // 2.4 Se nÃ£o autenticado, redireciona para /login
@@ -407,7 +407,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
   
-  // 2.5 ObtÃ©m perfil do usuÃ¡rio
+  // 2.5 Obtem perfil do usuÃ¡rio
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('role, empresa_id')
@@ -461,7 +461,7 @@ export function useClientes() {
 }
 ```
 
-### 5. FunÃ§Ã£o API Chama RPC do Supabase
+### 5. Funcao API Chama RPC do Supabase
 
 ```typescript
 // apps/web/src/lib/api.ts
