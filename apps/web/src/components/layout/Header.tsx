@@ -65,7 +65,6 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
           alt="Fluxo Logo" 
           width={32}
           height={32}
-          priority
           className="object-contain hidden sm:block"
           style={{ width: "auto", height: "auto" }}
         />
