@@ -212,6 +212,13 @@ export default function PDVPage() {
       // A RPC agora cria ou busca o cliente automaticamente dentro da transação
       // Buscar nome do vendedor selecionado
       const vendedorSelecionado = funcionarios.find(f => f.id === vendedorId);
+
+      // O PWA pode permanecer em segundo plano tempo suficiente para o access token expirar.
+      // Renova-o antes da operação transacional para que a RPC seja chamada como authenticated.
+      const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
+      if (sessionError || !session?.access_token) {
+        throw new Error('Sua sessão expirou. Entre novamente antes de concluir o pagamento.');
+      }
       
       const { data, error } = await supabase.rpc('tenant_processar_venda', {
         p_cliente_id: null,
