@@ -23,7 +23,9 @@ import { type Venda } from "@/lib/api";
 
 export default function VendasPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { data: vendas = [], isLoading: loading, error: queryError } = useVendas(searchTerm);
+  const [filtrarHoje, setFiltrarHoje] = useState(true);
+  const dataHoje = new Date().toLocaleDateString('en-CA');
+  const { data: vendas = [], isLoading: loading, error: queryError } = useVendas(searchTerm, filtrarHoje ? dataHoje : null);
   const deleteMutation = useDeleteVenda();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
@@ -131,6 +133,13 @@ export default function VendasPage() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href="/tenant/vendas/caixa"
+            className="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            <Banknote className="mr-2 h-4 w-4" />
+            Caixa
+          </Link>
+          <Link
             href="/tenant/vendas/pdv"
             data-tour="vendas-novo"
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
@@ -161,9 +170,20 @@ export default function VendasPage() {
               className="w-full bg-card border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
-          <button className="text-sm font-medium text-muted-foreground hover:text-foreground border border-border px-3 py-1.5 rounded-md bg-card">
-            Filtrar
-          </button>
+          <div className="flex items-center rounded-md border border-border bg-card p-0.5 text-sm">
+            <button
+              onClick={() => setFiltrarHoje(true)}
+              className={`rounded px-3 py-1.5 font-medium ${filtrarHoje ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Hoje
+            </button>
+            <button
+              onClick={() => setFiltrarHoje(false)}
+              className={`rounded px-3 py-1.5 font-medium ${!filtrarHoje ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              Todas
+            </button>
+          </div>
         </div>
         <Table>
           <TableHeader>
@@ -205,7 +225,7 @@ export default function VendasPage() {
                 <TableRow key={item.id} className={item.status === 'cancelado' ? 'opacity-50 grayscale' : ''}>
                   <TableCell className="font-medium">{item.id.substring(0, 8)}...</TableCell>
                   <TableCell className={item.status === 'cancelado' ? 'line-through' : ''}>{item.cliente}</TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{formatarData(item.data_venda ?? item.criado_em)}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{item.metodo}</TableCell>
                   <TableCell className={`font-medium ${item.status === 'cancelado' ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                     {formatarValor(item.valor)}

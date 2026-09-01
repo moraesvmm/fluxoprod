@@ -7,6 +7,7 @@ import { twMerge } from "tailwind-merge";
 import { clsx } from "clsx";
 import { createClient } from "@/utils/supabase/client";
 import { useToast, Toast } from "@/components/ui/toast";
+import { useContextosCaixa } from "@/lib/hooks/use-caixa";
 
 interface Funcionario {
   id: string;
@@ -57,8 +58,20 @@ export default function PDVPage() {
   const [desconto, setDesconto] = useState<number>(0);
   const [lembrarDias, setLembrarDias] = useState<number | null>(null);
   const [emitirNfe, setEmitirNfe] = useState(false);
+  const [contextoCaixaId, setContextoCaixaId] = useState('');
   const supabase = createClient();
   const { toasts, removeToast, success, error: toastError, warning } = useToast();
+  const { data: contextosCaixa = [] } = useContextosCaixa();
+
+  useEffect(() => {
+    if (!contextoCaixaId && contextosCaixa[0]) {
+      setContextoCaixaId(`${contextosCaixa[0].filial_id}:${contextosCaixa[0].caixa_id}`);
+    }
+  }, [contextoCaixaId, contextosCaixa]);
+
+  const contextoCaixa = contextosCaixa.find(
+    (contexto) => `${contexto.filial_id}:${contexto.caixa_id}` === contextoCaixaId
+  );
 
   // Carregar produtos REAIS do Supabase via RPC (Opção A)
   useEffect(() => {
@@ -178,6 +191,10 @@ export default function PDVPage() {
 
   const finalizarPagamento = async () => {
     if (cart.length === 0) return;
+    if (!contextoCaixa) {
+      toastError('Selecione um caixa autorizado antes de concluir a venda.');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -202,7 +219,9 @@ export default function PDVPage() {
         p_metodo_pagamento: metodoPagamento,
         p_valor_total: total,
         p_desconto: desconto,
-        p_emitir_nfe: emitirNfe
+        p_emitir_nfe: emitirNfe,
+        p_filial_id: contextoCaixa.filial_id,
+        p_caixa_id: contextoCaixa.caixa_id
       });
 
       if (error) throw error;
@@ -286,6 +305,20 @@ export default function PDVPage() {
             </Link>
             <h2 className="text-lg font-bold">Frente de Caixa (PDV)</h2>
           </div>
+          {contextosCaixa.length > 1 && (
+            <select
+              value={contextoCaixaId}
+              onChange={(event) => setContextoCaixaId(event.target.value)}
+              className="max-w-48 rounded-md border border-border bg-background px-2 py-1.5 text-xs outline-none focus:ring-1 focus:ring-primary"
+              aria-label="Filial e caixa"
+            >
+              {contextosCaixa.map((contexto) => (
+                <option key={`${contexto.filial_id}:${contexto.caixa_id}`} value={`${contexto.filial_id}:${contexto.caixa_id}`}>
+                  {contexto.filial_nome} - {contexto.caixa_nome}
+                </option>
+              ))}
+            </select>
+          )}
           <div className="relative w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input

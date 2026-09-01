@@ -3,6 +3,23 @@
 
 BEGIN;
 
+DO $preflight$
+BEGIN
+    IF to_regprocedure('public.executar_hooks_provisionamento(text)') IS NULL THEN
+        RAISE EXCEPTION 'Executor de hooks ausente; aplique 000_provisionamento_hooks.sql antes deste smoke test';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM public.provisionamento_hooks hook_item
+        WHERE hook_item.hook_key = 'mrp_producao'
+          AND hook_item.ativo
+    ) THEN
+        RAISE EXCEPTION 'Hook MRP ausente; aplique apps/api/migrations/mrp_producao.sql antes deste smoke test';
+    END IF;
+END;
+$preflight$;
+
 DO $smoke$
 DECLARE
     v_empresa_id UUID := gen_random_uuid();
@@ -20,7 +37,8 @@ DECLARE
         'nf_entrada', 'ncm', 'cfop_padrao', 'origem', 'deleted_at', 'image_urls'
     ];
     v_required_tables TEXT[] := ARRAY[
-        'fichas_tecnicas', 'ordens_producao', 'ordens_producao_insumos'
+        'fichas_tecnicas', 'ordens_producao', 'ordens_producao_insumos',
+        'usuarios_filiais', 'caixas', 'caixa_sessoes', 'caixa_movimentos', 'fechamentos_caixa'
     ];
 BEGIN
     SELECT u.id
@@ -76,9 +94,12 @@ BEGIN
        OR to_regprocedure(format('%I.tenant_listar_locais_estoque()', v_schema)) IS NULL
        OR to_regprocedure(format('%I.tenant_obter_sugestoes_nurturing()', v_schema)) IS NULL
        OR to_regprocedure(format(
-            '%I.tenant_processar_venda(uuid,text,jsonb,uuid,text,text,numeric,numeric,boolean,uuid)',
+          '%I.tenant_processar_venda(uuid,text,jsonb,uuid,text,text,numeric,numeric,boolean,uuid,uuid,uuid)',
             v_schema
        )) IS NULL
+      OR to_regprocedure(format('%I.tenant_listar_contextos_caixa()', v_schema)) IS NULL
+      OR to_regprocedure(format('%I.tenant_obter_resumo_caixa(uuid,uuid,date)', v_schema)) IS NULL
+      OR to_regprocedure(format('%I.tenant_fechar_caixa(uuid,uuid,date,jsonb,text)', v_schema)) IS NULL
        OR to_regprocedure(format(
             '%I.tenant_concluir_ordem_producao_local(uuid,numeric,jsonb)',
             v_schema
@@ -107,6 +128,7 @@ BEGIN
             'locais_estoque',
             'nurturing_interacoes',
             'processar_venda',
+            'caixa_diario',
             'mrp_producao'
         ]) required(hook_key)
         WHERE NOT EXISTS (

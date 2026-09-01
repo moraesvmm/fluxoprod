@@ -2177,6 +2177,7 @@ export type Database = {
         }[]
       }
       tenant_listar_kits: { Args: never; Returns: Json }
+      tenant_listar_contextos_caixa: { Args: never; Returns: Json }
       tenant_listar_locais_estoque: { Args: never; Returns: Json }
       tenant_listar_modulos_usuario: {
         Args: { p_target_user_id: string }
@@ -2268,12 +2269,22 @@ export type Database = {
         }[]
       }
       tenant_listar_vendas: {
-        Args: { p_busca?: string; p_limit?: number; p_offset?: number }
+        Args: {
+          p_busca?: string
+          p_data?: string | null
+          p_filial_id?: string | null
+          p_limit?: number
+          p_offset?: number
+        }
         Returns: Json
       }
       tenant_marcar_fechamento_visto: { Args: { p_mes: string }; Returns: Json }
       tenant_obter_documento: {
         Args: { p_documento_id: string }
+        Returns: Json
+      }
+      tenant_obter_resumo_caixa: {
+        Args: { p_caixa_id: string; p_data?: string | null; p_filial_id: string }
         Returns: Json
       }
       tenant_obter_dre: {
@@ -2285,15 +2296,48 @@ export type Database = {
       tenant_obter_sugestoes_nurturing: { Args: never; Returns: Json }
       tenant_processar_venda: {
         Args: {
-          p_cliente_id: string
+          p_caixa_id?: string | null
+          p_canal_venda_id?: string | null
+          p_cliente_id: string | null
           p_cliente_nome: string
           p_desconto?: number
+          p_emitir_nfe?: boolean
+          p_filial_id?: string | null
           p_itens: Json
           p_lembrar_dias?: number
           p_metodo_pagamento: string
           p_valor_total: number
-          p_vendedor_id: string
-          p_vendedor_nome: string
+          p_vendedor_id?: string | null
+          p_vendedor_nome?: string | null
+        }
+        Returns: Json
+      }
+      tenant_abrir_caixa: {
+        Args: { p_caixa_id: string; p_filial_id: string; p_valor_abertura?: number }
+        Returns: Json
+      }
+      tenant_fechar_caixa: {
+        Args: {
+          p_caixa_id: string
+          p_data: string
+          p_filial_id: string
+          p_observacao?: string | null
+          p_valores_contados: Json
+        }
+        Returns: Json
+      }
+      tenant_reabrir_caixa: {
+        Args: { p_fechamento_id: string; p_motivo: string }
+        Returns: Json
+      }
+      tenant_registrar_movimento_caixa: {
+        Args: {
+          p_caixa_id: string
+          p_filial_id: string
+          p_forma_pagamento: string
+          p_motivo: string
+          p_tipo: string
+          p_valor: number
         }
         Returns: Json
       }

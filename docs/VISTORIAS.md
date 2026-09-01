@@ -5,6 +5,18 @@
 
 ---
 
+## VISTORIA PENDENTE - Caixa diario por filial
+**Data:** 01/09/2026
+**Status:** PENDENTE (validar antes do deploy)
+**Alteracoes:**
+- Criada migracao `apps/api/migrations/caixa_diario_filiais.sql` com hook idempotente para filiais, caixas, sessoes, movimentos e fechamentos auditaveis.
+- Vendas e cancelamentos passam a registrar o movimento financeiro no caixa autorizado da filial; o banco bloqueia acesso cruzado entre filiais.
+- Criada a rota `Vendas > Caixa`, com conferencia por forma de pagamento, sangria, suprimento, fechamento com justificativa de diferenca e reabertura gerencial.
+- O historico de vendas abre no filtro do dia operacional e o PDV envia o contexto filial/caixa autorizado.
+- Pendente obrigatorio: executar a migracao em transacao com `ROLLBACK`, rodar `apps/api/testes_provisionamento_hooks.sql`, regenerar `database.types.ts` usando a CLI apos aplicar em ambiente de banco e rodar `scripts/export_db_map.py`.
+
+---
+
 ## ⚠️ VISTORIA PENDENTE — Integração WhatsApp Cloud API Meta (Vistoria 82)
 **Data:** 10/08/2026
 **Status:** ⚠️ PENDENTE (Realizar vistoria o mais rápido possível)

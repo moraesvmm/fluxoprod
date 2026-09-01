@@ -310,6 +310,54 @@ export interface LocalEstoque {
   criado_em: string;
 }
 
+export interface CaixaContexto {
+  filial_id: string;
+  filial_nome: string;
+  caixa_id: string;
+  caixa_codigo: string;
+  caixa_nome: string;
+  papel: 'operador' | 'supervisor' | 'gerente' | string;
+}
+
+export interface CaixaMovimento {
+  id: string;
+  tipo: 'entrada' | 'saida' | 'estorno' | 'ajuste' | 'suprimento' | string;
+  valor: number;
+  forma_pagamento: string;
+  origem_tipo: string;
+  origem_id?: string;
+  descricao: string;
+  criado_em: string;
+}
+
+export interface CircuitoPorForma {
+  entradas: number;
+  estornos: number;
+  saidas: number;
+  saldo: number;
+}
+
+export interface ResumoCaixa {
+  success: boolean;
+  sessao_id?: string;
+  fechamento_id?: string;
+  status: 'nao_aberto' | 'aberto' | 'fechado' | 'reaberto' | string;
+  data_operacional: string;
+  valor_abertura: number;
+  valor_esperado: number;
+  formas: Record<string, number>;
+  circuito_por_forma: Record<string, CircuitoPorForma>;
+  movimentos: CaixaMovimento[];
+}
+
+export interface FechamentoCaixaInput {
+  filialId: string;
+  caixaId: string;
+  data: string;
+  valoresContados: Record<string, number>;
+  observacao?: string;
+}
+
 export interface EstoquePorLocal {
   id: string;
   produto_id: string;
@@ -783,13 +831,15 @@ function isMissingRpcError(message: string) {
 }
 
 // VENDAS - Usar RPC tenant_listar_vendas para leitura
-export async function fetchVendas(searchTerm?: string): Promise<Venda[]> {
+export async function fetchVendas(searchTerm?: string, dataVenda?: string | null): Promise<Venda[]> {
   const { data, error } = await getSupabaseStrict()
     .rpc('tenant_listar_vendas', {
       p_limit: 100,
-      p_busca: searchTerm || undefined
+      p_busca: searchTerm || undefined,
+      p_data: dataVenda || undefined
     });
   if (error) throw new Error(error.message);
+  assertRpcResult(data);
   return (data as unknown as Venda[]) || [];
 }
 
@@ -1280,6 +1330,114 @@ export async function desativarLocalEstoque(localId: string): Promise<void> {
     .rpc('tenant_desativar_local_estoque', {
       p_local_id: localId
     });
+  if (error) throw new Error(error.message);
+  assertRpcResult(data);
+}
+
+function parseResumoCaixa(data: unknown): ResumoCaixa {
+  const result = assertRpcResult(data);
+  const formasRecord = asRecord(result.formas);
+  const formas = Object.fromEntries(
+    Object.entries(formasRecord ?? {}).flatMap(([forma, valor]) =>
+      typeof valor === 'number' ? [[forma, valor]] : []
+    )
+  );
+  const circuitoRecord = asRecord(result.circuito_por_forma);
+  const circuitoPorForma = Object.fromEntries(
+    Object.entries(circuitoRecord ?? {}).flatMap(([forma, valores]) => {
+      const registro = asRecord(valores);
+      if (!registro) return [];
+      return [[forma, {
+        entradas: getNumberField(registro, 'entradas') ?? 0,
+        estornos: getNumberField(registro, 'estornos') ?? 0,
+        saidas: getNumberField(registro, 'saidas') ?? 0,
+        saldo: getNumberField(registro, 'saldo') ?? 0,
+      }]];
+    })
+  );
+
+  return {
+    success: result.success === true,
+    sessao_id: getStringField(result, 'sessao_id'),
+    fechamento_id: getStringField(result, 'fechamento_id'),
+    status: getStringField(result, 'status') ?? 'nao_aberto',
+    data_operacional: getStringField(result, 'data_operacional') ?? '',
+    valor_abertura: getNumberField(result, 'valor_abertura') ?? 0,
+    valor_esperado: getNumberField(result, 'valor_esperado') ?? 0,
+    formas,
+    circuito_por_forma: circuitoPorForma,
+    movimentos: getArray<CaixaMovimento>(result.movimentos),
+  };
+}
+
+export async function fetchContextosCaixa(): Promise<CaixaContexto[]> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_listar_contextos_caixa');
+  if (error) throw new Error(error.message);
+  assertRpcResult(data);
+  return getArray<CaixaContexto>(data);
+}
+
+export async function fetchResumoCaixa(filialId: string, caixaId: string, data?: string): Promise<ResumoCaixa> {
+  const { data: response, error } = await getSupabaseStrict().rpc('tenant_obter_resumo_caixa', {
+    p_filial_id: filialId,
+    p_caixa_id: caixaId,
+    p_data: data,
+  });
+  if (error) throw new Error(error.message);
+  return parseResumoCaixa(response);
+}
+
+export async function abrirCaixa(filialId: string, caixaId: string, valorAbertura: number): Promise<void> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_abrir_caixa', {
+    p_filial_id: filialId,
+    p_caixa_id: caixaId,
+    p_valor_abertura: valorAbertura,
+  });
+  if (error) throw new Error(error.message);
+  assertRpcResult(data);
+}
+
+export async function registrarMovimentoCaixa(
+  filialId: string,
+  caixaId: string,
+  tipo: 'saida' | 'suprimento' | 'ajuste',
+  valor: number,
+  formaPagamento: string,
+  motivo: string
+): Promise<void> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_registrar_movimento_caixa', {
+    p_filial_id: filialId,
+    p_caixa_id: caixaId,
+    p_tipo: tipo,
+    p_valor: valor,
+    p_forma_pagamento: formaPagamento,
+    p_motivo: motivo,
+  });
+  if (error) throw new Error(error.message);
+  assertRpcResult(data);
+}
+
+export async function fecharCaixa(input: FechamentoCaixaInput): Promise<{ fechamentoId?: string; diferenca: number }> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_fechar_caixa', {
+    p_filial_id: input.filialId,
+    p_caixa_id: input.caixaId,
+    p_data: input.data,
+    p_valores_contados: input.valoresContados,
+    p_observacao: input.observacao || null,
+  });
+  if (error) throw new Error(error.message);
+  const result = assertRpcResult(data);
+  return {
+    fechamentoId: getStringField(result, 'fechamento_id'),
+    diferenca: getNumberField(result, 'diferenca') ?? 0,
+  };
+}
+
+export async function reabrirCaixa(fechamentoId: string, motivo: string): Promise<void> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_reabrir_caixa', {
+    p_fechamento_id: fechamentoId,
+    p_motivo: motivo,
+  });
   if (error) throw new Error(error.message);
   assertRpcResult(data);
 }

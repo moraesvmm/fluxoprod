@@ -51,13 +51,12 @@ export function FloatingParticles({ count = 5 }: { count?: number }) {
       {particles.map((p) => (
         <motion.div
           key={p.id}
-          className="absolute rounded-full"
+          className="absolute rounded-full bg-violet-500/20"
           style={{
-            width: p.size,
-            height: p.size,
-            background: `rgba(139,92,246,${p.opacity})`,
-            left: `${p.left}%`,
-            top: `${p.top}%`,
+            width: `${p.size.toFixed(5)}px`,
+            height: `${p.size.toFixed(5)}px`,
+            left: `${p.left.toFixed(4)}%`,
+            top: `${p.top.toFixed(4)}%`,
           }}
           animate={{ y: [0, -25, 0], opacity: [0.15, 0.5, 0.15] }}
           transition={{ duration: p.duration, repeat: Infinity, delay: p.delay, ease: "easeInOut" }}

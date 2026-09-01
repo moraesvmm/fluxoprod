@@ -5,10 +5,10 @@ import { fetchVendas, createVenda, deleteVenda, cancelarVenda, devolverItem, typ
 
 const VENDAS_KEY = ["vendas"] as const;
 
-export function useVendas(searchTerm?: string) {
+export function useVendas(searchTerm?: string, dataVenda?: string | null) {
   return useQuery({
-    queryKey: [...VENDAS_KEY, searchTerm],
-    queryFn: () => fetchVendas(searchTerm),
+    queryKey: [...VENDAS_KEY, searchTerm, dataVenda],
+    queryFn: () => fetchVendas(searchTerm, dataVenda),
   });
 }
 
