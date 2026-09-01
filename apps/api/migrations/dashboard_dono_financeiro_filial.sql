@@ -6,6 +6,7 @@ DECLARE v_filial_id UUID;
 BEGIN
   PERFORM public.validar_schema_tenant_provisionamento(p_schema);
   EXECUTE format('ALTER TABLE %I.financeiro ADD COLUMN IF NOT EXISTS filial_id UUID', p_schema);
+  EXECUTE format('ALTER TABLE %I.financeiro ADD COLUMN IF NOT EXISTS categoria TEXT', p_schema);
   EXECUTE format('SELECT id FROM %I.locais_estoque WHERE ativo AND tipo IN (''filial'', ''loja'') ORDER BY criado_em LIMIT 1', p_schema) INTO v_filial_id;
   IF v_filial_id IS NULL THEN RAISE EXCEPTION 'Schema % nao possui filial ativa', p_schema; END IF;
   EXECUTE format('UPDATE %I.financeiro SET filial_id = $1 WHERE filial_id IS NULL', p_schema) USING v_filial_id;

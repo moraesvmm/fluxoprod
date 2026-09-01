@@ -31,6 +31,7 @@ import { DREWaterfall } from "@/components/financeiro/DREWaterfall";
 
 type ReportType = "vendas" | "financeiro" | "estoque" | "crm" | "rh" | "comissoes" | "dre" | "os" | "obras";
 type ReportRow = Record<string, unknown>;
+type AtalhoPeriodo = "hoje" | "mes" | null;
 
 const REPORT_HEADERS: Record<ReportType, string[]> = {
   vendas: ["Data", "Cliente", "Valor", "Método", "Status"],
@@ -99,6 +100,7 @@ export default function RelatoriosPage() {
   const [dreData, setDreData] = useState<DREData | null>(null);
   const [dataInicio, setDataInicio] = useState(() => dataLocal(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
   const [dataFim, setDataFim] = useState(() => dataLocal(new Date()));
+  const [atalhoPeriodo, setAtalhoPeriodo] = useState<AtalhoPeriodo>("mes");
   const { toasts, removeToast, info, success, error: toastError } = useToast();
 
   const isModuleActive = (type: ReportType) => {
@@ -652,13 +654,13 @@ export default function RelatoriosPage() {
         </div>
         <div className="flex flex-wrap items-end gap-2">
           <label className="text-xs font-medium text-muted-foreground">De
-            <input type="date" value={dataInicio} max={dataFim} onChange={(event) => setDataInicio(event.target.value)} className="mt-1 block h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground" />
+            <input type="date" value={dataInicio} max={dataFim} onChange={(event) => { setDataInicio(event.target.value); setAtalhoPeriodo(null); }} className="mt-1 block h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground" />
           </label>
           <label className="text-xs font-medium text-muted-foreground">Até
-            <input type="date" value={dataFim} min={dataInicio} max={dataLocal(new Date())} onChange={(event) => setDataFim(event.target.value)} className="mt-1 block h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground" />
+            <input type="date" value={dataFim} min={dataInicio} max={dataLocal(new Date())} onChange={(event) => { setDataFim(event.target.value); setAtalhoPeriodo(null); }} className="mt-1 block h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground" />
           </label>
-          <button type="button" onClick={() => { const hoje = new Date(); setDataInicio(dataLocal(hoje)); setDataFim(dataLocal(hoje)); }} className="h-9 rounded-md border border-border px-3 text-sm font-medium hover:bg-muted">Hoje</button>
-          <button type="button" onClick={() => { const hoje = new Date(); setDataInicio(dataLocal(new Date(hoje.getFullYear(), hoje.getMonth(), 1))); setDataFim(dataLocal(hoje)); }} className="h-9 rounded-md border border-border px-3 text-sm font-medium hover:bg-muted">Este mês</button>
+          <button type="button" onClick={() => { const hoje = new Date(); setDataInicio(dataLocal(hoje)); setDataFim(dataLocal(hoje)); setAtalhoPeriodo("hoje"); }} className={`h-9 rounded-md border px-3 text-sm font-medium transition-colors ${atalhoPeriodo === "hoje" ? "border-primary bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/30" : "border-border hover:bg-muted"}`}>Hoje</button>
+          <button type="button" onClick={() => { const hoje = new Date(); setDataInicio(dataLocal(new Date(hoje.getFullYear(), hoje.getMonth(), 1))); setDataFim(dataLocal(hoje)); setAtalhoPeriodo("mes"); }} className={`h-9 rounded-md border px-3 text-sm font-medium transition-colors ${atalhoPeriodo === "mes" ? "border-primary bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/30" : "border-border hover:bg-muted"}`}>Este mês</button>
           <button type="button" onClick={() => void gerarRelatorio()} disabled={loading} className="h-9 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">Aplicar</button>
         </div>
       </section>
