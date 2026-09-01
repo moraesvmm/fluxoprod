@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ThemeToggle } from "./ThemeToggle";
+import { PwaControls } from "./PwaControls";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
 interface HeaderProps {
@@ -75,11 +76,11 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
           Fluxo
         </span>
       </div>
-      <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+      <div className="flex flex-1 justify-end gap-x-4 self-stretch lg:gap-x-6">
         <button
           onClick={onSearchClick}
           data-tour="global-search"
-          className="relative flex flex-1 items-center gap-2 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-left"
+          className="relative hidden flex-1 items-center gap-2 px-4 py-2 text-left rounded-lg bg-muted transition-colors hover:bg-muted/80 sm:flex"
         >
           <Search className="h-4 w-4 text-muted-foreground/60" />
           <span className="text-sm text-muted-foreground/60">Buscar transações, produtos ou clientes...</span>
@@ -96,20 +97,15 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
           
           <ThemeToggle />
 
+          <PwaControls />
+
           {/* Separator */}
           <div
             className="hidden lg:block lg:h-6 lg:w-px lg:bg-border/60"
             aria-hidden="true"
           />
 
-          <button
-            type="button"
-            className="-m-2.5 p-2.5 text-muted-foreground/70 hover:text-foreground hover:bg-muted transition-all rounded-lg relative"
-          >
-            <span className="sr-only">Notificações</span>
-            <Bell className="h-5 w-5" aria-hidden="true" />
-            <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-destructive border-2 border-white dark:border-border shadow-sm"></span>
-          </button>
+          <Bell className="h-5 w-5 text-muted-foreground/70" aria-label="Notificações" />
 
           <div
             className="hidden lg:block lg:h-6 lg:w-px lg:bg-border/60"

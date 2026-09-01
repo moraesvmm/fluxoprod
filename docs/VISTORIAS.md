@@ -16,6 +16,7 @@
 - Ajustado o tema global de controles numericos para que os spinners nativos respeitem claro/escuro, e corrigida a acentuacao de rotulos visiveis de navegacao e caixa.
 - Convites persistem permissao explicita para cada modulo contratado e negam, por padrao, os modulos nao selecionados.
 - A sidebar invalida suas permissoes em login/logout e nao retem cache entre sessoes, impedindo que modulos de um administrador aparecam para usuario recem-autenticado.
+- O cabeçalho mobile oculta a busca global para preservar os controles, e o app agora expõe manifesto, service worker, atalho instalável e notificacao persistente ao concluir venda.
 - Pendente obrigatorio: executar a migracao em transacao com `ROLLBACK`, rodar `apps/api/testes_provisionamento_hooks.sql`, regenerar `database.types.ts` usando a CLI apos aplicar em ambiente de banco e rodar `scripts/export_db_map.py`.
 
 ---

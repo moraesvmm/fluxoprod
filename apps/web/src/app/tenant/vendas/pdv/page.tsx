@@ -9,6 +9,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useToast, Toast } from "@/components/ui/toast";
 import { useContextosCaixa } from "@/lib/hooks/use-caixa";
 import { useQueryClient } from "@tanstack/react-query";
+import { notifySaleCompleted } from "@/lib/sale-notifications";
 
 interface Funcionario {
   id: string;
@@ -239,6 +240,11 @@ export default function PDVPage() {
         queryClient.invalidateQueries({ queryKey: ["caixa"] }),
         queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
       ]);
+      await notifySaleCompleted({
+        clientName: cliente === "Cliente Avulso" ? "Venda avulsa" : cliente,
+        itemCount: itens.reduce((totalItens, item) => totalItens + item.qtd, 0),
+        total: resultado.total ?? total,
+      });
       success('Pagamento realizado com sucesso!');
 
       // Gatilho de NFe
