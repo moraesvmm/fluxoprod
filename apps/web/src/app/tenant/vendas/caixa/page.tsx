@@ -35,8 +35,8 @@ type ModalAberto = "abrir" | "sangria" | "suprimento" | "fechar" | "reabrir" | n
 const FORMAS_LABEL: Record<string, string> = {
   dinheiro: "Dinheiro",
   pix: "PIX",
-  cartao_credito: "Credito",
-  cartao_debito: "Debito",
+  cartao_credito: "Crédito",
+  cartao_debito: "Débito",
   boleto: "Boleto",
   transferencia: "Transferencia",
 };
@@ -121,7 +121,7 @@ export default function CaixaPage() {
       success("Caixa aberto. O circuito financeiro ja esta sendo acompanhado.");
       setModalAberto(null);
     } catch (error: unknown) {
-      toastError(error instanceof Error ? error.message : "Nao foi possivel abrir o caixa.");
+      toastError(error instanceof Error ? error.message : "Não foi possível abrir o caixa.");
     }
   };
 
@@ -143,7 +143,7 @@ export default function CaixaPage() {
       setMotivoMovimento("");
       setModalAberto(null);
     } catch (error: unknown) {
-      toastError(error instanceof Error ? error.message : "Nao foi possivel registrar o movimento.");
+      toastError(error instanceof Error ? error.message : "Não foi possível registrar o movimento.");
     }
   };
 
@@ -151,7 +151,7 @@ export default function CaixaPage() {
     event.preventDefault();
     if (!contexto || !resumo) return;
     if (diferenca !== 0 && !observacaoFechamento.trim()) {
-      toastError("Explique a diferenca antes de fechar o caixa.");
+      toastError("Explique a diferença antes de fechar o caixa.");
       return;
     }
     try {
@@ -164,10 +164,10 @@ export default function CaixaPage() {
         ),
         observacao: observacaoFechamento.trim() || undefined,
       });
-      success(`Caixa fechado com diferenca de ${formatarMoeda(resposta.diferenca)}.`);
+      success(`Caixa fechado com diferença de ${formatarMoeda(resposta.diferenca)}.`);
       setModalAberto(null);
     } catch (error: unknown) {
-      toastError(error instanceof Error ? error.message : "Nao foi possivel fechar o caixa.");
+      toastError(error instanceof Error ? error.message : "Não foi possível fechar o caixa.");
     }
   };
 
@@ -180,7 +180,7 @@ export default function CaixaPage() {
       setMotivoReabertura("");
       setModalAberto(null);
     } catch (error: unknown) {
-      toastError(error instanceof Error ? error.message : "Nao foi possivel reabrir o caixa.");
+      toastError(error instanceof Error ? error.message : "Não foi possível reabrir o caixa.");
     }
   };
 
@@ -194,7 +194,7 @@ export default function CaixaPage() {
         <ShieldAlert className="mx-auto mb-4 h-10 w-10 text-amber-600" />
         <h2 className="text-xl font-semibold">Nenhum caixa disponivel</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Voce nao possui um caixa autorizado nesta empresa. Solicite ao gestor da filial a configuracao do seu acesso.
+          Você não possui um caixa autorizado nesta empresa. Solicite ao gestor da filial a configuração do seu acesso.
         </p>
       </div>
     );
@@ -210,7 +210,7 @@ export default function CaixaPage() {
         <div>
           <Link href="/tenant/vendas" className="text-sm text-muted-foreground hover:text-foreground">Vendas</Link>
           <h2 className="mt-1 text-2xl font-bold tracking-tight">Caixa da filial</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Conferencia do circuito financeiro e fechamento diario.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Conferência do circuito financeiro e fechamento diário.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <label className="flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm">
@@ -254,7 +254,7 @@ export default function CaixaPage() {
               </div>
               <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${caixaAberto ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-muted text-muted-foreground"}`}>
                 {caixaAberto ? <CheckCircle2 className="h-3.5 w-3.5" /> : <LockKeyhole className="h-3.5 w-3.5" />}
-                {caixaAberto ? "Caixa aberto" : resumo?.status === "fechado" ? "Caixa fechado" : "Caixa nao aberto"}
+                {caixaAberto ? "Caixa aberto" : resumo?.status === "fechado" ? "Caixa fechado" : "Caixa não aberto"}
               </span>
             </div>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -274,7 +274,7 @@ export default function CaixaPage() {
           </section>
 
           <section className="border border-border bg-card p-5 shadow-sm">
-            <p className="text-sm font-semibold">Acoes do caixa</p>
+            <p className="text-sm font-semibold">Ações do caixa</p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               {resumo?.status === "nao_aberto" ? (
                 <Button className="col-span-2" onClick={() => setModalAberto("abrir")}>
@@ -313,7 +313,7 @@ export default function CaixaPage() {
       )}
 
       {erroResumo ? (
-        <div className="border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">Nao foi possivel carregar o resumo do caixa.</div>
+        <div className="border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">Não foi possível carregar o resumo do caixa.</div>
       ) : carregandoResumo ? (
         <div className="py-10 text-center text-sm text-muted-foreground">Atualizando circuito financeiro...</div>
       ) : (
@@ -321,7 +321,7 @@ export default function CaixaPage() {
           <section className="border border-border bg-card shadow-sm">
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <div>
-                <h3 className="font-semibold">Conferencia por forma de pagamento</h3>
+                <h3 className="font-semibold">Conferência por forma de pagamento</h3>
                 <p className="text-sm text-muted-foreground">Valores calculados pelo livro de movimentos da filial.</p>
               </div>
               <WalletCards className="h-5 w-5 text-muted-foreground" />
@@ -400,7 +400,7 @@ export default function CaixaPage() {
 
       <Modal isOpen={modalAberto === "fechar"} onClose={fecharModal} title="Conferir e fechar caixa">
         <form className="space-y-4" onSubmit={fecharCaixa}>
-          <p className="text-sm text-muted-foreground">Informe os valores contados ou conciliados. Uma diferenca precisa ser justificada.</p>
+          <p className="text-sm text-muted-foreground">Informe os valores contados ou conciliados. Uma diferença precisa ser justificada.</p>
           <div className="space-y-2">
             {(formas.length ? formas : ["dinheiro", "pix", "cartao_credito", "cartao_debito"]).map((forma) => (
               <label key={forma} className="grid grid-cols-[1fr_120px] items-center gap-3 text-sm font-medium">
@@ -412,9 +412,9 @@ export default function CaixaPage() {
           <div className={`border p-3 text-sm ${diferenca === 0 ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200" : "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100"}`}>
             <div className="flex justify-between"><span>Total esperado</span><strong>{formatarMoeda(resumo?.valor_esperado ?? 0)}</strong></div>
             <div className="mt-1 flex justify-between"><span>Total informado</span><strong>{formatarMoeda(totalInformado)}</strong></div>
-            <div className="mt-2 flex justify-between border-t border-current/20 pt-2"><span>Diferenca</span><strong>{formatarMoeda(diferenca)}</strong></div>
+            <div className="mt-2 flex justify-between border-t border-current/20 pt-2"><span>Diferença</span><strong>{formatarMoeda(diferenca)}</strong></div>
           </div>
-          <label className="block text-sm font-medium">Observacao {diferenca !== 0 ? "(obrigatoria)" : "(opcional)"}
+          <label className="block text-sm font-medium">Observação {diferenca !== 0 ? "(obrigatória)" : "(opcional)"}
             <textarea required={diferenca !== 0} value={observacaoFechamento} onChange={(event) => setObservacaoFechamento(event.target.value)} className="mt-1 min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-ring" />
           </label>
           <Button type="submit" disabled={fechando} className="w-full"><Banknote data-icon="inline-start" /> Fechar caixa</Button>

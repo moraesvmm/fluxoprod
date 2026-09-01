@@ -31,15 +31,15 @@ const navigation = [
   { key: "estoque", name: "Estoque", href: "/tenant/estoque", icon: Package },
   { key: "crm", name: "Clientes & CRM", href: "/tenant/crm", icon: Users },
   { key: "financeiro", name: "Financeiro", href: "/tenant/financeiro", icon: Wallet },
-  { key: "catalogo", name: "Catalogo", href: "/tenant/catalogo", icon: Tags },
+  { key: "catalogo", name: "Catálogo", href: "/tenant/catalogo", icon: Tags },
   { key: "producao", name: "Produção (MRP)", href: "/tenant/producao", icon: Factory },
   { key: "rh", name: "RH & Equipe", href: "/tenant/rh", icon: Briefcase },
-  { key: "os", name: "Ordem de Servico", href: "/tenant/os", icon: Wrench },
+  { key: "os", name: "Ordem de Serviço", href: "/tenant/os", icon: Wrench },
   { key: "obras", name: "Obras", href: "/tenant/obras", icon: Building2 },
-  { key: "comissoes", name: "Comissoes", href: "/tenant/comissoes", icon: DollarSign },
-  { key: "relatorios", name: "Relatorios", href: "/tenant/relatorios", icon: FileText },
+  { key: "comissoes", name: "Comissões", href: "/tenant/comissoes", icon: DollarSign },
+  { key: "relatorios", name: "Relatórios", href: "/tenant/relatorios", icon: FileText },
   { key: "loja", name: "Loja de Módulos", href: "/tenant/loja", icon: ShoppingBag },
-  { key: "configuracoes", name: "Configuracoes", href: "/tenant/configuracoes", icon: Settings },
+  { key: "configuracoes", name: "Configurações", href: "/tenant/configuracoes", icon: Settings },
 ];
 
 import { useTheme } from "@/components/providers/ThemeProvider";

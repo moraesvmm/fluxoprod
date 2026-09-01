@@ -149,6 +149,15 @@
     outline: 2px solid color-mix(in oklch, var(--primary) 35%, transparent);
     outline-offset: 1px;
   }
+  input[type="number"] {
+    color-scheme: light;
+  }
+  .dark input[type="number"] {
+    color-scheme: dark;
+  }
+  input[type="number"]::-webkit-inner-spin-button {
+    opacity: 0.8;
+  }
   h1, h2, h3 {
     font-family: var(--font-serif);
     letter-spacing: -0.01em;
