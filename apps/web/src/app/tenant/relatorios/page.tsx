@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { DollarSign, Download, FileText, Package, TrendingUp, Users, Wrench, Building2, Lock, type LucideIcon } from "lucide-react";
+import { CalendarDays, DollarSign, Download, FileText, Package, TrendingUp, Users, Wrench, Building2, Lock, type LucideIcon } from "lucide-react";
 
 import { KPICard } from "@/components/modules/base/KPICard";
 import {
@@ -72,6 +72,22 @@ function formatarData(data?: string) {
   });
 }
 
+function dataLocal(data: Date) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
+function filtrarPorPeriodo<T extends object>(dados: T[], dataInicio: string, dataFim: string): T[] {
+  return dados.filter((item) => {
+    const row = item as Record<string, unknown>;
+    const valor = row.data_venda ?? row.data_vencimento ?? row.data_inicio ?? row.criado_em ?? row.data_cadastro;
+    const data = typeof valor === "string" ? valor.slice(0, 10) : null;
+    return data !== null && data >= dataInicio && data <= dataFim;
+  });
+}
+
 export default function RelatoriosPage() {
   const { data: sidebarData, isLoading: loadingModules } = useSidebarData();
   const activeKeys = useMemo(() => sidebarData?.activeKeys || [], [sidebarData]);
@@ -81,6 +97,8 @@ export default function RelatoriosPage() {
   const [rows, setRows] = useState<ReportRow[]>([]);
   const [kpis, setKpis] = useState<{ label: string; value: string; icon: LucideIcon }[]>([]);
   const [dreData, setDreData] = useState<DREData | null>(null);
+  const [dataInicio, setDataInicio] = useState(() => dataLocal(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
+  const [dataFim, setDataFim] = useState(() => dataLocal(new Date()));
   const { toasts, removeToast, info, success, error: toastError } = useToast();
 
   const isModuleActive = (type: ReportType) => {
@@ -89,6 +107,10 @@ export default function RelatoriosPage() {
   };
 
   const gerarRelatorio = async (tipo: ReportType = reportType) => {
+    if (dataInicio > dataFim) {
+      toastError("A data inicial não pode ser posterior à data final.");
+      return;
+    }
     if (!isModuleActive(tipo)) {
       // Se não for ativo, não permitimos gerar
       return;
@@ -102,7 +124,7 @@ export default function RelatoriosPage() {
     try {
       switch (tipo) {
         case "vendas": {
-          const vendas = await fetchVendas();
+          const vendas = filtrarPorPeriodo(await fetchVendas(), dataInicio, dataFim);
           setRows(vendas as unknown as ReportRow[]);
           const total = vendas.reduce((sum, venda) => sum + (venda.valor || venda.valor_total || venda.total || 0), 0);
           const ticket = vendas.length > 0 ? total / vendas.length : 0;
@@ -114,7 +136,7 @@ export default function RelatoriosPage() {
           break;
         }
         case "financeiro": {
-          const transacoes = await fetchFinanceiro();
+          const transacoes = filtrarPorPeriodo(await fetchFinanceiro(), dataInicio, dataFim);
           setRows(transacoes as unknown as ReportRow[]);
           const receitas = transacoes
             .filter((item) => item.tipo === "receber" || item.tipo === "receita")
@@ -148,13 +170,13 @@ export default function RelatoriosPage() {
         }
         case "crm": {
           const clientesResult = await fetchClientes({ limit: 100 });
-          const clientes = clientesResult.data;
+          const clientes = filtrarPorPeriodo(clientesResult.data, dataInicio, dataFim);
           setRows(clientes as unknown as ReportRow[]);
           setKpis([{ label: "Clientes Ativos", value: String(clientes.length), icon: Users }]);
           break;
         }
         case "rh": {
-          const funcionarios = await fetchFuncionarios();
+          const funcionarios = filtrarPorPeriodo(await fetchFuncionarios(), dataInicio, dataFim);
           setRows(funcionarios as unknown as ReportRow[]);
           const folha = funcionarios.reduce((sum, item) => sum + (item.salario || 0), 0);
           setKpis([
@@ -164,7 +186,7 @@ export default function RelatoriosPage() {
           break;
         }
         case "comissoes": {
-          const comissoes = await fetchComissoes();
+          const comissoes = filtrarPorPeriodo(await fetchComissoes(), dataInicio, dataFim);
           setRows(comissoes as unknown as ReportRow[]);
           const totalComissoes = comissoes.reduce(
             (sum, item) => sum + (item.valor_comissao || 0),
@@ -180,10 +202,7 @@ export default function RelatoriosPage() {
           break;
         }
         case "dre": {
-          const hoje = new Date();
-          const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString();
-          const fimMes = hoje.toISOString();
-          const dre = await fetchDRE(inicioMes, fimMes);
+          const dre = await fetchDRE(`${dataInicio}T00:00:00`, `${dataFim}T23:59:59`);
           setDreData(dre);
 
           setRows([
@@ -202,7 +221,7 @@ export default function RelatoriosPage() {
           break;
         }
         case "os": {
-          const ordens = await fetchOS();
+          const ordens = filtrarPorPeriodo(await fetchOS(), dataInicio, dataFim);
           setRows(ordens as unknown as ReportRow[]);
           const totalOrcado = ordens.reduce((sum, os) => sum + (os.valor_orcamento || 0), 0);
           const abertas = ordens.filter(os => os.status !== 'concluida' && os.status !== 'cancelada').length;
@@ -214,7 +233,7 @@ export default function RelatoriosPage() {
           break;
         }
         case "obras": {
-          const obras = await fetchObras();
+          const obras = filtrarPorPeriodo(await fetchObras(), dataInicio, dataFim);
           setRows(obras as unknown as ReportRow[]);
           const orcamentoTotal = obras.reduce((sum, obra) => sum + (obra.orcamento || 0), 0);
           const emAndamento = obras.filter(obra => obra.status === 'em_andamento').length;
@@ -625,6 +644,24 @@ export default function RelatoriosPage() {
           }
         )}
       </div>
+
+      <section className="flex flex-col gap-3 border-y border-border py-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <CalendarDays className="h-4 w-4" />
+          <span>Período do relatório</span>
+        </div>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="text-xs font-medium text-muted-foreground">De
+            <input type="date" value={dataInicio} max={dataFim} onChange={(event) => setDataInicio(event.target.value)} className="mt-1 block h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground" />
+          </label>
+          <label className="text-xs font-medium text-muted-foreground">Até
+            <input type="date" value={dataFim} min={dataInicio} max={dataLocal(new Date())} onChange={(event) => setDataFim(event.target.value)} className="mt-1 block h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground" />
+          </label>
+          <button type="button" onClick={() => { const hoje = new Date(); setDataInicio(dataLocal(hoje)); setDataFim(dataLocal(hoje)); }} className="h-9 rounded-md border border-border px-3 text-sm font-medium hover:bg-muted">Hoje</button>
+          <button type="button" onClick={() => { const hoje = new Date(); setDataInicio(dataLocal(new Date(hoje.getFullYear(), hoje.getMonth(), 1))); setDataFim(dataLocal(hoje)); }} className="h-9 rounded-md border border-border px-3 text-sm font-medium hover:bg-muted">Este mês</button>
+          <button type="button" onClick={() => void gerarRelatorio()} disabled={loading} className="h-9 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">Aplicar</button>
+        </div>
+      </section>
 
       {/* Cascata de resultado — peça central do DRE */}
       {reportType === "dre" && dreData && !loading && (
