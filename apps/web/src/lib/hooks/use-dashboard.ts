@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useUserProfile } from "./use-user-profile";
 import type { Database } from "@/types/database.types";
 import type { Venda } from "@/lib/api";
+import { fetchDashboardDono } from "@/lib/api";
 
 // Cliente estrito — integra com o contrato Database
 const supabase = createClient() as import('@supabase/supabase-js').SupabaseClient<Database>;
@@ -159,6 +160,16 @@ export function useDashboardData() {
     ultimasVendas: ultimasVendas || [],
     modulosAtivos: modulosAtivos || [],
   };
+}
+
+export function useDashboardDono(filialId?: string | null) {
+  const { userId } = useUserProfile();
+  return useQuery({
+    queryKey: ["dashboard", "dono", filialId],
+    queryFn: () => fetchDashboardDono(filialId),
+    enabled: !!userId,
+    staleTime: 30_000,
+  });
 }
 
 export function useFechamentoPendente() {

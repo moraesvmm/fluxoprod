@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Sparkles, MessageCircle, Check, ArrowRight, Clock, ShoppingBag, X } from 'lucide-react';
 import { obterSugestoesNurturing, finalizarAlertaNurturing } from '@/lib/api';
 import { useToast, Toast } from '@/components/ui/toast';
@@ -102,6 +102,12 @@ export function NurturingPanel() {
     return 'Cliente inativo. Hora de reengajar!';
   };
 
+  const filaPriorizada = useMemo(() => [...sugestoes].sort((primeira, segunda) =>
+    new Date(primeira.data_alerta).getTime() - new Date(segunda.data_alerta).getTime()
+  ), [sugestoes]);
+
+  const recompraPendente = filaPriorizada.filter((item) => item.categoria === 'recompra').length;
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -118,11 +124,14 @@ export function NurturingPanel() {
     <div className="mb-10">
       <div className="flex items-center gap-2 mb-4">
         <Sparkles className="h-5 w-5 text-indigo-600" />
-        <h2 className="text-lg font-semibold text-foreground">Sugestões de Reengajamento</h2>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">CRM de recompra</h2>
+          <p className="text-sm text-muted-foreground">{recompraPendente} oportunidade(s) de recompra para priorizar hoje.</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {sugestoes.map((item, idx) => {
+        {filaPriorizada.map((item, idx) => {
           const config = getBadgeConfig(item.tipo);
           return (
             <div 
@@ -166,7 +175,7 @@ export function NurturingPanel() {
                   <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{item.cliente_telefone}</p>
                 )}
                 <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
-                  {getDescricaoContextual(item)}
+                    {getDescricaoContextual(item)} Ação sugerida: contato pelo WhatsApp.
                 </p>
               </div>
 

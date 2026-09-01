@@ -21,10 +21,12 @@ import {
   UserPlus,
   TrendingUp,
   RefreshCw,
+  Building2,
 } from "lucide-react";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
-import { useDashboardData } from "@/lib/hooks/use-dashboard";
+import { useDashboardData, useDashboardDono } from "@/lib/hooks/use-dashboard";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
+import { useContextosCaixa } from "@/lib/hooks/use-caixa";
 import BoasVindasBanner from "@/components/modules/base/BoasVindasBanner";
 import AlertasRH from "@/components/modules/rh/AlertasRH";
 import { FechamentoMesModal } from "@/components/modules/base/FechamentoMesModal";
@@ -104,6 +106,9 @@ function ChartSkeleton() {
 export default function DashboardPage() {
   const dashboard = useDashboardData();
   const userProfile = useUserProfile();
+  const { data: contextosCaixa = [] } = useContextosCaixa();
+  const [filialDonoId, setFilialDonoId] = useState<string | null>(null);
+  const visaoDono = useDashboardDono(filialDonoId);
   const queryClient = useQueryClient();
   const [dateLabels, setDateLabels] = useState({
     periodo: "período atual",
@@ -121,6 +126,12 @@ export default function DashboardPage() {
 
     return () => window.cancelAnimationFrame(frameId);
   }, []);
+
+  useEffect(() => {
+    if (userProfile.role !== "tenant_admin" && !filialDonoId && contextosCaixa[0]) {
+      setFilialDonoId(contextosCaixa[0].filial_id);
+    }
+  }, [contextosCaixa, filialDonoId, userProfile.role]);
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -224,6 +235,30 @@ export default function DashboardPage() {
           Emitido em {emissaoLabel} &middot; Valores em BRL &middot; Regime de competência (data da venda)
         </p>
       </header>
+
+      <section className="border border-border bg-card p-5 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Visão do dono</p>
+            <h3 className="mt-1 font-heading text-lg font-semibold">Resultado e atenção financeira</h3>
+          </div>
+          <label className="flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm">
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <select value={filialDonoId ?? ""} onChange={(event) => setFilialDonoId(event.target.value || null)} className="min-w-40 bg-transparent outline-none" aria-label="Filtrar dashboard por filial">
+              {userProfile.role === "tenant_admin" && <option value="">Geral: todas as filiais</option>}
+              {contextosCaixa.filter((contexto, index, items) => items.findIndex((item) => item.filial_id === contexto.filial_id) === index).map((contexto) => <option key={contexto.filial_id} value={contexto.filial_id}>{contexto.filial_nome}</option>)}
+            </select>
+          </label>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Faturamento hoje", visaoDono.data?.faturamento_hoje ?? 0],
+            ["Faturamento do mês", visaoDono.data?.faturamento_mes ?? 0],
+            ["Saldo financeiro", visaoDono.data?.saldo_financeiro ?? 0],
+            ["Contas vencidas", visaoDono.data?.contas_vencidas ?? 0],
+          ].map(([label, value]) => <div key={String(label)} className="border-l-2 border-primary/30 pl-3"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 text-xl font-semibold tnum">{label === "Contas vencidas" ? value : formatarMoeda(Number(value))}</p></div>)}
+        </div>
+      </section>
 
       {/* Sumário executivo */}
       {!dashboard.isLoading && teses.length > 0 && (

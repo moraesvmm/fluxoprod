@@ -19,6 +19,8 @@
 - O cabeçalho mobile oculta a busca global para preservar os controles, e o app agora expõe manifesto, service worker, atalho instalável e notificacao persistente ao concluir venda.
 - Web Push remoto: dispositivos autorizados registram assinatura por empresa em `push_assinaturas`; vendas disparam notificacao VAPID para os dispositivos inscritos, inclusive quando a venda foi realizada em outro dispositivo.
 - Pendente de ambiente: definir `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` e `VAPID_SUBJECT` na Vercel antes de ativar o envio remoto.
+- Criada a migracao `dashboard_dono_financeiro_filial.sql`: financeiro recebe filial obrigatoria, usuarios comuns veem somente sua filial e administrador usa visao geral ou filtra uma filial no Dashboard do Dono.
+- O painel CRM existente foi elevado para fila de recompra priorizada por vencimento, com contagem de oportunidades e proxima acao de contato.
 - Pendente obrigatorio: executar a migracao em transacao com `ROLLBACK`, rodar `apps/api/testes_provisionamento_hooks.sql`, regenerar `database.types.ts` usando a CLI apos aplicar em ambiente de banco e rodar `scripts/export_db_map.py`.
 
 ---

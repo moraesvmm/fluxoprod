@@ -1910,6 +1910,10 @@ export type Database = {
         }
         Returns: Json
       }
+      tenant_criar_financeiro_filial: {
+        Args: { p_categoria?: string | null; p_data_vencimento: string; p_descricao: string; p_filial_id: string; p_status: string; p_tipo: string; p_valor: number }
+        Returns: Json
+      }
       tenant_criar_funcionario: {
         Args: {
           p_cargo: string
@@ -2181,6 +2185,10 @@ export type Database = {
           vencimento: string
         }[]
       }
+      tenant_listar_financeiro_filial: {
+        Args: { p_filial_id?: string | null }
+        Returns: Json
+      }
       tenant_listar_funcionarios: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -2328,6 +2336,10 @@ export type Database = {
       }
       tenant_obter_dre: {
         Args: { p_data_fim: string; p_data_inicio: string }
+        Returns: Json
+      }
+      tenant_obter_dashboard_dono: {
+        Args: { p_filial_id?: string | null }
         Returns: Json
       }
       tenant_obter_fechamento_pendente: { Args: never; Returns: Json }

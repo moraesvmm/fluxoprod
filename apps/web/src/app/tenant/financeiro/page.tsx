@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { KPICard } from "@/components/modules/base/KPICard";
 import { StatusBadge } from "@/components/modules/base/StatusBadge";
 import {
@@ -19,6 +19,8 @@ import { useFinanceiro, useCreateFinanceiro, useDeleteFinanceiro, useUpdateFinan
 import { type FinanceiroUpdate } from "@/lib/api";
 import { ConciliacaoModal } from "@/components/financeiro/ConciliacaoModal";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
+import { useContextosCaixa } from "@/lib/hooks/use-caixa";
+import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
 interface Transacao {
   id: string;
@@ -32,7 +34,11 @@ interface Transacao {
 }
 
 export default function FinanceiroPage() {
-  const { data: transacoes, isLoading, error } = useFinanceiro();
+  const { data: contextos = [] } = useContextosCaixa();
+  const { role } = useUserProfile();
+  const [filialId, setFilialId] = useState<string | null>(null);
+  useEffect(() => { if (role !== 'tenant_admin' && !filialId && contextos[0]) setFilialId(contextos[0].filial_id); }, [contextos, filialId, role]);
+  const { data: transacoes, isLoading, error } = useFinanceiro(filialId);
   const createFinanceiro = useCreateFinanceiro();
   const deleteFinanceiro = useDeleteFinanceiro();
   const updateFinanceiro = useUpdateFinanceiro();
@@ -63,6 +69,7 @@ export default function FinanceiroPage() {
 
     try {
       await createFinanceiro.mutateAsync({
+        filial_id: filialId ?? undefined,
         tipo: formData.tipo,
         descricao: formData.descricao,
         valor: parseFloat(formData.valor),
@@ -242,6 +249,10 @@ export default function FinanceiroPage() {
           <p className="text-muted-foreground">Gestão de caixa e reconciliação bancária.</p>
         </div>
         <div className="flex items-center gap-2">
+          <select value={filialId ?? ''} onChange={(event) => setFilialId(event.target.value || null)} className="h-10 max-w-48 rounded-md border border-border bg-background px-3 text-sm" aria-label="Filial financeira">
+            {role === 'tenant_admin' && <option value="">Todas as filiais</option>}
+            {contextos.filter((contexto, index, items) => items.findIndex((item) => item.filial_id === contexto.filial_id) === index).map((contexto) => <option key={contexto.filial_id} value={contexto.filial_id}>{contexto.filial_nome}</option>)}
+          </select>
           <button 
             onClick={verFluxoCaixa}
             data-tour="fin-dre"

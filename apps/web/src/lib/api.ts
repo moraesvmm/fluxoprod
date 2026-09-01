@@ -358,6 +358,16 @@ export interface FechamentoCaixaInput {
   observacao?: string;
 }
 
+export interface DashboardDono {
+  faturamento_hoje: number;
+  faturamento_mes: number;
+  vendas_mes: number;
+  saldo_financeiro: number;
+  contas_vencidas: number;
+  filial_id: string | null;
+  visao: 'geral' | 'filial';
+}
+
 export interface LotacaoFilial {
   filial_id: string;
   filial_nome: string;
@@ -778,6 +788,7 @@ export interface Financeiro {
 }
 
 export interface FinanceiroCreate {
+  filial_id?: string;
   tipo: string;
   descricao: string;
   valor: number;
@@ -1902,10 +1913,30 @@ export async function atualizarDadosPessoais(funcionarioId: string, dados: Dados
 }
 
 // FINANCEIRO - RPCs com schema distinto do tipo local - usar _untyped()
-export async function fetchFinanceiro(): Promise<Financeiro[]> {
-  const { data, error } = await _untyped().rpc('tenant_listar_financeiro');
+export async function fetchFinanceiro(filialId?: string | null): Promise<Financeiro[]> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_listar_financeiro_filial', {
+    p_filial_id: filialId ?? null,
+  });
   if (error) throw new Error(error.message);
+  assertRpcResult(data);
   return (data as unknown as Financeiro[]) || [];
+}
+
+export async function fetchDashboardDono(filialId?: string | null): Promise<DashboardDono> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_obter_dashboard_dono', {
+    p_filial_id: filialId ?? null,
+  });
+  if (error) throw new Error(error.message);
+  const result = assertRpcResult(data);
+  return {
+    faturamento_hoje: getNumberField(result, 'faturamento_hoje') ?? 0,
+    faturamento_mes: getNumberField(result, 'faturamento_mes') ?? 0,
+    vendas_mes: getNumberField(result, 'vendas_mes') ?? 0,
+    saldo_financeiro: getNumberField(result, 'saldo_financeiro') ?? 0,
+    contas_vencidas: getNumberField(result, 'contas_vencidas') ?? 0,
+    filial_id: getStringField(result, 'filial_id') ?? null,
+    visao: getStringField(result, 'visao') === 'filial' ? 'filial' : 'geral',
+  };
 }
 
 export async function updateFinanceiro(id: string, financeiro: FinanceiroUpdate): Promise<Financeiro> {
@@ -1923,13 +1954,15 @@ export async function updateFinanceiro(id: string, financeiro: FinanceiroUpdate)
 }
 
 export async function createFinanceiro(financeiro: FinanceiroCreate): Promise<Financeiro> {
-  const { data, error } = await _untyped().rpc('tenant_criar_financeiro', {
+  if (!financeiro.filial_id) throw new Error('Selecione uma filial antes de criar um lançamento financeiro.');
+  const { data, error } = await getSupabaseStrict().rpc('tenant_criar_financeiro_filial', {
+    p_filial_id: financeiro.filial_id,
     p_tipo: financeiro.tipo,
     p_descricao: financeiro.descricao,
     p_valor: financeiro.valor,
     p_data_vencimento: financeiro.data_vencimento,
     p_status: financeiro.status || 'pendente',
-    p_categoria: financeiro.categoria
+    p_categoria: financeiro.categoria || null
   });
   if (error) throw new Error(error.message);
   return {

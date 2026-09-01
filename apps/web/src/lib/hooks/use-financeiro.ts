@@ -5,10 +5,10 @@ import { fetchFinanceiro, updateFinanceiro, createFinanceiro, deleteFinanceiro, 
 
 const FINANCEIRO_KEY = ["financeiro"] as const;
 
-export function useFinanceiro() {
+export function useFinanceiro(filialId?: string | null) {
   return useQuery({
-    queryKey: FINANCEIRO_KEY,
-    queryFn: fetchFinanceiro,
+    queryKey: [...FINANCEIRO_KEY, filialId],
+    queryFn: () => fetchFinanceiro(filialId),
   });
 }
 
