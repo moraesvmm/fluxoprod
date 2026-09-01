@@ -1,4 +1,4 @@
-export async function notifySaleCompleted(vendaId: string): Promise<{ enviados: number; erro?: string }> {
+export async function notifySaleCompleted(vendaId: string): Promise<{ enviados: number; erro?: string; warning?: string }> {
   try {
     if (!vendaId || typeof vendaId !== "string") {
       return { enviados: 0, erro: "Id da venda inválido." };
@@ -14,6 +14,10 @@ export async function notifySaleCompleted(vendaId: string): Promise<{ enviados: 
     if (!response.ok) {
       const message = typeof payload.error === "string" ? payload.error : typeof payload.warning === "string" ? payload.warning : "Não foi possível enviar notificações.";
       return { enviados: 0, erro: message };
+    }
+
+    if (typeof payload.warning === "string") {
+      return { enviados: typeof payload.enviados === "number" ? payload.enviados : 0, warning: payload.warning };
     }
 
     return { enviados: typeof payload.enviados === "number" ? payload.enviados : 0 };
