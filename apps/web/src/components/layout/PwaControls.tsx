@@ -12,6 +12,7 @@ export function PwaControls() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "default" | "unsupported">("default");
   const [notificationsSupported, setNotificationsSupported] = useState(false);
+  const [pushStatus, setPushStatus] = useState<"idle" | "subscribing" | "subscribed" | "error">("idle");
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -31,31 +32,43 @@ export function PwaControls() {
   }, []);
 
   const inscreverPush = async () => {
-    const registration = await navigator.serviceWorker.ready;
-    const keyResponse = await fetch("/api/notifications/push-subscription", { cache: "no-store" });
-    const keyPayload = await keyResponse.json() as { publicKey?: unknown };
-    if (!keyResponse.ok || typeof keyPayload.publicKey !== "string") return;
+    setPushStatus("subscribing");
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const keyResponse = await fetch("/api/notifications/push-subscription", { cache: "no-store" });
+      const keyPayload = await keyResponse.json() as { publicKey?: unknown; error?: unknown };
+      if (!keyResponse.ok || typeof keyPayload.publicKey !== "string") {
+        throw new Error(typeof keyPayload.error === "string" ? keyPayload.error : "Chave de notificações indisponível.");
+      }
 
-    const existingSubscription = await registration.pushManager.getSubscription();
-    const applicationServerKey = Uint8Array.from(
-      atob(keyPayload.publicKey.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - keyPayload.publicKey.length % 4) % 4)),
-      (character) => character.charCodeAt(0)
-    );
-    const subscription = existingSubscription ?? await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey,
-    });
+      const existingSubscription = await registration.pushManager.getSubscription();
+      const applicationServerKey = Uint8Array.from(
+        atob(keyPayload.publicKey.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - keyPayload.publicKey.length % 4) % 4)),
+        (character) => character.charCodeAt(0)
+      );
+      const subscription = existingSubscription ?? await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey,
+      });
 
-    await fetch("/api/notifications/push-subscription", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(subscription),
-    });
+      const saveResponse = await fetch("/api/notifications/push-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subscription),
+      });
+      const savePayload = await saveResponse.json() as { error?: unknown };
+      if (!saveResponse.ok) {
+        throw new Error(typeof savePayload.error === "string" ? savePayload.error : "Não foi possível registrar este dispositivo.");
+      }
+      setPushStatus("subscribed");
+    } catch {
+      setPushStatus("error");
+    }
   };
 
   useEffect(() => {
     if (notificationPermission === "granted") {
-      void inscreverPush().catch(() => undefined);
+      void inscreverPush();
     }
   }, [notificationPermission]);
 
@@ -67,6 +80,10 @@ export function PwaControls() {
 
   const ativarNotificacoes = async () => {
     if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      await inscreverPush();
+      return;
+    }
     const permission = await Notification.requestPermission();
     setNotificationPermission(permission);
   };
@@ -87,13 +104,19 @@ export function PwaControls() {
       <button
         type="button"
         onClick={ativarNotificacoes}
-        disabled={!notificationsSupported || notificationPermission === "granted"}
-        className={`relative -m-2.5 rounded-lg p-2.5 transition-all ${notificationPermission === "granted" ? "text-emerald-600 dark:text-emerald-400" : "text-primary hover:bg-primary/10"} disabled:cursor-default disabled:opacity-100`}
+        disabled={!notificationsSupported || pushStatus === "subscribing"}
+        className={`relative -m-2.5 rounded-lg p-2.5 transition-all ${pushStatus === "subscribed" ? "text-emerald-600 dark:text-emerald-400" : pushStatus === "error" ? "text-destructive" : "text-primary hover:bg-primary/10"} disabled:cursor-default disabled:opacity-100`}
         title={
           !notificationsSupported
             ? "Notificações não são suportadas neste navegador"
-            : notificationPermission === "granted"
-              ? "Notificações de vendas ativadas"
+            : pushStatus === "subscribed"
+              ? "Notificações de vendas ativadas neste dispositivo"
+              : pushStatus === "subscribing"
+                ? "Ativando notificações neste dispositivo"
+                : pushStatus === "error"
+                  ? "Permissão concedida, mas o dispositivo não foi inscrito. Configure VAPID e a tabela push_assinaturas, depois toque aqui para tentar novamente."
+              : notificationPermission === "granted"
+                ? "Toque para finalizar a ativação de notificações"
               : notificationPermission === "denied"
                 ? "Notificações bloqueadas: libere nos Ajustes do iPhone"
                 : "Ativar notificações de vendas"
@@ -101,21 +124,25 @@ export function PwaControls() {
         aria-label={
           !notificationsSupported
             ? "Notificações não suportadas"
-            : notificationPermission === "granted"
+            : pushStatus === "subscribed"
               ? "Notificações de vendas ativadas"
+              : pushStatus === "error"
+                ? "Falha ao ativar notificações"
+              : notificationPermission === "granted"
+                ? "Finalizar ativação de notificações"
               : notificationPermission === "denied"
                 ? "Notificações bloqueadas"
                 : "Ativar notificações de vendas"
         }
       >
-        {notificationPermission === "granted" ? (
+        {pushStatus === "subscribed" ? (
           <BellRing className="h-5 w-5" aria-hidden="true" />
         ) : notificationPermission === "denied" || !notificationsSupported ? (
           <BellOff className="h-5 w-5" aria-hidden="true" />
         ) : (
           <BellRing className="h-5 w-5" aria-hidden="true" />
         )}
-        {notificationPermission === "granted" && (
+        {pushStatus === "subscribed" && (
           <Check className="absolute bottom-1 right-1 h-2.5 w-2.5 rounded-full bg-card" aria-hidden="true" />
         )}
       </button>

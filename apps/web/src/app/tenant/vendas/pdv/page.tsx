@@ -241,7 +241,11 @@ export default function PDVPage() {
         queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
       ]);
       if (resultado.venda_id) {
-        void notifySaleCompleted(resultado.venda_id);
+        void notifySaleCompleted(resultado.venda_id).then((notificacao) => {
+          if (notificacao.enviados === 0) {
+            warning(notificacao.erro || "Nenhum dispositivo inscrito recebeu a notificação desta venda.");
+          }
+        });
       }
       success('Pagamento realizado com sucesso!');
 
