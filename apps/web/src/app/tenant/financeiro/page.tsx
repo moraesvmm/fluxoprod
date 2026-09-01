@@ -31,6 +31,7 @@ interface Transacao {
   status: string;
   criado_em: string;
   data_vencimento?: string;
+  filial_id?: string;
 }
 
 export default function FinanceiroPage() {
@@ -38,7 +39,7 @@ export default function FinanceiroPage() {
   const { role } = useUserProfile();
   const [filialId, setFilialId] = useState<string | null>(null);
   useEffect(() => { if (role !== 'tenant_admin' && !filialId && contextos[0]) setFilialId(contextos[0].filial_id); }, [contextos, filialId, role]);
-  const { data: transacoes, isLoading, error } = useFinanceiro(filialId);
+  const { data: transacoes, isLoading, error, refetch } = useFinanceiro(filialId);
   const createFinanceiro = useCreateFinanceiro();
   const deleteFinanceiro = useDeleteFinanceiro();
   const updateFinanceiro = useUpdateFinanceiro();
@@ -47,11 +48,13 @@ export default function FinanceiroPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedTransacao, setSelectedTransacao] = useState<Transacao | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Transacao | null>(null);
+  const [editFilialId, setEditFilialId] = useState<string | null>(null);
   const [syncConfirm, setSyncConfirm] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const [showConciliacao, setShowConciliacao] = useState(false);
+  const [busca, setBusca] = useState('');
   const syncBtnRef = useRef<HTMLButtonElement>(null);
   const [formData, setFormData] = useState({
     descricao: '',
@@ -95,20 +98,24 @@ export default function FinanceiroPage() {
   };
 
   const confirmDeleteTransacao = async () => {
-    if (!deleteId) return;
+    if (!deleteTarget?.filial_id) {
+      toastError('Não foi possível identificar a filial deste lançamento.');
+      return;
+    }
     try {
-      await deleteFinanceiro.mutateAsync(deleteId);
+      await deleteFinanceiro.mutateAsync({ id: deleteTarget.id, filialId: deleteTarget.filial_id });
       success("Transação excluída com sucesso!");
     } catch (err: unknown) {
       console.error("Erro ao excluir transação:", err);
       toastError("Erro ao excluir transação.");
     } finally {
-      setDeleteId(null);
+      setDeleteTarget(null);
     }
   };
 
   const abrirEdicao = (transacao: Transacao) => {
     setEditId(transacao.id);
+    setEditFilialId(transacao.filial_id ?? null);
     setFormData({
       descricao: transacao.descricao,
       valor: String(transacao.valor),
@@ -127,7 +134,10 @@ export default function FinanceiroPage() {
 
   const editarTransacao = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editId || !formData.descricao.trim() || !formData.valor) return;
+    if (!editId || !editFilialId || !formData.descricao.trim() || !formData.valor) {
+      toastError('Não foi possível identificar a filial deste lançamento.');
+      return;
+    }
 
     try {
       const payload: FinanceiroUpdate = {
@@ -139,7 +149,7 @@ export default function FinanceiroPage() {
       };
       if (formData.categoria) payload.categoria = formData.categoria;
 
-      await updateFinanceiro.mutateAsync({ id: editId, financeiro: payload });
+      await updateFinanceiro.mutateAsync({ id: editId, filialId: editFilialId, financeiro: payload });
 
       setFormData({ 
         descricao: '', 
@@ -151,6 +161,7 @@ export default function FinanceiroPage() {
       });
       setShowEditModal(false);
       setEditId(null);
+      setEditFilialId(null);
       success("Transação atualizada com sucesso!");
     } catch (err: unknown) {
       console.error("Erro ao atualizar transação:", err);
@@ -159,6 +170,10 @@ export default function FinanceiroPage() {
   };
 
   const confirmSyncBanco = async () => {
+    if (!filialId) {
+      toastError('Selecione uma filial antes de importar um extrato.');
+      return;
+    }
     setSyncConfirm(false);
     setShowConciliacao(true);
   };
@@ -178,8 +193,8 @@ export default function FinanceiroPage() {
   };
 
   const verFluxoCaixa = () => {
-    const entradas = transacoes?.filter(t => t.tipo === 'receber').reduce((sum, t) => sum + t.valor, 0) || 0;
-    const saidas = transacoes?.filter(t => t.tipo === 'pagar').reduce((sum, t) => sum + t.valor, 0) || 0;
+    const entradas = transacoes?.filter(t => t.tipo === 'receber' || t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0) || 0;
+    const saidas = transacoes?.filter(t => t.tipo === 'pagar' || t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0) || 0;
     const saldo = entradas - saidas;
 
     const mensagem = `Entradas: ${formatarValor(entradas)} | Saídas: ${formatarValor(saidas)} | Saldo: ${formatarValor(saldo)} | Transações: ${transacoes?.length || 0}`;
@@ -188,9 +203,10 @@ export default function FinanceiroPage() {
   };
 
   // KPIs dinâmicos
-  const totalEntradas = transacoes?.filter(t => t.tipo === 'receber').reduce((sum, t) => sum + t.valor, 0) || 0;
-  const totalSaidas = transacoes?.filter(t => t.tipo === 'pagar').reduce((sum, t) => sum + t.valor, 0) || 0;
+  const totalEntradas = transacoes?.filter(t => t.tipo === 'receber' || t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0) || 0;
+  const totalSaidas = transacoes?.filter(t => t.tipo === 'pagar' || t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0) || 0;
   const pendentes = transacoes?.filter(t => t.status === 'pendente').length || 0;
+  const transacoesFiltradas = (transacoes || []).filter((transacao) => transacao.descricao.toLowerCase().includes(busca.toLowerCase()) || (transacao.categoria || '').toLowerCase().includes(busca.toLowerCase()));
 
   return (
     <div className="space-y-8">
@@ -206,9 +222,9 @@ export default function FinanceiroPage() {
 
       {/* Confirm Modals */}
       <ConfirmModal
-        isOpen={!!deleteId}
+        isOpen={!!deleteTarget}
         onConfirm={confirmDeleteTransacao}
-        onCancel={() => setDeleteId(null)}
+        onCancel={() => setDeleteTarget(null)}
         title="Excluir transação"
         message="Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita."
         confirmText="Excluir"
@@ -274,6 +290,8 @@ export default function FinanceiroPage() {
             }}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-emerald-600 text-white hover:bg-emerald-700 h-10 px-4 py-2"
             data-tour="fin-nova"
+            disabled={!filialId}
+            title={!filialId ? 'Selecione uma filial para criar um lançamento.' : undefined}
           >
             <Plus className="mr-2 h-4 w-4" />
             Nova Transação
@@ -286,7 +304,7 @@ export default function FinanceiroPage() {
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 disabled:opacity-50"
           >
             <RefreshCcw className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Sincronizando...' : 'Sincronizar Banco'}
+            {syncing ? 'Importando...' : 'Importar Extrato OFX'}
           </button>
           <TutorialHelpButton moduleKey="financeiro" />
         </div>
@@ -478,6 +496,8 @@ export default function FinanceiroPage() {
             <input
               type="search"
               placeholder="Buscar histórico bancário..."
+              value={busca}
+              onChange={(event) => setBusca(event.target.value)}
               className="w-full bg-background border border-border rounded-md pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
             />
           </div>
@@ -506,14 +526,14 @@ export default function FinanceiroPage() {
                   <div className="text-red-500">{error.message}</div>
                 </TableCell>
               </TableRow>
-            ) : !transacoes || transacoes.length === 0 ? (
+            ) : transacoesFiltradas.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-6">
                   <div className="text-muted-foreground">Nenhuma transação encontrada</div>
                 </TableCell>
               </TableRow>
             ) : (
-              transacoes?.map((item) => (
+              transacoesFiltradas.map((item) => (
                 <TableRow key={item.id} className="hover:bg-muted/30">
                   <TableCell className="text-muted-foreground text-sm">{formatarData(item.criado_em)}</TableCell>
                   <TableCell className="font-medium text-foreground">{item.descricao}</TableCell>
@@ -534,7 +554,7 @@ export default function FinanceiroPage() {
                         <Edit className="h-4 w-4" />
                       </button>
                       <button 
-                        onClick={() => setDeleteId(item.id)}
+                        onClick={() => setDeleteTarget(item)}
                         className="text-muted-foreground hover:text-red-600 dark:text-red-500 p-1" 
                         title="Excluir"
                       >
@@ -561,8 +581,11 @@ export default function FinanceiroPage() {
         onClose={() => setShowConciliacao(false)}
         onSuccess={() => {
           success("Conciliação bancária realizada com sucesso!");
+          void refetch();
         }}
+        onError={toastError}
         existingTransactions={transacoes || []}
+        filialId={filialId}
       />
     </div>
   );

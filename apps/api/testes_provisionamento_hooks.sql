@@ -98,8 +98,14 @@ BEGIN
             v_schema
        )) IS NULL
       OR to_regprocedure(format('%I.tenant_listar_contextos_caixa()', v_schema)) IS NULL
+    OR to_regprocedure(format('%I.tenant_listar_lotacoes_filiais(uuid)', v_schema)) IS NULL
+    OR to_regprocedure(format('%I.tenant_salvar_lotacoes_filiais(uuid,jsonb)', v_schema)) IS NULL
       OR to_regprocedure(format('%I.tenant_obter_resumo_caixa(uuid,uuid,date)', v_schema)) IS NULL
       OR to_regprocedure(format('%I.tenant_fechar_caixa(uuid,uuid,date,jsonb,text)', v_schema)) IS NULL
+    OR to_regprocedure(format('%I.tenant_listar_financeiro_filial(uuid)', v_schema)) IS NULL
+    OR to_regprocedure(format('%I.tenant_atualizar_financeiro_filial(uuid,uuid,text,text,numeric,date,text,text)', v_schema)) IS NULL
+    OR to_regprocedure(format('%I.tenant_excluir_financeiro_filial(uuid,uuid)', v_schema)) IS NULL
+    OR to_regprocedure(format('%I.tenant_conciliar_financeiro_filial(uuid,jsonb)', v_schema)) IS NULL
        OR to_regprocedure(format(
             '%I.tenant_concluir_ordem_producao_local(uuid,numeric,jsonb)',
             v_schema
@@ -129,6 +135,9 @@ BEGIN
             'nurturing_interacoes',
             'processar_venda',
             'caixa_diario',
+            'gestao_lotacoes_filiais',
+            'dashboard_dono_filial',
+            'financeiro_filial_seguranca',
             'mrp_producao'
         ]) required(hook_key)
         WHERE NOT EXISTS (

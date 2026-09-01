@@ -12,20 +12,24 @@ import {
 } from "lucide-react";
 import { parseOfx, OfxTransaction } from "@/lib/utils/ofx-parser";
 import { Financeiro } from "@/lib/api";
-import { createClient } from "@/utils/supabase/client";
+import { conciliarFinanceiro } from "@/lib/api";
 
 interface ConciliacaoModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onError: (message: string) => void;
   existingTransactions: Financeiro[];
+  filialId: string | null;
 }
 
 export function ConciliacaoModal({ 
   isOpen, 
   onClose, 
   onSuccess,
-  existingTransactions 
+  onError,
+  existingTransactions,
+  filialId,
 }: ConciliacaoModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [bankTransactions, setBankTransactions] = useState<OfxTransaction[]>([]);
@@ -51,6 +55,7 @@ export function ConciliacaoModal({
       parsed.forEach(bt => {
         const match = existingTransactions.find(et => 
           !et.conciliado && 
+          !Object.values(autoMatches).includes(et.id) &&
           Math.abs(et.valor - bt.valor) < 0.01 && 
           (new Date(et.data_vencimento).toDateString() === new Date(bt.data).toDateString())
         );
@@ -65,28 +70,22 @@ export function ConciliacaoModal({
 
   const handleProcess = async () => {
     setProcessing(true);
-    const supabase = createClient();
-
     try {
-      for (const bankTxId in matches) {
-        const financeiroId = matches[bankTxId];
-        const bankTx = bankTransactions.find(t => t.id === bankTxId);
-
-        await supabase
-          .from('financeiro')
-          .update({
-            conciliado: true,
-            banco_transacao_id: bankTxId,
-            banco_nome: 'Extrato Importado',
-            data_conciliacao: new Date().toISOString(),
-            status: 'concluido'
-          })
-          .eq('id', financeiroId);
+      if (!filialId) {
+        throw new Error("Selecione uma filial antes de conciliar o extrato.");
       }
+      const conciliacoes = Object.entries(matches).map(([bankTxId, financeiroId]) => ({
+        financeiro_id: financeiroId,
+        banco_transacao_id: bankTxId,
+        banco_nome: 'Extrato OFX',
+        data_conciliacao: new Date().toISOString(),
+      }));
+      await conciliarFinanceiro(filialId, conciliacoes);
       onSuccess();
       onClose();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
+      onError(err instanceof Error ? err.message : "Não foi possível concluir a conciliação.");
     } finally {
       setProcessing(false);
     }

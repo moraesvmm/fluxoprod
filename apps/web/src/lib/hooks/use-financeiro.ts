@@ -15,7 +15,7 @@ export function useFinanceiro(filialId?: string | null) {
 export function useUpdateFinanceiro() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, financeiro }: { id: string; financeiro: FinanceiroUpdate }) => updateFinanceiro(id, financeiro),
+    mutationFn: ({ id, filialId, financeiro }: { id: string; filialId: string; financeiro: FinanceiroUpdate }) => updateFinanceiro(id, filialId, financeiro),
     onSuccess: () => qc.invalidateQueries({ queryKey: FINANCEIRO_KEY }),
   });
 }
@@ -31,7 +31,7 @@ export function useCreateFinanceiro() {
 export function useDeleteFinanceiro() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => deleteFinanceiro(id),
+    mutationFn: ({ id, filialId }: { id: string; filialId: string }) => deleteFinanceiro(id, filialId),
     onSuccess: () => qc.invalidateQueries({ queryKey: FINANCEIRO_KEY }),
   });
 }

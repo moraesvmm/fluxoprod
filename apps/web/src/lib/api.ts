@@ -785,6 +785,7 @@ export interface Financeiro {
   conciliado?: boolean;
   banco_transacao_id?: string;
   banco_nome?: string;
+  filial_id?: string;
 }
 
 export interface FinanceiroCreate {
@@ -1939,18 +1940,23 @@ export async function fetchDashboardDono(filialId?: string | null): Promise<Dash
   };
 }
 
-export async function updateFinanceiro(id: string, financeiro: FinanceiroUpdate): Promise<Financeiro> {
-  const { data, error } = await _untyped().rpc('tenant_atualizar_financeiro', {
+export async function updateFinanceiro(id: string, filialId: string, financeiro: FinanceiroUpdate): Promise<Financeiro> {
+  if (!financeiro.tipo || !financeiro.descricao || financeiro.valor === undefined || !financeiro.data_vencimento) {
+    throw new Error('Informe todos os dados obrigatórios do lançamento.');
+  }
+  const { data, error } = await getSupabaseStrict().rpc('tenant_atualizar_financeiro_filial', {
+    p_filial_id: filialId,
     p_financeiro_id: id,
     p_tipo: financeiro.tipo,
     p_descricao: financeiro.descricao,
     p_valor: financeiro.valor,
     p_data_vencimento: financeiro.data_vencimento,
     p_status: financeiro.status || 'pendente',
-    p_categoria: financeiro.categoria
+    p_categoria: financeiro.categoria || null
   });
   if (error) throw new Error(error.message);
-  return (data as unknown) as Financeiro;
+  assertRpcResult(data);
+  return { id, filial_id: filialId, ...financeiro } as Financeiro;
 }
 
 export async function createFinanceiro(financeiro: FinanceiroCreate): Promise<Financeiro> {
@@ -1972,9 +1978,16 @@ export async function createFinanceiro(financeiro: FinanceiroCreate): Promise<Fi
   } as Financeiro;
 }
 
-export async function deleteFinanceiro(id: string): Promise<void> {
-  const { error } = await _untyped().rpc('tenant_excluir_financeiro', { p_financeiro_id: id });
+export async function deleteFinanceiro(id: string, filialId: string): Promise<void> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_excluir_financeiro_filial', { p_financeiro_id: id, p_filial_id: filialId });
   if (error) throw new Error(error.message);
+  assertRpcResult(data);
+}
+
+export async function conciliarFinanceiro(filialId: string, conciliacoes: { financeiro_id: string; banco_transacao_id: string; banco_nome: string; data_conciliacao: string }[]): Promise<void> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_conciliar_financeiro_filial', { p_filial_id: filialId, p_conciliacoes: conciliacoes });
+  if (error) throw new Error(error.message);
+  assertRpcResult(data);
 }
 
 // COMISSOES - RPCs nao mapeadas no types - usar _untyped()

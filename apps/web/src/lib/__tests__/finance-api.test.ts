@@ -31,8 +31,8 @@ describe('Finance API (api.ts)', () => {
         error: null,
       })
 
-      const result = await fetchFinanceiro()
-      expect(mockRpc).toHaveBeenCalledWith('tenant_listar_financeiro')
+      const result = await fetchFinanceiro('filial-1')
+      expect(mockRpc).toHaveBeenCalledWith('tenant_listar_financeiro_filial', { p_filial_id: 'filial-1' })
       expect(result).toHaveLength(1)
       expect(result[0].tipo).toBe('receita')
     })
@@ -44,6 +44,7 @@ describe('Finance API (api.ts)', () => {
       })
 
       const payload = {
+        filial_id: 'filial-1',
         tipo: 'despesa',
         descricao: 'Aluguel',
         valor: 2500,
@@ -53,7 +54,8 @@ describe('Finance API (api.ts)', () => {
       }
 
       const result = await createFinanceiro(payload)
-      expect(mockRpc).toHaveBeenCalledWith('tenant_criar_financeiro', expect.objectContaining({
+      expect(mockRpc).toHaveBeenCalledWith('tenant_criar_financeiro_filial', expect.objectContaining({
+        p_filial_id: 'filial-1',
         p_descricao: 'Aluguel',
         p_valor: 2500
       }))

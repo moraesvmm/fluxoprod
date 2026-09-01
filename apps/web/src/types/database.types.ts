@@ -1767,6 +1767,14 @@ export type Database = {
         }
         Returns: Json
       }
+      tenant_atualizar_financeiro_filial: {
+        Args: { p_categoria?: string | null; p_data_vencimento: string; p_descricao: string; p_filial_id: string; p_financeiro_id: string; p_status: string; p_tipo: string; p_valor: number }
+        Returns: Json
+      }
+      tenant_conciliar_financeiro_filial: {
+        Args: { p_conciliacoes: Json; p_filial_id: string }
+        Returns: Json
+      }
       tenant_atualizar_funcionario:
         | {
             Args: {
@@ -2066,6 +2074,10 @@ export type Database = {
       }
       tenant_excluir_financeiro: {
         Args: { p_financeiro_id: string }
+        Returns: Json
+      }
+      tenant_excluir_financeiro_filial: {
+        Args: { p_filial_id: string; p_financeiro_id: string }
         Returns: Json
       }
       tenant_excluir_funcionario: {
