@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ThemeToggle } from "./ThemeToggle";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
@@ -15,6 +16,7 @@ interface HeaderProps {
 
 export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
   const [supabase] = useState(() => createClient());
+  const queryClient = useQueryClient();
   const router = useRouter();
   const { nome } = useUserProfile();
 
@@ -42,6 +44,7 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    queryClient.removeQueries({ queryKey: ["sidebar-data"] });
     router.push("/login");
     router.refresh();
   };

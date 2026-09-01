@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Mail, Lock, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [success, setSuccess] = useState<string | null>(null);
   
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [supabase] = useState(() => createClient());
 
   useEffect(() => {
@@ -66,6 +68,8 @@ export default function LoginPage() {
       setLoading(false);
       return;
     }
+
+    queryClient.removeQueries({ queryKey: ["sidebar-data"] });
 
     const { data: profile, error: profileErr } = await supabase
       .from("user_profiles")

@@ -14,6 +14,8 @@
 - Criada a rota `Vendas > Caixa`, com conferencia por forma de pagamento, sangria, suprimento, fechamento com justificativa de diferenca e reabertura gerencial.
 - O historico de vendas abre no filtro do dia operacional e o PDV envia o contexto filial/caixa autorizado.
 - Ajustado o tema global de controles numericos para que os spinners nativos respeitem claro/escuro, e corrigida a acentuacao de rotulos visiveis de navegacao e caixa.
+- Convites persistem permissao explicita para cada modulo contratado e negam, por padrao, os modulos nao selecionados.
+- A sidebar invalida suas permissoes em login/logout e nao retem cache entre sessoes, impedindo que modulos de um administrador aparecam para usuario recem-autenticado.
 - Pendente obrigatorio: executar a migracao em transacao com `ROLLBACK`, rodar `apps/api/testes_provisionamento_hooks.sql`, regenerar `database.types.ts` usando a CLI apos aplicar em ambiente de banco e rodar `scripts/export_db_map.py`.
 
 ---

@@ -244,14 +244,18 @@ export function UserManagement() {
           <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl z-10 overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-border">
               <h3 className="text-base font-bold">Convidar Novo Usuário</h3>
-              <button onClick={() => setShowInvite(false)} className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors">
+              <button type="button" onClick={() => setShowInvite(false)} className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
+            <form onSubmit={(event) => { event.preventDefault(); handleInvite(); }}>
             <div className="p-6 space-y-4">
               <div>
                 <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1 block">Nome Completo *</label>
                 <input
+                  name="name"
+                  autoComplete="name"
+                  required
                   value={form.nome}
                   onChange={e => setForm(p => ({ ...p, nome: e.target.value }))}
                   className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
@@ -261,7 +265,10 @@ export function UserManagement() {
               <div>
                 <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1 block">E-mail Profissional *</label>
                 <input
+                  name="email"
                   type="email"
+                  autoComplete="email"
+                  required
                   value={form.email}
                   onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
                   className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
@@ -271,7 +278,11 @@ export function UserManagement() {
               <div>
                 <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1 block">Senha Inicial * (mín. 8 caracteres)</label>
                 <input
+                  name="new-password"
                   type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
                   value={form.password}
                   onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
                   className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
@@ -301,15 +312,16 @@ export function UserManagement() {
               </div>
             </div>
             <div className="p-6 border-t border-border flex justify-end gap-3">
-              <button onClick={() => setShowInvite(false)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">Cancelar</button>
+              <button type="button" onClick={() => setShowInvite(false)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">Cancelar</button>
               <button
-                onClick={handleInvite}
+                type="submit"
                 disabled={createMutation.isPending}
                 className="inline-flex items-center gap-2 px-5 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
                 {createMutation.isPending ? <><Loader2 className="w-4 h-4 animate-spin" /> Criando...</> : 'Convidar Usuário'}
               </button>
             </div>
+            </form>
           </div>
         </div>
       )}

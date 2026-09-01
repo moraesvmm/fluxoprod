@@ -109,23 +109,23 @@ export async function POST(request: Request) {
 
     if (profileError) throw new Error(profileError.message);
 
-    // 7. Gravar permissões de módulo iniciais
-    if (requestedModules.length > 0) {
-      const modulosPayload = requestedModules.map(key => ({
-        user_id: createdAuthUserId!,
-        empresa_id,
-        modulo_key: key,
-        permitido: true,
-      }));
+    // 7. Gravar o estado de cada modulo contratado. Ausencia de linha nunca deve
+    // significar permissao implicita para um usuario novo.
+    const permittedKeys = new Set([...requestedModules, 'dashboard']);
+    const modulosPayload = [...new Set(['dashboard', ...contractedKeys])].map((key) => ({
+      user_id: createdAuthUserId!,
+      empresa_id,
+      modulo_key: key,
+      permitido: permittedKeys.has(key),
+    }));
 
-      const { error: modulosError } = await admin
-        .from('usuario_modulos_permitidos')
-        .insert(modulosPayload);
+    const { error: modulosError } = await admin
+      .from('usuario_modulos_permitidos')
+      .upsert(modulosPayload, { onConflict: 'user_id,empresa_id,modulo_key' });
 
-      if (modulosError) {
-        console.error('[users/create] Erro ao gravar módulos:', modulosError);
-        throw new Error('Não foi possível configurar as permissões iniciais do usuário.');
-      }
+    if (modulosError) {
+      console.error('[users/create] Erro ao gravar módulos:', modulosError);
+      throw new Error('Não foi possível configurar as permissões iniciais do usuário.');
     }
 
     const origin = request.headers.get('origin') || `https://${request.headers.get('host') || 'fluxoerp.com.br'}`;
