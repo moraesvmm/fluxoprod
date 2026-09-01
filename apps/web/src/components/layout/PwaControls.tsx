@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BellRing, Download } from "lucide-react";
+import { BellOff, BellRing, Check, Download } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -84,17 +84,41 @@ export function PwaControls() {
           <Download className="h-5 w-5" aria-hidden="true" />
         </button>
       )}
-      {notificationsSupported && notificationPermission !== "granted" && (
-        <button
-          type="button"
-          onClick={ativarNotificacoes}
-          className="-m-2.5 rounded-lg p-2.5 text-muted-foreground/70 transition-all hover:bg-muted hover:text-foreground"
-          title={notificationPermission === "denied" ? "Notificações bloqueadas: libere nos Ajustes do iPhone" : "Ativar notificações de vendas"}
-          aria-label={notificationPermission === "denied" ? "Notificações bloqueadas" : "Ativar notificações de vendas"}
-        >
+      <button
+        type="button"
+        onClick={ativarNotificacoes}
+        disabled={!notificationsSupported || notificationPermission === "granted"}
+        className={`relative -m-2.5 rounded-lg p-2.5 transition-all ${notificationPermission === "granted" ? "text-emerald-600 dark:text-emerald-400" : "text-primary hover:bg-primary/10"} disabled:cursor-default disabled:opacity-100`}
+        title={
+          !notificationsSupported
+            ? "Notificações não são suportadas neste navegador"
+            : notificationPermission === "granted"
+              ? "Notificações de vendas ativadas"
+              : notificationPermission === "denied"
+                ? "Notificações bloqueadas: libere nos Ajustes do iPhone"
+                : "Ativar notificações de vendas"
+        }
+        aria-label={
+          !notificationsSupported
+            ? "Notificações não suportadas"
+            : notificationPermission === "granted"
+              ? "Notificações de vendas ativadas"
+              : notificationPermission === "denied"
+                ? "Notificações bloqueadas"
+                : "Ativar notificações de vendas"
+        }
+      >
+        {notificationPermission === "granted" ? (
           <BellRing className="h-5 w-5" aria-hidden="true" />
-        </button>
-      )}
+        ) : notificationPermission === "denied" || !notificationsSupported ? (
+          <BellOff className="h-5 w-5" aria-hidden="true" />
+        ) : (
+          <BellRing className="h-5 w-5" aria-hidden="true" />
+        )}
+        {notificationPermission === "granted" && (
+          <Check className="absolute bottom-1 right-1 h-2.5 w-2.5 rounded-full bg-card" aria-hidden="true" />
+        )}
+      </button>
     </>
   );
 }
