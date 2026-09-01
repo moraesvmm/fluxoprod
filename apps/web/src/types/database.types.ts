@@ -2179,6 +2179,10 @@ export type Database = {
       tenant_listar_kits: { Args: never; Returns: Json }
       tenant_listar_contextos_caixa: { Args: never; Returns: Json }
       tenant_listar_locais_estoque: { Args: never; Returns: Json }
+      tenant_listar_lotacoes_filiais: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       tenant_listar_modulos_usuario: {
         Args: { p_target_user_id: string }
         Returns: {
@@ -2370,6 +2374,10 @@ export type Database = {
       }
       tenant_salvar_configuracao: {
         Args: { p_chave: string; p_descricao?: string; p_valor: string }
+        Returns: Json
+      }
+      tenant_salvar_lotacoes_filiais: {
+        Args: { p_lotacoes: Json; p_user_id: string }
         Returns: Json
       }
       tenant_vender_kit: {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Users, Plus, Trash2, Shield, ShieldCheck, Settings2,
+  Users, Plus, Trash2, Shield, ShieldCheck, Settings2, Building2,
   Loader2, X, Crown, AlertTriangle, ArrowUpRight, Check,
 } from 'lucide-react';
 import {
@@ -12,6 +12,7 @@ import {
 import { UserModulesModal } from './UserModulesModal';
 import { useToast } from '@/components/ui/toast';
 import { createClient } from '@/utils/supabase/client';
+import { UserFiliaisModal } from './UserFiliaisModal';
 
 interface InviteForm {
   nome: string;
@@ -31,6 +32,7 @@ export function UserManagement() {
 
   const [showInvite, setShowInvite] = useState(false);
   const [modulesFor, setModulesFor] = useState<TeamMember | null>(null);
+  const [filiaisFor, setFiliaisFor] = useState<TeamMember | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<TeamMember | null>(null);
   const [callerRole, setCallerRole] = useState<string | null>(null);
   const [callerId, setCallerId] = useState<string | null>(null);
@@ -195,12 +197,14 @@ export function UserManagement() {
                       {isAdmin ? (
                         <span className="text-xs text-muted-foreground">Acesso total</span>
                       ) : (
-                        <button
-                          onClick={() => setModulesFor(m)}
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
-                        >
-                          <Settings2 className="w-3.5 h-3.5" /> Configurar
-                        </button>
+                        <div className="flex justify-center gap-3">
+                          <button onClick={() => setModulesFor(m)} className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium">
+                            <Settings2 className="w-3.5 h-3.5" /> Módulos
+                          </button>
+                          <button onClick={() => setFiliaisFor(m)} className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium">
+                            <Building2 className="w-3.5 h-3.5" /> Filiais
+                          </button>
+                        </div>
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -343,6 +347,13 @@ export function UserManagement() {
           userName={modulesFor.nome}
           onClose={() => setModulesFor(null)}
           onSuccess={() => { refetch(); setModulesFor(null); }}
+        />
+      )}
+      {filiaisFor && (
+        <UserFiliaisModal
+          userId={filiaisFor.user_id}
+          userName={filiaisFor.nome}
+          onClose={() => setFiliaisFor(null)}
         />
       )}
     </div>

@@ -358,6 +358,14 @@ export interface FechamentoCaixaInput {
   observacao?: string;
 }
 
+export interface LotacaoFilial {
+  filial_id: string;
+  filial_nome: string;
+  caixas_ativos: number;
+  permitido: boolean;
+  papel: 'operador' | 'supervisor' | 'gerente' | null;
+}
+
 export interface EstoquePorLocal {
   id: string;
   produto_id: string;
@@ -1437,6 +1445,27 @@ export async function reabrirCaixa(fechamentoId: string, motivo: string): Promis
   const { data, error } = await getSupabaseStrict().rpc('tenant_reabrir_caixa', {
     p_fechamento_id: fechamentoId,
     p_motivo: motivo,
+  });
+  if (error) throw new Error(error.message);
+  assertRpcResult(data);
+}
+
+export async function fetchLotacoesFiliais(userId: string): Promise<LotacaoFilial[]> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_listar_lotacoes_filiais', {
+    p_user_id: userId,
+  });
+  if (error) throw new Error(error.message);
+  assertRpcResult(data);
+  return getArray<LotacaoFilial>(data);
+}
+
+export async function salvarLotacoesFiliais(
+  userId: string,
+  lotacoes: { filial_id: string; papel: 'operador' | 'supervisor' | 'gerente' }[]
+): Promise<void> {
+  const { data, error } = await getSupabaseStrict().rpc('tenant_salvar_lotacoes_filiais', {
+    p_user_id: userId,
+    p_lotacoes: lotacoes,
   });
   if (error) throw new Error(error.message);
   assertRpcResult(data);
