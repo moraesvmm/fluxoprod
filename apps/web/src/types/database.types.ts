@@ -1204,6 +1204,41 @@ export type Database = {
           },
         ]
       }
+      push_assinaturas: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          empresa_id: string
+          endpoint: string
+          subscription: Json
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          empresa_id: string
+          endpoint: string
+          subscription: Json
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          empresa_id?: string
+          endpoint?: string
+          subscription?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_assinaturas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usuario_modulos_permitidos: {
         Row: {
           criado_em: string | null

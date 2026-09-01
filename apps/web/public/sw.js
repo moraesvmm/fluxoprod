@@ -8,5 +8,15 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  event.waitUntil(self.clients.openWindow("/tenant/vendas/caixa"));
+  event.waitUntil(self.clients.openWindow(event.notification.data?.url || "/tenant/vendas/caixa"));
+});
+
+self.addEventListener("push", (event) => {
+  const payload = event.data ? event.data.json() : {};
+  event.waitUntil(self.registration.showNotification(payload.title || "Fluxo ERP", {
+    body: payload.body || "Há uma atualização na sua operação.",
+    icon: "/apple-icon",
+    badge: "/apple-icon",
+    data: { url: payload.url || "/tenant/dashboard" },
+  }));
 });

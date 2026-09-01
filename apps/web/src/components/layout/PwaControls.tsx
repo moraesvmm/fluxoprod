@@ -28,6 +28,35 @@ export function PwaControls() {
     return () => window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
   }, []);
 
+  const inscreverPush = async () => {
+    const registration = await navigator.serviceWorker.ready;
+    const keyResponse = await fetch("/api/notifications/push-subscription", { cache: "no-store" });
+    const keyPayload = await keyResponse.json() as { publicKey?: unknown };
+    if (!keyResponse.ok || typeof keyPayload.publicKey !== "string") return;
+
+    const existingSubscription = await registration.pushManager.getSubscription();
+    const applicationServerKey = Uint8Array.from(
+      atob(keyPayload.publicKey.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - keyPayload.publicKey.length % 4) % 4)),
+      (character) => character.charCodeAt(0)
+    );
+    const subscription = existingSubscription ?? await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey,
+    });
+
+    await fetch("/api/notifications/push-subscription", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(subscription),
+    });
+  };
+
+  useEffect(() => {
+    if (notificationPermission === "granted") {
+      void inscreverPush().catch(() => undefined);
+    }
+  }, [notificationPermission]);
+
   const instalar = async () => {
     if (!installPrompt) return;
     await installPrompt.prompt();

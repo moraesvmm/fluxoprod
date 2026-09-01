@@ -240,11 +240,9 @@ export default function PDVPage() {
         queryClient.invalidateQueries({ queryKey: ["caixa"] }),
         queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
       ]);
-      await notifySaleCompleted({
-        clientName: cliente === "Cliente Avulso" ? "Venda avulsa" : cliente,
-        itemCount: itens.reduce((totalItens, item) => totalItens + item.qtd, 0),
-        total: resultado.total ?? total,
-      });
+      if (resultado.venda_id) {
+        void notifySaleCompleted(resultado.venda_id);
+      }
       success('Pagamento realizado com sucesso!');
 
       // Gatilho de NFe
