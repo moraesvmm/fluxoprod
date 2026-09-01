@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BellOff, BellRing, Check, Download } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -35,6 +36,9 @@ export function PwaControls() {
   const inscreverPush = async () => {
     setPushStatus("subscribing");
     try {
+      const { data: { session } } = await createClient().auth.getSession();
+      if (!session?.access_token) throw new Error("Sessão expirada. Entre novamente para ativar as notificações.");
+
       const registration = await navigator.serviceWorker.ready;
       const keyResponse = await fetch("/api/notifications/push-subscription", { cache: "no-store" });
       const keyPayload = await keyResponse.json() as { publicKey?: unknown; error?: unknown };
@@ -54,7 +58,10 @@ export function PwaControls() {
 
       const saveResponse = await fetch("/api/notifications/push-subscription", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify(subscription),
       });
       const savePayload = await saveResponse.json() as { error?: unknown };

@@ -9,17 +9,19 @@ export interface TenantContext {
   tenantSchema: string
 }
 
-export async function getAuthenticatedTenantContext(): Promise<TenantContext> {
-  const supabase = await createClient()
+export async function getAuthenticatedTenantContext(accessToken?: string): Promise<TenantContext> {
+  const admin = createAdminClient()
+  const supabase = accessToken ? null : await createClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = accessToken
+    ? await admin.auth.getUser(accessToken)
+    : await supabase!.auth.getUser()
 
   if (!user) {
     throw new Error('Usuário não autenticado.')
   }
 
-  const admin = createAdminClient()
   const { data: profile, error: profileError } = await admin
     .from('user_profiles')
     .select('role, empresa_id')

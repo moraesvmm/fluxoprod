@@ -8,6 +8,11 @@ function getPublicVapidKey() {
   return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? process.env.VAPID_PUBLIC_KEY;
 }
 
+function getAccessToken(request: Request) {
+  const authorization = request.headers.get("authorization");
+  return authorization?.startsWith("Bearer ") ? authorization.slice("Bearer ".length) : undefined;
+}
+
 export async function GET() {
   const publicKey = getPublicVapidKey();
   if (!publicKey) {
@@ -18,7 +23,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { empresaId, userId } = await getAuthenticatedTenantContext();
+    const { empresaId, userId } = await getAuthenticatedTenantContext(getAccessToken(request));
     const subscription = await request.json() as { endpoint?: unknown; keys?: unknown };
     if (typeof subscription.endpoint !== "string" || !subscription.endpoint || !subscription.keys) {
       return NextResponse.json({ success: false, error: "Assinatura de notificação inválida." }, { status: 400 });

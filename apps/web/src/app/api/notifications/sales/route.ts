@@ -19,6 +19,11 @@ function configureWebPush() {
   return true;
 }
 
+function getAccessToken(request: Request) {
+  const authorization = request.headers.get("authorization");
+  return authorization?.startsWith("Bearer ") ? authorization.slice("Bearer ".length) : undefined;
+}
+
 export async function POST(request: Request) {
   try {
     if (!configureWebPush()) {
@@ -30,7 +35,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Venda inválida." }, { status: 400 });
     }
 
-    const { empresaId, tenantSchema } = await getAuthenticatedTenantContext();
+    const { empresaId, tenantSchema } = await getAuthenticatedTenantContext(getAccessToken(request));
     const admin = createAdminClient();
     const { data: venda, error: vendaError } = await admin
       .schema(tenantSchema)
