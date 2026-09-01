@@ -9,6 +9,12 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+function hasSameApplicationServerKey(current: ArrayBuffer | null, expected: Uint8Array) {
+  if (!current) return true;
+  const currentKey = new Uint8Array(current);
+  return currentKey.length === expected.length && currentKey.every((value, index) => value === expected[index]);
+}
+
 export function PwaControls() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "default" | "unsupported">("default");
@@ -51,10 +57,15 @@ export function PwaControls() {
         atob(keyPayload.publicKey.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - keyPayload.publicKey.length % 4) % 4)),
         (character) => character.charCodeAt(0)
       );
-      const subscription = existingSubscription ?? await registration.pushManager.subscribe({
+      if (existingSubscription && !hasSameApplicationServerKey(existingSubscription.options.applicationServerKey, applicationServerKey)) {
+        await existingSubscription.unsubscribe();
+      }
+      const subscription = !existingSubscription || !hasSameApplicationServerKey(existingSubscription.options.applicationServerKey, applicationServerKey)
+        ? await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey,
-      });
+        })
+        : existingSubscription;
 
       const saveResponse = await fetch("/api/notifications/push-subscription", {
         method: "POST",

@@ -250,7 +250,7 @@ export default function PDVPage() {
       if (resultado.venda_id) {
         void notifySaleCompleted(resultado.venda_id).then((notificacao) => {
           if (notificacao.enviados === 0) {
-            warning(notificacao.erro || "Nenhum dispositivo inscrito recebeu a notificação desta venda.");
+            warning(notificacao.erro || notificacao.warning || "Nenhum dispositivo inscrito recebeu a notificação desta venda.");
           }
         });
       }

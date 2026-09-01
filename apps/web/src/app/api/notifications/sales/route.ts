@@ -91,7 +91,25 @@ export async function POST(request: Request) {
       )
     );
 
-    return NextResponse.json({ success: true, enviados: results.filter((result) => result.status === "fulfilled").length });
+    const enviados = results.filter((result) => result.status === "fulfilled").length;
+    const falhas = results
+      .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+      .map((result) => {
+        const reason = result.reason as { statusCode?: unknown; message?: unknown };
+        return {
+          statusCode: typeof reason?.statusCode === "number" ? reason.statusCode : null,
+          mensagem: typeof reason?.message === "string" ? reason.message : "Falha desconhecida ao enviar notificação.",
+        };
+      });
+
+    return NextResponse.json({
+      success: true,
+      enviados,
+      falhas,
+      ...(enviados === 0 && falhas.length > 0
+        ? { warning: "O dispositivo está inscrito, mas o serviço de notificações recusou a entrega." }
+        : {}),
+    });
   } catch (error: unknown) {
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : "Não foi possível enviar notificações." },
