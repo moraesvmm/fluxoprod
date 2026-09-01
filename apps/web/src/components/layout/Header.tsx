@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, LogOut, Menu } from "lucide-react";
+import { Search, LogOut, Menu } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -104,8 +104,6 @@ export function Header({ onSearchClick, onMenuClick }: HeaderProps) {
             className="hidden lg:block lg:h-6 lg:w-px lg:bg-border/60"
             aria-hidden="true"
           />
-
-          <Bell className="h-5 w-5 text-muted-foreground/70" aria-label="Notificações" />
 
           <div
             className="hidden lg:block lg:h-6 lg:w-px lg:bg-border/60"

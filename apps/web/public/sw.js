@@ -15,8 +15,8 @@ self.addEventListener("push", (event) => {
   const payload = event.data ? event.data.json() : {};
   event.waitUntil(self.registration.showNotification(payload.title || "Fluxo ERP", {
     body: payload.body || "Há uma atualização na sua operação.",
-    icon: "/apple-icon",
-    badge: "/apple-icon",
+    icon: "/apple-touch-icon.png",
+    badge: "/apple-touch-icon.png",
     data: { url: payload.url || "/tenant/dashboard" },
   }));
 });

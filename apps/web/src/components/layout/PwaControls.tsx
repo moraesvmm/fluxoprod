@@ -10,13 +10,15 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function PwaControls() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "default" | "unsupported">("default");
+  const [notificationsSupported, setNotificationsSupported] = useState(false);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
     if ("Notification" in window) {
+      setNotificationsSupported(true);
       setNotificationPermission(Notification.permission);
     }
 
@@ -82,13 +84,13 @@ export function PwaControls() {
           <Download className="h-5 w-5" aria-hidden="true" />
         </button>
       )}
-      {notificationPermission !== "granted" && notificationPermission !== "unsupported" && (
+      {notificationsSupported && notificationPermission !== "granted" && (
         <button
           type="button"
           onClick={ativarNotificacoes}
           className="-m-2.5 rounded-lg p-2.5 text-muted-foreground/70 transition-all hover:bg-muted hover:text-foreground"
-          title={notificationPermission === "denied" ? "Notificações bloqueadas no navegador" : "Ativar notificações de vendas"}
-          aria-label="Ativar notificações de vendas"
+          title={notificationPermission === "denied" ? "Notificações bloqueadas: libere nos Ajustes do iPhone" : "Ativar notificações de vendas"}
+          aria-label={notificationPermission === "denied" ? "Notificações bloqueadas" : "Ativar notificações de vendas"}
         >
           <BellRing className="h-5 w-5" aria-hidden="true" />
         </button>
