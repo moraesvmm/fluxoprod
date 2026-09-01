@@ -8,6 +8,7 @@ import { clsx } from "clsx";
 import { createClient } from "@/utils/supabase/client";
 import { useToast, Toast } from "@/components/ui/toast";
 import { useContextosCaixa } from "@/lib/hooks/use-caixa";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Funcionario {
   id: string;
@@ -59,7 +60,8 @@ export default function PDVPage() {
   const [lembrarDias, setLembrarDias] = useState<number | null>(null);
   const [emitirNfe, setEmitirNfe] = useState(false);
   const [contextoCaixaId, setContextoCaixaId] = useState('');
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
+  const queryClient = useQueryClient();
   const { toasts, removeToast, success, error: toastError, warning } = useToast();
   const { data: contextosCaixa = [] } = useContextosCaixa();
 
@@ -232,6 +234,11 @@ export default function PDVPage() {
         throw new Error(resultado?.error || 'Erro ao processar venda');
       }
 
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["vendas"] }),
+        queryClient.invalidateQueries({ queryKey: ["caixa"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+      ]);
       success('Pagamento realizado com sucesso!');
 
       // Gatilho de NFe

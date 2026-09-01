@@ -1,11 +1,16 @@
 import { createBrowserClient } from '@supabase/ssr'
-import { Database } from '@/types/database.types'
+
+let browserClient: ReturnType<typeof createBrowserClient<any>> | undefined;
 
 export function createClient() {
-  return createBrowserClient<any>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  if (!browserClient) {
+    browserClient = createBrowserClient<any>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+
+  return browserClient;
 }
 
 // NOTA: Schema routing é garantido via RPC set_tenant_schema no middleware.
