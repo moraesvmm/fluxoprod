@@ -24,8 +24,9 @@ export function PwaControls() {
     }
 
     const onBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
+      const promptEvent = event as BeforeInstallPromptEvent;
+      if (!promptEvent || typeof promptEvent.prompt !== "function") return;
+      setInstallPrompt(promptEvent);
     };
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
     return () => window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);

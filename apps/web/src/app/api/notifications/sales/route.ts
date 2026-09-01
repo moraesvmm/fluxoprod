@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       .eq("id", vendaId)
       .maybeSingle();
     if (vendaError || !venda) {
-      return NextResponse.json({ success: false, error: "Venda não encontrada." }, { status: 404 });
+      return NextResponse.json({ success: true, enviados: 0, warning: "Venda não encontrada para envio de notificação." }, { status: 200 });
     }
 
     const { data: item } = await admin
@@ -61,6 +61,10 @@ export async function POST(request: Request) {
       .select("endpoint, subscription")
       .eq("empresa_id", empresaId);
     if (assinaturasError) throw new Error(assinaturasError.message);
+
+    if (!assinaturas || assinaturas.length === 0) {
+      return NextResponse.json({ success: true, enviados: 0, warning: "Nenhuma assinatura ativa para enviar notificações." }, { status: 200 });
+    }
 
     const value = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(venda.valor_total));
     const clientName = venda.cliente_nome || "Cliente avulso";
