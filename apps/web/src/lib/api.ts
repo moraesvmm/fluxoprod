@@ -1093,7 +1093,7 @@ export async function createProduto(produto: ProdutoCreate): Promise<Produto> {
       p_categoria: produto.categoria || 'geral',
       p_estoque_atual: produto.estoque_atual || 0,
       p_estoque_minimo: produto.estoque_minimo || 10,
-      p_nf_entrada: produto.nf_entrada || null,
+      p_nf_entrada: produto.nf_entrada ?? undefined,
       p_image_urls: produto.image_urls
     });
   if (error) throw new Error(error.message);
@@ -1443,7 +1443,7 @@ export async function fecharCaixa(input: FechamentoCaixaInput): Promise<{ fecham
     p_caixa_id: input.caixaId,
     p_data: input.data,
     p_valores_contados: input.valoresContados,
-    p_observacao: input.observacao || null,
+    p_observacao: input.observacao ?? undefined,
   });
   if (error) throw new Error(error.message);
   const result = assertRpcResult(data);
@@ -1916,7 +1916,7 @@ export async function atualizarDadosPessoais(funcionarioId: string, dados: Dados
 // FINANCEIRO - RPCs com schema distinto do tipo local - usar _untyped()
 export async function fetchFinanceiro(filialId?: string | null): Promise<Financeiro[]> {
   const { data, error } = await getSupabaseStrict().rpc('tenant_listar_financeiro_filial', {
-    p_filial_id: filialId ?? null,
+    p_filial_id: filialId ?? undefined,
   });
   if (error) throw new Error(error.message);
   assertRpcResult(data);
@@ -1925,7 +1925,7 @@ export async function fetchFinanceiro(filialId?: string | null): Promise<Finance
 
 export async function fetchDashboardDono(filialId?: string | null): Promise<DashboardDono> {
   const { data, error } = await getSupabaseStrict().rpc('tenant_obter_dashboard_dono', {
-    p_filial_id: filialId ?? null,
+    p_filial_id: filialId ?? undefined,
   });
   if (error) throw new Error(error.message);
   const result = assertRpcResult(data);
@@ -1952,7 +1952,7 @@ export async function updateFinanceiro(id: string, filialId: string, financeiro:
     p_valor: financeiro.valor,
     p_data_vencimento: financeiro.data_vencimento,
     p_status: financeiro.status || 'pendente',
-    p_categoria: financeiro.categoria || null
+    p_categoria: financeiro.categoria ?? undefined
   });
   if (error) throw new Error(error.message);
   assertRpcResult(data);
@@ -1968,7 +1968,7 @@ export async function createFinanceiro(financeiro: FinanceiroCreate): Promise<Fi
     p_valor: financeiro.valor,
     p_data_vencimento: financeiro.data_vencimento,
     p_status: financeiro.status || 'pendente',
-    p_categoria: financeiro.categoria || null
+    p_categoria: financeiro.categoria ?? undefined
   });
   if (error) throw new Error(error.message);
   return {
