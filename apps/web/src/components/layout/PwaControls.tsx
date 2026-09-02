@@ -9,6 +9,19 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+// Converte uma chave VAPID URL-safe Base64 para Uint8Array de forma robusta.
+// O atob() nativo pode falhar silenciosamente no Safari/iOS com padding irregular.
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 function hasSameApplicationServerKey(current: ArrayBuffer | null, expected: Uint8Array) {
   if (!current) return true;
   const currentKey = new Uint8Array(current);
@@ -52,11 +65,12 @@ export function PwaControls() {
         throw new Error(typeof keyPayload.error === "string" ? keyPayload.error : "Chave de notificações indisponível.");
       }
 
+      // Conversão robusta de chave VAPID URL-safe Base64 → Uint8Array.
+      // A conversão manual com atob() falha no Safari/iOS quando a chave não
+      // tem padding exato, gerando um ArrayBuffer incorreto silenciosamente.
+      const applicationServerKey = urlBase64ToUint8Array(keyPayload.publicKey);
+
       const existingSubscription = await registration.pushManager.getSubscription();
-      const applicationServerKey = Uint8Array.from(
-        atob(keyPayload.publicKey.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - keyPayload.publicKey.length % 4) % 4)),
-        (character) => character.charCodeAt(0)
-      );
       if (existingSubscription && !hasSameApplicationServerKey(existingSubscription.options.applicationServerKey, applicationServerKey)) {
         await existingSubscription.unsubscribe();
       }
@@ -80,7 +94,9 @@ export function PwaControls() {
         throw new Error(typeof savePayload.error === "string" ? savePayload.error : "Não foi possível registrar este dispositivo.");
       }
       setPushStatus("subscribed");
-    } catch {
+    } catch (err) {
+      // Log visível no Web Inspector do Safari para facilitar diagnóstico no iPhone
+      console.error("[PwaControls] Falha ao ativar push:", err);
       setPushStatus("error");
     }
   };

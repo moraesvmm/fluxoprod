@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, useDragControls, AnimatePresence } from "framer-motion";
 import { MessageCircle, X } from "lucide-react";
 import { ChatDrawer } from "./ChatDrawer";
@@ -25,6 +26,7 @@ export function WhatsAppFloatingButton() {
   const [totalUnread, setTotalUnread] = useState(0);
   const [connectionStatus, setConnectionStatus] = useState<string>("disconnected");
   const [isServiceAvailable, setIsServiceAvailable] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dragControls = useDragControls();
   const constraintsRef = useRef<HTMLDivElement>(null);
 
@@ -66,8 +68,16 @@ export function WhatsAppFloatingButton() {
     return () => window.removeEventListener('open-whatsapp-chat', handleOpen as EventListener);
   }, []);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Sempre exibir o botão para evitar que ele "suma" da tela
-  return (
+  // Portal para document.body garante que o drawer sempre fique acima de qualquer
+  // stacking context criado pelos painéis do PDV (overflow-hidden / transform).
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Área de restrição de arrasto (tela inteira) */}
       <div
@@ -139,6 +149,7 @@ export function WhatsAppFloatingButton() {
           />
         )}
       </AnimatePresence>
-    </>
+    </>,
+    document.body
   );
 }

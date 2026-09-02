@@ -39,6 +39,12 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   manifest: "/manifest.webmanifest",
+  // Meta tags obrigatórias para PWA no iOS (Safari/iPhone)
+  appleWebApp: {
+    capable: true,
+    title: "Fluxo",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({
