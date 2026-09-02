@@ -38,33 +38,29 @@ export async function POST(request: Request) {
     const { empresaId, tenantSchema } = await getAuthenticatedTenantContext(getAccessToken(request));
     const admin = createAdminClient();
 
-    // Colunas corretas conforme interface Venda em api.ts: cliente (não cliente_nome) e valor (não valor_total)
+    // Busca venda no schema tenant — mesmo padrão usado em focus-nfe-service.ts.
+    // Usa valor_total (coluna real) e cliente (coluna de nome do cliente avulso).
+    // Inclui vendas_itens para obter o nome do primeiro produto.
     const { data: venda, error: vendaError } = await admin
       .schema(tenantSchema)
       .from("vendas")
-      .select("id, cliente, valor")
+      .select("id, cliente, valor_total, vendas_itens(produto_id)")
       .eq("id", vendaId)
       .maybeSingle();
 
     if (vendaError) {
-      console.error("[sales/route] Erro ao buscar venda:", vendaError.message);
-      return NextResponse.json({ success: true, enviados: 0, warning: "Erro ao buscar venda para notificação." }, { status: 200 });
+      console.error("[sales/route] Erro ao buscar venda:", vendaError.message, "| schema:", tenantSchema);
+      return NextResponse.json({ success: true, enviados: 0, warning: `Erro ao buscar venda: ${vendaError.message}` }, { status: 200 });
     }
     if (!venda) {
       return NextResponse.json({ success: true, enviados: 0, warning: "Venda não encontrada para envio de notificação." }, { status: 200 });
     }
 
-    // Buscar nome do primeiro produto via itens_venda → estoque → produtos (falha silenciosa)
+    // Buscar nome do primeiro produto (falha silenciosa — não bloqueia a notificação)
     let productName = "produto(s)";
     try {
-      const { data: itens } = await admin
-        .schema(tenantSchema)
-        .from("itens_venda")
-        .select("produto_id")
-        .eq("venda_id", vendaId)
-        .limit(1);
-
-      const primeiroProdutoId = itens?.[0]?.produto_id as string | undefined;
+      const itens = (venda as Record<string, unknown>).vendas_itens as Array<{ produto_id: string }> | null;
+      const primeiroProdutoId = itens?.[0]?.produto_id;
       if (primeiroProdutoId) {
         const { data: produto } = await admin
           .schema(tenantSchema)
@@ -72,10 +68,12 @@ export async function POST(request: Request) {
           .select("nome")
           .eq("id", primeiroProdutoId)
           .maybeSingle();
-        if (produto?.nome) productName = produto.nome as string;
+        if (produto && typeof (produto as Record<string, unknown>).nome === "string") {
+          productName = (produto as Record<string, unknown>).nome as string;
+        }
       }
     } catch {
-      // Não bloqueia o envio se a busca do produto falhar
+      // Nome do produto não encontrado — continua com "produto(s)"
     }
 
     const { data: assinaturas, error: assinaturasError } = await admin
@@ -88,8 +86,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, enviados: 0, warning: "Nenhuma assinatura ativa para enviar notificações." }, { status: 200 });
     }
 
-    const value = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(venda.valor));
-    const clientName = (venda.cliente as string | null) || "Cliente avulso";
+    const valorNum = Number((venda as Record<string, unknown>).valor_total ?? 0);
+    const value = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valorNum);
+    const clientName = (typeof (venda as Record<string, unknown>).cliente === "string"
+      ? (venda as Record<string, unknown>).cliente as string
+      : null) ?? "Cliente avulso";
+
     const payload = JSON.stringify({
       title: "Venda concluída",
       body: `${clientName} comprou ${productName} no valor de ${value}.`,
