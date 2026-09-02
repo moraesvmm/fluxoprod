@@ -41,6 +41,7 @@ interface Produto {
   cfop_padrao?: string;
   origem?: number;
   tipo_item?: string;
+  unidade_medida?: string;
 }
 
 export default function CatalogoPage() {
