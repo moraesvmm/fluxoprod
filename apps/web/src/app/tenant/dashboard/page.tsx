@@ -26,7 +26,7 @@ import {
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
 import { useDashboardData, useDashboardDono } from "@/lib/hooks/use-dashboard";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
-import { useContextosCaixa } from "@/lib/hooks/use-caixa";
+import { useLocaisEstoque } from "@/lib/hooks/use-locais-estoque";
 import BoasVindasBanner from "@/components/modules/base/BoasVindasBanner";
 import AlertasRH from "@/components/modules/rh/AlertasRH";
 import { FechamentoMesModal } from "@/components/modules/base/FechamentoMesModal";
@@ -106,7 +106,8 @@ function ChartSkeleton() {
 export default function DashboardPage() {
   const dashboard = useDashboardData();
   const userProfile = useUserProfile();
-  const { data: contextosCaixa = [] } = useContextosCaixa();
+  const { data: locaisEstoque = [] } = useLocaisEstoque();
+  const filiaisDashboard = locaisEstoque.filter((local) => local.ativo && (local.tipo === 'filial' || local.tipo === 'loja'));
   const [filialDonoId, setFilialDonoId] = useState<string | null>(null);
   const visaoDono = useDashboardDono(filialDonoId);
   const queryClient = useQueryClient();
@@ -128,10 +129,10 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (userProfile.role !== "tenant_admin" && !filialDonoId && contextosCaixa[0]) {
-      setFilialDonoId(contextosCaixa[0].filial_id);
+    if (userProfile.role !== "tenant_admin" && !filialDonoId && filiaisDashboard[0]) {
+      setFilialDonoId(filiaisDashboard[0].id);
     }
-  }, [contextosCaixa, filialDonoId, userProfile.role]);
+  }, [filiaisDashboard, filialDonoId, userProfile.role]);
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -246,7 +247,7 @@ export default function DashboardPage() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
             <select value={filialDonoId ?? ""} onChange={(event) => setFilialDonoId(event.target.value || null)} className="min-w-40 bg-transparent outline-none" aria-label="Filtrar dashboard por filial">
               {userProfile.role === "tenant_admin" && <option value="">Geral: todas as filiais</option>}
-              {contextosCaixa.filter((contexto, index, items) => items.findIndex((item) => item.filial_id === contexto.filial_id) === index).map((contexto) => <option key={contexto.filial_id} value={contexto.filial_id}>{contexto.filial_nome}</option>)}
+              {filiaisDashboard.map((local) => <option key={local.id} value={local.id}>{local.nome}</option>)}
             </select>
           </label>
         </div>
