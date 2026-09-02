@@ -27,17 +27,27 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
   }); // bottom-6 right-6 equivalent relative to screen bottom-right
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
+  const DRAG_THRESHOLD_PX = 4;
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    setIsDragging(true);
+    // Só marca o início do gesto; o arraste real (e a captura do ponteiro) só
+    // começa se houver movimento, para não engolir cliques simples (abrir/fechar).
+    setDragStart({ x: e.clientX, y: e.clientY });
     setDragOffset({
       x: e.clientX - position.x,
       y: e.clientY - position.y
     });
-    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging && dragStart) {
+      const moved = Math.hypot(e.clientX - dragStart.x, e.clientY - dragStart.y);
+      if (moved > DRAG_THRESHOLD_PX) {
+        setIsDragging(true);
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }
+    }
     if (isDragging) {
       const newPos = {
         x: e.clientX - dragOffset.x,
@@ -48,9 +58,12 @@ export function FloatingCalculator({ isOpen, onToggle }: FloatingCalculatorProps
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    if (isDragging) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+      localStorage.setItem('calculatorPosition', JSON.stringify(position));
+    }
     setIsDragging(false);
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    localStorage.setItem('calculatorPosition', JSON.stringify(position));
+    setDragStart(null);
   };
 
 

@@ -19,7 +19,7 @@ import { useFinanceiro, useCreateFinanceiro, useDeleteFinanceiro, useUpdateFinan
 import { type FinanceiroUpdate } from "@/lib/api";
 import { ConciliacaoModal } from "@/components/financeiro/ConciliacaoModal";
 import { TutorialHelpButton } from "@/components/onboarding/TutorialHelpButton";
-import { useContextosCaixa } from "@/lib/hooks/use-caixa";
+import { useLocaisEstoque } from "@/lib/hooks/use-locais-estoque";
 import { useUserProfile } from "@/lib/hooks/use-user-profile";
 
 interface Transacao {
@@ -35,10 +35,11 @@ interface Transacao {
 }
 
 export default function FinanceiroPage() {
-  const { data: contextos = [] } = useContextosCaixa();
+  const { data: locaisEstoque = [] } = useLocaisEstoque();
+  const filiais = locaisEstoque.filter((local) => local.ativo && (local.tipo === 'filial' || local.tipo === 'loja'));
   const { role } = useUserProfile();
   const [filialId, setFilialId] = useState<string | null>(null);
-  useEffect(() => { if (role !== 'tenant_admin' && !filialId && contextos[0]) setFilialId(contextos[0].filial_id); }, [contextos, filialId, role]);
+  useEffect(() => { if (role !== 'tenant_admin' && !filialId && filiais[0]) setFilialId(filiais[0].id); }, [filiais, filialId, role]);
   const { data: transacoes, isLoading, error, refetch } = useFinanceiro(filialId);
   const createFinanceiro = useCreateFinanceiro();
   const deleteFinanceiro = useDeleteFinanceiro();
@@ -267,7 +268,7 @@ export default function FinanceiroPage() {
         <div className="flex items-center gap-2">
           <select value={filialId ?? ''} onChange={(event) => setFilialId(event.target.value || null)} className="h-10 max-w-48 rounded-md border border-border bg-background px-3 text-sm" aria-label="Filial financeira">
             {role === 'tenant_admin' && <option value="">Todas as filiais</option>}
-            {contextos.filter((contexto, index, items) => items.findIndex((item) => item.filial_id === contexto.filial_id) === index).map((contexto) => <option key={contexto.filial_id} value={contexto.filial_id}>{contexto.filial_nome}</option>)}
+            {filiais.map((local) => <option key={local.id} value={local.id}>{local.nome}</option>)}
           </select>
           <button 
             onClick={verFluxoCaixa}
