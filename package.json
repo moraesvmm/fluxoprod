@@ -10,5 +10,10 @@
     "dev": "npm run dev -w apps/web",
     "start": "npm run start -w apps/web",
     "web:build": "npm run build -w apps/web"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "msw": true,
+    "unrs-resolver": true
   }
 }
