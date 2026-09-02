@@ -10,6 +10,14 @@ interface StoredSubscription {
   subscription: webpush.PushSubscription;
 }
 
+interface VendaNotificacaoResult {
+  found: boolean;
+  cliente?: string;
+  valor_total?: number;
+  produto_nome?: string;
+  error?: string;
+}
+
 function configureWebPush() {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
@@ -38,42 +46,26 @@ export async function POST(request: Request) {
     const { empresaId, tenantSchema } = await getAuthenticatedTenantContext(getAccessToken(request));
     const admin = createAdminClient();
 
-    // Busca venda no schema tenant — mesmo padrão usado em focus-nfe-service.ts.
-    // Usa valor_total (coluna real) e cliente (coluna de nome do cliente avulso).
-    // Inclui vendas_itens para obter o nome do primeiro produto.
-    const { data: venda, error: vendaError } = await admin
-      .schema(tenantSchema)
-      .from("vendas")
-      .select("id, cliente, valor_total, vendas_itens(produto_id)")
-      .eq("id", vendaId)
-      .maybeSingle();
+    // Usa RPC SECURITY DEFINER para contornar a limitação do PostgREST:
+    // schemas tenant não ficam nos "Exposed Schemas", então admin.schema()
+    // lança "Invalid schema". A RPC roda com privilégio de owner e acessa
+    // o schema via SQL dinâmico com format().
+    // Migração: apps/api/migrations/rpc_notificacao_buscar_venda.sql
+    const { data: vendaData, error: vendaError } = await admin
+      .rpc("tenant_buscar_venda_para_notificacao", {
+        p_venda_id: vendaId,
+        p_schema: tenantSchema,
+      });
 
     if (vendaError) {
-      console.error("[sales/route] Erro ao buscar venda:", vendaError.message, "| schema:", tenantSchema);
+      console.error("[sales/route] Erro RPC buscar venda:", vendaError.message);
       return NextResponse.json({ success: true, enviados: 0, warning: `Erro ao buscar venda: ${vendaError.message}` }, { status: 200 });
     }
-    if (!venda) {
-      return NextResponse.json({ success: true, enviados: 0, warning: "Venda não encontrada para envio de notificação." }, { status: 200 });
-    }
 
-    // Buscar nome do primeiro produto (falha silenciosa — não bloqueia a notificação)
-    let productName = "produto(s)";
-    try {
-      const itens = (venda as Record<string, unknown>).vendas_itens as Array<{ produto_id: string }> | null;
-      const primeiroProdutoId = itens?.[0]?.produto_id;
-      if (primeiroProdutoId) {
-        const { data: produto } = await admin
-          .schema(tenantSchema)
-          .from("produtos")
-          .select("nome")
-          .eq("id", primeiroProdutoId)
-          .maybeSingle();
-        if (produto && typeof (produto as Record<string, unknown>).nome === "string") {
-          productName = (produto as Record<string, unknown>).nome as string;
-        }
-      }
-    } catch {
-      // Nome do produto não encontrado — continua com "produto(s)"
+    const venda = vendaData as VendaNotificacaoResult | null;
+    if (!venda?.found) {
+      const motivo = venda?.error ? `Erro interno: ${venda.error}` : "Venda não encontrada para envio de notificação.";
+      return NextResponse.json({ success: true, enviados: 0, warning: motivo }, { status: 200 });
     }
 
     const { data: assinaturas, error: assinaturasError } = await admin
@@ -86,15 +78,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, enviados: 0, warning: "Nenhuma assinatura ativa para enviar notificações." }, { status: 200 });
     }
 
-    const valorNum = Number((venda as Record<string, unknown>).valor_total ?? 0);
-    const value = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valorNum);
-    const clientName = (typeof (venda as Record<string, unknown>).cliente === "string"
-      ? (venda as Record<string, unknown>).cliente as string
-      : null) ?? "Cliente avulso";
-
+    const value = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(venda.valor_total ?? 0);
     const payload = JSON.stringify({
       title: "Venda concluída",
-      body: `${clientName} comprou ${productName} no valor de ${value}.`,
+      body: `${venda.cliente} comprou ${venda.produto_nome} no valor de ${value}.`,
       url: "/tenant/vendas/caixa",
     });
 
