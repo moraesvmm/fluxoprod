@@ -307,7 +307,7 @@ export default function PDVPage() {
   const total = Math.max(0, subtotal - desconto);
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex gap-6">
+    <div className="h-[calc(100vh-8rem)] flex flex-col lg:flex-row gap-4 lg:gap-6">
       {/* Toast Container */}
       {toasts.map(toast => (
         <Toast
@@ -319,8 +319,8 @@ export default function PDVPage() {
       ))}
 
       {/* Esquerda: Catálogo */}
-      <div className="flex-1 flex flex-col bg-muted rounded-xl border border-border shadow-sm overflow-hidden">
-        <div className="p-4 bg-card border-b border-border flex items-center justify-between">
+      <div className="flex-1 min-h-[45vh] lg:min-h-0 flex flex-col bg-muted rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="p-4 bg-card border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-4">
             <Link href="/tenant/vendas" className="text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-5 w-5" />
@@ -341,7 +341,7 @@ export default function PDVPage() {
               ))}
             </select>
           )}
-          <div className="relative w-64">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
@@ -437,7 +437,7 @@ export default function PDVPage() {
       </div>
 
       {/* Direita: Carrinho */}
-      <div className="w-96 flex flex-col bg-card rounded-xl border border-border shadow-lg">
+      <div className="w-full lg:w-96 lg:shrink-0 min-h-[35vh] lg:min-h-0 flex flex-col bg-card rounded-xl border border-border shadow-lg">
         <div className="p-4 border-b border-border bg-card text-white rounded-t-xl flex justify-between items-center">
           <div className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
