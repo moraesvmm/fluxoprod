@@ -140,7 +140,7 @@ export function NurturingPanel() {
                 item.categoria === 'recompra' ? 'border-emerald-100' : 'border-amber-100'
               }`}
             >
-              <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 opacity-5 rounded-full transition-transform group-hover:scale-110 ${
+              <div className={`pointer-events-none absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 opacity-5 rounded-full transition-transform group-hover:scale-110 ${
                 item.categoria === 'recompra' ? 'bg-emerald-500' : 'bg-amber-500'
               }`} />
 
