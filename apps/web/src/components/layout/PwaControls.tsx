@@ -11,11 +11,14 @@ interface BeforeInstallPromptEvent extends Event {
 
 // Converte uma chave VAPID URL-safe Base64 para Uint8Array de forma robusta.
 // O atob() nativo pode falhar silenciosamente no Safari/iOS com padding irregular.
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
+  // Usar ArrayBuffer explícito para que o tipo seja Uint8Array<ArrayBuffer>
+  // e não Uint8Array<ArrayBufferLike>, satisfazendo o tipo BufferSource do pushManager.
+  const buffer = new ArrayBuffer(rawData.length);
+  const outputArray = new Uint8Array(buffer);
   for (let i = 0; i < rawData.length; ++i) {
     outputArray[i] = rawData.charCodeAt(i);
   }
