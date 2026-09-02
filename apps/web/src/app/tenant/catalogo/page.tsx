@@ -22,6 +22,8 @@ interface FiscalItem {
   ncm?: string;
   cfop_padrao?: string;
   origem?: number;
+  tipo_item?: string;
+  unidade_medida?: string;
 }
 
 interface Produto {
@@ -64,6 +66,8 @@ export default function CatalogoPage() {
     ncm: "",
     cfop_padrao: "",
     origem: "0",
+    tipo_item: "produto_acabado",
+    unidade_medida: "UN",
   });
   const { toasts, removeToast, success, error: toastError } = useToast();
   const produtosComFiscal: Produto[] = (produtos || []).map((produto) => ({
@@ -97,6 +101,8 @@ export default function CatalogoPage() {
               ncm: item.ncm || "",
               cfop_padrao: item.cfop_padrao || "",
               origem: typeof item.origem === "number" ? item.origem : 0,
+              tipo_item: item.tipo_item || "produto_acabado",
+              unidade_medida: item.unidade_medida || "UN",
             },
           ])
         );
@@ -120,6 +126,8 @@ export default function CatalogoPage() {
         ncm: formData.ncm,
         cfop_padrao: formData.cfop_padrao,
         origem: parseInt(formData.origem, 10) || 0,
+        tipo_item: formData.tipo_item,
+        unidade_medida: formData.unidade_medida,
       }),
     });
     const fiscalPayload = await fiscalResponse.json();
@@ -133,6 +141,8 @@ export default function CatalogoPage() {
         ncm: formData.ncm,
         cfop_padrao: formData.cfop_padrao,
         origem: parseInt(formData.origem, 10) || 0,
+        tipo_item: formData.tipo_item,
+        unidade_medida: formData.unidade_medida,
       },
     }));
   };
@@ -150,6 +160,8 @@ export default function CatalogoPage() {
       ncm: "",
       cfop_padrao: "",
       origem: "0",
+      tipo_item: "produto_acabado",
+      unidade_medida: "UN",
     });
   };
 
@@ -211,6 +223,8 @@ export default function CatalogoPage() {
       ncm: produto.ncm || "",
       cfop_padrao: produto.cfop_padrao || "",
       origem: String(produto.origem || 0),
+      tipo_item: produto.tipo_item || "produto_acabado",
+      unidade_medida: produto.unidade_medida || "UN",
     });
     setShowEditModal(true);
   };
@@ -542,6 +556,33 @@ export default function CatalogoPage() {
                 <option value="8">8 - Nacional (Conteúdo de Importação superior a 70%)</option>
               </select>
             </div>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Tipo de Item</label>
+                <select
+                  value={formData.tipo_item}
+                  onChange={(e) => setFormData({ ...formData, tipo_item: e.target.value })}
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card"
+                >
+                  <option value="produto_acabado">Produto Acabado</option>
+                  <option value="materia_prima">Matéria-Prima</option>
+                  <option value="embalagem">Embalagem</option>
+                  <option value="consumo">Material de Consumo</option>
+                </select>
+                <p className="mt-1 text-xs text-muted-foreground">Define se este item aparece como matéria-prima na Ficha Técnica (Produção).</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground/80 mb-1">Unidade de Medida</label>
+                <input
+                  type="text"
+                  maxLength={10}
+                  value={formData.unidade_medida}
+                  onChange={(e) => setFormData({ ...formData, unidade_medida: e.target.value })}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
+                  placeholder="Ex: UN, KG, L"
+                />
+              </div>
+            </div>
           </div>
           <div className="flex gap-3 pt-4">
             <button
@@ -662,6 +703,33 @@ export default function CatalogoPage() {
                 <option value="7">7 - Estrangeira (Mercado Interno, sem similar nacional)</option>
                 <option value="8">8 - Nacional (Conteúdo de Importação superior a 70%)</option>
               </select>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Tipo de Item</label>
+                <select
+                  value={formData.tipo_item}
+                  onChange={(e) => setFormData({ ...formData, tipo_item: e.target.value })}
+                  className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-card"
+                >
+                  <option value="produto_acabado">Produto Acabado</option>
+                  <option value="materia_prima">Matéria-Prima</option>
+                  <option value="embalagem">Embalagem</option>
+                  <option value="consumo">Material de Consumo</option>
+                </select>
+                <p className="mt-1 text-xs text-muted-foreground">Define se este item aparece como matéria-prima na Ficha Técnica (Produção).</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Unidade de Medida</label>
+                <input
+                  type="text"
+                  maxLength={10}
+                  value={formData.unidade_medida}
+                  onChange={(e) => setFormData({ ...formData, unidade_medida: e.target.value })}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
+                  placeholder="Ex: UN, KG, L"
+                />
+              </div>
             </div>
           </div>
           <div className="flex gap-3 pt-4">

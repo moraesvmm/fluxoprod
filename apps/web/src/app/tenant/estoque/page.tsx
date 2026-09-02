@@ -55,7 +55,8 @@ export default function EstoquePage() {
   const [editFormData, setEditFormData] = useState({ nome: '', preco_venda: '', estoque_minimo: '', categoria: '', nf_entrada: '' });
   const [formData, setFormData] = useState({
     nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '',
-    estoque_atual: '0', estoque_minimo: '10', categoria: '', nf_entrada: ''
+    estoque_atual: '0', estoque_minimo: '10', categoria: '', nf_entrada: '',
+    tipo_item: 'produto_acabado', unidade_medida: 'UN', ncm: '', cfop_padrao: '', origem: '0'
   });
   const { toasts, removeToast, success, error: toastError } = useToast();
   const createMutation = useCreateProduto();
@@ -78,7 +79,7 @@ export default function EstoquePage() {
     e.preventDefault();
     if (!formData.nome.trim()) return;
     try {
-      await createMutation.mutateAsync({
+      const created = await createMutation.mutateAsync({
         nome: formData.nome,
         descricao: formData.descricao || undefined,
         sku: formData.sku || undefined,
@@ -89,6 +90,20 @@ export default function EstoquePage() {
         categoria: formData.categoria || undefined,
         nf_entrada: formData.nf_entrada || undefined
       });
+      if (created.id) {
+        await fetch("/api/tenant/catalogo/fiscal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            produtoId: created.id,
+            ncm: formData.ncm,
+            cfop_padrao: formData.cfop_padrao,
+            origem: parseInt(formData.origem, 10) || 0,
+            tipo_item: formData.tipo_item,
+            unidade_medida: formData.unidade_medida,
+          }),
+        });
+      }
       success("Produto adicionado com sucesso!");
       setIsModalOpen(false);
       resetForm();
@@ -99,7 +114,8 @@ export default function EstoquePage() {
 
   const resetForm = () => setFormData({
     nome: '', descricao: '', sku: '', preco_custo: '', preco_venda: '',
-    estoque_atual: '0', estoque_minimo: '10', categoria: '', nf_entrada: ''
+    estoque_atual: '0', estoque_minimo: '10', categoria: '', nf_entrada: '',
+    tipo_item: 'produto_acabado', unidade_medida: 'UN', ncm: '', cfop_padrao: '', origem: '0'
   });
 
   const abrirEdicaoProduto = (item: Produto) => {
@@ -395,6 +411,35 @@ export default function EstoquePage() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Quantidade Mínima *</label>
               <input type="number" value={formData.estoque_minimo} onChange={(e) => setFormData({ ...formData, estoque_minimo: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="10" required />
+            </div>
+          </div>
+          <div className="border-t border-border pt-4">
+            <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Informações Fiscais (NFe)</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">NCM</label>
+                <input type="text" maxLength={8} value={formData.ncm} onChange={(e) => setFormData({ ...formData, ncm: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Ex: 85444200" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">CFOP Padrão</label>
+                <input type="text" maxLength={4} value={formData.cfop_padrao} onChange={(e) => setFormData({ ...formData, cfop_padrao: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Ex: 5102" />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Tipo de Item</label>
+                <select value={formData.tipo_item} onChange={(e) => setFormData({ ...formData, tipo_item: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-background">
+                  <option value="produto_acabado">Produto Acabado</option>
+                  <option value="materia_prima">Matéria-Prima</option>
+                  <option value="embalagem">Embalagem</option>
+                  <option value="consumo">Material de Consumo</option>
+                </select>
+                <p className="mt-1 text-xs text-muted-foreground">Define se este item aparece como matéria-prima na Ficha Técnica (Produção).</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Unidade de Medida</label>
+                <input type="text" maxLength={10} value={formData.unidade_medida} onChange={(e) => setFormData({ ...formData, unidade_medida: e.target.value })} className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Ex: UN, KG, L" />
+              </div>
             </div>
           </div>
           <div className="flex gap-3 pt-4">

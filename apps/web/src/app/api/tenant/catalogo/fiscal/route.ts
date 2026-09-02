@@ -61,6 +61,8 @@ export async function POST(request: Request) {
       p_ncm: body.ncm ? String(body.ncm).trim() : null,
       p_cfop_padrao: body.cfop_padrao ? String(body.cfop_padrao).trim() : null,
       p_origem: Number.isFinite(Number(body.origem)) ? Number(body.origem) : 0,
+      p_tipo_item: body.tipo_item ? String(body.tipo_item).trim() : null,
+      p_unidade_medida: body.unidade_medida ? String(body.unidade_medida).trim() : null,
     }
 
     const { data, error } = await supabase.rpc('tenant_atualizar_produto_fiscal', payload)
