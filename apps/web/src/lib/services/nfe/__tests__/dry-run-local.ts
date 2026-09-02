@@ -61,6 +61,7 @@ function main() {
     valor_total: 100.0,
     desconto_aplicado: 0,
     metodo_pagamento: 'pix',
+    uf_destino: 'SP', // diferente do emitente (RS) -> deve virar CFOP 6xxx
     vendas_itens: [
       {
         produto_id: 'prod-001',
@@ -89,10 +90,12 @@ function main() {
 
   const temAssinatura = xmlSigned.includes('<Signature') || xmlSigned.includes(':Signature')
   const temChave = /Id="NFe(\d{44})"/.test(xmlSigned)
+  const cfopInterestadual = xmlSigned.includes('<CFOP>6102</CFOP>')
 
   console.log('=== RESULTADO ===')
   console.log('Contém bloco de assinatura digital?', temAssinatura ? 'SIM' : 'NÃO (falhou)')
   console.log('Contém chave de acesso de 44 dígitos?', temChave ? 'SIM' : 'NÃO (falhou)')
+  console.log('CFOP virou 6102 (interestadual RS->SP)?', cfopInterestadual ? 'SIM' : 'NÃO (falhou)')
   console.log('\n=== XML FINAL (assinado) ===\n')
   console.log(xmlSigned)
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, ShoppingCart, Trash2, ArrowLeft, CreditCard, Banknote, QrCode, Check, AlertCircle, User, FileText } from "lucide-react";
 import Link from "next/link";
 import { twMerge } from "tailwind-merge";
@@ -10,6 +10,7 @@ import { useToast, Toast } from "@/components/ui/toast";
 import { useContextosCaixa } from "@/lib/hooks/use-caixa";
 import { useQueryClient } from "@tanstack/react-query";
 import { notifySaleCompleted } from "@/lib/sale-notifications";
+import { fetchClientes, type Cliente } from "@/lib/api";
 
 interface Funcionario {
   id: string;
@@ -45,6 +46,11 @@ interface CartItem {
   estoque_disponivel: number;
 }
 
+const UFS_BRASIL = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG",
+  "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+];
+
 export default function PDVPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [produtos, setProdutos] = useState<ProdutoEstoque[]>([]);
@@ -54,12 +60,17 @@ export default function PDVPage() {
   const [error, setError] = useState<string | null>(null);
   const [metodoPagamento, setMetodoPagamento] = useState<string>('cartao_credito');
   const [cliente, setCliente] = useState('Cliente Avulso');
+  const [clienteId, setClienteId] = useState<string | null>(null);
+  const [clientesEncontrados, setClientesEncontrados] = useState<Cliente[]>([]);
+  const [mostrarSugestoesCliente, setMostrarSugestoesCliente] = useState(false);
+  const [buscandoClientes, setBuscandoClientes] = useState(false);
   const [vendedorId, setVendedorId] = useState('');
   const [userEmpresaId, setUserEmpresaId] = useState('');
   const [busca, setBusca] = useState('');
   const [desconto, setDesconto] = useState<number>(0);
   const [lembrarDias, setLembrarDias] = useState<number | null>(null);
   const [emitirNfe, setEmitirNfe] = useState(false);
+  const [ufDestino, setUfDestino] = useState('');
   const [contextoCaixaId, setContextoCaixaId] = useState('');
   const [supabase] = useState(() => createClient());
   const queryClient = useQueryClient();
@@ -192,6 +203,40 @@ export default function PDVPage() {
     }));
   };
 
+  const buscaClienteTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleBuscarCliente = (valor: string) => {
+    setCliente(valor);
+    setClienteId(null);
+    if (buscaClienteTimeoutRef.current) clearTimeout(buscaClienteTimeoutRef.current);
+
+    if (!valor.trim()) {
+      setClientesEncontrados([]);
+      setMostrarSugestoesCliente(false);
+      return;
+    }
+
+    setMostrarSugestoesCliente(true);
+    setBuscandoClientes(true);
+    buscaClienteTimeoutRef.current = setTimeout(async () => {
+      try {
+        const resultado = await fetchClientes({ busca: valor, limit: 8 });
+        setClientesEncontrados(resultado.data);
+      } catch {
+        setClientesEncontrados([]);
+      } finally {
+        setBuscandoClientes(false);
+      }
+    }, 300);
+  };
+
+  const handleSelecionarCliente = (c: Cliente) => {
+    setCliente(c.nome);
+    setClienteId(c.id);
+    setMostrarSugestoesCliente(false);
+    setClientesEncontrados([]);
+  };
+
   const finalizarPagamento = async () => {
     if (cart.length === 0) return;
     if (!contextoCaixa) {
@@ -221,7 +266,7 @@ export default function PDVPage() {
       }
       
       const { data, error } = await supabase.rpc('tenant_processar_venda', {
-        p_cliente_id: null,
+        p_cliente_id: clienteId,
         p_cliente_nome: cliente && cliente !== 'Cliente Avulso' ? cliente : 'Cliente Avulso',
         p_itens: itens,
         p_vendedor_id: vendedorId || null,
@@ -230,6 +275,7 @@ export default function PDVPage() {
         p_valor_total: total,
         p_desconto: desconto,
         p_emitir_nfe: emitirNfe,
+        p_uf_destino: emitirNfe ? (ufDestino || null) : null,
         p_filial_id: contextoCaixa.filial_id,
         p_caixa_id: contextoCaixa.caixa_id
       });
@@ -277,10 +323,13 @@ export default function PDVPage() {
 
       setCart([]);
       setCliente('Cliente Avulso');
+      setClienteId(null);
+      setClientesEncontrados([]);
       setVendedorId('');
       setDesconto(0);
       setLembrarDias(null);
       setEmitirNfe(false);
+      setUfDestino('');
 
       // Recarregar produtos com estoque atualizado via RPC
       const { data: produtosAtualizados } = await supabase
@@ -484,15 +533,41 @@ export default function PDVPage() {
         </div>
 
         <div className="p-4 border-t border-border bg-muted rounded-b-xl">
-          <div className="mb-4">
+          <div className="mb-4 relative">
             <label className="block text-sm font-medium text-foreground mb-2">Cliente</label>
             <input
               type="text"
               value={cliente}
-              onChange={(e) => setCliente(e.target.value)}
+              onChange={(e) => handleBuscarCliente(e.target.value)}
+              onFocus={() => { if (clientesEncontrados.length > 0) setMostrarSugestoesCliente(true); }}
+              onBlur={() => setTimeout(() => setMostrarSugestoesCliente(false), 150)}
               className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Nome do cliente"
+              placeholder="Buscar cliente cadastrado ou digitar nome novo"
+              autoComplete="off"
             />
+            {clienteId && (
+              <span className="mt-1 block text-xs text-emerald-600 dark:text-emerald-500">Cliente cadastrado vinculado</span>
+            )}
+            {mostrarSugestoesCliente && (buscandoClientes || clientesEncontrados.length > 0) && (
+              <div className="absolute z-20 mt-1 w-full bg-card border border-border rounded-md shadow-lg max-h-56 overflow-y-auto">
+                {buscandoClientes ? (
+                  <div className="px-3 py-2 text-xs text-muted-foreground">Buscando...</div>
+                ) : (
+                  clientesEncontrados.map((c, index) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onMouseDown={() => handleSelecionarCliente(c)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2"
+                    >
+                      <span className="text-xs font-mono text-muted-foreground shrink-0">{index + 1} -</span>
+                      <span className="truncate">{c.nome}</span>
+                      {c.telefone && <span className="text-xs text-muted-foreground ml-auto shrink-0">{c.telefone}</span>}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
 
           <div className="mb-4">
@@ -614,6 +689,24 @@ export default function PDVPage() {
               />
             </button>
           </div>
+
+          {emitirNfe && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                UF de destino (para calcular CFOP estadual/interestadual)
+              </label>
+              <select
+                value={ufDestino}
+                onChange={(e) => setUfDestino(e.target.value)}
+                className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="">Mesmo estado do emitente (padrão)</option>
+                {UFS_BRASIL.map((uf) => (
+                  <option key={uf} value={uf}>{uf}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <button
             onClick={finalizarPagamento}

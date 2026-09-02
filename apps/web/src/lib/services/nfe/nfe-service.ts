@@ -55,6 +55,7 @@ interface VendaFiscal {
   metodo_pagamento?: string | null
   desconto_aplicado?: number | null
   nfe_status?: string | null
+  uf_destino?: string | null
   vendas_itens: Array<{
     produto_id: string
     quantidade: number
@@ -134,7 +135,7 @@ export class NfeService {
 
     const { data: venda, error: vendaError } = await tenant
       .from('vendas')
-      .select('id, cliente_id, valor_total, metodo_pagamento, desconto_aplicado, nfe_status')
+      .select('id, cliente_id, valor_total, metodo_pagamento, desconto_aplicado, nfe_status, uf_destino')
       .eq('id', vendaId)
       .single()
 

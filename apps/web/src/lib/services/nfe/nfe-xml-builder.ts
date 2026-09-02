@@ -23,6 +23,7 @@ interface VendaFiscalInput {
   metodo_pagamento?: string | null
   metodo?: string | null
   id?: string
+  uf_destino?: string | null
 }
 
 export class NfeXmlBuilder {
@@ -137,7 +138,7 @@ export class NfeXmlBuilder {
       xml += `<cEAN>SEM GTIN</cEAN>`
       xml += `<xProd>${item.produtos?.nome || 'Produto'}</xProd>`
       xml += `<NCM>${item.produtos?.ncm || '00000000'}</NCM>`
-      xml += `<CFOP>${item.produtos?.cfop_padrao || '5102'}</CFOP>`
+      xml += `<CFOP>${this.resolverCfop(item.produtos?.cfop_padrao, emitente.uf, venda?.uf_destino)}</CFOP>`
       xml += `<uCom>UN</uCom>`
       xml += `<qCom>${quantidade.toFixed(4)}</qCom>`
       xml += `<vUnCom>${precoUnitario.toFixed(10)}</vUnCom>`
@@ -243,6 +244,21 @@ export class NfeXmlBuilder {
       TO: '17',
     }
     return codes[uf] || '43'
+  }
+
+  /**
+   * CFOP depende do destino real da venda, não só do produto: o dígito inicial
+   * (5=estadual, 6=interestadual) muda conforme o UF do destinatário. O cadastro
+   * do produto guarda apenas a natureza da operação (últimos 3 dígitos).
+   * Sem uf_destino informado, mantém o valor cadastrado como está (comportamento anterior).
+   */
+  private static resolverCfop(cfopCadastro: string | null | undefined, ufEmitente: string | undefined, ufDestino: string | null | undefined): string {
+    const cfop = String(cfopCadastro || '5102').padStart(4, '0')
+    if (!ufDestino || !ufEmitente || ufDestino.toUpperCase() === ufEmitente.toUpperCase()) {
+      return cfop
+    }
+    const naturezaOperacao = cfop.slice(-3)
+    return `6${naturezaOperacao}`
   }
 
   private static getMetodoPagamentoCode(metodo: string): string {
