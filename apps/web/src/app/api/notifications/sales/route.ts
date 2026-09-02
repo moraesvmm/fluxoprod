@@ -37,29 +37,46 @@ export async function POST(request: Request) {
 
     const { empresaId, tenantSchema } = await getAuthenticatedTenantContext(getAccessToken(request));
     const admin = createAdminClient();
+
+    // Colunas corretas conforme interface Venda em api.ts: cliente (não cliente_nome) e valor (não valor_total)
     const { data: venda, error: vendaError } = await admin
       .schema(tenantSchema)
       .from("vendas")
-      .select("id, cliente_nome, valor_total")
+      .select("id, cliente, valor")
       .eq("id", vendaId)
       .maybeSingle();
-    if (vendaError || !venda) {
+
+    if (vendaError) {
+      console.error("[sales/route] Erro ao buscar venda:", vendaError.message);
+      return NextResponse.json({ success: true, enviados: 0, warning: "Erro ao buscar venda para notificação." }, { status: 200 });
+    }
+    if (!venda) {
       return NextResponse.json({ success: true, enviados: 0, warning: "Venda não encontrada para envio de notificação." }, { status: 200 });
     }
 
-    const { data: item } = await admin
-      .schema(tenantSchema)
-      .from("vendas_itens")
-      .select("produto_id")
-      .eq("venda_id", vendaId)
-      .limit(1)
-      .maybeSingle();
-    const { data: estoque } = item?.produto_id
-      ? await admin.schema(tenantSchema).from("estoque").select("produto_id").eq("id", item.produto_id).maybeSingle()
-      : { data: null };
-    const { data: produto } = estoque?.produto_id
-      ? await admin.schema(tenantSchema).from("produtos").select("nome").eq("id", estoque.produto_id).maybeSingle()
-      : { data: null };
+    // Buscar nome do primeiro produto via itens_venda → estoque → produtos (falha silenciosa)
+    let productName = "produto(s)";
+    try {
+      const { data: itens } = await admin
+        .schema(tenantSchema)
+        .from("itens_venda")
+        .select("produto_id")
+        .eq("venda_id", vendaId)
+        .limit(1);
+
+      const primeiroProdutoId = itens?.[0]?.produto_id as string | undefined;
+      if (primeiroProdutoId) {
+        const { data: produto } = await admin
+          .schema(tenantSchema)
+          .from("produtos")
+          .select("nome")
+          .eq("id", primeiroProdutoId)
+          .maybeSingle();
+        if (produto?.nome) productName = produto.nome as string;
+      }
+    } catch {
+      // Não bloqueia o envio se a busca do produto falhar
+    }
 
     const { data: assinaturas, error: assinaturasError } = await admin
       .from("push_assinaturas")
@@ -71,9 +88,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, enviados: 0, warning: "Nenhuma assinatura ativa para enviar notificações." }, { status: 200 });
     }
 
-    const value = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(venda.valor_total));
-    const clientName = venda.cliente_nome || "Cliente avulso";
-    const productName = produto?.nome || "produto(s)";
+    const value = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(venda.valor));
+    const clientName = (venda.cliente as string | null) || "Cliente avulso";
     const payload = JSON.stringify({
       title: "Venda concluída",
       body: `${clientName} comprou ${productName} no valor de ${value}.`,
