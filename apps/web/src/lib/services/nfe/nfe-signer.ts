@@ -17,6 +17,8 @@ export class NfeSigner {
       
       // NF-e 4.00 exige contrato alinhado a SHA-256 no fluxo nativo.
       sig.signatureAlgorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+      // xml-crypto v6 não infere mais do transform da referência: precisa ser setado explicitamente.
+      sig.canonicalizationAlgorithm = "http://www.w3.org/2001/10/xml-exc-c14n#";
       sig.addReference({
         xpath: "//*[local-name()='infNFe']",
         transforms: [
