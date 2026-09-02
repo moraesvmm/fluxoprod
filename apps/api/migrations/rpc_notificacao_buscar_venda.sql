@@ -20,15 +20,17 @@ AS $$
 DECLARE
     v_cliente    TEXT;
     v_valor      NUMERIC;
-    v_produto_id UUID;
     v_produto    TEXT;
 BEGIN
     PERFORM public.validar_schema_tenant_provisionamento(p_schema);
 
     -- Buscar cliente e valor da venda
     EXECUTE format(
-        'SELECT cliente, valor_total FROM %I.vendas WHERE id = $1',
-        p_schema
+        'SELECT COALESCE(v.cliente_nome, c.nome, ''Cliente avulso''), v.valor_total
+         FROM %I.vendas v
+         LEFT JOIN %I.clientes c ON c.id = v.cliente_id
+         WHERE v.id = $1',
+        p_schema, p_schema
     )
     INTO v_cliente, v_valor
     USING p_venda_id;
@@ -37,23 +39,18 @@ BEGIN
         RETURN jsonb_build_object('found', false);
     END IF;
 
-    -- Buscar produto_id do primeiro item (opcional — falha silenciosa)
+    -- vendas_itens.produto_id referencia estoque.id; resolve o produto pelo estoque.
     BEGIN
         EXECUTE format(
-            'SELECT produto_id FROM %I.vendas_itens WHERE venda_id = $1 LIMIT 1',
-            p_schema
-        )
-        INTO v_produto_id
-        USING p_venda_id;
-
-        IF v_produto_id IS NOT NULL THEN
-            EXECUTE format(
-                'SELECT nome FROM %I.produtos WHERE id = $1',
-                p_schema
-            )
-            INTO v_produto
-            USING v_produto_id;
-        END IF;
+            'SELECT p.nome
+             FROM %I.vendas_itens vi
+             JOIN %I.estoque e ON e.id = vi.produto_id
+             JOIN %I.produtos p ON p.id = e.produto_id
+             WHERE vi.venda_id = $1
+             ORDER BY vi.criado_em, vi.id
+             LIMIT 1',
+            p_schema, p_schema, p_schema
+        ) INTO v_produto USING p_venda_id;
     EXCEPTION WHEN OTHERS THEN
         v_produto := NULL;
     END;
@@ -75,3 +72,5 @@ REVOKE ALL ON FUNCTION public.tenant_buscar_venda_para_notificacao(UUID, TEXT)
     FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.tenant_buscar_venda_para_notificacao(UUID, TEXT)
     TO service_role;
+
+NOTIFY pgrst, 'reload schema';
