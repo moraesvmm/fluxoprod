@@ -6,6 +6,7 @@
  *
  * Rodar com: npx tsx apps/web/src/lib/services/nfe/__tests__/dry-run-local.ts
  */
+// @ts-ignore - node-forge não publica types próprios (mesma exceção usada em certificate-manager.ts)
 import * as forge from 'node-forge'
 import { NfeXmlBuilder } from '../nfe-xml-builder'
 import { NfeSigner } from '../nfe-signer'
