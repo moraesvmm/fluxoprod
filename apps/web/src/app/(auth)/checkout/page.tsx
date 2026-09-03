@@ -494,7 +494,14 @@ function CheckoutContent() {
 
           {step === 2 && (
              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-3xl mx-auto space-y-8">
-                <div className="bg-[#121216] border border-white/5 rounded-2xl p-8 shadow-2xl">
+                <form
+                  id="checkout-account-form"
+                  className="bg-[#121216] border border-white/5 rounded-2xl p-8 shadow-2xl"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    setStep(3);
+                  }}
+                >
                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
                      <UserCircle2 className="w-6 h-6 text-indigo-400"/> Conta Administrador
                    </h2>
@@ -550,12 +557,13 @@ function CheckoutContent() {
                        </select>
                      </div>
                    </div>
-                </div>
+                 </form>
 
                 <div className="flex justify-between items-center bg-[#121216] border border-white/5 p-4 rounded-2xl">
-                   <button onClick={() => setStep(1)} className="text-gray-400 hover:text-white px-4 py-2 font-medium transition-colors">Voltar</button>
+                   <button type="button" onClick={() => setStep(1)} className="text-gray-400 hover:text-white px-4 py-2 font-medium transition-colors">Voltar</button>
                    <button 
-                      onClick={() => setStep(3)} 
+                     type="submit"
+                     form="checkout-account-form"
                        disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11}
                       className="bg-card text-black disabled:opacity-50 hover:bg-gray-200 font-medium py-3 px-8 rounded-xl flex items-center gap-2 group transition-all"
                    >

@@ -72,6 +72,26 @@ describe('Register Trial API', () => {
     expect(data.error).toBe('Payload de cadastro inválido.')
   })
 
+  it('informa indisponibilidade quando a credencial administrativa não está configurada', async () => {
+    vi.mocked(createAdminClient).mockImplementationOnce(() => {
+      throw new Error('Missing SUPABASE config (NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY).')
+    })
+    const request = new Request('http://localhost/api/auth/register-trial', {
+      method: 'POST',
+      body: JSON.stringify({
+        customerName: 'João Silva', customerEmail: 'joao@realcompany.com', password: 'securepassword',
+        companyName: 'Silva Corp', companyDocument: '12.345.678/0001-99', companySize: 'MPE',
+        companySegment: 'Tecnologia', planName: 'Business', modules: [],
+      } satisfies TrialRegistrationPayload),
+    })
+
+    const response = await POST(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(500)
+    expect(data.error).toBe('Cadastro temporariamente indisponível por configuração do servidor.')
+  })
+
   it('deve realizar o fluxo completo de provisionamento com sucesso', async () => {
     const payloadRequest: TrialRegistrationPayload = {
       customerName: 'João Silva',

@@ -68,10 +68,11 @@ async function findAuthUserByEmail(admin: ReturnType<typeof createAdminClient>, 
 }
 
 export async function POST(request: Request) {
-  const admin = createAdminClient();
+  let admin: ReturnType<typeof createAdminClient> | null = null;
   let createdUserId: string | null = null;
 
   try {
+    admin = createAdminClient();
     const payload = (await request.json()) as TrialRegistrationPayload;
 
     if (
@@ -309,13 +310,18 @@ export async function POST(request: Request) {
     });
   } catch (error: unknown) {
     console.error("Erro no cadastro trial:", error);
-    if (createdUserId) {
+    if (createdUserId && admin) {
       await admin.auth.admin.deleteUser(createdUserId).catch(() => undefined);
     }
 
+    const isMissingServerConfig =
+      error instanceof Error && error.message.startsWith("Missing SUPABASE config");
+
     return NextResponse.json(
       { 
-        error: "Erro interno no registro", 
+        error: isMissingServerConfig
+          ? "Cadastro temporariamente indisponível por configuração do servidor."
+          : "Erro interno no registro",
         details: error instanceof Error ? error.message : "Erro desconhecido durante o provisionamento",
         stack: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined
       },
