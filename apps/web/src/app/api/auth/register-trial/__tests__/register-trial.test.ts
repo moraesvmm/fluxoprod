@@ -10,6 +10,7 @@ const mockDbChain: any = {
   upsert: vi.fn().mockReturnThis(),
   insert: vi.fn().mockReturnThis(),
   eq: vi.fn().mockReturnThis(),
+  ilike: vi.fn().mockReturnThis(),
   single: vi.fn().mockImplementation(() => Promise.resolve({ data: {}, error: null })),
   maybeSingle: vi.fn().mockImplementation(() => Promise.resolve({ data: null, error: null })),
   then: vi.fn().mockImplementation((resolve: any) => resolve({ data: {}, error: null })),
@@ -48,12 +49,17 @@ describe('Register Trial API', () => {
     // Default success mocks
     mockAdmin.auth.admin.createUser.mockResolvedValue({ data: { user: { id: 'user-123' } }, error: null })
     mockAdmin.auth.admin.generateLink.mockResolvedValue({ data: { properties: { action_link: 'http://activate.me' } }, error: null })
+    mockAdmin.auth.admin.deleteUser.mockResolvedValue({ data: {}, error: null })
     mockAdmin.auth.admin.listUsers.mockResolvedValue({ data: { users: [] }, error: null })
     mockAdmin.rpc.mockResolvedValue({ data: { status: 'success' }, error: null })
     mockDbChain.then.mockImplementation((resolve: any) => resolve({ data: {}, error: null }))
   })
 
   it('deve retornar erro 400 se o payload for inválido', async () => {
+    mockDbChain.maybeSingle.mockResolvedValueOnce({
+      data: { modulos_incluidos: ['dashboard', 'crm', 'catalogo', 'estoque'] },
+      error: null,
+    })
     const request = new Request('http://localhost/api/auth/register-trial', {
       method: 'POST',
       body: JSON.stringify({}),
@@ -91,7 +97,30 @@ describe('Register Trial API', () => {
     expect(data.success).toBe(true)
 
     expect(mockAdmin.rpc).toHaveBeenCalledWith('provisionar_empresa_master', expect.objectContaining({
-      p_modules: ['crm', 'estoque']
+      p_modules: ['crm', 'catalogo', 'estoque'],
+      p_nome: 'João Silva',
+    }))
+  })
+
+  it('preserva os módulos-base do plano ao selecionar módulos adicionais', async () => {
+    mockDbChain.maybeSingle.mockResolvedValueOnce({
+      data: { modulos_incluidos: ['dashboard', 'crm', 'catalogo', 'estoque', 'vendas', 'financeiro', 'rh'] },
+      error: null,
+    })
+    const request = new Request('http://localhost/api/auth/register-trial', {
+      method: 'POST',
+      body: JSON.stringify({
+        customerName: 'João Silva', customerEmail: 'joao@realcompany.com', password: 'securepassword',
+        companyName: 'Silva Corp', companyDocument: '12.345.678/0001-99', companySize: 'MPE',
+        companySegment: 'Tecnologia', planName: 'Business', modules: ['os'],
+      } satisfies TrialRegistrationPayload),
+    })
+
+    await POST(request)
+
+    expect(mockAdmin.rpc).toHaveBeenCalledWith('provisionar_empresa_master', expect.objectContaining({
+      p_modules: ['crm', 'catalogo', 'estoque', 'vendas', 'financeiro', 'rh', 'os'],
+      p_nome: 'João Silva',
     }))
   })
 })

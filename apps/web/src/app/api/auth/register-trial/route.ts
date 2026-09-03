@@ -149,9 +149,10 @@ export async function POST(request: Request) {
       "financeiro", "rh", "os", "obras", "comissoes", "relatorios", "producao"
     ]);
 
-    // Resolver módulos: se payload.modules vazio, buscar do plano na tabela planos
-    let modulesToProvision = (payload.modules || []).filter(m => VALID_MODULE_KEYS.has(m));
-    if (modulesToProvision.length === 0 && payload.planName) {
+    // O plano sempre define a base; módulos enviados pelo cliente são apenas adicionais.
+    const requestedModules = (payload.modules || []).filter(m => VALID_MODULE_KEYS.has(m));
+    let planModules: string[] = [];
+    if (payload.planName) {
       const { data: planoData } = await admin
         .from("planos")
         .select("modulos_incluidos")
@@ -159,12 +160,12 @@ export async function POST(request: Request) {
         .maybeSingle();
       
       if (planoData?.modulos_incluidos && Array.isArray(planoData.modulos_incluidos)) {
-        // Filtrar apenas chaves técnicas válidas — descartar strings de marketing
-        modulesToProvision = (planoData.modulos_incluidos as string[]).filter(
+        planModules = (planoData.modulos_incluidos as string[]).filter(
           (m: string) => VALID_MODULE_KEYS.has(m)
         );
       }
     }
+    let modulesToProvision = [...new Set([...planModules, ...requestedModules])];
 
     // Fallback final: se ainda vazio, usar módulos mínimos do Starter
     if (modulesToProvision.length === 0) {
@@ -188,6 +189,7 @@ export async function POST(request: Request) {
         p_segmento: payload.companySegment,
         p_schema_name: schemaName,
         p_modules: modulesToProvision,
+        p_nome: payload.customerName,
       }
     );
 

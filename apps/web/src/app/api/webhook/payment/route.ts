@@ -476,9 +476,28 @@ export async function POST(request: Request) {
       console.error("Erro ao registrar audit log:", auditError.message);
     }
 
-    // Enviar e-mail de boas-vindas
-    if (customerEmail) {
-      await sendWelcomeEmail(customerEmail, customerName).catch(err => 
+    // O pagamento cria uma conta não confirmada, portanto deve seguir o mesmo fluxo
+    // de ativação do trial.
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://seufluxoerp.com.br";
+    const origin = appUrl.replace(/\/+$/, "");
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+      type: "signup",
+      email: customerEmail,
+      password,
+      options: { redirectTo: `${origin}/login?confirmed=true` },
+    });
+    let activationLink = linkData?.properties?.action_link;
+    if (activationLink) {
+      const linkUrl = new URL(activationLink);
+      linkUrl.searchParams.set("redirect_to", `${origin}/login?confirmed=true`);
+      activationLink = linkUrl.toString();
+    }
+    if (linkError || !activationLink) {
+      console.error("Erro ao gerar link de ativação após pagamento:", linkError?.message);
+    }
+
+    if (customerEmail && activationLink) {
+      await sendWelcomeEmail(customerEmail, customerName, activationLink).catch(err =>
         console.error("Erro ao disparar e-mail de boas-vindas:", err)
       );
     }

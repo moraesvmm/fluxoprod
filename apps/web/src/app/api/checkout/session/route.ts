@@ -84,6 +84,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const admin = createAdminClient();
+
     if (payload.isUpgrade) {
       const cookieStore = await cookies();
       const supabase = createServerClient(
@@ -104,7 +106,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Apenas o administrador da empresa pode alterar a assinatura." }, { status: 403 });
       }
 
-      const admin = createAdminClient();
       const { data: empresa } = await admin
         .from("empresas")
         .select("id, razao_social, cnpj, porte, segmento, plan_name, subscription_id")
@@ -163,6 +164,41 @@ export async function POST(request: Request) {
         companySize: empresa.porte || "MPE",
         companySegment: empresa.segmento || "Geral",
       };
+    } else {
+      const requestedModules = [...new Set((payload.modules || []).filter((module): module is string => typeof module === "string"))];
+      const normalizedPlanName = payload.planName?.trim() || "";
+      const isALaCarte = /personalizado|a la carte/i.test(normalizedPlanName);
+
+      const { data: plan } = isALaCarte
+        ? { data: null }
+        : await admin
+          .from("planos")
+          .select("key, nome, preco, preco_promocional, modulos_incluidos")
+          .ilike("nome", normalizedPlanName)
+          .maybeSingle();
+
+      if (!isALaCarte && !plan) {
+        return NextResponse.json({ error: "Plano não disponível." }, { status: 400 });
+      }
+
+      const planModules = Array.isArray(plan?.modulos_incluidos) ? plan.modulos_incluidos : [];
+      const extraKeys = requestedModules.filter((key) => !planModules.includes(key));
+      const { data: extras } = extraKeys.length
+        ? await admin.from("modulos_avulsos").select("key, preco, preco_promocional").in("key", extraKeys).eq("ativo", true)
+        : { data: [] as Array<{ key: string; preco: number; preco_promocional: number | null }> };
+
+      if (extraKeys.length !== (extras || []).length || (isALaCarte && requestedModules.length === 0)) {
+        return NextResponse.json({ error: "Seleção de módulos inválida." }, { status: 400 });
+      }
+
+      const amount = (plan?.preco_promocional ?? plan?.preco ?? 0)
+        + (extras || []).reduce((sum, module) => sum + (module.preco_promocional ?? module.preco), 0);
+      payload = {
+        ...payload,
+        planName: plan?.nome || "Personalizado (A La Carte)",
+        amount,
+        modules: [...new Set([...planModules, ...requestedModules])],
+      };
     }
 
     if (
@@ -192,7 +228,6 @@ export async function POST(request: Request) {
     }
 
     const checkoutReference = generateCheckoutReference();
-    const admin = createAdminClient();
 
     const { error: checkoutPersistError } = await admin.from("checkout_vendas").upsert(
       {
