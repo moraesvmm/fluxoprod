@@ -308,6 +308,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error: unknown) {
+    console.error("Erro no cadastro trial:", error);
     if (createdUserId) {
       await admin.auth.admin.deleteUser(createdUserId).catch(() => undefined);
     }
