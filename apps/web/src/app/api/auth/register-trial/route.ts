@@ -218,6 +218,10 @@ export async function POST(request: Request) {
     const provisionResult = (provisionData ?? {}) as Record<string, unknown>;
     if (provisionResult.status && provisionResult.status !== "success") {
       console.error("Falha no provisionamento técnico:", provisionResult.message);
+      if (createdUserId) {
+        await admin.auth.admin.deleteUser(createdUserId).catch(() => undefined);
+        createdUserId = null;
+      }
       return NextResponse.json({ 
         error: "Falha técnica no provisionamento", 
         details: provisionResult.message 

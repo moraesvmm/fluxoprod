@@ -108,6 +108,25 @@ describe('Register Trial API', () => {
     expect(mockAdmin.auth.admin.createUser).not.toHaveBeenCalled()
   })
 
+  it('remove o usuário criado quando o provisionamento retorna falha', async () => {
+    mockDbChain.maybeSingle
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: { modulos_incluidos: ['crm'] }, error: null })
+    mockAdmin.rpc.mockResolvedValueOnce({ data: { status: 'error', message: 'Hook com falha' }, error: null })
+    const request = new Request('http://localhost/api/auth/register-trial', {
+      method: 'POST',
+      body: JSON.stringify({
+        customerName: 'João Silva', customerEmail: 'joao@realcompany.com', password: 'securepassword',
+        companyName: 'Silva Corp', companyDocument: '12.345.678/0001-99', companySize: 'MPE',
+        companySegment: 'Tecnologia', planName: 'Business', modules: [],
+      } satisfies TrialRegistrationPayload),
+    })
+
+    const response = await POST(request)
+    expect(response.status).toBe(500)
+    expect(mockAdmin.auth.admin.deleteUser).toHaveBeenCalledWith('user-123')
+  })
+
   it('deve realizar o fluxo completo de provisionamento com sucesso', async () => {
     mockDbChain.maybeSingle
       .mockResolvedValueOnce({ data: null, error: null })
