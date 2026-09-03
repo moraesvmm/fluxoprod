@@ -262,7 +262,9 @@ function CheckoutContent() {
       if (response.ok && data.success) {
         setSuccess(true);
       } else {
-        alert("Erro no cadastro: " + (data.error || "Falha ao criar conta de teste"));
+        const message = data.error || "Falha ao criar conta de teste";
+        const detail = typeof data.details === "string" && data.details ? `\n\nDetalhe: ${data.details}` : "";
+        alert("Erro no cadastro: " + message + detail);
         setLoading(false);
       }
     } catch (err) {
