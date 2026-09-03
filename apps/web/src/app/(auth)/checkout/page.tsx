@@ -508,15 +508,15 @@ function CheckoutContent() {
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
                      <div>
                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">Seu Nome</label>
-                       <input value={customerName} onChange={e=>setCustomerName(e.target.value)} className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-indigo-500 outline-none hover:border-white/20 transition-colors" placeholder="João da Silva" />
+                       <input autoComplete="name" value={customerName} onChange={e=>setCustomerName(e.target.value)} className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-indigo-500 outline-none hover:border-white/20 transition-colors" placeholder="João da Silva" />
                      </div>
                      <div>
                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">E-mail Profissional</label>
-                       <input value={customerEmail} onChange={e=>setCustomerEmail(e.target.value)} className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-indigo-500 outline-none hover:border-white/20 transition-colors" placeholder="joao@suaempresa.com" />
+                       <input autoComplete="email" value={customerEmail} onChange={e=>setCustomerEmail(e.target.value)} className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-indigo-500 outline-none hover:border-white/20 transition-colors" placeholder="joao@suaempresa.com" />
                      </div>
                      <div className="md:col-span-2">
                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">Definir Senha do ERP</label>
-                       <input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-indigo-500 outline-none hover:border-white/20 transition-colors" placeholder="••••••••" />
+                       <input type="password" autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full bg-[#0a0a0c] border border-white/10 rounded-xl p-4 text-white focus:ring-1 focus:ring-indigo-500 outline-none hover:border-white/20 transition-colors" placeholder="••••••••" />
                        <p className="mt-2 text-xs text-muted-foreground">Minimo de 8 caracteres. A senha nao e enviada ao gateway de pagamento.</p>
                      </div>
                    </div>
