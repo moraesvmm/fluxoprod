@@ -99,6 +99,23 @@ export async function POST(request: Request) {
       );
     }
 
+    const companyDocument = payload.companyDocument.replace(/[^0-9]/g, "");
+    const { data: existingCompany, error: companyLookupError } = await admin
+      .from("empresas")
+      .select("id")
+      .eq("cnpj", companyDocument)
+      .maybeSingle();
+
+    if (companyLookupError) {
+      throw new Error(companyLookupError.message);
+    }
+    if (existingCompany) {
+      return NextResponse.json(
+        { error: "Já existe uma empresa cadastrada com este CNPJ/documento. Entre com a conta existente." },
+        { status: 409 }
+      );
+    }
+
     // Cria o usuário com necessidade de confirmação de e-mail (para teste do fluxo)
     const { data: createdUser, error: createUserError } = await admin.auth.admin.createUser({
       email: payload.customerEmail,
@@ -184,7 +201,7 @@ export async function POST(request: Request) {
       "provisionar_empresa_master",
       {
         p_empresa_id: empresaId,
-        p_cnpj: payload.companyDocument.replace(/[^0-9]/g, ""),
+        p_cnpj: companyDocument,
         p_razao_social: payload.companyName,
         p_porte: payload.companySize,
         p_segmento: payload.companySegment,

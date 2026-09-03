@@ -52,14 +52,11 @@ describe('Register Trial API', () => {
     mockAdmin.auth.admin.deleteUser.mockResolvedValue({ data: {}, error: null })
     mockAdmin.auth.admin.listUsers.mockResolvedValue({ data: { users: [] }, error: null })
     mockAdmin.rpc.mockResolvedValue({ data: { status: 'success' }, error: null })
+    mockDbChain.maybeSingle.mockResolvedValue({ data: null, error: null })
     mockDbChain.then.mockImplementation((resolve: any) => resolve({ data: {}, error: null }))
   })
 
   it('deve retornar erro 400 se o payload for inválido', async () => {
-    mockDbChain.maybeSingle.mockResolvedValueOnce({
-      data: { modulos_incluidos: ['dashboard', 'crm', 'catalogo', 'estoque'] },
-      error: null,
-    })
     const request = new Request('http://localhost/api/auth/register-trial', {
       method: 'POST',
       body: JSON.stringify({}),
@@ -92,7 +89,32 @@ describe('Register Trial API', () => {
     expect(data.error).toBe('Cadastro temporariamente indisponível por configuração do servidor.')
   })
 
+  it('rejeita CNPJ já cadastrado antes de criar o usuário', async () => {
+    mockDbChain.maybeSingle.mockResolvedValueOnce({ data: { id: 'empresa-123' }, error: null })
+    const request = new Request('http://localhost/api/auth/register-trial', {
+      method: 'POST',
+      body: JSON.stringify({
+        customerName: 'João Silva', customerEmail: 'joao@realcompany.com', password: 'securepassword',
+        companyName: 'Silva Corp', companyDocument: '12.345.678/0001-99', companySize: 'MPE',
+        companySegment: 'Tecnologia', planName: 'Business', modules: [],
+      } satisfies TrialRegistrationPayload),
+    })
+
+    const response = await POST(request)
+    const data = await response.json()
+
+    expect(response.status).toBe(409)
+    expect(data.error).toBe('Já existe uma empresa cadastrada com este CNPJ/documento. Entre com a conta existente.')
+    expect(mockAdmin.auth.admin.createUser).not.toHaveBeenCalled()
+  })
+
   it('deve realizar o fluxo completo de provisionamento com sucesso', async () => {
+    mockDbChain.maybeSingle
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({
+        data: { modulos_incluidos: ['dashboard', 'crm', 'catalogo', 'estoque'] },
+        error: null,
+      })
     const payloadRequest: TrialRegistrationPayload = {
       customerName: 'João Silva',
       customerEmail: 'joao@realcompany.com',
@@ -123,10 +145,12 @@ describe('Register Trial API', () => {
   })
 
   it('preserva os módulos-base do plano ao selecionar módulos adicionais', async () => {
-    mockDbChain.maybeSingle.mockResolvedValueOnce({
-      data: { modulos_incluidos: ['dashboard', 'crm', 'catalogo', 'estoque', 'vendas', 'financeiro', 'rh'] },
-      error: null,
-    })
+    mockDbChain.maybeSingle
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({
+        data: { modulos_incluidos: ['dashboard', 'crm', 'catalogo', 'estoque', 'vendas', 'financeiro', 'rh'] },
+        error: null,
+      })
     const request = new Request('http://localhost/api/auth/register-trial', {
       method: 'POST',
       body: JSON.stringify({
