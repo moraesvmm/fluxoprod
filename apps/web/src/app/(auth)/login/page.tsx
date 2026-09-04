@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Mail, Lock, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { whatsappLink } from "@/lib/contato";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -202,7 +203,7 @@ export default function LoginPage() {
               )}
             </button>
             <div className="flex justify-end w-full">
-              <a href="#" className="text-xs font-medium text-violet-600 hover:text-violet-500 transition-colors">
+              <a href="/recuperar-senha" className="text-xs font-medium text-violet-600 hover:text-violet-500 transition-colors">
                 Esqueceu sua senha?
               </a>
             </div>
@@ -216,6 +217,22 @@ export default function LoginPage() {
             </div>
           </div>
         </form>
+
+        <div className="pt-6 border-t border-slate-100 space-y-3">
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-violet-500" />
+            <span>Conexão segura · Criptografia 256-bit</span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] text-muted-foreground">
+            <a href="/privacidade" className="hover:text-violet-600 transition-colors">Privacidade</a>
+            <span className="text-slate-300">·</span>
+            <a href="/termos" className="hover:text-violet-600 transition-colors">Termos</a>
+            <span className="text-slate-300">·</span>
+            <a href="/seguranca" className="hover:text-violet-600 transition-colors">Segurança</a>
+            <span className="text-slate-300">·</span>
+            <a href={whatsappLink("Olá! Preciso de ajuda para acessar o Fluxo ERP.")} target="_blank" rel="noopener noreferrer" className="hover:text-violet-600 transition-colors">Precisa de ajuda?</a>
+          </div>
+        </div>
       </div>
     </div>
   );

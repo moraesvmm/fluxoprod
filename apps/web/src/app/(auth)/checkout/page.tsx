@@ -2,13 +2,14 @@
 
 import { useState, useMemo, useEffect, Suspense, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ShieldCheck, CreditCard, ArrowRight, Loader2, Building2, UserCircle2, Server, X, Percent, Ticket } from "lucide-react";
+import { Check, ShieldCheck, CreditCard, ArrowRight, Loader2, Building2, UserCircle2, Server, X, Percent, Ticket, Lock, RotateCcw, FileText, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import AppIcon from "../../icon.png";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PaymentGatewayService, PaymentTransactionPayload } from "@/services/PaymentGatewayService";
 import { createClient } from "@/utils/supabase/client";
 import { validarCupom, type Cupom } from "@/lib/api";
+import { CONTATO, whatsappLink } from "@/lib/contato";
 
 interface PlanoData { id: string; key: string; nome: string; preco: number; preco_promocional: number | null; descricao: string; modulos_incluidos: string[]; ordem_exibicao: number; }
 interface ModuloData { id: string; key: string; nome: string; preco: number; preco_promocional: number | null; descricao: string; icone: string; features: string[]; ordem_exibicao: number; }
@@ -121,6 +122,7 @@ function CheckoutContent() {
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Dados da Empresa
   const [companyName, setCompanyName] = useState("");
@@ -501,6 +503,7 @@ function CheckoutContent() {
                   className="bg-[#121216] border border-white/5 rounded-2xl p-8 shadow-2xl"
                   onSubmit={(event) => {
                     event.preventDefault();
+                    if (!acceptedTerms) return;
                     setStep(3);
                   }}
                 >
@@ -561,12 +564,34 @@ function CheckoutContent() {
                    </div>
                  </form>
 
+                <div className="bg-[#121216] border border-white/5 rounded-2xl px-6 py-5 space-y-4">
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-white/20 bg-[#0a0a0c] text-indigo-500 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    <span className="text-xs text-gray-400 leading-relaxed">
+                      Li e concordo com os{" "}
+                      <a href="/termos" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Termos de Uso</a>{" "}
+                      e a{" "}
+                      <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Política de Privacidade</a>.
+                      Autorizo o tratamento dos meus dados conforme a LGPD.
+                    </span>
+                  </label>
+                  <p className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    Dados criptografados e hospedados no Brasil. Sua senha não é compartilhada com o gateway de pagamento.
+                  </p>
+                </div>
+
                 <div className="flex justify-between items-center bg-[#121216] border border-white/5 p-4 rounded-2xl">
                    <button type="button" onClick={() => setStep(1)} className="text-gray-400 hover:text-white px-4 py-2 font-medium transition-colors">Voltar</button>
                    <button 
                      type="submit"
                      form="checkout-account-form"
-                       disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11}
+                       disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11 || !acceptedTerms}
                       className="bg-card text-black disabled:opacity-50 hover:bg-gray-200 font-medium py-3 px-8 rounded-xl flex items-center gap-2 group transition-all"
                    >
                      Começar Teste Grátis <ArrowRight className="w-4 h-4" />
@@ -653,9 +678,43 @@ function CheckoutContent() {
                   >
                     {loading ? <><Loader2 className="w-5 h-5 animate-spin"/> Mágica Acontecendo...</> : "Criar Conta e Iniciar Teste"}
                   </button>
+
+                  <div className="relative z-10 mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="flex items-start gap-2.5 bg-[#0a0a0c] border border-white/5 rounded-xl p-3.5">
+                      <Lock className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-white">Cobrança segura</p>
+                        <p className="text-[11px] text-muted-foreground leading-snug">Nenhum valor é cobrado durante o teste.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2.5 bg-[#0a0a0c] border border-white/5 rounded-xl p-3.5">
+                      <RotateCcw className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-white">Cancele quando quiser</p>
+                        <p className="text-[11px] text-muted-foreground leading-snug">Assinatura mensal, sem fidelidade ou multa.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2.5 bg-[#0a0a0c] border border-white/5 rounded-xl p-3.5">
+                      <FileText className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-white">Transparência fiscal</p>
+                        <p className="text-[11px] text-muted-foreground leading-snug">Valores em BRL, com emissão de nota fiscal.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="relative z-10 mt-4 text-center text-[11px] text-muted-foreground">
+                    Ao criar a conta você concorda com os{" "}
+                    <a href="/termos" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Termos de Uso</a>{" "}
+                    e a{" "}
+                    <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Política de Privacidade</a>.
+                  </p>
                </div>
-               
-               <div className="text-center">
+
+               <div className="flex flex-col items-center gap-3">
+                 <a href={whatsappLink("Olá! Tenho dúvidas sobre planos e cobrança do Fluxo ERP.")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-white transition-colors">
+                   <MessageCircle className="w-4 h-4 text-emerald-500" /> Dúvidas sobre planos? Fale com o comercial
+                 </a>
                  <button onClick={() => setStep(2)} className="text-muted-foreground hover:text-white transition-colors text-sm font-medium">Cancelar e Voltar</button>
                </div>
             </motion.div>
@@ -698,7 +757,7 @@ function CheckoutContent() {
                  {step === 2 && (
                    <button 
                      onClick={() => setStep(3)} 
-                      disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11}
+                      disabled={!customerName || !passwordValida || !customerEmail || !companyName || documentoNormalizado.length < 11 || !acceptedTerms}
                      className="w-full sm:w-auto bg-emerald-500 text-white disabled:opacity-50 disabled:bg-gray-600 font-bold py-3 px-8 rounded-lg flex items-center justify-center gap-2 transition-colors"
                    >
                      Começar Teste Grátis

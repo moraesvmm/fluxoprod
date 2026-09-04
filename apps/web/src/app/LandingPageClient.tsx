@@ -7,11 +7,13 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import {
   ArrowRight, BarChart3, ShieldCheck, Zap, Users, Package, TrendingUp,
   Menu, X, Star, CheckCircle2, Sparkles, Globe, Clock, Layers, Moon, Sun,
-  Play, ChevronRight, Cpu, Lock, Gauge, FileText, Printer, Ban, Trash2, RotateCcw, Banknote
+  Play, ChevronRight, Cpu, Lock, Gauge, FileText, Printer, Ban, Trash2, RotateCcw, Banknote,
+  MessageCircle, Mail, HelpCircle, Plus, Rocket, Headset
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { AnimatedSection, FloatingParticles, GradientText, SectionBadge } from "./landing-components";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { CONTATO, whatsappLink } from "@/lib/contato";
 
 const VideoDemo = dynamic(() => import("@/components/VideoDemo"), {
   ssr: false,
@@ -45,9 +47,26 @@ const benefits = [
   "Atualizações automáticas semanais",
 ];
 
+const onboardingSteps = [
+  { icon: Rocket, title: "Ativação em minutos", description: "Crie sua conta, confirme o e-mail e seu ambiente é provisionado automaticamente — sem instalação." },
+  { icon: Layers, title: "Configuração guiada", description: "Ative os módulos que sua operação precisa e importe seus dados iniciais com apoio do time." },
+  { icon: Headset, title: "Suporte na implantação", description: "Acompanhamento humano via WhatsApp durante o teste para você começar a operar com segurança." },
+];
+
+const faqs = [
+  { q: "Preciso instalar algo para usar o Fluxo ERP?", a: "Não. O Fluxo é 100% cloud e roda no navegador. Você cria a conta, confirma o e-mail e o ambiente da sua empresa é provisionado automaticamente." },
+  { q: "O teste grátis exige cartão de crédito?", a: "Não. São 7 dias de teste sem necessidade de cartão. Você só define uma forma de pagamento se decidir continuar após o período." },
+  { q: "Meus dados ficam seguros e em conformidade com a LGPD?", a: "Sim. Os dados são hospedados no Brasil, com criptografia em trânsito e isolamento por empresa (um banco lógico por cliente), seguindo as diretrizes da LGPD." },
+  { q: "A emissão de NF-e tem custo adicional?", a: "Não. A emissão de NF-e 4.00 está inclusa na plataforma, com assinatura digital e comunicação segura (mTLS) nativas." },
+  { q: "Posso cancelar quando quiser?", a: "Sim. A assinatura é mensal e sem fidelidade. Você pode cancelar a qualquer momento, sem multa." },
+  { q: "Como funciona o suporte?", a: "Oferecemos suporte especializado via WhatsApp e e-mail durante todo o período de teste e assinatura, com atendimento humano." },
+];
+
 const navLinks = [
   { href: "#funcionalidades", label: "Funcionalidades" },
   { href: "#vantagens", label: "Vantagens" },
+  { href: "#implantacao", label: "Implantação" },
+  { href: "#faq", label: "Dúvidas" },
   { href: "#contato", label: "Contato" },
 ];
 
@@ -309,6 +328,70 @@ export default function LandingPageClient() {
           </div>
         </section>
 
+        {/* ═══ IMPLANTAÇÃO / ONBOARDING ═══ */}
+        <section id="implantacao" className="py-24 sm:py-32">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <AnimatedSection className="text-center mb-16">
+              <SectionBadge icon={Rocket} label="Implantação" dark={d} />
+              <h2 className={`mt-5 text-3xl sm:text-4xl font-extrabold tracking-tight ${d ? "text-white" : "text-foreground"}`}>
+                Do cadastro à operação em <GradientText>três passos.</GradientText>
+              </h2>
+              <p className={`mt-4 text-lg max-w-2xl mx-auto ${d ? "text-slate-400" : "text-muted-foreground"}`}>Um processo de ativação simples, com acompanhamento humano em cada etapa.</p>
+            </AnimatedSection>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {onboardingSteps.map((s, i) => (
+                <AnimatedSection key={s.title} delay={i * 0.08}>
+                  <div className={`relative h-full p-7 rounded-2xl border ${d ? "bg-white/[0.02] border-white/[0.06]" : "bg-card border-slate-200/80 shadow-sm"}`}>
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                        <s.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className={`text-sm font-bold ${d ? "text-slate-500" : "text-slate-400"}`}>Passo {i + 1}</span>
+                    </div>
+                    <h3 className={`text-lg font-bold mb-2 ${d ? "text-white" : "text-foreground"}`}>{s.title}</h3>
+                    <p className={`text-sm leading-relaxed ${d ? "text-slate-400" : "text-muted-foreground"}`}>{s.description}</p>
+                  </div>
+                </AnimatedSection>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ FAQ ═══ */}
+        <section id="faq" className="py-24 sm:py-32">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <AnimatedSection className="text-center mb-14">
+              <SectionBadge icon={HelpCircle} label="Perguntas frequentes" dark={d} />
+              <h2 className={`mt-5 text-3xl sm:text-4xl font-extrabold tracking-tight ${d ? "text-white" : "text-foreground"}`}>
+                Ainda tem <GradientText>dúvidas?</GradientText>
+              </h2>
+              <p className={`mt-4 text-lg ${d ? "text-slate-400" : "text-muted-foreground"}`}>Reunimos as perguntas mais comuns sobre a plataforma.</p>
+            </AnimatedSection>
+
+            <AnimatedSection className="space-y-3">
+              {faqs.map((f) => (
+                <details key={f.q} className={`group rounded-2xl border transition-colors ${d ? "bg-white/[0.02] border-white/[0.06] open:border-violet-500/30" : "bg-card border-slate-200/80 shadow-sm open:border-violet-300/60"}`}>
+                  <summary className={`flex items-center justify-between gap-4 cursor-pointer list-none px-6 py-5 text-sm sm:text-base font-semibold ${d ? "text-white" : "text-foreground"}`}>
+                    {f.q}
+                    <Plus className="w-5 h-5 text-violet-500 shrink-0 transition-transform duration-300 group-open:rotate-45" />
+                  </summary>
+                  <p className={`px-6 pb-5 -mt-1 text-sm leading-relaxed ${d ? "text-slate-400" : "text-muted-foreground"}`}>{f.a}</p>
+                </details>
+              ))}
+            </AnimatedSection>
+
+            <AnimatedSection className="mt-10 text-center">
+              <p className={`text-sm ${d ? "text-slate-400" : "text-muted-foreground"}`}>
+                Não encontrou o que procurava?{" "}
+                <a href={whatsappLink("Olá! Tenho uma dúvida sobre o Fluxo ERP.")} target="_blank" rel="noopener noreferrer" className="font-semibold text-violet-500 hover:text-violet-400 transition-colors">
+                  Fale com um especialista
+                </a>.
+              </p>
+            </AnimatedSection>
+          </div>
+        </section>
+
         {/* ═══ CTA FINAL ═══ */}
         <section id="contato" className="py-24 sm:py-32 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700" />
@@ -323,9 +406,14 @@ export default function LandingPageClient() {
                 <span className="underline decoration-white/30 decoration-4 underline-offset-4">sua gestão?</span>
               </h2>
               <p className="text-lg sm:text-xl text-violet-100 max-w-2xl mx-auto mb-10 leading-relaxed">Comece agora mesmo sua jornada com o Fluxo ERP e descubra por que somos a escolha de empresas que buscam eficiência real.</p>
-              <Link href="/login" className="group inline-flex items-center gap-3 px-10 py-5 bg-card text-violet-700 font-bold text-lg rounded-2xl shadow-2xl shadow-black/20 transition-all duration-300 hover:scale-105">
-                Começar Teste Grátis <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1.5" />
-              </Link>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link href="/login" className="group inline-flex items-center gap-3 px-10 py-5 bg-card text-violet-700 font-bold text-lg rounded-2xl shadow-2xl shadow-black/20 transition-all duration-300 hover:scale-105">
+                  Começar Teste Grátis <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1.5" />
+                </Link>
+                <a href={whatsappLink("Olá! Gostaria de agendar uma demonstração do Fluxo ERP.")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2.5 px-8 py-5 bg-white/10 text-white font-semibold text-base rounded-2xl border border-white/25 hover:bg-white/15 transition-all duration-300">
+                  <MessageCircle className="w-5 h-5" /> Falar com um especialista
+                </a>
+              </div>
             </AnimatedSection>
           </div>
         </section>
@@ -333,22 +421,71 @@ export default function LandingPageClient() {
 
       {/* ═══ FOOTER ═══ */}
       <footer className={`border-t ${d ? "border-white/[0.04] bg-[#060611]" : "border-slate-200/60 bg-[#fafafe]"}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Image 
-                src="/logo-fluxo.png" 
-                alt="Fluxo ERP - Logo" 
-                width={28} 
-                height={28} 
-                className="object-contain drop-shadow-[0_0_8px_rgba(139,92,246,0.4)]" 
-              />
-              <span className="text-sm font-semibold bg-gradient-to-r from-violet-500 to-indigo-400 bg-clip-text text-transparent">Fluxo ERP</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-10">
+            {/* Marca + contato */}
+            <div className="col-span-2 lg:col-span-2">
+              <div className="flex items-center gap-3 mb-4">
+                <Image src="/logo-fluxo.png" alt="Fluxo ERP - Logo" width={28} height={28} className="object-contain drop-shadow-[0_0_8px_rgba(139,92,246,0.4)]" />
+                <span className="text-sm font-semibold bg-gradient-to-r from-violet-500 to-indigo-400 bg-clip-text text-transparent">Fluxo ERP</span>
+              </div>
+              <p className={`text-sm leading-relaxed max-w-xs mb-5 ${d ? "text-slate-400" : "text-muted-foreground"}`}>
+                Plataforma de gestão empresarial que centraliza finanças, estoque, CRM e vendas em um único ambiente seguro e escalável.
+              </p>
+              <div className="space-y-2">
+                <a href={whatsappLink("Olá! Gostaria de falar com o time comercial do Fluxo ERP.")} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 text-sm font-medium transition-colors ${d ? "text-slate-300 hover:text-white" : "text-foreground hover:text-violet-600"}`}>
+                  <MessageCircle className="w-4 h-4 text-violet-500" /> {CONTATO.whatsappExibicao}
+                </a>
+                <a href={`mailto:${CONTATO.email}`} className={`flex items-center gap-2 text-sm font-medium transition-colors ${d ? "text-slate-300 hover:text-white" : "text-foreground hover:text-violet-600"}`}>
+                  <Mail className="w-4 h-4 text-violet-500" /> {CONTATO.email}
+                </a>
+              </div>
             </div>
+
+            {/* Produto */}
+            <div>
+              <h4 className={`text-xs font-bold uppercase tracking-wider mb-4 ${d ? "text-slate-500" : "text-slate-400"}`}>Produto</h4>
+              <ul className={`space-y-2.5 text-sm ${d ? "text-slate-400" : "text-muted-foreground"}`}>
+                <li><a href="#funcionalidades" className="hover:text-violet-500 transition-colors">Funcionalidades</a></li>
+                <li><a href="#vantagens" className="hover:text-violet-500 transition-colors">Vantagens</a></li>
+                <li><a href="#implantacao" className="hover:text-violet-500 transition-colors">Implantação</a></li>
+                <li><a href="#faq" className="hover:text-violet-500 transition-colors">Perguntas frequentes</a></li>
+                <li><Link href="/checkout" className="hover:text-violet-500 transition-colors">Planos e assinatura</Link></li>
+              </ul>
+            </div>
+
+            {/* Suporte */}
+            <div>
+              <h4 className={`text-xs font-bold uppercase tracking-wider mb-4 ${d ? "text-slate-500" : "text-slate-400"}`}>Suporte</h4>
+              <ul className={`space-y-2.5 text-sm ${d ? "text-slate-400" : "text-muted-foreground"}`}>
+                <li><a href={whatsappLink("Olá! Preciso de ajuda com o Fluxo ERP.")} target="_blank" rel="noopener noreferrer" className="hover:text-violet-500 transition-colors">Central de ajuda</a></li>
+                <li><a href={whatsappLink("Olá! Gostaria de falar com um especialista.")} target="_blank" rel="noopener noreferrer" className="hover:text-violet-500 transition-colors">Falar com especialista</a></li>
+                <li><a href={`mailto:${CONTATO.emailSuporte}`} className="hover:text-violet-500 transition-colors">Suporte especializado</a></li>
+                <li><Link href="/login" className="hover:text-violet-500 transition-colors">Acessar plataforma</Link></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div className="col-span-2 lg:col-span-1">
+              <h4 className={`text-xs font-bold uppercase tracking-wider mb-4 ${d ? "text-slate-500" : "text-slate-400"}`}>Empresa & Legal</h4>
+              <ul className={`space-y-2.5 text-sm ${d ? "text-slate-400" : "text-muted-foreground"}`}>
+                <li><Link href="/seguranca" className="hover:text-violet-500 transition-colors">Segurança e conformidade</Link></li>
+                <li><Link href="/privacidade" className="hover:text-violet-500 transition-colors">Política de privacidade</Link></li>
+                <li><Link href="/termos" className="hover:text-violet-500 transition-colors">Termos de uso</Link></li>
+                <li><a href={whatsappLink("Olá! Tenho interesse em parceria com o Fluxo ERP.")} target="_blank" rel="noopener noreferrer" className="hover:text-violet-500 transition-colors">Canal de parceiros</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className={`mt-12 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${d ? "border-white/[0.05]" : "border-slate-200/60"}`}>
             <p className={`text-xs ${d ? "text-muted-foreground" : "text-slate-400"}`}>
               © 2026 Fluxo ERP. Sistema de Gestão Empresarial. Desenvolvido por{" "}
               <a href="https://www.linkedin.com/in/vitor-moraes" target="_blank" rel="noopener noreferrer" className="text-violet-500 hover:text-violet-400 hover:underline transition-colors">Vitor Moraes</a>.
             </p>
+            <div className={`flex items-center gap-4 text-xs ${d ? "text-muted-foreground" : "text-slate-400"}`}>
+              <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-violet-500" /> Dados no Brasil (LGPD)</span>
+              <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-violet-500" /> Criptografia 256-bit</span>
+            </div>
           </div>
         </div>
       </footer>
