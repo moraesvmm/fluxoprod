@@ -146,7 +146,7 @@ export default function ConfiguracoesPage() {
           bairro: formData.bairro,
           cidade: formData.cidade,
           uf: formData.uf,
-          cep: formData.cep,
+          cep: formData.cep.replace(/\D/g, ""),
           codigo_municipio_ibge: formData.codigo_municipio_ibge,
         },
       });
