@@ -113,11 +113,11 @@ export function MetaWhatsAppConnection() {
           <form onSubmit={handleSave} className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="meta-phone-number-id">Phone Number ID</label>
-              <input id="meta-phone-number-id" value={phoneNumberId} onChange={(event) => setPhoneNumberId(event.target.value)} required inputMode="numeric" className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" placeholder="ID do número no Meta Business" />
+              <input id="meta-phone-number-id" value={phoneNumberId} onChange={(event) => setPhoneNumberId(event.target.value)} required inputMode="numeric" autoComplete="off" className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" placeholder="ID do número no Meta Business" />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="meta-waba-id">WhatsApp Business Account ID</label>
-              <input id="meta-waba-id" value={wabaId} onChange={(event) => setWabaId(event.target.value)} inputMode="numeric" className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" placeholder="Opcional" />
+              <input id="meta-waba-id" value={wabaId} onChange={(event) => setWabaId(event.target.value)} inputMode="numeric" autoComplete="off" className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" placeholder="Opcional" />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="meta-access-token">Token de acesso permanente</label>

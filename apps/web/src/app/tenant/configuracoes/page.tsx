@@ -523,10 +523,11 @@ export default function ConfiguracoesPage() {
                           </p>
                         </div>
 
-                        <div>
+                        <form onSubmit={(event) => event.preventDefault()}>
                           <label className="block text-sm font-medium text-foreground/80">Senha do Certificado</label>
                           <input
                             type="password"
+                            autoComplete="off"
                             value={fiscalForm.nfe_certificado_senha}
                             onChange={(e) => setFiscalForm({ ...fiscalForm, nfe_certificado_senha: e.target.value })}
                             className="mt-1 block w-full rounded-md border border-border bg-background py-2 px-3 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm text-foreground"
@@ -537,7 +538,7 @@ export default function ConfiguracoesPage() {
                               ? "A senha atual permanece oculta e não volta mais para o navegador."
                               : "A senha do certificado será enviada apenas ao backend."}
                           </p>
-                        </div>
+                        </form>
                       </div>
                     </div>
                   </div>

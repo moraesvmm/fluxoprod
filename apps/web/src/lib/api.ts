@@ -1998,7 +1998,10 @@ export async function fetchComissoes(): Promise<Comissao[]> {
 }
 
 export async function fetchRegrasComissao(): Promise<RegraComissao[]> {
-  const { data, error } = await _untyped().rpc('tenant_listar_regras_comissao');
+  const { data, error } = await _untyped().rpc('tenant_listar_regras_comissao', {
+    p_limit: 1000,
+    p_offset: 0,
+  });
   if (error) {
     if (isMissingRpcError(error.message)) return [];
     throw new Error(error.message);
